@@ -2,6 +2,7 @@ import User from "../models/User.Model.js"
 import asyncHandler from "express-async-handler"
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import transporter from "../config/emailConfig.js";  //
 
 // @desc Register user
 // @access Public
@@ -41,9 +42,22 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     // Verify user creation and send payload
     if (user) {
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: 'Welcome to GIMS!',
+            text: `Hello ${user.name},\n\nThank you for registering at GIMS. We're excited to have you on board!\n\nBest regards,\nThe GIMS Team`
+        }
+
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (emailError) {
+            console.error("Email sending failed:", emailError);
+        }
+
         res.status(201).json({
             accessToken: token,
-            user: {id: user._id,name: user.name,email: user.email}
+            user: { id: user._id, name: user.name, email: user.email }
         })
     } else {
         res.status(400)
@@ -68,7 +82,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
     // Check password
     const checkPasword = await bcrypt.compare(password, user.password);
-    if(!checkPasword){
+    if (!checkPasword) {
         res.status(400)
         throw new Error("Invalid Credentials")
     }
@@ -81,7 +95,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     // sending payload
     res.status(200).json({
         accessToken: token,
-        user: {id: user._id,name: user.name,email: user.email}
+        user: { id: user._id, name: user.name, email: user.email }
     })
 })
 
