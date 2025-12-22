@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/User.Routes.js"
 import errorHandler from "./middleware/errorHandler.js"
+import cookieParser from "cookie-parser";
 
 // Configurations
 dotenv.config();
@@ -11,8 +12,9 @@ connectDB();
 const app = express()
 const PORT = process.env.PORT || 5000
 
-// Body parser middleware
-app.use(express.json())
+// Body parser middleware and Cookie parser
+app.use(express.json());
+app.use(cookieParser());
 
 // Test Route
 app.get("/", (req,res) => {

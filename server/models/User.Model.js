@@ -14,11 +14,24 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please add a password"]
     },
+    verifyOpt: {
+        type: String
+    },
+    verifyOptExpiryAt: {
+        type: Number,
+        default: 0
+    },
     isVerfied: {
-        type: Boolean
+        type: Boolean,
+        default: false
+    },
+    resetOpt: {
+        type: String
+    },
+    resetOptExpiryAt: {
+        type: Number,
+        default: 0
     }
-}, {
-    timestamps: true
 })
 
 export default mongoose.model('User', userSchema)
