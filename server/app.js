@@ -2,10 +2,14 @@
 import express from "express"
 import dotenv from "dotenv"
 import connectDB from "./config/db.js";
-import authRoutes from "./routes/Auth.route.js"
-import userRoutes from "./routes/User.Route.js"
-import errorHandler from "./middleware/errorHandler.js"
 import cookieParser from "cookie-parser";
+
+// Import Custom Middleware
+import errorHandler from "./middleware/errorHandler.js"
+
+// Import Routes
+import userRoutes from "./routes/User.Route.js"
+import authRoutes from "./routes/Auth.route.js"
 
 // Configurations
 dotenv.config();
@@ -23,11 +27,12 @@ app.get("/", (req,res) => {
 })
 
 // Routes
-app.use("/api/v1/auths", authRoutes)
-app.use("/api/v1/users", userRoutes)
+app.use("/api/v1/auths", authRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/categories", categoryRoutes);
 
 // Error Middleware
-app.use(errorHandler)
+app.use(errorHandler);
 
 // Running server 
 app.listen(PORT, ()=>{
