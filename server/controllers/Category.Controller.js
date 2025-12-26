@@ -12,8 +12,7 @@ export const createCategory = asyncHandler(async (req, res) => {
         throw new Error('Category name is required');
     }
 
-    const category = Category.create({ name, description });
-    const createdCategory = await category.save();
+    const createdCategory = await Category.create({ name, description });
 
     if (!createdCategory) {
         res.status(500);
@@ -42,12 +41,12 @@ export const getCategoryById = asyncHandler(async (req, res) => {
         throw new Error('Category ID is required');
     }
 
-    const category = await Category.findById(id);
+    const category = await Category.findById(id).select(['-__v', '-createdAt', '-updatedAt']);
     if (!category) {
         res.status(404);
         throw new Error('Category not found');
     }
-    res.json(category.select('-__v', '-createdAt', '-updatedAt'));
+    res.json(category);
 });
 
 // @desc    Update category by ID
@@ -72,14 +71,14 @@ export const updateCategory = asyncHandler(async (req, res) => {
         id,
         { name, description },
         { new: true }
-    );
+    ).select(['-__v', '-createdAt', '-updatedAt']);
 
     if (!updatedCategory) {
         res.status(500);
         throw new Error('Failed to update category');
     }
 
-    res.json(updatedCategory.select('-__v', '-createdAt', '-updatedAt'));
+    res.json(updatedCategory);
 });
 
 // @desc    Delete category by ID
@@ -91,11 +90,11 @@ export const deleteCategory = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Category ID is required');
     }
-    const category = await Category.findById(id);
+    const category = await Category.findByIdAndDelete(id);
+    
     if (!category) {
         res.status(404);
         throw new Error('Category not found');
     }
-    await category.remove();
     res.json({ message: 'Category removed' });
 });

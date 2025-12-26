@@ -10,6 +10,7 @@ import errorHandler from "./middleware/errorHandler.js"
 // Import Routes
 import userRoutes from "./routes/User.Route.js"
 import authRoutes from "./routes/Auth.route.js"
+import categoryRoutes from "./routes/Category.Route.js"
 
 // Configurations
 dotenv.config();
