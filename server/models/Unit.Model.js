@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const unitSchema = new mongoose.Schema({
-    fullForm: {
+    name: {
         type: String,
-        required: [true, "Please add a unit full form"],
+        required: [true, "Please add a unit full name"],
         unique: true
     },
     shortForm: {
@@ -11,16 +11,24 @@ const unitSchema = new mongoose.Schema({
         required: [true, "Please add a unit short form"],
         unique: true
     },
-    UnitOfMeasurement: {
+    unitType: {
         type: String,
-        required: [true, "Please add a unit of measurement"],
+        enum: ['weight', 'volume', 'count', 'pack'],
     },
-    IsFractional: {
+    baseUnit: {
         type: Boolean,
-        required: [true, "Please specify if the unit is fractional"],
+        default: false
     },
+    isFractional: {
+        type: Boolean,
+        default: false
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    }
 }, {
     timestamps: true
 });
 
-module.exports = mongoose.model('Units', unitSchema);
+export default mongoose.model('Units', unitSchema);

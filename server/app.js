@@ -11,6 +11,7 @@ import errorHandler from "./middleware/errorHandler.js"
 import userRoutes from "./routes/User.Route.js"
 import authRoutes from "./routes/Auth.route.js"
 import categoryRoutes from "./routes/Category.Route.js"
+import unitRoutes from "./routes/Unit.Route.js"
 
 // Configurations
 dotenv.config();
@@ -23,7 +24,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Test Route
-app.get("/", (req,res) => {
+app.get("/", (req, res) => {
     res.send("Hello World!!")
 })
 
@@ -31,11 +32,12 @@ app.get("/", (req,res) => {
 app.use("/api/v1/auths", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/units", unitRoutes);
 
 // Error Middleware
 app.use(errorHandler);
 
 // Running server 
-app.listen(PORT, ()=>{
+app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 })
