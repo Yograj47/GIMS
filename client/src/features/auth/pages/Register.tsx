@@ -4,10 +4,10 @@ import { ArrowLeft } from "lucide-react";
 
 export default function Register() {
   return (
-    <div className="w-full">
+    <div className="max-w-3/4 m-auto h-full flex flex-col justify-center ">
       {/* Back to Login Link */}
-      <Link 
-        to="/login" 
+      <Link
+        to="/login"
         className="inline-flex items-center text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors mb-6 group"
       >
         <ArrowLeft className="mr-1.5 h-3 w-3 transition-transform group-hover:-translate-x-1" />

@@ -3,7 +3,7 @@ import LoginForm from "../components/LoginForm";
 
 export default function LoginPage() {
     return (
-        <div className="w-full h-full">
+        <div className="max-w-3/4 m-auto h-full flex flex-col justify-center items-center">
             {/* Header section with more impact */}
             <div className="flex flex-col space-y-2 mb-8">
                 <h2 className="text-2xl font-semibold tracking-tight text-slate-900">

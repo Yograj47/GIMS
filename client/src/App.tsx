@@ -7,6 +7,8 @@ import AppLayout from "./layout/AppLayout"
 // Pages
 import Login from "./features/auth/pages/Login"
 import Register from "./features/auth/pages/Register"
+import Home from "./features/Home"
+import VerifyAccount from "./features/auth/pages/VerifyAccount"
 
 function App() {
   return (
@@ -15,8 +17,10 @@ function App() {
         {/* Public Routes Here */}
         <Route element={<AuthLayout />}>
           {/* Example Public Route */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify" element={<VerifyAccount />} />
         </Route>
 
         {/* Protected Routes Here */}
