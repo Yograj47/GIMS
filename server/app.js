@@ -9,7 +9,7 @@ import errorHandler from "./middleware/errorHandler.js"
 
 // Import Routes
 import userRoutes from "./routes/User.Route.js"
-import authRoutes from "./routes/Auth.route.js"
+import authRoutes from "./routes/Auth.Route.js"
 import categoryRoutes from "./routes/Category.Route.js"
 import unitRoutes from "./routes/Unit.Route.js"
 
