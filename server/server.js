@@ -1,4 +1,4 @@
-// Import Packages and Configurations
+// Import Packages 
 import dotenv from "dotenv"
 import connectDB from "./app/config/db.js";
 import app from "./app/app.js";

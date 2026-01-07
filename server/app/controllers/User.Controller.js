@@ -19,7 +19,8 @@ export const getMe = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        success: true, data: {
+        "status": "success",
+        data: {
             name: user.name,
             isVerfied: user.isVerfied,
         }

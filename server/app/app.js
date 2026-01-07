@@ -1,8 +1,6 @@
 // Import Packages and Configurations
 import express from "express"
 import cookieParser from "cookie-parser";
-
-// Import Custom Middleware
 import errorHandler from "./middleware/errorHandler.js"
 
 // Import Routes

@@ -1,11 +1,19 @@
+import { z } from "zod";
+
 const errorHandler = (err, req, res, next) => {
-    const statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+    let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    let message = err.message;
 
-    res.status(statusCode);
+    // Handle Zod Validation Errors
+    if (err instanceof z.ZodError) {
+        statusCode = 400;
+        message = err.errors.map(e => e.message).join(", ");
+    }
 
-    res.json({
-        message: err.message,
-        stack: process.env.NODE_ENV === "production" ? null : err.stack
+    res.status(statusCode).json({
+        status: "failed",
+        message,
+        stack: process.env.NODE_ENV === "production" ? null : err.stack,
     });
 };
 
