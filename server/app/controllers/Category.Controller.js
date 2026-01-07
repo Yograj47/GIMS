@@ -1,100 +1,109 @@
-import asyncHandler from 'express-async-handler';
 import Category from '../models/Category.Model.js';
+import Product from '../models/Product.Model.js';
+import asyncHandler from 'express-async-handler';
+import { categorySchema } from '../validation/Category.validation.js';
 
-// @desc    Create a new category
-// @route   POST /api/v1/categories
-// @access  Private/Admin
+/**
+ * @desc    Create a new category
+ * @route   POST /api/v1/categories
+ * @access  Private/Admin
+*/
 export const createCategory = asyncHandler(async (req, res) => {
-    const { name, description } = req.body;
+    // 1. Validate input
+    const validatedData = categorySchema.parse(req.body);
 
-    if (!name) {
+    // 2. Check for existing category (Avoid Duplicate Key error from MongoDB)
+    const categoryExists = await Category.findOne({ name: validatedData.name });
+    if (categoryExists) {
         res.status(400);
-        throw new Error('Category name is required');
+        throw new Error('Category name already exists');
     }
 
-    const createdCategory = await Category.create({ name, description });
+    const createdCategory = await Category.create(validatedData);
 
-    if (!createdCategory) {
-        res.status(500);
-        throw new Error('Failed to create category');
-    }
-
-    res.status(201).json(createdCategory);
+    res.status(201).json({
+        status: "success",
+        data: createdCategory
+    });
 });
 
-// @desc    Get all categories
-// @route   GET /api/v1/categories
-// @access  Public
+/**
+ * @desc    Get all categories
+ * @route   GET /api/v1/categories
+ * @access  Public
+*/
 export const getCategories = asyncHandler(async (req, res) => {
+
     const categories = await Category.find({});
-    res.json(categories);
+
+    res.status(200).json({
+        status: "success",
+        results: categories.length,
+        data: categories
+    });
 });
 
-// @desc    Get category by ID
-// @route   GET /api/v1/categories/:id
-// @access  Public
+// @desc Get category by ID
 export const getCategoryById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const category = await Category.findById(req.params.id).select('-__v');
 
-    if (!id) {
-        res.status(400);
-        throw new Error('Category ID is required');
-    }
-
-    const category = await Category.findById(id).select(['-__v', '-createdAt', '-updatedAt']);
     if (!category) {
         res.status(404);
         throw new Error('Category not found');
     }
-    res.json(category);
+
+    res.status(200).json({
+        status: "success",
+        data: category
+    });
 });
 
-// @desc    Update category by ID
-// @route   PUT /api/v1/categories/:id
-// @access  Private/Admin
+// @desc Update category by ID
 export const updateCategory = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { name, description } = req.body;
-
-    if (!id) {
-        res.status(400);
-        throw new Error('Category ID is required');
-    }
-
-    const category = await Category.findById(id);
-    if (!category) {
-        res.status(404);
-        throw new Error('Category not found');
-    }
+    const validatedData = categorySchema.parse(req.body);
 
     const updatedCategory = await Category.findByIdAndUpdate(
-        id,
-        { name, description },
-        { new: true }
-    ).select(['-__v', '-createdAt', '-updatedAt']);
+        req.params.id,
+        validatedData,
+        { new: true, runValidators: true }
+    ).select('-__v');
 
     if (!updatedCategory) {
-        res.status(500);
-        throw new Error('Failed to update category');
+        res.status(404);
+        throw new Error('Category not found');
     }
 
-    res.json(updatedCategory);
+    res.status(200).json({
+        status: "success",
+        message: "Category updated",
+        data: updatedCategory
+    });
 });
 
-// @desc    Delete category by ID
-// @route   DELETE /api/v1/categories/:id
-// @access  Private/Admin
+// @desc Delete category by ID
 export const deleteCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    if (!id) {
+
+    // 1. Check if any products are using this category
+    const productsUsingCategory = await Product.countDocuments({ category: id });
+
+    if (productsUsingCategory > 0) {
         res.status(400);
-        throw new Error('Category ID is required');
+        throw new Error(
+            `Cannot delete category. There are ${productsUsingCategory} products assigned to it.`
+        );
     }
+
+    // 2. Proceed with deletion if safe
     const category = await Category.findByIdAndDelete(id);
-    
+
     if (!category) {
         res.status(404);
         throw new Error('Category not found');
     }
-    res.json({ message: 'Category removed' });
+
+    res.status(200).json({
+        status: "success",
+        message: 'Category removed successfully'
+    });
 });

@@ -186,7 +186,7 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc Reset Password Final
+ * @desc Reset Password 
  */
 export const resetPassword = asyncHandler(async (req, res) => {
     const { email, otp, newPassword } = resetPasswordSchema.parse(req.body);
