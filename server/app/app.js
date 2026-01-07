@@ -1,7 +1,5 @@
 // Import Packages and Configurations
 import express from "express"
-import dotenv from "dotenv"
-import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
 // Import Custom Middleware
@@ -14,11 +12,7 @@ import categoryRoutes from "./routes/Category.Route.js"
 import unitRoutes from "./routes/Unit.Route.js"
 import productRoutes from "./routes/Product.Route.js"
 
-// Configurations
-dotenv.config();
-connectDB();
-const app = express()
-const PORT = process.env.PORT || 5000
+const app = express();
 
 // Body parser middleware and Cookie parser
 app.use(express.json());
@@ -41,7 +35,4 @@ app.use(`${API}/products`, productRoutes)
 // Error Middleware
 app.use(errorHandler);
 
-// Running server 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-})
+export default app;
