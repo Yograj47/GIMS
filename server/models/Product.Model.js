@@ -19,7 +19,6 @@ const productSchema = new mongoose.Schema({
     },
     quantity: {
         type: Number,
-        required: [true, 'Quantity is required.'],
         min: [0, 'Quantity cannot be negative.'],
         default: 0
     },
@@ -31,6 +30,7 @@ const productSchema = new mongoose.Schema({
     supplierId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Suppliers',
+        default: ""
     },
     basePrice: {
         type: Number,
@@ -39,7 +39,6 @@ const productSchema = new mongoose.Schema({
     },
     isActive: {
         type: Boolean,
-        required: true,
         default: true
     },
     sellingPrice: {

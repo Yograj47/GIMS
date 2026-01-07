@@ -12,6 +12,7 @@ import userRoutes from "./routes/User.Route.js"
 import authRoutes from "./routes/Auth.Route.js"
 import categoryRoutes from "./routes/Category.Route.js"
 import unitRoutes from "./routes/Unit.Route.js"
+import productRoutes from "./routes/Product.Route.js"
 
 // Configurations
 dotenv.config();
@@ -28,11 +29,14 @@ app.get("/", (req, res) => {
     res.send("Hello World!!")
 })
 
+const API = "/api/v1"
+
 // Routes
-app.use("/api/v1/auths", authRoutes);
-app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/categories", categoryRoutes);
-app.use("/api/v1/units", unitRoutes);
+app.use(`${API}/auths`, authRoutes);
+app.use(`${API}/users`, userRoutes);
+app.use(`${API}/categories`, categoryRoutes);
+app.use(`${API}/units`, unitRoutes);
+app.use(`${API}/products`, productRoutes)
 
 // Error Middleware
 app.use(errorHandler);
