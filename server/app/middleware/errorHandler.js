@@ -7,7 +7,7 @@ const errorHandler = (err, req, res, next) => {
     // Handle Zod Validation Errors
     if (err instanceof z.ZodError) {
         statusCode = 400;
-        message = err.errors.map(e => e.message).join(", ");
+        message = err.errors?.map(e => e.message).join(", ") || "Validation Error";
     }
 
     res.status(statusCode).json({

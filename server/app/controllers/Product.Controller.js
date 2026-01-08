@@ -138,8 +138,30 @@ export const getProductById = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const UpdateProductById = asyncHandler(async (req, res) => {
+    const { productId } = req.params;
 
+    // 1. Validate the incoming update data with Zod
+    const validatedData = productSchema.parse(req.body);
 
+    // 2. Check if product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+        res.status(404);
+        throw new Error("Product not found");
+    }
+
+    // 3. Update and return the new document
+    const updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        validatedData,
+        { new: true, runValidators: true }
+    ).lean();
+
+    res.status(200).json({
+        success: true,
+        message: "Product updated successfully",
+        data: updatedProduct
+    });
 })
 
 /**
@@ -149,5 +171,17 @@ export const UpdateProductById = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const deleteProductById = asyncHandler(async (req, res) => {
+    const { productId } = req.params;
 
+    const product = await Product.findByIdAndDelete(productId);
+
+    if (!product) {
+        res.status(404);
+        throw new Error("Product not found");
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Product deleted successfully"
+    });
 })

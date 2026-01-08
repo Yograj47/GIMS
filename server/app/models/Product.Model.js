@@ -47,7 +47,8 @@ const productSchema = new mongoose.Schema({
         min: [0.01, 'Selling price must be greater than zero.'],
         validate: {
             validator: function (v) {
-                return v >= this.basePrice;
+                const basePrice = this.basePrice || (this.getUpdate && this.getUpdate().$set ? this.getUpdate().$set.basePrice : null);
+                return v >= basePrice;
             },
             message: props => `Selling price (${props.value}) must be greater than or equal to the base price!`
         }
