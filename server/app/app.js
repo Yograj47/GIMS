@@ -2,6 +2,7 @@
 import express from "express"
 import cookieParser from "cookie-parser";
 import errorHandler from "./middleware/errorHandler.js"
+import cors from "cors"
 
 // Import Routes
 import userRoutes from "./routes/User.Route.js"
@@ -15,6 +16,7 @@ const app = express();
 // Body parser middleware and Cookie parser
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors())
 
 // Test Route
 app.get("/", (req, res) => {
