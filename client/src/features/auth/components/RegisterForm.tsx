@@ -1,26 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-
-const registerSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+import { registerSchema, type RegisterFormData } from "@/types/Auth";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useGlobalStore } from "@/store/globalStore";
+import { useNavigate } from "react-router-dom";
 
 function RegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { backendUrl } = useGlobalStore();
+  const navigate = useNavigate();
 
   const { handleSubmit, register, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -28,10 +21,25 @@ function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
-    console.log("Register data:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+      console.log("Login data:", data);
+      const response = await axios.post(`${backendUrl}/auths/`, data)
+
+      if (response?.data?.status === "success") {
+        toast.success(response?.data?.message)
+        navigate("/verify")
+      } else {
+        toast.error(response?.data?.message)
+      }
+    }
+    catch (error: any) {
+      console.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message)
+    }
+    finally {
+      setIsLoading(false);
+    }
   };
 
   // Helper for input styling to keep code clean
@@ -105,7 +113,7 @@ function RegisterForm() {
         <div className="relative">
           <input
             id="confirmPassword"
-            type={isConfirmVisible ? "text" : "password"}
+            type={isPasswordVisible ? "text" : "password"}
             {...register("confirmPassword")}
             placeholder="••••••••"
             className={inputStyles(errors.confirmPassword)}
@@ -113,17 +121,17 @@ function RegisterForm() {
           <button
             type="button"
             className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
-            onClick={() => setIsConfirmVisible(!isConfirmVisible)}
+            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
           >
-            {isConfirmVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+            {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
         {errors.confirmPassword && <p className="text-[11px] font-medium text-red-500 ml-1">{errors.confirmPassword.message}</p>}
       </div>
 
       {/* Submit Button */}
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         disabled={isLoading}
         className="w-full py-6 mt-2 text-base font-bold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 rounded-xl"
       >

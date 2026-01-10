@@ -1,44 +1,37 @@
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 
 export default function LoginPage() {
     return (
-        <div className="max-w-3/4 m-auto h-full flex flex-col justify-center items-center">
-            {/* Header section with more impact */}
-            <div className="flex flex-col space-y-2 mb-8">
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-                    Welcome back
-                </h2>
-                <p className="text-sm text-slate-500">
-                    Enter your credentials to manage your inventory
-                </p>
-            </div>
+        <div className="w-full flex items-center justify-center px-4">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg shadow-zinc-300 p-8">
 
-            {/* The Form */}
-            <div>
-                <LoginForm />
-            </div>
-
-            {/* Footer / Helper Info */}
-            <div className="mt-8 flex flex-col items-center space-y-4">
-                <div className="rounded-lg bg-blue-50/50 border border-blue-100 p-3 w-full">
-                    <p className="text-[11px] font-medium text-blue-600/80 text-center uppercase tracking-wider mb-1">
-                        Quick Access Demo
-                    </p>
-                    <p className="text-xs text-slate-600 text-center font-mono">
-                        admin@grocery.local <span className="mx-1 opacity-30">|</span> demo123
+                {/* Header */}
+                <div className="mb-6 text-center">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        Welcome back
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Sign in to manage your inventory
                     </p>
                 </div>
 
-                <div className="text-sm text-slate-500">
-                    Don't have an account?{" "}
+                {/* Form */}
+                <div className="space-y-6">
+                    <LoginForm />
+                </div>
+
+                {/* Footer */}
+                <div className="mt-6 text-center text-sm text-slate-500">
+                    Don&apos;t have an account?{" "}
                     <Link
                         to="/register"
-                        className="text-blue-600 font-semibold hover:underline underline-offset-4"
+                        className="font-semibold text-blue-600 hover:underline underline-offset-4"
                     >
                         Create an account
                     </Link>
                 </div>
+
             </div>
         </div>
     );

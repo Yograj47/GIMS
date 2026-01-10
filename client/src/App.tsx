@@ -9,8 +9,14 @@ import Login from "./features/auth/pages/Login"
 import Register from "./features/auth/pages/Register"
 import Home from "./features/Home"
 import VerifyAccount from "./features/auth/pages/VerifyAccount"
+import NotFound from "./features/NotFound"
+import { ToastContainer } from "react-toastify"
+import axios from "axios"
+
 
 function App() {
+  axios.defaults.withCredentials = true;
+  
   return (
     <BrowserRouter>
       <Routes>
@@ -21,6 +27,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<VerifyAccount />} />
+
         </Route>
 
         {/* Protected Routes Here */}
@@ -28,7 +35,11 @@ function App() {
           {/* Example Protected Route */}
           <Route path="/dashboard" element={<div>Dashboard Page</div>} />
         </Route>
+
+        {/* Not Found Page */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
   )
 }

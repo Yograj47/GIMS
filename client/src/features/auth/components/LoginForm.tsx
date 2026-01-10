@@ -1,20 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2 } from "lucide-react"; // Note: EyeOff is standard for Lucide
-
-const loginSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { loginSchema, type LoginFormData } from "@/types/Auth";
+import { useGlobalStore } from "@/store/globalStore";
+import { useNavigate } from "react-router-dom";
+import { useUserStore } from "@/store/userStore";
 
 function LoginForm() {
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const { backendUrl } = useGlobalStore();
+    const { fetchUser } = useUserStore();
+    const navigate = useNavigate();
 
     const { handleSubmit, register, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -22,11 +23,26 @@ function LoginForm() {
     });
 
     const onSubmit = async (data: LoginFormData) => {
-        setIsLoading(true);
-        console.log("Login data:", data);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        setIsLoading(false);
+        try {
+            setIsLoading(true);
+            console.log("Login data:", data);
+            const response = await axios.post(`${backendUrl}/auths/login`, data)
+            console.log(response.data);
+
+            if (response.data.status === "success") {
+                await fetchUser()
+                navigate('/dashboard');
+            } else {
+                toast.error(response?.data?.message)
+            }
+        }
+        catch (error: any) {
+            console.error(error.response?.data?.message);
+            toast.error(error.response?.data?.message)
+        }
+        finally {
+            setIsLoading(false);
+        }
     };
 
     return (
