@@ -76,7 +76,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
@@ -142,6 +142,26 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
     res.status(200).json({ status: "success", message: "Email verified successfully" });
 });
+
+/**
+ * @desc Check Auth User
+ */
+export const verfiedUser = asyncHandler(async (req, res) => {
+    const userId = req.userId
+
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+        res.status(400);
+        throw new Error("User not found");
+    }
+
+    const verfied = user.isVerfied
+
+    if(!verfied){
+res.status
+    }
+})
 
 /**
  * @desc Logout User

@@ -16,7 +16,10 @@ const app = express();
 // Body parser middleware and Cookie parser
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}))
 
 // Test Route
 app.get("/", (req, res) => {

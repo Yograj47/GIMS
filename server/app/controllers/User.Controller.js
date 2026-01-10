@@ -19,10 +19,13 @@ export const getMe = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        "status": "success",
+        status: "success",
         data: {
             name: user.name,
-            isVerfied: user.isVerfied,
+            role: user.role,
+            password: user.password,
+            email: user.email,
+            isVerfied: user.isVerfied
         }
     });
 })
