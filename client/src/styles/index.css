@@ -1,15 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-.input {
-  @apply w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none
-  focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
-}
-
-.error {
-  @apply text-xs text-red-500 mt-1;
-}
-
 
 @custom-variant dark (&:is(.dark *));
 
@@ -127,7 +118,9 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
 }
