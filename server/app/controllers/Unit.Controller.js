@@ -69,7 +69,7 @@ export const getUnitById = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const updateUnitById = asyncHandler(async (req, res) => {
-    const validatedData = unitSchema.parse(req.body);
+    const validatedData = unitSchema.partial().parse(req.body);
 
     const updatedUnit = await Unit.findByIdAndUpdate(
         req.params.id,

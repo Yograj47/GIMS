@@ -10,6 +10,7 @@ import authRoutes from "./routes/Auth.Route.js"
 import categoryRoutes from "./routes/Category.Route.js"
 import unitRoutes from "./routes/Unit.Route.js"
 import productRoutes from "./routes/Product.Route.js"
+import supplierRoutes from "./routes/Supplier.Route.js"
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use(`${API}/users`, userRoutes);
 app.use(`${API}/categories`, categoryRoutes);
 app.use(`${API}/units`, unitRoutes);
 app.use(`${API}/products`, productRoutes)
+app.use(`${API}/suppliers`, supplierRoutes);
 
 // Error Middleware
 app.use(errorHandler);
