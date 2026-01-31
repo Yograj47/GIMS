@@ -2,12 +2,12 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock, ShieldCheck } from "lucide-react";
 import { registerSchema, type RegisterFormData } from "@/types/Auth";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { useGlobalStore } from "@/store/globalStore";
 import { useNavigate } from "react-router-dom";
+import { notify } from "@/lib/toast";
 
 function RegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -23,126 +23,97 @@ function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true);
-      console.log("Login data:", data);
-      const response = await axios.post(`${backendUrl}/auths/`, data)
+      const response = await axios.post(`${backendUrl}/auths/`, data);
 
       if (response?.data?.status === "success") {
-        toast.success(response?.data?.message)
-        navigate("/verify")
+        notify.success("Account created!", "Please verify your email to continue.");
+        navigate("/verify");
       } else {
-        toast.error(response?.data?.message)
+        notify.error(response?.data?.message || "Registration failed");
       }
-    }
-    catch (error: any) {
-      console.error(error.response?.data?.message);
-      toast.error(error.response?.data?.message)
-    }
-    finally {
+    } catch (error: any) {
+      notify.error(error.response?.data?.message || "An unexpected error occurred");
+    } finally {
       setIsLoading(false);
     }
   };
 
-  // Helper for input styling to keep code clean
-  const inputStyles = (error: any) => `
-    w-full rounded-xl border bg-white/50 px-4 py-2.5 text-sm transition-all 
-    focus:outline-none focus:ring-2 focus:ring-blue-500/20 
-    ${error ? 'border-red-500 bg-red-50/50' : 'border-slate-200 focus:border-blue-500'}
+  const inputClasses = (error: any) => `
+    w-full rounded-xl border bg-white/50 pl-11 pr-4 py-2.5 text-sm transition-all 
+    focus:outline-none focus:ring-4 focus:ring-blue-500/10 
+    ${error ? 'border-red-500 bg-red-50/50' : 'border-slate-200 focus:border-blue-500 focus:bg-white'}
   `;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Name Field */}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Full Name */}
       <div className="space-y-1.5">
-        <label htmlFor="name" className="text-sm font-semibold text-slate-700 ml-1">
-          Full Name
-        </label>
-        <input
-          id="name"
-          type="text"
-          {...register("name")}
-          placeholder="John Doe"
-          className={inputStyles(errors.name)}
-        />
+        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Full Name</label>
+        <div className="relative group">
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+          <input {...register("name")} placeholder="John Doe" className={inputClasses(errors.name)} />
+        </div>
         {errors.name && <p className="text-[11px] font-medium text-red-500 ml-1">{errors.name.message}</p>}
       </div>
 
-      {/* Email Field */}
+      {/* Email */}
       <div className="space-y-1.5">
-        <label htmlFor="email" className="text-sm font-semibold text-slate-700 ml-1">
-          Email Address
-        </label>
-        <input
-          id="email"
-          type="email"
-          {...register("email")}
-          placeholder="admin@grocery.local"
-          className={inputStyles(errors.email)}
-        />
+        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Email Address</label>
+        <div className="relative group">
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+          <input {...register("email")} placeholder="admin@grocery.local" className={inputClasses(errors.email)} />
+        </div>
         {errors.email && <p className="text-[11px] font-medium text-red-500 ml-1">{errors.email.message}</p>}
       </div>
 
-      {/* Password Field */}
-      <div className="space-y-1.5">
-        <label htmlFor="password" className="text-sm font-semibold text-slate-700 ml-1">
-          Password
-        </label>
-        <div className="relative">
-          <input
-            id="password"
-            type={isPasswordVisible ? "text" : "password"}
-            {...register("password")}
-            placeholder="••••••••"
-            className={inputStyles(errors.password)}
-          />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
-            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-          >
-            {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
+      {/* Passwords Grid - Optimization for 2 password fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Password</label>
+          <div className="relative group">
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+            <input 
+              type={isPasswordVisible ? "text" : "password"} 
+              {...register("password")} 
+              placeholder="••••••••" 
+              className={inputClasses(errors.password)} 
+            />
+          </div>
         </div>
-        {errors.password && <p className="text-[11px] font-medium text-red-500 ml-1">{errors.password.message}</p>}
-      </div>
 
-      {/* Confirm Password Field */}
-      <div className="space-y-1.5">
-        <label htmlFor="confirmPassword" className="text-sm font-semibold text-slate-700 ml-1">
-          Confirm Password
-        </label>
-        <div className="relative">
-          <input
-            id="confirmPassword"
-            type={isPasswordVisible ? "text" : "password"}
-            {...register("confirmPassword")}
-            placeholder="••••••••"
-            className={inputStyles(errors.confirmPassword)}
-          />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
-            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-          >
-            {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Confirm</label>
+          <div className="relative group">
+            <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+            <input 
+              type={isPasswordVisible ? "text" : "password"} 
+              {...register("confirmPassword")} 
+              placeholder="••••••••" 
+              className={inputClasses(errors.confirmPassword)} 
+            />
+            <button
+              type="button"
+              onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              {isPasswordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
-        {errors.confirmPassword && <p className="text-[11px] font-medium text-red-500 ml-1">{errors.confirmPassword.message}</p>}
       </div>
+      {(errors.password || errors.confirmPassword) && (
+        <p className="text-[11px] font-medium text-red-500 ml-1">
+          {errors.password?.message || errors.confirmPassword?.message}
+        </p>
+      )}
 
-      {/* Submit Button */}
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full py-6 mt-2 text-base font-bold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 rounded-xl"
+        className="w-full py-6 mt-4 text-sm font-bold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-100 rounded-xl"
       >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating Account...
-          </>
-        ) : (
-          "Create Account"
-        )}
+        {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...</> : "Create Account"}
       </Button>
     </form>
   );

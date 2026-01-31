@@ -1,46 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Plus, Filter, PackageOpen } from "lucide-react";
-import type { ProductAPIResponse } from '@/interface/Product';
-import ProductListing from '../components/ProductListing';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
+import type { SupplierApiResponse } from '@/interface/Supplier';
+import SupplierListing from '../components/SupplierListing';
 
-const Products: React.FC = () => {
+const Suppliers: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // Your data...
-    const products: ProductAPIResponse[] = [
-        {
-            _id: "1",
-            name: "Basmati Rice",
-            quantity: 20,
-            threshold: 50,
-            basePrice: 80,
-            sellingPrice: 95,
-            category: { _id: "cat1", name: "Grains" },
-            unit: { _id: "u1", name: "kg" },
-            supplier: { _id: "s1", name: "Alpha Traders" },
-            isActive: true,
-            createdAt: "2024-03-20"
-        },
 
-        {
-            _id: "2",
-            name: "Refined Oil",
-            quantity: 120,
-            threshold: 30,
-            basePrice: 150,
-            sellingPrice: 180,
-            category: { _id: "cat2", name: "Oils" },
-            unit: { _id: "u2", name: "L" },
-            supplier: { _id: "s2", name: "Pure Oil Co" },
-            isActive: true,
-            createdAt: "2024-03-21"
-        }
-    ];
+    const suppliers: SupplierApiResponse[] = []
 
     useEffect(() => {
         setIsLoading(true);
@@ -56,15 +28,15 @@ const Products: React.FC = () => {
             {/* Page Title & Add Button */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">Inventory Details</h1>
-                    <p className="text-slate-500 text-sm font-medium">Total Products: {products.length}</p>
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">Supplier Details</h1>
+                    <p className="text-slate-500 text-sm font-medium">Total Suppliers: {suppliers.length}</p>
                 </div>
                 <Button
-                    onClick={() => navigate("/products/add")}
+                    onClick={() => navigate("/suppliers/add")}
                     className="bg-blue-600 hover:bg-blue-700 h-11 px-6 rounded-xl font-bold shadow-lg shadow-blue-100"
                 >
                     <Plus className="mr-2 h-5 w-5" strokeWidth={3} />
-                    Add New Product
+                    New Supplier
                 </Button>
             </div>
 
@@ -90,18 +62,15 @@ const Products: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                            <thead className="bg-slate-50/50">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Product Details</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Category</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Stock Level</th>
-                                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase">Pricing (₹)</th>
-                                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase">Actions</th>
-                                </tr>
-                            </thead>
+                        <thead className="bg-slate-50/50">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Name</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Phone</th>
+                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase">Address</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                // Show a loading state that spans the whole table
                                 <tr>
                                     <td colSpan={5} className="py-20">
                                         <div className="flex justify-center items-center">
@@ -109,17 +78,16 @@ const Products: React.FC = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : products.length > 0 ? (
-                                products.map((p) => (
-                                    <ProductListing key={p._id} Product={p} />
+                            ) : suppliers.length > 0 ? (
+                                suppliers.map((s) => (
+                                    <SupplierListing key={s.data._id} Supplier={s} />
                                 ))
                             ) : (
-                                // Show empty state if no products and not loading
                                 <tr>
                                     <td colSpan={5} className="py-20 text-center">
                                         <div className="flex flex-col items-center gap-2 text-slate-400">
                                             <PackageOpen size={48} strokeWidth={1} />
-                                            <p className="font-medium">No products found</p>
+                                            <p className="font-medium">No Suppliers found</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -132,4 +100,4 @@ const Products: React.FC = () => {
     );
 };
 
-export default Products;
+export default Suppliers;

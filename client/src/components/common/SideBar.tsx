@@ -49,46 +49,49 @@ const menuSections: MenuSection[] = [
     },
 ]
 
+import { NavLink } from "react-router-dom"; // Essential for SPA behavior
+import { cn } from "@/lib/utils"; // Shadcn utility for cleaner classes
+
 function Sidebar() {
     return (
-        <aside className="flex h-screen w-64 flex-col border-r bg-white px-4 py-3">
-
+        <aside className="flex h-screen w-64 flex-col border-r bg-white px-4 py-3 shrink-0">
             {/* Header */}
-            <div className="mb-6 flex items-center gap-3">
-
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shadow-sm">
+            <div className="mb-8 flex items-center gap-3 px-2">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-100">
                     <Box className="w-5 h-5" />
                 </div>
-
                 <div className="leading-tight">
-                    <h1 className="text-lg font-bold text-slate-900">
+                    <h1 className="text-lg font-bold text-slate-900 tracking-tight">
                         Grocery<span className="text-blue-600">Pro</span>
                     </h1>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wide">
-                        Inventory System
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        v1.0 Admin
                     </p>
                 </div>
             </div>
 
-
             {/* Menu */}
-            <nav className="flex-1 space-y-6">
+            <nav className="flex-1 space-y-6 overflow-y-auto custom-scrollbar">
                 {menuSections.map((section) => (
                     <div key={section.title}>
-                        <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                        <h2 className="mb-3 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">
                             {section.title}
                         </h2>
-
                         <ul className="space-y-1">
                             {section.items.map((item) => (
                                 <li key={item.label}>
-                                    <a
-                                        href={item.href}
-                                        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 active:bg-[#dbeafe] active:text-[#2563eb] hover:bg-[#dbeafe] hover:text-[#2563eb]"
+                                    <NavLink
+                                        to={item.href}
+                                        className={({ isActive }) => cn(
+                                            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                            isActive 
+                                                ? "bg-blue-50 text-blue-600 shadow-sm" 
+                                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                        )}
                                     >
-                                        <item.icon className="h-4 w-4" />
+                                        <item.icon className="h-4 w-4 shrink-0" />
                                         {item.label}
-                                    </a>
+                                    </NavLink>
                                 </li>
                             ))}
                         </ul>
@@ -97,12 +100,14 @@ function Sidebar() {
             </nav>
 
             {/* Footer */}
-            <button className="mt-auto flex items-center gap-3 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50">
-                <LogOut className="h-4 w-4" />
-                Logout
-            </button>
+            <div className="pt-4 border-t border-slate-100">
+                <button className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors">
+                    <LogOut className="h-4 w-4" />
+                    Logout Account
+                </button>
+            </div>
         </aside>
-    )
+    );
 }
 
-export default Sidebar
+export default Sidebar;
