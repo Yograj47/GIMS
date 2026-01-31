@@ -17,7 +17,6 @@ export default function ManageProduct() {
 
     const [product, setProduct] = useState<ProductAPIResponse | undefined>(undefined);
 
-    // Fetch data only if in Edit Mode
     useEffect(() => {
         if (!isEditMode) return;
 

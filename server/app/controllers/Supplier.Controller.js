@@ -1,5 +1,5 @@
 import Supplier from "../models/Supplier.Model.js";
-import ProductModel from "../models/Product.Model.js";
+import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
 import { supplierSchema } from "../validation/Supplier.validation.js";
 
@@ -20,27 +20,32 @@ export const createSupplier = asyncHandler(async (req, res) => {
     });
 })
 
-/**
- * @desc    Get all active suppliers sorted alphabetically
- * @route   GET /api/v1/suppliers
- * @access  Private
- */
 export const getSuppliers = asyncHandler(async (req, res) => {
-    const suppliers = await Supplier.find({ isActive: true }).sort({ name: 1 }).select('-__v');
+    const suppliers = await Supplier.find().sort({ name: 1 }).select('-__v');
+
+    const formattedSuppliers = suppliers.map(s => ({
+        _id: s._id,
+        data: {
+            name: s.name,
+            phone: s.phone,
+            address: s.address,
+            isActive: s.isActive
+        }
+    }));
 
     res.status(200).json({
         status: "success",
-        results: suppliers.length,
-        data: suppliers
+        results: formattedSuppliers.length,
+        data: formattedSuppliers
     });
- })
+});
 
 /**
  * @desc    Get a single supplier by its MongoDB ID
  * @route   GET /api/v1/suppliers/:id
  * @access  Private
  */
-export const getSupplierById = asyncHandler(async (req, res) => { 
+export const getSupplierById = asyncHandler(async (req, res) => {
     const supplier = await Supplier.findById(req.params.id).select('-__v');
 
     if (!supplier) {
@@ -48,13 +53,29 @@ export const getSupplierById = asyncHandler(async (req, res) => {
         throw new Error("Supplier not found");
     }
 
-    const products = await ProductModel.find({ supplier: supplier._id });
+    const products = await Product.find({ supplierId: supplier._id });
+
+    const productData = products.map(p => ({
+        _id: p._id,
+        name: p.name,
+        basePrice: p.basePrice,
+        sellingPrice: p.sellingPrice,
+        stock: p.quantity 
+    }));
 
     res.status(200).json({
         status: "success",
-        data: { ...supplier.toObject(), products}
+        _id: supplier._id, 
+        data: {
+            name: supplier.name,
+            phone: supplier.phone,
+            address: supplier.address,
+            notes: supplier.notes,
+            isActive: supplier.isActive
+        },
+        productData
     });
-})
+});
 
 /**
  * @desc    Update a supplier by its MongoDB ID
@@ -82,13 +103,13 @@ export const updateSupplier = asyncHandler(async (req, res) => {
         data: supplier
     });
 
- })
+})
 
 /** 
  * @desc    Delete a supplier by its MongoDB ID
  * @route   DELETE /api/v1/suppliers/:id
  * @access  Private
- */ 
+ */
 export const deleteSupplier = asyncHandler(async (req, res) => {
     const supplier = await Supplier.findByIdAndDelete(req.params.id).select('-__v');
 
@@ -101,4 +122,4 @@ export const deleteSupplier = asyncHandler(async (req, res) => {
         status: "success",
         data: supplier
     });
- })
+})
