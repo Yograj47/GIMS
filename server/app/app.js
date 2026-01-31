@@ -11,6 +11,7 @@ import categoryRoutes from "./routes/Category.Route.js"
 import unitRoutes from "./routes/Unit.Route.js"
 import productRoutes from "./routes/Product.Route.js"
 import supplierRoutes from "./routes/Supplier.Route.js"
+import stockMovementRoutes from "./routes/StockMovement.Route.js"
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use(`${API}/categories`, categoryRoutes);
 app.use(`${API}/units`, unitRoutes);
 app.use(`${API}/products`, productRoutes)
 app.use(`${API}/suppliers`, supplierRoutes);
+app.use(`${API}/stock-movements`, stockMovementRoutes);
 
 // Error Middleware
 app.use(errorHandler);
