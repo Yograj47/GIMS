@@ -17,6 +17,8 @@ import NotFound from "./features/NotFound";
 import Products from "./features/products/pages/Products";
 import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
+import SupplierView from "./features/suppliers/pages/ViewSupplier";
+import ManageSupplier from "./features/suppliers/pages/Manage";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -53,6 +55,9 @@ function App() {
             {/* Supplier Management */}
              <Route path="/suppliers">
               <Route index element={<Suppliers />} />
+              <Route path="v/:id" element={<SupplierView />} />
+              <Route path="add" element={<ManageSupplier />} />
+              <Route path="edit/:id" element={<ManageSupplier />} />
             </Route>
 
           </Route>

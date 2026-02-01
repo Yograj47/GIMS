@@ -45,7 +45,7 @@ function SupplierListing({ Supplier }: { Supplier: SupplierApiResponse }) {
             {/* ACTION: VIEW DETAILS */}
             <td className="px-6 py-4 text-right">
                 <button 
-                    onClick={() => navigate(`/suppliers/${Supplier._id}`)}
+                    onClick={() => navigate(`/suppliers/v/${Supplier._id}`)}
                     className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm active:scale-95"
                 >
                     <Eye size={14} strokeWidth={2.5} />
