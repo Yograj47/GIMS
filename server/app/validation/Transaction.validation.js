@@ -7,26 +7,19 @@ export const ItemSchema = z.object({
     unitId: z
         .string()
         .regex(/^[0-9a-fA-F]{24}$/, 'Invalid Unit ID format'),
-    qty: z
-        .number(),
-    rate: z
-        .number(),
-    total: z
-        .number()
+    qty: z.number().min(1),
+    rate: z.number().min(0),
+    total: z.number()
 });
 
 export const transactionSchema = z.object({
-    transactionType: z
-        .enum['Purchase', 'Sale', 'Return', 'Damage', 'Fixed'],
-    items: [ItemSchema],
-    grandTotal: z
-        .number(),
-    isPaid: z
-        .boolean(),
-    partyDetails: {
-        name: z.string,
-        phone: z.string
-    },
-    notes: z
-        .string()
-})
+    transactionType: z.enum(['Purchase', 'Sale', 'Return', 'Damage', 'Fixed']),
+    items: z.array(ItemSchema),
+    grandTotal: z.number(),
+    isPaid: z.boolean().default(false),
+    partyDetails: z.object({ 
+        name: z.string().optional(), 
+        phone: z.string().optional()
+    }),
+    notes: z.string().optional() 
+});
