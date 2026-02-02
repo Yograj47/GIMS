@@ -12,9 +12,6 @@ export const StockMovementSchema = z.object({
         .min(0, 'Quantity must be a positive number'),
     movementType: z
         .enum(['IN', 'OUT']),
-    reason: z
-        .string()
-        .max(255, 'Reason must be less than 255 characters'),
     oldQuantity: z
         .number(),
     newQuantity: z

@@ -21,9 +21,12 @@ export const createStockMovement = asyncHandler(async (req, res) => {
 
     const stockMovement = await StockMovement.create({
         productId: validateResult.productId,
+        performedBy: validateResult.performedBy,
         quantity: validateResult.quantity,
         movementType: validateResult.movementType,
-        date: validateResult.date
+        oldQuantity: validateResult.oldQuantity,
+        newQuantity: validateResult.newQuantity,
+        notes: validateResult.notes 
     });
 
     res.status(201).json({

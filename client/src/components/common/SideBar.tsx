@@ -29,7 +29,7 @@ const menuSections: MenuSection[] = [
             { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
             { label: "Products", icon: Box, href: "/products" },
             { label: "Suppliers", icon: Truck, href: "/suppliers" },
-            { label: "Stock Movement", icon: ArrowLeftRight, href: "/stock" },
+            { label: "Stock Movement", icon: ArrowLeftRight, href: "/movement" },
         ],
     },
     {

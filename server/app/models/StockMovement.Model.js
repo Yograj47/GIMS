@@ -20,10 +20,6 @@ const StockMovementSchema = new mongoose.Schema({
         enum: ['IN', 'OUT'],
         required: true
     },
-    reason: {
-        type: String,
-        required: true
-    },
     oldQuantity: {
         type: Number,
         required: true
@@ -34,6 +30,7 @@ const StockMovementSchema = new mongoose.Schema({
     },
     notes: {
         type: String,
+        default: ""
     },
 }, { timestamps: true })
 

@@ -19,6 +19,8 @@ import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
 import SupplierView from "./features/suppliers/pages/ViewSupplier";
 import ManageSupplier from "./features/suppliers/pages/Manage";
+import StockManagement from "./features/stock/pages/Stock";
+import StockMovementForm from "./features/stock/components/StockForm";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -58,6 +60,12 @@ function App() {
               <Route path="v/:id" element={<SupplierView />} />
               <Route path="add" element={<ManageSupplier />} />
               <Route path="edit/:id" element={<ManageSupplier />} />
+            </Route>
+
+            {/* Stock Management */}
+             <Route path="/movement">
+              <Route index element={<StockManagement />} />
+              <Route path="form" element={<StockMovementForm/>} />
             </Route>
 
           </Route>
