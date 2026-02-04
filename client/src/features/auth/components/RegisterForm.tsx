@@ -3,11 +3,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, User, Mail, Lock, ShieldCheck } from "lucide-react";
-import { registerSchema, type RegisterFormData } from "@/types/Auth";
 import axios from "axios";
 import { useGlobalStore } from "@/store/globalStore";
 import { useNavigate } from "react-router-dom";
 import { notify } from "@/lib/toast";
+import { registerSchema, type RegisterFormData } from "@/interface/Auth";
 
 function RegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);

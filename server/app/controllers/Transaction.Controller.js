@@ -40,7 +40,7 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 
 /**
  * @desc Update Credit Transaction Status
- * @route PUT api/v1/transaction/:id
+ * @route PUT api/v1/transactions/:id
  * @access Private/Admin
  * @param {Object} req.body expects
  * {ispaid}
