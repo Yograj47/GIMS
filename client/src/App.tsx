@@ -23,6 +23,7 @@ import StockManagement from "./features/stock/pages/Stock";
 import StockMovementForm from "./features/stock/components/StockForm";
 import Alert from "./features/alerts/pages/Alert";
 import ActivityLogs from "./features/activityLogs/pages/ActivityLogs";
+import ReportsHub from "./features/reports/pages/Report";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -65,7 +66,7 @@ function App() {
             </Route>
 
             {/* Stock Management */}
-             <Route path="/movements">
+             <Route path="/stock-movements">
               <Route index element={<StockManagement />} />
               <Route path="form" element={<StockMovementForm/>} />
             </Route>
@@ -75,9 +76,11 @@ function App() {
               <Route index element={<Alert />} />
             </Route>
 
-            {/* Activity Logs */}
-             <Route path="/logs">
-              <Route index element={<ActivityLogs />} />
+
+            {/* Reports */}
+             <Route path="/reports">
+              <Route index element={<ReportsHub />} />
+              <Route path="activity" element={<ActivityLogs />} />
             </Route>
 
           </Route>

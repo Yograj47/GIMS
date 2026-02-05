@@ -9,14 +9,14 @@ export default function StockManagement() {
       title: "Stock In",
       description: "Record incoming stock from suppliers or manual adjustments",
       icon: <Download className="text-blue-600" size={32} />,
-      path: "/movement/form?mode=in",
+      path: "/stock-movements/form?mode=in",
       color: "bg-blue-50",
     },
     {
       title: "Stock Out",
       description: "Record outgoing stock for sales, damage, or returns",
       icon: <Upload className="text-rose-600" size={32} />,
-      path: "/movement/form?mode=out",
+      path: "/stock-movements/form?mode=out",
       color: "bg-rose-50",
     }
   ];

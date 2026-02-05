@@ -4,7 +4,6 @@ import {
     Truck,
     ArrowLeftRight,
     Bell,
-    ClipboardList,
     BarChart3,
     Users,
     Settings,
@@ -29,14 +28,13 @@ const menuSections: MenuSection[] = [
             { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
             { label: "Products", icon: Box, href: "/products" },
             { label: "Suppliers", icon: Truck, href: "/suppliers" },
-            { label: "Stock Movement", icon: ArrowLeftRight, href: "/movement" },
+            { label: "Stock Movement", icon: ArrowLeftRight, href: "/stock-movements" },
         ],
     },
     {
         title: "Analytics",
         items: [
             { label: "Alerts", icon: Bell, href: "/alerts" },
-            { label: "Activity Logs", icon: ClipboardList, href: "/logs" },
             { label: "Reports", icon: BarChart3, href: "/reports" },
         ],
     },
@@ -49,8 +47,8 @@ const menuSections: MenuSection[] = [
     },
 ]
 
-import { NavLink } from "react-router-dom"; // Essential for SPA behavior
-import { cn } from "@/lib/utils"; // Shadcn utility for cleaner classes
+import { NavLink } from "react-router-dom"; 
+import { cn } from "@/lib/utils"; 
 
 function Sidebar() {
     return (
