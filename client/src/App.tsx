@@ -19,11 +19,15 @@ import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
 import SupplierView from "./features/suppliers/pages/ViewSupplier";
 import ManageSupplier from "./features/suppliers/pages/Manage";
-import StockManagement from "./features/stock/pages/Stock";
+import StockManagement from "./features/stock/pages/StockHub";
 import StockMovementForm from "./features/stock/components/StockForm";
 import Alert from "./features/alerts/pages/Alert";
 import ActivityLogs from "./features/activityLogs/pages/ActivityLogs";
 import ReportsHub from "./features/reports/pages/Report";
+import Transaction from "./features/transactions/pages/Transaction";
+import StockReport from "./features/stock/pages/Stock";
+import StockMovementReport from "./features/stock/pages/StockMovement";
+import UserManagement from "./features/auth/pages/User";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -49,7 +53,9 @@ function App() {
           <Route element={<AppLayout />}>
             {/* Dashboard placeholder - suggest creating a dedicated Dashboard feature soon */}
             <Route path="/dashboard" element={<div className="p-4">Dashboard Page</div>} />
+            <Route path="/users" element={<UserManagement/>} />
             
+
             {/* Product Management */}
             <Route path="/products">
               <Route index element={<Products />} />
@@ -81,6 +87,9 @@ function App() {
              <Route path="/reports">
               <Route index element={<ReportsHub />} />
               <Route path="activity" element={<ActivityLogs />} />
+              <Route path="transactions" element={<Transaction />} />
+              <Route path="stock" element={<StockReport />} />
+              <Route path="movement" element={<StockMovementReport />} />
             </Route>
 
           </Route>
