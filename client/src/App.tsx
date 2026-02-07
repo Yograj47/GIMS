@@ -28,6 +28,8 @@ import Transaction from "./features/transactions/pages/Transaction";
 import StockReport from "./features/stock/pages/Stock";
 import StockMovementReport from "./features/stock/pages/StockMovement";
 import UserManagement from "./features/auth/pages/User";
+import Dashboard from "./features/dashboard/pages/Dashboard";
+import SettingsPage from "./features/settings/pages/Setting";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -52,7 +54,7 @@ function App() {
           {/* --- Protected Inventory/Admin Routes --- */}
           <Route element={<AppLayout />}>
             {/* Dashboard placeholder - suggest creating a dedicated Dashboard feature soon */}
-            <Route path="/dashboard" element={<div className="p-4">Dashboard Page</div>} />
+            <Route path="/dashboard" element={<Dashboard/>} />
             <Route path="/users" element={<UserManagement/>} />
             
 
@@ -80,6 +82,11 @@ function App() {
             {/* Alerts */}
              <Route path="/alerts">
               <Route index element={<Alert />} />
+            </Route>
+
+            {/* Setting */}
+             <Route path="/settings">
+              <Route index element={<SettingsPage />} />
             </Route>
 
 
