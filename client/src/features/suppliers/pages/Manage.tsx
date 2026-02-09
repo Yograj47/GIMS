@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { Loading } from "@/lib/loader";
-import type { SupplierType } from "@/interface/Supplier";
+import type { SupplierType } from "@/types/Supplier";
 import SupplierForm from "../components/SupplierForm";
 
 export default function ManageSupplier() {

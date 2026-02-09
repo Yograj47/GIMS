@@ -8,7 +8,7 @@ import { useGlobalStore } from "@/store/globalStore";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "@/store/userStore";
 import { notify } from "@/lib/toast";
-import { loginSchema, type LoginFormData } from "@/interface/Auth";
+import { loginSchema, type LoginFormData } from "@/types/Auth";
 
 function LoginForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);

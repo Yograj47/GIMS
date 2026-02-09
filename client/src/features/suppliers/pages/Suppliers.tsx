@@ -3,7 +3,7 @@ import { Search, Plus, Filter, Truck } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
-import type { SupplierApiResponse } from '@/interface/Supplier';
+import type { SupplierApiResponse } from '@/types/Supplier';
 import SupplierListing from '../components/SupplierListing';
 
 const Suppliers: React.FC = () => {

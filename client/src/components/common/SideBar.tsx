@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
 import {
     LayoutDashboard,
     Box,
@@ -8,100 +12,128 @@ import {
     Users,
     Settings,
     LogOut,
-} from "lucide-react"
+    PanelLeftClose,
+    PanelLeftOpen
+} from "lucide-react";
 
-type MenuItem = {
-    label: string
-    icon: React.ElementType
-    href: string
+interface SidebarProps {
+    isOpen: boolean;
+    onToggle: () => void;
 }
 
-type MenuSection = {
-    title: string
-    items: MenuItem[]
-}
+function Sidebar({ isOpen, onToggle }: SidebarProps) {
+    const location = useLocation();
+    const iconStyle = "h-6 w-6 shrink-0";
 
-const menuSections: MenuSection[] = [
-    {
-        title: "Main",
-        items: [
-            { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-            { label: "Products", icon: Box, href: "/products" },
-            { label: "Suppliers", icon: Truck, href: "/suppliers" },
-            { label: "Stock Movement", icon: ArrowLeftRight, href: "/stock-movements" },
-        ],
-    },
-    {
-        title: "Analytics",
-        items: [
-            { label: "Alerts", icon: Bell, href: "/alerts" },
-            { label: "Reports", icon: BarChart3, href: "/reports" },
-        ],
-    },
-    {
-        title: "Settings",
-        items: [
-            { label: "User", icon: Users, href: "/users" },
-            { label: "System Preferences", icon: Settings, href: "/settings" },
-        ],
-    },
-]
+    const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
-import { NavLink } from "react-router-dom"; 
-import { cn } from "@/lib/utils"; 
+    // ---------- Screen Detection ----------
+    useEffect(() => {
+        const update = () => {
+            const w = window.innerWidth;
 
-function Sidebar() {
+            if (w < 768) setScreen("mobile");
+            else if (w < 1024) setScreen("tablet");
+            else setScreen("desktop");
+        };
+
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, []);
+
+    // ---------- Collapse Rules ----------
+    const collapsed = screen === "desktop" ? !isOpen : true;
+
+    // ---------- Visibility Rules ----------
+    const showToggle = screen === "desktop";
+    const showLogo = screen !== "desktop" || !collapsed;
+    const showLabel = screen === "desktop" && !collapsed;
+
+    // ---------- Menu ----------
+    const menu = [
+        { name: "Dashboard", icon: <LayoutDashboard className={iconStyle} />, path: "/dashboard" },
+        { name: "Products", icon: <Box className={iconStyle} />, path: "/products" },
+        { name: "Suppliers", icon: <Truck className={iconStyle} />, path: "/suppliers" },
+        { name: "Stock Movement", icon: <ArrowLeftRight className={iconStyle} />, path: "/stock-movements" },
+        { name: "Alerts", icon: <Bell className={iconStyle} />, path: "/alerts" },
+        { name: "Reports", icon: <BarChart3 className={iconStyle} />, path: "/reports" },
+        { name: "Users", icon: <Users className={iconStyle} />, path: "/users" },
+        { name: "Settings", icon: <Settings className={iconStyle} />, path: "/settings" },
+    ];
+
     return (
-        <aside className="flex h-screen w-64 flex-col border-r bg-white px-4 py-3 shrink-0">
-            {/* Header */}
-            <div className="mb-8 flex items-center gap-3 px-2">
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-100">
-                    <Box className="w-5 h-5" />
-                </div>
-                <div className="leading-tight">
-                    <h1 className="text-lg font-bold text-slate-900 tracking-tight">
-                        Grocery<span className="text-blue-600">Pro</span>
-                    </h1>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                        v1.0 Admin
-                    </p>
-                </div>
+        <aside
+            className={cn(
+                "fixed inset-y-0 left-0 z-50 flex flex-col bg-[#24303f] text-white transition-all duration-300 overflow-x-hidden",
+                collapsed ? "w-16" : "w-64"
+            )}
+        >
+            {/* ---------- Header ---------- */}
+            <div
+                className={cn(
+                    "flex items-center h-16 border-b border-slate-700/50",
+                    showLogo ? "justify-between px-4" : "justify-center"
+                )}
+            >
+                {showLogo && (
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-600 text-white">
+                            <Box className="w-5 h-5" />
+                        </div>
+
+                        {showLabel && (
+                            <h1 className="text-lg font-bold text-blue-100">
+                                Grocery<span className="text-blue-400">Pro</span>
+                            </h1>
+                        )}
+                    </div>
+                )}
+
+                {showToggle && (
+                    <button
+                        onClick={onToggle}
+                        className="p-1 hover:bg-slate-700 rounded"
+                    >
+                        {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+                    </button>
+                )}
             </div>
 
-            {/* Menu */}
-            <nav className="flex-1 space-y-6 overflow-y-auto custom-scrollbar">
-                {menuSections.map((section) => (
-                    <div key={section.title}>
-                        <h2 className="mb-3 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                            {section.title}
-                        </h2>
-                        <ul className="space-y-1">
-                            {section.items.map((item) => (
-                                <li key={item.label}>
-                                    <NavLink
-                                        to={item.href}
-                                        className={({ isActive }) => cn(
-                                            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                                            isActive 
-                                                ? "bg-blue-50 text-blue-600 shadow-sm" 
-                                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                                        )}
-                                    >
-                                        <item.icon className="h-4 w-4 shrink-0" />
-                                        {item.label}
-                                    </NavLink>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ))}
+            {/* ---------- Navigation ---------- */}
+            <nav className="flex-1 mt-4 flex flex-col gap-2 px-2 overflow-y-auto">
+                {menu.map(item => {
+                    const active = location.pathname.startsWith(item.path);
+
+                    return (
+                        <Link
+                            key={item.name}
+                            to={item.path}
+                            className={cn(
+                                "flex items-center rounded p-2 transition-all",
+                                showLabel ? "gap-4" : "justify-center",
+                                active
+                                    ? "bg-[#333a48] text-white border-r-4 border-blue-500"
+                                    : "text-slate-400 hover:bg-[#333a48] hover:text-white"
+                            )}
+                        >
+                            {item.icon}
+                            {showLabel && <span>{item.name}</span>}
+                        </Link>
+                    );
+                })}
             </nav>
 
-            {/* Footer */}
-            <div className="pt-4 border-t border-slate-100">
-                <button className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors">
-                    <LogOut className="h-4 w-4" />
-                    Logout Account
+            {/* ---------- Logout ---------- */}
+            <div className="p-4 border-t border-slate-700/50">
+                <button
+                    className={cn(
+                        "flex items-center w-full gap-4 p-2 rounded text-red-400 hover:bg-red-500/10",
+                        !showLabel && "justify-center"
+                    )}
+                >
+                    <LogOut className={iconStyle} />
+                    {showLabel && "Logout"}
                 </button>
             </div>
         </aside>

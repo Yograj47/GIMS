@@ -1,6 +1,6 @@
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supplierSchema, type SupplierType } from "@/interface/Supplier";
+import { supplierSchema, type SupplierType } from "@/types/Supplier";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

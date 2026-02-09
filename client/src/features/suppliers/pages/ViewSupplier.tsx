@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Pencil, ArrowLeft, Phone, Mail, MapPin, Package, TrendingUp, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
-import type { SupplierApiResponse } from '@/interface/Supplier';
+import type { SupplierApiResponse } from '@/types/Supplier';
 
 export default function SupplierView() {
     const { id } = useParams();

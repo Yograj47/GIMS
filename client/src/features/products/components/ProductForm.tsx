@@ -1,10 +1,10 @@
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type ProductAPIResponse, productSchema, type ProductFormData } from "@/interface/Product";
+import { productSchema, type ProductFormData, type ProductData } from "@/types/Product";
 import { TrendingUp, BadgeIndianRupee, Package, AlertCircle } from "lucide-react";
 
 type ProductFormProps = {
-    initialData?: ProductAPIResponse;
+    initialData?: ProductData;
     onSubmit?: (data: ProductFormData) => void;
 };
 

@@ -1,6 +1,6 @@
 import { Eye, Phone, MapPin, Building2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import type { SupplierApiResponse } from "@/interface/Supplier";
+import type { SupplierApiResponse } from "@/types/Supplier";
 
 function SupplierListing({ Supplier }: { Supplier: SupplierApiResponse }) {
     const navigate = useNavigate();

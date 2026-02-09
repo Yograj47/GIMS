@@ -1,78 +1,52 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Save, Trash2, ArrowLeft, PackagePlus, FileEdit } from "lucide-react";
-import axios from "axios";
-import { toast } from "react-toastify";
-
 import ProductForm from "../components/ProductForm";
 import { Button } from "@/components/ui/button";
-import { useGlobalStore } from "@/store/globalStore";
-import type { ProductAPIResponse, ProductFormData } from "@/interface/Product";
+import { useProducts } from "../hooks/useProducts";
+import type { ProductFormData } from "@/types/Product";
 
 export default function ManageProduct() {
-    const { productId } = useParams(); 
+    const { productId } = useParams();
     const isEditMode = Boolean(productId);
     const navigate = useNavigate();
-    const { backendUrl, isLoading, setLoading } = useGlobalStore();
 
-    const [product, setProduct] = useState<ProductAPIResponse | undefined>(undefined);
+    // 🚀 Use our clean custom hook
+    const { 
+        addProduct, 
+        updateProduct, 
+        removeProduct, 
+        singleProduct, 
+        fetchProductById, 
+        isLoading 
+    } = useProducts();
 
     useEffect(() => {
-        if (!isEditMode) return;
-
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${backendUrl}/products/${productId}`, {
-                    withCredentials: true
-                });
-                if (response.data.status === "success") {
-                    setProduct(response.data.data);
-                }
-            } catch (error: any) {
-                toast.error(error?.response?.data?.message || "Failed to load product");
-                navigate("/products");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProduct();
-    }, [productId, isEditMode, backendUrl, navigate, setLoading]);
+        if (isEditMode && productId) {
+            fetchProductById(productId);
+        }
+    }, [productId, isEditMode, fetchProductById]);
 
     const handleFormSubmit = async (data: ProductFormData) => {
-        try {
-            setLoading(true);
-            const url = isEditMode ? `${backendUrl}/products/${productId}` : `${backendUrl}/products/`;
-            const method = isEditMode ? "put" : "post";
+        let success = false;
 
-            const response = await axios[method](url, data, { withCredentials: true });
+        if (isEditMode && productId) {
+            success = await updateProduct(productId, data);
+        } else {
+            success = await addProduct(data);
+        }
 
-            if (response.data.status === "success") {
-                toast.success(response.data.message || `Product ${isEditMode ? 'updated' : 'added'} successfully`);
-                navigate("/products");
-            }
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Operation failed");
-        } finally {
-            setLoading(false);
+        if (success) {
+            navigate("/products");
         }
     };
 
     const handleDelete = async () => {
-        if (!window.confirm("Are you sure you want to delete this product?")) return;
-        try {
-            setLoading(true);
-            const response = await axios.delete(`${backendUrl}/products/${productId}`, { withCredentials: true });
-            if (response.data.status === "success") {
-                toast.success("Product removed");
-                navigate("/products");
-            }
-        } catch (error: any) {
-            toast.error("Delete failed");
-        } finally {
-            setLoading(false);
-        }
+        if (!productId || !window.confirm("Are you sure you want to delete this product?")) return;
+        
+        // removeProduct in hook already handles filtering the state and showing toast
+        await removeProduct(productId);
+        navigate("/products");
     };
 
     return (
@@ -80,9 +54,9 @@ export default function ManageProduct() {
             {/* Header with Navigation */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Button 
-                        variant="outline" 
-                        size="icon" 
+                    <Button
+                        variant="outline"
+                        size="icon"
                         className="rounded-xl border-slate-200"
                         onClick={() => navigate("/products")}
                     >
@@ -90,13 +64,15 @@ export default function ManageProduct() {
                     </Button>
                     <div>
                         <div className="flex items-center gap-2">
-                            {isEditMode ? <FileEdit className="text-blue-600" size={20}/> : <PackagePlus className="text-blue-600" size={20}/>}
+                            {isEditMode ? <FileEdit className="text-blue-600" size={20} /> : <PackagePlus className="text-blue-600" size={20} />}
                             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                                 {isEditMode ? "Update Product" : "Create New Item"}
                             </h1>
                         </div>
                         <p className="text-sm font-medium text-slate-500">
-                            {isEditMode ? `Managing details for ${product?.name || '...'}` : "Add a new item to your grocery inventory"}
+                            {isEditMode 
+                                ? `Managing details for ${singleProduct?.name || '...'}` 
+                                : "Add a new item to your grocery inventory"}
                         </p>
                     </div>
                 </div>
@@ -107,11 +83,16 @@ export default function ManageProduct() {
                 <div className="lg:col-span-2">
                     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                         <div className="p-8">
-                            {/* Conditional Rendering for loading state */}
-                            {isEditMode && !product ? (
-                                <div className="py-20 text-center text-slate-400 font-medium">Loading product data...</div>
+                            {/* Loader state using hook data */}
+                            {isEditMode && !singleProduct ? (
+                                <div className="py-20 text-center text-slate-400 font-medium animate-pulse">
+                                    Loading product data...
+                                </div>
                             ) : (
-                                <ProductForm initialData={product} onSubmit={handleFormSubmit} />
+                                <ProductForm 
+                                    initialData={isEditMode && singleProduct ? singleProduct : undefined} 
+                                    onSubmit={handleFormSubmit} 
+                                />
                             )}
                         </div>
 
@@ -145,7 +126,7 @@ export default function ManageProduct() {
 
                                 <Button
                                     type="submit"
-                                    form="product-form"
+                                    form="product-form" // Ensure your ProductForm has id="product-form"
                                     disabled={isLoading}
                                     className="bg-blue-600 hover:bg-blue-700 rounded-xl font-bold px-8 shadow-lg shadow-blue-100"
                                 >
@@ -157,7 +138,7 @@ export default function ManageProduct() {
                     </div>
                 </div>
 
-                {/* Info Sidebar (Helpful for non-technical users) */}
+                {/* Info Sidebar */}
                 <div className="space-y-6">
                     <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-blue-100">
                         <h3 className="font-bold text-lg mb-2">Pro Tip</h3>
@@ -165,7 +146,7 @@ export default function ManageProduct() {
                             Ensure your <span className="text-white font-bold">Sell Price</span> is higher than your <span className="text-white font-bold">Buy Price</span> to maintain a healthy profit margin.
                         </p>
                     </div>
-                    
+
                     <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
                         <h3 className="font-bold text-slate-900">Inventory Logic</h3>
                         <div className="space-y-3">

@@ -29,7 +29,7 @@ import StockReport from "./features/stock/pages/Stock";
 import StockMovementReport from "./features/stock/pages/StockMovement";
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
-import SettingsPage from "./features/settings/pages/Setting";
+import SettingsLayout from "./layout/SettingLayout";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -41,7 +41,7 @@ function App() {
           Antialiased helps fonts look "sharper" on modern screens.
       */}
       <div className="antialiased selection:bg-blue-100 selection:text-blue-700">
-        
+
         <Routes>
           {/* --- Public / Marketing / Auth Routes --- */}
           <Route element={<AuthLayout />}>
@@ -54,9 +54,9 @@ function App() {
           {/* --- Protected Inventory/Admin Routes --- */}
           <Route element={<AppLayout />}>
             {/* Dashboard placeholder - suggest creating a dedicated Dashboard feature soon */}
-            <Route path="/dashboard" element={<Dashboard/>} />
-            <Route path="/users" element={<UserManagement/>} />
-            
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/users" element={<UserManagement />} />
+
 
             {/* Product Management */}
             <Route path="/products">
@@ -66,7 +66,7 @@ function App() {
             </Route>
 
             {/* Supplier Management */}
-             <Route path="/suppliers">
+            <Route path="/suppliers">
               <Route index element={<Suppliers />} />
               <Route path="v/:id" element={<SupplierView />} />
               <Route path="add" element={<ManageSupplier />} />
@@ -74,24 +74,19 @@ function App() {
             </Route>
 
             {/* Stock Management */}
-             <Route path="/stock-movements">
+            <Route path="/stock-movements">
               <Route index element={<StockManagement />} />
-              <Route path="form" element={<StockMovementForm/>} />
+              <Route path="form" element={<StockMovementForm />} />
             </Route>
 
             {/* Alerts */}
-             <Route path="/alerts">
+            <Route path="/alerts">
               <Route index element={<Alert />} />
-            </Route>
-
-            {/* Setting */}
-             <Route path="/settings">
-              <Route index element={<SettingsPage />} />
             </Route>
 
 
             {/* Reports */}
-             <Route path="/reports">
+            <Route path="/reports">
               <Route index element={<ReportsHub />} />
               <Route path="activity" element={<ActivityLogs />} />
               <Route path="transactions" element={<Transaction />} />
@@ -101,12 +96,19 @@ function App() {
 
           </Route>
 
+          <Route element={<SettingsLayout />}>
+            {/* Setting */}
+            <Route path="/settings">
+            <Route path="users" element={<UserManagement/>}/>
+            </Route>
+          </Route>
+
           {/* --- 404 Route --- */}
           <Route path="*" element={<NotFound />} />
         </Routes>
 
         <Toaster position="top-right" richColors closeButton expand={false} />
-        
+
       </div>
     </BrowserRouter>
   );

@@ -2,7 +2,7 @@ import { Bell, ChevronDown, Search } from "lucide-react";
 
 function AppHeader() {
     return (
-        <header className="w-full h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-10">
+        <header className="w-full h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10">
             <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">

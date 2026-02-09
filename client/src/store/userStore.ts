@@ -39,8 +39,8 @@ export const useUserStore = create<AuthState>()(
             }
         }),
         {
-            name: "user-storage", // Unique name for the item in localStorage
-            storage: createJSONStorage(() => localStorage), // Defaults to localStorage
+            name: "user-storage", 
+            storage: createJSONStorage(() => localStorage), 
         }
     )
 );

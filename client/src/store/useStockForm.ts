@@ -1,4 +1,4 @@
-import type { Item } from "@/interface/Transaction";
+import type { Item } from "@/types/Transaction";
 import { useState } from "react";
 
 export const useStockForm = () => {

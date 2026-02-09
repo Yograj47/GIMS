@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import type { Item, TransactionInput } from "@/interface/Transaction";
+import type { Item, TransactionInput } from "@/types/Transaction";
 
 export default function StockMovementForm() {
     const [searchParams] = useSearchParams();

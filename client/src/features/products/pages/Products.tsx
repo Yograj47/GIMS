@@ -1,55 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Plus, Filter, PackageOpen } from "lucide-react";
-import type { ProductAPIResponse } from '@/interface/Product';
 import ProductListing from '../components/ProductListing';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
+import { useProducts } from '../hooks/useProducts';
 
 const Products: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-
-    // Your data...
-    const products: ProductAPIResponse[] = [
-        {
-            _id: "1",
-            name: "Basmati Rice",
-            quantity: 20,
-            threshold: 50,
-            basePrice: 80,
-            sellingPrice: 95,
-            category: { _id: "cat1", name: "Grains" },
-            unit: { _id: "u1", name: "kg" },
-            supplier: { _id: "s1", name: "Alpha Traders" },
-            isActive: true,
-            createdAt: "2024-03-20"
-        },
-
-        {
-            _id: "2",
-            name: "Refined Oil",
-            quantity: 120,
-            threshold: 30,
-            basePrice: 150,
-            sellingPrice: 180,
-            category: { _id: "cat2", name: "Oils" },
-            unit: { _id: "u2", name: "L" },
-            supplier: { _id: "s2", name: "Pure Oil Co" },
-            isActive: true,
-            createdAt: "2024-03-21"
-        }
-    ];
+    const {products, fetchProducts, isLoading} = useProducts();
 
     useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            console.log("Simulated data fetch complete.");
-            setIsLoading(false);
-        }, 2000);
-        return () => clearTimeout(timer);
-    }, []);
+        fetchProducts();
+    }, [fetchProducts]);
+
+    // Filter products based on search query
+    const filteredProducts = products.filter(p =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.category.name.toLowerCase().includes(searchQuery.toLowerCase()) 
+        // p.supplier.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -57,7 +28,9 @@ const Products: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight">Inventory Details</h1>
-                    <p className="text-slate-500 text-sm font-medium">Total Products: {products.length}</p>
+                    <p className="text-slate-500 text-sm font-medium">
+                        Total Products: {isLoading ? "..." : filteredProducts.length}
+                    </p>
                 </div>
                 <Button
                     onClick={() => navigate("/products/add")}
@@ -74,7 +47,7 @@ const Products: React.FC = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input
                         type="text"
-                        placeholder="Quick search by name, category, or SKU..."
+                        placeholder="Search by name, category, or supplier..."
                         className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm text-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -90,36 +63,37 @@ const Products: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                            <thead className="bg-slate-50/50">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Product Details</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Category</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Stock Level</th>
-                                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase">Pricing (₹)</th>
-                                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase">Actions</th>
-                                </tr>
-                            </thead>
+                        <thead className="bg-slate-50/50">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Product Details</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Category</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Stock Level</th>
+                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Pricing (₹)</th>
+                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                // Show a loading state that spans the whole table
                                 <tr>
-                                    <td colSpan={5} className="py-20">
+                                    <td colSpan={5} className="py-24">
                                         <div className="flex justify-center items-center">
                                             <Loading size="lg" />
                                         </div>
                                     </td>
                                 </tr>
-                            ) : products.length > 0 ? (
-                                products.map((p) => (
+                            ) : filteredProducts.length > 0 ? (
+                                filteredProducts.map((p) => (
                                     <ProductListing key={p._id} Product={p} />
                                 ))
                             ) : (
-                                // Show empty state if no products and not loading
                                 <tr>
-                                    <td colSpan={5} className="py-20 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-slate-400">
-                                            <PackageOpen size={48} strokeWidth={1} />
-                                            <p className="font-medium">No products found</p>
+                                    <td colSpan={5} className="py-24 text-center">
+                                        <div className="flex flex-col items-center gap-3 text-slate-400">
+                                            <PackageOpen size={64} strokeWidth={1} className="text-slate-200" />
+                                            <div>
+                                                <p className="font-bold text-slate-500">No products found</p>
+                                                <p className="text-sm">Try adjusting your search or add a new item.</p>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

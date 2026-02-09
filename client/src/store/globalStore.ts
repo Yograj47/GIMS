@@ -1,15 +1,12 @@
 import { create } from "zustand";
 
-type stateType = {
-  backendUrl: string;
+interface GlobalState {
   isLoading: boolean;
-  setLoading: (isLoading: boolean) => void;
-};
+  setLoading: (loading: boolean) => void;
+}
 
-export const useGlobalStore = create<stateType>((set) => ({
-  backendUrl: import.meta.env.VITE_BACKEND_URL,
+export const useGlobalStore = create<GlobalState>((set) => ({
   isLoading: false,
 
-  // Actions
-  setLoading: (loading) => set({ isLoading: loading }),
+  setLoading: (loading) => set(() => ({ isLoading: loading })),
 }));

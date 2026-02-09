@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { type ProductAPIResponse } from "@/interface/Product";
+import { type ProductData } from "@/types/Product";
 import { Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
-function ProductListing({ Product }: { Product: ProductAPIResponse }) {
+function ProductListing({ Product }: { Product: ProductData }) {
     const isLowStock = Product.quantity <= Product.threshold;
     const navigate = useNavigate();
 
