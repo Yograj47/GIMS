@@ -2,17 +2,23 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData, type ProductData } from "@/types/Product";
 import { TrendingUp, BadgeIndianRupee, Package, AlertCircle } from "lucide-react";
+import type { CategoryData } from "@/types/Category";
+import type { UnitData } from "@/types/Unit";
+import { useEffect } from "react";
 
 type ProductFormProps = {
     initialData?: ProductData;
+    categories: CategoryData[];
+    units: UnitData[];
     onSubmit?: (data: ProductFormData) => void;
 };
 
-export default function ProductForm({ initialData, onSubmit }: ProductFormProps) {
+export default function ProductForm({ initialData, categories, units, onSubmit }: ProductFormProps) {
     const {
         register,
         handleSubmit,
         watch,
+        reset,
         formState: { errors },
     } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
@@ -29,6 +35,22 @@ export default function ProductForm({ initialData, onSubmit }: ProductFormProps)
         },
     });
 
+    useEffect(() => {
+        if (initialData) {
+            reset({
+                name: initialData.name,
+                categoryId: initialData.category?._id,
+                unitId: initialData.unit?._id,
+                supplierId: initialData.supplier?._id,
+                quantity: initialData.quantity,
+                threshold: initialData.threshold,
+                basePrice: initialData.basePrice,
+                sellingPrice: initialData.sellingPrice,
+                isActive: initialData.isActive,
+            });
+        }
+    }, [initialData, reset]);
+
     // Watch prices to calculate profit in real-time
     const buyPrice = watch("basePrice") || 0;
     const sellPrice = watch("sellingPrice") || 0;
@@ -40,15 +62,15 @@ export default function ProductForm({ initialData, onSubmit }: ProductFormProps)
     const errorStyle = "text-xs text-red-500 font-medium mt-1 ml-1";
 
     return (
-        <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => {}))} className="w-full space-y-8">
-            
+        <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => { }))} className="w-full space-y-8">
+
             {/* Section 1: Basic Info */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-blue-600 mb-2">
                     <Package size={18} strokeWidth={2.5} />
                     <h2 className="font-black uppercase tracking-wider text-xs">General Information</h2>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2 space-y-2">
                         <label className={labelStyle}>Product Name <span className="text-red-500">*</span></label>
@@ -60,8 +82,11 @@ export default function ProductForm({ initialData, onSubmit }: ProductFormProps)
                         <label className={labelStyle}>Category <span className="text-red-500">*</span></label>
                         <select {...register("categoryId")} className={inputStyle}>
                             <option value="">Select category</option>
-                            <option value="cat1">Grains</option>
-                            <option value="cat2">Oils</option>
+                            {
+                                categories && categories.map((c) => (
+                                    <option key={c._id} value={c._id}>{c.name}</option>
+                                ))
+                            }
                         </select>
                         {errors.categoryId && <p className={errorStyle}>{errors.categoryId.message}</p>}
                     </div>
@@ -70,8 +95,11 @@ export default function ProductForm({ initialData, onSubmit }: ProductFormProps)
                         <label className={labelStyle}>Unit of Measure <span className="text-red-500">*</span></label>
                         <select {...register("unitId")} className={inputStyle}>
                             <option value="">Select unit</option>
-                            <option value="u1">kg</option>
-                            <option value="u2">Litre</option>
+                            {
+                                units && units.map((u) => (
+                                    <option key={u._id} value={u._id}>{u.name}({u.shortForm})</option>
+                                ))
+                            }
                         </select>
                         {errors.unitId && <p className={errorStyle}>{errors.unitId.message}</p>}
                     </div>
@@ -103,9 +131,8 @@ export default function ProductForm({ initialData, onSubmit }: ProductFormProps)
                     </div>
 
                     {/* LIVE PROFIT PREVIEW CARD */}
-                    <div className={`md:col-span-2 flex items-center justify-between p-4 rounded-xl border-2 border-dashed transition-all ${
-                        profit >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"
-                    }`}>
+                    <div className={`md:col-span-2 flex items-center justify-between p-4 rounded-xl border-2 border-dashed transition-all ${profit >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"
+                        }`}>
                         <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-lg ${profit >= 0 ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
                                 <TrendingUp size={20} />

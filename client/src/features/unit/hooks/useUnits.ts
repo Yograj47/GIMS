@@ -1,0 +1,96 @@
+import { useState, useCallback } from 'react';
+import { useGlobalStore } from '@/store/globalStore';
+import { notify } from '@/lib/toast';
+import type { UnitData, UnitFormData } from '@/types/Unit';
+import { unitService } from '../api/UnitService';
+
+export const useUnits = () => {
+    const [units, setunits] = useState<UnitData[]>([]);
+    const [singleUnit, setSingleUnit] = useState<UnitData | null>(null);
+    const { setLoading, isLoading } = useGlobalStore();
+
+    // 1. Fetch All units
+    const fetchUnits = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await unitService.getAll();
+            if (response.status === "Success") {
+                setunits(response.data as UnitData[]);
+            }
+        } catch (error: any) {
+            // the error notification happens automatically!
+        } finally {
+            setLoading(false);
+        }
+    }, [setLoading]);
+
+    // 2. Fetch Single Unit (for Edit/View pages)
+    const fetchUnitById = useCallback(async (id: string) => {
+        try {
+            setLoading(true);
+            const response = await unitService.getById(id);
+            if (response.status === "Success") {
+                const data = response.data as UnitData;
+                setSingleUnit(data);
+                return data;
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [setLoading]);
+
+    // 3. Create Unit
+    const addUnit = async (payload: UnitFormData) => {
+        try {
+            setLoading(true);
+            const response = await unitService.create(payload);
+            if (response.status === "Success") {
+                notify.success("Unit added successfully");
+                return true;
+            }
+        } finally {
+            setLoading(false);
+        }
+        return false;
+    };
+
+    // 4. Update Unit
+    const updateUnit = async (id: string, payload: UnitFormData) => {
+        try {
+            setLoading(true);
+            const response = await unitService.updateById(id, payload);
+            if (response.status === "Success") {
+                notify.success("Unit updated successfully");
+                return true;
+            }
+        } finally {
+            setLoading(false);
+        }
+        return false;
+    };
+
+    // 5. Delete Unit
+    const removeUnit = async (id: string) => {
+        try {
+            setLoading(true);
+            const response = await unitService.delete(id);
+            if (response.success || response.status === "Success") {
+                setunits((prev) => prev.filter((u) => u._id !== id));
+                notify.success("Unit removed");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return {
+        units,
+        singleUnit,
+        isLoading,
+        fetchUnits,
+        fetchUnitById,
+        addUnit,
+        updateUnit,
+        removeUnit
+    };
+};

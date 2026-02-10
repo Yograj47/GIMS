@@ -9,16 +9,18 @@ import { useProducts } from '../hooks/useProducts';
 const Products: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
-    const {products, fetchProducts, isLoading} = useProducts();
+    const { products, fetchProducts, isLoading } = useProducts();
 
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
 
+
+
     // Filter products based on search query
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.name.toLowerCase().includes(searchQuery.toLowerCase()) 
+        p.category.name.toLowerCase().includes(searchQuery.toLowerCase())
         // p.supplier.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 

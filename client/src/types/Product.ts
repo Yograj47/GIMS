@@ -5,7 +5,7 @@ export const productSchema = z.object({
     name: z.string().min(1, "Product name cannot be empty").trim(),
     categoryId: z.string(),
     unitId: z.string(),
-    supplierId: z.string(),
+    supplierId: z.string().optional(),
     quantity: z.coerce.number().min(0).default(0),
     threshold: z.coerce.number().min(0).default(0),
     basePrice: z.coerce.number().min(0.01),

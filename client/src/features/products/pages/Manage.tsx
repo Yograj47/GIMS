@@ -5,33 +5,59 @@ import ProductForm from "../components/ProductForm";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "../hooks/useProducts";
 import type { ProductFormData } from "@/types/Product";
+import { useCategories } from "@/features/category/hooks/useCategories";
+import { useUnits } from "@/features/unit/hooks/useUnits";
 
 export default function ManageProduct() {
     const { productId } = useParams();
     const isEditMode = Boolean(productId);
     const navigate = useNavigate();
 
-    // 🚀 Use our clean custom hook
-    const { 
-        addProduct, 
-        updateProduct, 
-        removeProduct, 
-        singleProduct, 
-        fetchProductById, 
-        isLoading 
+    // custom hooks
+    const {
+        addProduct,
+        updateProduct,
+        removeProduct,
+        singleProduct,
+        fetchProductById,
+        isLoading
     } = useProducts();
 
+    const {
+        categories,
+        fetchCategories,
+    } = useCategories();
+
+    const {
+        units,
+        fetchUnits,
+    } = useUnits();
+
     useEffect(() => {
+        fetchCategories();
+        fetchUnits();
+
         if (isEditMode && productId) {
             fetchProductById(productId);
         }
-    }, [productId, isEditMode, fetchProductById]);
+    }, [productId, isEditMode, fetchProductById, fetchCategories, fetchUnits]);
 
     const handleFormSubmit = async (data: ProductFormData) => {
+
+        let finalPayload;
+
+        if (!data.supplierId || data.supplierId === "") {
+            const { supplierId, ...rest } = data;
+            finalPayload = rest;
+        } else {
+            finalPayload = data;
+        }
+
+
         let success = false;
 
         if (isEditMode && productId) {
-            success = await updateProduct(productId, data);
+            success = await updateProduct(productId, finalPayload);
         } else {
             success = await addProduct(data);
         }
@@ -43,7 +69,7 @@ export default function ManageProduct() {
 
     const handleDelete = async () => {
         if (!productId || !window.confirm("Are you sure you want to delete this product?")) return;
-        
+
         // removeProduct in hook already handles filtering the state and showing toast
         await removeProduct(productId);
         navigate("/products");
@@ -70,8 +96,8 @@ export default function ManageProduct() {
                             </h1>
                         </div>
                         <p className="text-sm font-medium text-slate-500">
-                            {isEditMode 
-                                ? `Managing details for ${singleProduct?.name || '...'}` 
+                            {isEditMode
+                                ? `Managing details for ${singleProduct?.name || '...'}`
                                 : "Add a new item to your grocery inventory"}
                         </p>
                     </div>
@@ -89,9 +115,11 @@ export default function ManageProduct() {
                                     Loading product data...
                                 </div>
                             ) : (
-                                <ProductForm 
-                                    initialData={isEditMode && singleProduct ? singleProduct : undefined} 
-                                    onSubmit={handleFormSubmit} 
+                                <ProductForm
+                                    initialData={isEditMode && singleProduct ? singleProduct : undefined}
+                                    categories={categories}
+                                    units={units}
+                                    onSubmit={handleFormSubmit}
                                 />
                             )}
                         </div>
@@ -126,7 +154,7 @@ export default function ManageProduct() {
 
                                 <Button
                                     type="submit"
-                                    form="product-form" // Ensure your ProductForm has id="product-form"
+                                    form="product-form"
                                     disabled={isLoading}
                                     className="bg-blue-600 hover:bg-blue-700 rounded-xl font-bold px-8 shadow-lg shadow-blue-100"
                                 >
