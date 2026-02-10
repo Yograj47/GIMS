@@ -24,7 +24,7 @@ export const createUnit = asyncHandler(async (req, res) => {
     const unit = await Unit.create(validatedData);
 
     res.status(201).json({
-        status: "success",
+        status: "Success",
         data: unit
     });
 });
@@ -38,8 +38,7 @@ export const getUnits = asyncHandler(async (req, res) => {
     const units = await Unit.find({ isActive: true }).sort({ name: 1 }).select('-__v');
 
     res.status(200).json({
-        status: "success",
-        results: units.length,
+        status: "Success",
         data: units
     });
 });
@@ -58,7 +57,7 @@ export const getUnitById = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         data: unit
     });
 });
@@ -83,7 +82,7 @@ export const updateUnitById = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         data: updatedUnit
     });
 });
@@ -112,7 +111,7 @@ export const deleteUnitById = asyncHandler(async (req, res) => {
     await unit.save();
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         message: "Unit deactivated successfully"
     });
 });

@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema({
     supplierId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Suppliers',
-        default: ""
+        required: false
     },
     basePrice: {
         type: Number,

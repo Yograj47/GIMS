@@ -23,7 +23,7 @@ export const createCategory = asyncHandler(async (req, res) => {
     const createdCategory = await Category.create(validatedData);
 
     res.status(201).json({
-        status: "success",
+        status: "Success",
         data: createdCategory
     });
 });
@@ -38,8 +38,7 @@ export const getCategories = asyncHandler(async (req, res) => {
     const categories = await Category.find({}).sort({ name: 1 }).select('-__v');
 
     res.status(200).json({
-        status: "success",
-        results: categories.length,
+        status: "Success",
         data: categories
     });
 });
@@ -58,7 +57,7 @@ export const getCategoryById = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         data: category
     });
 });
@@ -83,7 +82,7 @@ export const updateCategory = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         message: "Category updated successfully",
         data: updatedCategory
     });
@@ -116,7 +115,7 @@ export const deleteCategory = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         message: 'Category removed successfully'
     });
 });

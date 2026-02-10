@@ -158,8 +158,7 @@ export const UpdateProductById = asyncHandler(async (req, res) => {
     ).lean();
 
     res.status(200).json({
-        success: true,
-        message: "Product updated successfully",
+        status: "Success",
         data: updatedProduct
     });
 })
@@ -181,7 +180,7 @@ export const deleteProductById = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        success: true,
+        status: "Success",
         message: "Product deleted successfully"
     });
 })

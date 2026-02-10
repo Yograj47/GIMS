@@ -18,8 +18,8 @@ export const productSchema = z.object({
         .string()
         .regex(/^[0-9a-fA-F]{24}$/, "Invalid Supplier ID format")
         .optional()
-        .or(z.literal("")),
-
+        .or(z.literal("").transform(() => undefined)),
+        
     quantity: z
         .number()
         .min(0, "Quantity cannot be negative")
@@ -42,5 +42,5 @@ export const productSchema = z.object({
 
 }).refine((data) => data.sellingPrice >= data.basePrice, {
     message: "Selling price must be greater than or equal to the base price",
-    path: ["sellingPrice"], 
+    path: ["sellingPrice"],
 });
