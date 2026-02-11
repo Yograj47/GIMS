@@ -9,6 +9,10 @@ const supplierSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please enter phone number"]
     },
+    email: {
+        type: String,
+        required: false,
+    },
     address: {
         type: String,
         required: [true, "Please enter address"]

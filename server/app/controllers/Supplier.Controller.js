@@ -24,18 +24,17 @@ export const getSuppliers = asyncHandler(async (req, res) => {
     const suppliers = await Supplier.find().sort({ name: 1 }).select('-__v');
 
     const formattedSuppliers = suppliers.map(s => ({
-        _id: s._id,
-        data: {
+            _id: s._id,
             name: s.name,
             phone: s.phone,
+            email: s.email,
             address: s.address,
+            notes: s.notes,
             isActive: s.isActive
-        }
     }));
 
     res.status(200).json({
-        status: "success",
-        results: formattedSuppliers.length,
+        status: "Success",
         data: formattedSuppliers
     });
 });
@@ -60,15 +59,16 @@ export const getSupplierById = asyncHandler(async (req, res) => {
         name: p.name,
         basePrice: p.basePrice,
         sellingPrice: p.sellingPrice,
-        stock: p.quantity 
+        stock: p.quantity
     }));
 
     res.status(200).json({
-        status: "success",
-        _id: supplier._id, 
+        status: "Success",
         data: {
+            _id: supplier._id,
             name: supplier.name,
             phone: supplier.phone,
+            email: supplier.email,
             address: supplier.address,
             notes: supplier.notes,
             isActive: supplier.isActive
@@ -99,7 +99,7 @@ export const updateSupplier = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         data: supplier
     });
 
@@ -119,7 +119,7 @@ export const deleteSupplier = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
-        data: supplier
+        status: "Success",
+        message: "Supplier Deleted Successfully"
     });
 })

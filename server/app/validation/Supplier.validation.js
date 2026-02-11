@@ -9,6 +9,9 @@ export const supplierSchema = z.object({
         .string()
         .min(1, "Supplier phone cannot be empty")
         .trim(),
+    email: z
+        .string()
+        .optional(),
     address: z
         .string()
         .min(1, "Supplier address cannot be empty")
