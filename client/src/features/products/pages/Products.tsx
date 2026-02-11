@@ -50,19 +50,19 @@ const Products: React.FC = () => {
                     <input
                         type="text"
                         placeholder="Search by name, category, or supplier..."
-                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm text-sm"
+                        className="w-full bg-white border border-slate-300 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <Button variant="outline" className="rounded-xl border-slate-200 h-12 gap-2 text-slate-600 font-bold">
+                <Button variant="outline" className="rounded-xl border-slate-300 h-12 gap-2 text-slate-600 font-bold">
                     <Filter size={18} />
                     Filters
                 </Button>
             </div>
 
             {/* Table Container */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white border border-slate-300 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-slate-50/50">

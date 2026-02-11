@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Download, Upload, ArrowRightLeft } from 'lucide-react';
+import { Download, Upload, ArrowRightLeft, History } from 'lucide-react';
 
 export default function StockManagement() {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ export default function StockManagement() {
       icon: <Download className="text-blue-600" size={32} />,
       path: "/stock-movements/form?mode=in",
       color: "bg-blue-50",
+      accent: "border-blue-100"
     },
     {
       title: "Stock Out",
@@ -18,64 +19,63 @@ export default function StockManagement() {
       icon: <Upload className="text-rose-600" size={32} />,
       path: "/stock-movements/form?mode=out",
       color: "bg-rose-50",
+      accent: "border-rose-100"
     }
   ];
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto animate-in fade-in duration-500">
-      {/* Header Section */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-slate-400">
-           <ArrowRightLeft size={16} />
-           <span className="text-[10px] font-black uppercase tracking-[0.2em]">Inventory Flow</span>
+    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      {/* Header */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-blue-600 mb-1">
+          <ArrowRightLeft size={16} strokeWidth={3} />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Inventory Management</span>
         </div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Stock Movement</h1>
-        <p className="text-slate-500 font-medium">Select an action to manage your inventory levels</p>
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Stock Movement</h1>
+        <p className="text-slate-500 font-medium">Log inventory flow to keep your stock levels accurate.</p>
       </div>
 
-      {/* Grid Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Action Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {actions.map((action) => (
           <button
             key={action.title}
             onClick={() => navigate(action.path)}
-            className="group relative bg-white border border-slate-200 rounded-[2.5rem] p-10 text-center transition-all hover:shadow-2xl hover:shadow-slate-200/50 hover:-translate-y-1 active:scale-[0.98]"
+            className={`group relative bg-white border ${action.accent} rounded-[2rem] p-8 text-left transition-all hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-1 active:scale-[0.98] border-b-4`}
           >
-            <div className={`mx-auto w-20 h-20 ${action.color} rounded-3xl flex items-center justify-center mb-6 transition-transform group-hover:rotate-6`}>
+            <div className={`w-16 h-16 ${action.color} rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-300`}>
               {action.icon}
             </div>
             
-            <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
+            <h2 className="text-2xl font-black text-slate-800 mb-2 tracking-tight flex items-center gap-2">
               {action.title}
             </h2>
-            <p className="text-slate-500 text-sm leading-relaxed max-w-60 mx-auto font-medium">
+            <p className="text-slate-500 text-sm leading-relaxed font-medium mb-4">
               {action.description}
             </p>
 
-            <div className="mt-8 inline-flex items-center justify-center w-12 h-12 rounded-full border border-slate-100 text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all">
-               <ArrowRightLeft size={20} />
+            <div className="flex items-center text-xs font-bold text-slate-400 group-hover:text-slate-900 transition-colors uppercase tracking-widest">
+              Open Form <ArrowRightLeft size={14} className="ml-2" />
             </div>
           </button>
         ))}
       </div>
 
-      {/* Quick Stats/Info Footer */}
-      <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 flex items-center justify-between">
+      {/* Subtle Footer Link */}
+      <div 
+        onClick={() => navigate('/reports/stock')}
+        className="group flex items-center justify-between bg-white border-blue-200 hover:border-blue-400 cursor-pointer border rounded-2xl p-5 transition-all"
+      >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-blue-600">
-            <ArrowRightLeft size={24} />
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-blue-600 shadow-sm transition-colors">
+            <History size={20} />
           </div>
           <div>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Recent Activity</p>
-            <p className="text-sm font-bold text-slate-700">View detailed stock history in Reports</p>
+            <p className="text-sm font-bold text-slate-700">Audit Trail</p>
+            <p className="text-xs text-slate-400 font-medium">Review history of all movements</p>
           </div>
         </div>
-        <button 
-          onClick={() => navigate('/reports')}
-          className="text-blue-600 font-black text-xs uppercase tracking-widest hover:underline"
-        >
-          View Full Log
-        </button>
+        <span className="text-blue-600 text-xs font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">View Logs</span>
       </div>
     </div>
   );

@@ -1,98 +1,95 @@
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { User, MapPin, Notebook, Phone, Mail} from "lucide-react";
 import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/Supplier"
 import { useEffect } from "react";
 
 interface SupplierFormProps {
-  initialData?: SupplierData;
-  onSubmit: (data: SupplierFormData) => void;
-  isLoading: boolean;
+    initialData?: SupplierData;
+    onSubmit: (data: SupplierFormData) => void;
+    isLoading: boolean;
 }
 
 export default function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormProps) {
-  const navigate = useNavigate();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<SupplierFormData>({
-    resolver: zodResolver(supplierSchema) as Resolver<SupplierFormData>,
-    defaultValues: initialData
-  });
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<SupplierFormData>({
+        resolver: zodResolver(supplierSchema) as Resolver<SupplierFormData>,
+        defaultValues: initialData
+    });
 
-  // Sync form when initialData loads (crucial for Edit Mode)
-  useEffect(() => {
-    if (initialData) {
-      reset(initialData);
-    }
-  }, [initialData, reset]);
+    useEffect(() => {
+        if (initialData) reset(initialData);
+    }, [initialData, reset]);
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-      {/* SECTION 1: Supplier Information */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 uppercase tracking-tight">Supplier Identity</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500">Supplier Name <span className="text-red-500">*</span></label>
-            <Input {...register("name")} placeholder="e.g., ABC Wholesalers" className="h-11 rounded-xl" />
-            {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.name.message}</p>}
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500">Phone Number <span className="text-red-500">*</span></label>
-            <Input {...register("phone")} placeholder="+977-1-XXXXXXX" className="h-11 rounded-xl" />
-            {errors.phone && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.phone.message}</p>}
-          </div>
-        </div>
-      </section>
+    const labelStyle = "text-[13px] font-bold text-slate-700 flex items-center gap-2";
+    const sectionHeaderStyle = "flex items-center gap-2 text-blue-600 mb-4";
+    const errorStyle = "text-xs text-red-500 font-medium mt-1 ml-1";
 
-      {/* SECTION 2: Location & Contact */}
-      <section className="space-y-4">
-        <h3 className="font-black text-slate-800 border-b border-slate-100 pb-2 uppercase tracking-tight text-sm">Location Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500">Email Address</label>
-            {/* ADDED REGISTER HERE */}
-            <Input {...register("email")} type="email" placeholder="supplier@example.com" className="h-11 rounded-xl" />
-            {errors.email && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.email.message}</p>}
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500">Full Address <span className="text-red-500">*</span></label>
-            {/* REMOVED City input because it wasn't in your Schema, or merge it here */}
-            <Input {...register("address")} placeholder="Street name, City, Area" className="h-11 rounded-xl" />
-            {errors.address && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.address.message}</p>}
-          </div>
-        </div>
-      </section>
+    return (
+        <form id="supplier-form" onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+            
+            {/* SECTION 1: Identity */}
+            <div className="space-y-4">
+                <div className={sectionHeaderStyle}>
+                    <User size={18} strokeWidth={2.5} />
+                    <h2 className="font-black uppercase tracking-wider text-xs">Supplier Identity</h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className={labelStyle}>Supplier Name <span className="text-red-500">*</span></label>
+                        <Input {...register("name")} placeholder="e.g. ABC Wholesalers" className="rounded-xl border-slate-200 bg-slate-50/50 h-12" />
+                        {errors.name && <p className={errorStyle}>{errors.name.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <label className={labelStyle}>
+                            <Phone size={14} className="text-slate-400" /> Phone Number <span className="text-red-500">*</span>
+                        </label>
+                        <Input {...register("phone")} placeholder="+977-1-XXXXXXX" className="rounded-xl border-slate-200 bg-slate-50/50 h-12" />
+                        {errors.phone && <p className={errorStyle}>{errors.phone.message}</p>}
+                    </div>
+                </div>
+            </div>
 
-      {/* SECTION 3: Additional Notes */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 uppercase tracking-tight">Internal Notes</h3>
-        <div className="space-y-1.5">
-          <Textarea {...register("notes")} placeholder="Add any specific delivery instructions or credit terms..." className="min-h-30 rounded-xl resize-none border-slate-200 focus:ring-blue-500" />
-        </div>
-      </section>
+            {/* SECTION 2: Location */}
+            <div className="space-y-4 bg-blue-50/30 p-6 rounded-2xl border border-blue-100">
+                <div className={sectionHeaderStyle}>
+                    <MapPin size={18} strokeWidth={2.5} />
+                    <h2 className="font-black uppercase tracking-wider text-xs">Contact & Location</h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className={labelStyle}>
+                            <Mail size={14} className="text-slate-400" /> Email Address
+                        </label>
+                        <Input {...register("email")} type="email" placeholder="supplier@example.com" className="rounded-xl border-blue-200 focus:ring-blue-500/20 h-12" />
+                        {errors.email && <p className={errorStyle}>{errors.email.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <label className={labelStyle}>Full Address <span className="text-red-500">*</span></label>
+                        <Input {...register("address")} placeholder="Street name, City, Area" className="rounded-xl border-blue-200 focus:ring-blue-500/20 h-12" />
+                        {errors.address && <p className={errorStyle}>{errors.address.message}</p>}
+                    </div>
+                </div>
+            </div>
 
-      {/* ACTIONS */}
-      <div className="flex items-center gap-4 pt-6">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="bg-blue-600 hover:bg-blue-700 px-12 h-12 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
-        >
-          {isLoading ? <Loader2 className="animate-spin mr-2" size={18} /> : "Save Supplier"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="px-12 h-12 rounded-xl font-bold text-sm border-slate-200 text-slate-500 hover:bg-slate-50"
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
+            {/* SECTION 3: Notes */}
+            <div className="space-y-4">
+                <div className={sectionHeaderStyle}>
+                    <Notebook size={18} strokeWidth={2.5} />
+                    <h2 className="font-black uppercase tracking-wider text-xs">Internal Notes</h2>
+                </div>
+                <div className="space-y-2">
+                    <Textarea 
+                        {...register("notes")} 
+                        placeholder="Add any specific delivery instructions or credit terms..." 
+                        className="min-h-30 rounded-2xl border-slate-200 bg-slate-50/50 resize-none p-4" 
+                    />
+                </div>
+            </div>
+        </form>
+    );
 }
