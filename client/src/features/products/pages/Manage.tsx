@@ -7,6 +7,7 @@ import { useProducts } from "../hooks/useProducts";
 import type { ProductFormData } from "@/types/Product";
 import { useCategories } from "@/features/category/hooks/useCategories";
 import { useUnits } from "@/features/unit/hooks/useUnits";
+import { Loading } from "@/lib/loader";
 
 export default function ManageProduct() {
     const { productId } = useParams();
@@ -67,10 +68,13 @@ export default function ManageProduct() {
         }
     };
 
+    if (isEditMode && isLoading) {
+        return <Loading fullPage />;
+    }
+
     const handleDelete = async () => {
         if (!productId || !window.confirm("Are you sure you want to delete this product?")) return;
 
-        // removeProduct in hook already handles filtering the state and showing toast
         await removeProduct(productId);
         navigate("/products");
     };

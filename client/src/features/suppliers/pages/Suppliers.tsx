@@ -3,86 +3,20 @@ import { Search, Plus, Filter, Truck } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
-import type { SupplierApiResponse } from '@/types/Supplier';
 import SupplierListing from '../components/SupplierListing';
+import { useSuppliers } from '../hooks/useSuppliers';
 
 const Suppliers: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-
-    const suppliers: SupplierApiResponse[] = [
-        {
-            _id: "sup_v1",
-            data: {
-                name: "Everest Wholesale Grains",
-                phone: "+977 980-1234567",
-                address: "Koteshwor-32, Kathmandu, Nepal",
-                notes: "Primary contact for long-grain rice and lentils.",
-                isActive: true,
-            },
-            productData: [
-                {
-                    _id: "prod_101",
-                    name: "Premium Basmati Rice (5kg)",
-                    basePrice: 850,
-                    sellingPrice: 1100,
-                    stock: 45
-                },
-                {
-                    _id: "prod_102",
-                    name: "Red Lentils (Musuro Dal)",
-                    basePrice: 160,
-                    sellingPrice: 210,
-                    stock: 120
-                }
-            ]
-        },
-        {
-            _id: "sup_v2",
-            data: {
-                name: "Quality Oil Industries",
-                phone: "+977 984-1122334",
-                address: "Industrial District, Patan, Lalitpur",
-                notes: "Delivery every Tuesday morning.",
-                isActive: true,
-            },
-            productData: [
-                {
-                    _id: "prod_201",
-                    name: "Sunflower Oil (1L)",
-                    basePrice: 220,
-                    sellingPrice: 280,
-                    stock: 60
-                },
-                {
-                    _id: "prod_202",
-                    name: "Mustard Oil (Pure)",
-                    basePrice: 290,
-                    sellingPrice: 350,
-                    stock: 30
-                }
-            ]
-        },
-        {
-            _id: "sup_v3",
-            data: {
-                name: "Organic Himalayan Spices",
-                phone: "+977 01-4455667",
-                address: "Boudha Road, Kathmandu",
-                notes: "Specializes in Turmeric and Cumin powder.",
-                isActive: true,
-            },
-            productData: [] // Testing the "No Products" state
-        }
-    ];
+    const { Suppliers, fetchSuppliers, isLoading } = useSuppliers();
 
     useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => setIsLoading(false), 2000);
-        return () => clearTimeout(timer);
-    }, []);
+        fetchSuppliers();
+    }, [fetchSuppliers]);
 
+    console.log(Suppliers);
+    
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Page Title & Add Button */}
@@ -107,19 +41,19 @@ const Suppliers: React.FC = () => {
                     <input
                         type="text"
                         placeholder="Search by company name or contact..."
-                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm text-sm font-medium"
+                        className="w-full bg-white border border-slate-300 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-text text-sm font-medium"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <Button variant="outline" className="rounded-xl border-slate-200 h-12 gap-2 text-slate-600 font-bold hover:bg-slate-50">
+                <Button variant="outline" className="rounded-xl border-slate-300 h-12 gap-2 text-slate-600 font-bold">
                     <Filter size={18} />
                     Filters
                 </Button>
             </div>
 
             {/* Table Container */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white border border-slate-300 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-slate-50/50 border-b border-slate-100">
@@ -140,8 +74,8 @@ const Suppliers: React.FC = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : suppliers.length > 0 ? (
-                                suppliers.map((s) => (
+                            ) : Suppliers.length > 0 ? (
+                                Suppliers.map((s) => (
                                     <SupplierListing key={s._id} Supplier={s} />
                                 ))
                             ) : (

@@ -1,40 +1,48 @@
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supplierSchema, type SupplierType } from "@/types/Supplier";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/Supplier"
+import { useEffect } from "react";
 
 interface SupplierFormProps {
-  initialData?: SupplierType;
-  onSubmit: (data: SupplierType) => void;
+  initialData?: SupplierData;
+  onSubmit: (data: SupplierFormData) => void;
   isLoading: boolean;
 }
 
 export default function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormProps) {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<SupplierType>({
-    resolver: zodResolver(supplierSchema) as Resolver<SupplierType>,
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<SupplierFormData>({
+    resolver: zodResolver(supplierSchema) as Resolver<SupplierFormData>,
     defaultValues: initialData
   });
 
+  // Sync form when initialData loads (crucial for Edit Mode)
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-      
       {/* SECTION 1: Supplier Information */}
       <section className="space-y-4">
         <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 uppercase tracking-tight">Supplier Identity</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500">Supplier Name <span className="text-red-500">*</span></label>
-            <Input {...register("name")} placeholder="e.g., ABC Wholesalers" className="h-11 rounded-xl border-slate-200" />
+            <Input {...register("name")} placeholder="e.g., ABC Wholesalers" className="h-11 rounded-xl" />
             {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.name.message}</p>}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500">Phone Number <span className="text-red-500">*</span></label>
-            <Input {...register("phone")} placeholder="+977-1-XXXXXXX" className="h-11 rounded-xl border-slate-200" />
+            <Input {...register("phone")} placeholder="+977-1-XXXXXXX" className="h-11 rounded-xl" />
             {errors.phone && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.phone.message}</p>}
           </div>
         </div>
@@ -46,16 +54,16 @@ export default function SupplierForm({ initialData, onSubmit, isLoading }: Suppl
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500">Email Address</label>
-            <Input type="email" placeholder="supplier@example.com" className="h-11 rounded-xl border-slate-200" />
+            {/* ADDED REGISTER HERE */}
+            <Input {...register("email")} type="email" placeholder="supplier@example.com" className="h-11 rounded-xl" />
+            {errors.email && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500">City <span className="text-red-500">*</span></label>
-            <Input placeholder="e.g. Kathmandu" className="h-11 rounded-xl border-slate-200" />
+            <label className="text-xs font-bold text-slate-500">Full Address <span className="text-red-500">*</span></label>
+            {/* REMOVED City input because it wasn't in your Schema, or merge it here */}
+            <Input {...register("address")} placeholder="Street name, City, Area" className="h-11 rounded-xl" />
+            {errors.address && <p className="text-[10px] font-bold text-red-500 uppercase">{errors.address.message}</p>}
           </div>
-        </div>
-        <div className="space-y-1.5 pt-2">
-          <label className="text-xs font-bold text-slate-500">Full Address <span className="text-red-500">*</span></label>
-          <Input {...register("address")} placeholder="Street name, Ward No, Area" className="h-11 rounded-xl border-slate-200" />
         </div>
       </section>
 
@@ -69,18 +77,18 @@ export default function SupplierForm({ initialData, onSubmit, isLoading }: Suppl
 
       {/* ACTIONS */}
       <div className="flex items-center gap-4 pt-6">
-        <Button 
-            type="submit" 
-            disabled={isLoading} 
-            className="bg-blue-600 hover:bg-blue-700 px-12 h-12 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="bg-blue-600 hover:bg-blue-700 px-12 h-12 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
         >
           {isLoading ? <Loader2 className="animate-spin mr-2" size={18} /> : "Save Supplier"}
         </Button>
-        <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate(-1)} 
-            className="px-12 h-12 rounded-xl font-bold text-sm border-slate-200 text-slate-500 hover:bg-slate-50"
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate(-1)}
+          className="px-12 h-12 rounded-xl font-bold text-sm border-slate-200 text-slate-500 hover:bg-slate-50"
         >
           Cancel
         </Button>

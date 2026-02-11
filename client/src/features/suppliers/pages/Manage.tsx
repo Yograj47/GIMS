@@ -1,54 +1,47 @@
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import axios from "axios";
-import { Loading } from "@/lib/loader";
-import type { SupplierType } from "@/types/Supplier";
 import SupplierForm from "../components/SupplierForm";
+import type { SupplierFormData } from "@/types/Supplier";
+import { useSuppliers } from "../hooks/useSuppliers";
+import { useEffect } from "react";
+import { Loading } from "@/lib/loader";
 
 export default function ManageSupplier() {
   const { id } = useParams();
+  const isEditMode = Boolean(id);
+
   const navigate = useNavigate();
-  const [initialData, setInitialData] = useState<SupplierType | undefined>(undefined);
-  const [isPageLoading, setIsPageLoading] = useState(!!id);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    addSupplier,
+    updateSupplier,
+    fetchSupplierById,
+    singleSupplier,
+    isLoading
+  } = useSuppliers();
+
 
   useEffect(() => {
-    if (id) {
-      const fetchSupplier = async () => {
-        try {
-          const { data } = await axios.get(`/api/v1/suppliers/${id}`);
-          setInitialData(data.data);
-        } catch (error) {
-          toast.error("Error: Could not find supplier record.");
-          navigate("/suppliers");
-        } finally {
-          setIsPageLoading(false);
-        }
-      };
-      fetchSupplier();
+    if (isEditMode && id) {
+      fetchSupplierById(id)
     }
-  }, [id, navigate]);
+  }, [id, fetchSupplierById])
 
-  const handleSubmit = async (formData: SupplierType) => {
-    setIsSubmitting(true);
-    try {
-      if (id) {
-        await axios.put(`/api/v1/suppliers/${id}`, formData);
-        toast.success("Supplier updated.");
-      } else {
-        await axios.post("/api/v1/suppliers", formData);
-        toast.success("Supplier successfully added to system.");
-      }
+  const handleSubmit = async (data: SupplierFormData) => {
+    let success = false;
+
+    if (isEditMode && id) {
+      success = await updateSupplier(id, data);
+    } else {
+      success = await addSupplier(data);
+    }
+
+    if (success) {
       navigate("/suppliers");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Submit failed.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  if (isPageLoading) return <Loading fullPage />;
+  if (isEditMode && !singleSupplier && isLoading) {
+    return <Loading fullPage />;
+  }
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -62,10 +55,10 @@ export default function ManageSupplier() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-[2rem] p-10 shadow-sm shadow-slate-100/50">
-        <SupplierForm 
-          initialData={initialData} 
-          onSubmit={handleSubmit} 
-          isLoading={isSubmitting} 
+        <SupplierForm
+          initialData={isEditMode && singleSupplier ? singleSupplier : undefined}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
         />
       </div>
     </div>

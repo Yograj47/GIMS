@@ -1,71 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Pencil, ArrowLeft, Phone, Mail, MapPin, Package, TrendingUp, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
-import type { SupplierApiResponse } from '@/types/Supplier';
+import { useSuppliers } from '../hooks/useSuppliers';
 
 export default function SupplierView() {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [supplier, setSupplier] = useState<SupplierApiResponse | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    // Static Fake Data for Simulation
-    const suppliers: SupplierApiResponse[] = [
-        {
-            _id: "sup_v1",
-            data: {
-                name: "Everest Wholesale Grains",
-                phone: "+977 980-1234567",
-                address: "Koteshwor-32, Kathmandu, Nepal",
-                notes: "Primary contact for long-grain rice and lentils.",
-                isActive: true,
-            },
-            productData: [
-                { _id: "prod_101", name: "Premium Basmati Rice (5kg)", basePrice: 850, sellingPrice: 1100, stock: 45 },
-                { _id: "prod_102", name: "Red Lentils (Musuro Dal)", basePrice: 160, sellingPrice: 210, stock: 120 }
-            ]
-        },
-        {
-            _id: "sup_v2",
-            data: {
-                name: "Quality Oil Industries",
-                phone: "+977 984-1122334",
-                address: "Industrial District, Patan, Lalitpur",
-                notes: "Delivery every Tuesday morning.",
-                isActive: true,
-            },
-            productData: [
-                { _id: "prod_201", name: "Sunflower Oil (1L)", basePrice: 220, sellingPrice: 280, stock: 60 },
-                { _id: "prod_202", name: "Mustard Oil (Pure)", basePrice: 290, sellingPrice: 350, stock: 30 }
-            ]
-        },
-        {
-            _id: "sup_v3",
-            data: {
-                name: "Organic Himalayan Spices",
-                phone: "+977 01-4455667",
-                address: "Boudha Road, Kathmandu",
-                notes: "Specializes in Turmeric and Cumin powder.",
-                isActive: true,
-            },
-            productData: []
-        }
-    ];
+    const { singleSupplier, productData, fetchSupplierById, isLoading } = useSuppliers();
 
     useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            const found = suppliers.find(m => m._id === id);
-            setSupplier(found || null);
-            setIsLoading(false);
-        }, 800); // Slight delay to show the nice loader
-        return () => clearTimeout(timer);
-    }, [id]);
+        if (id) fetchSupplierById(id);
+    }, [id, fetchSupplierById]);
+
+    // Destructure data for cleaner JSX
+    const { name, phone, email, address, notes } = singleSupplier || {};
 
     // --- FALLBACK UI: IF SUPPLIER NOT FOUND ---
-    if (!isLoading && !supplier) {
+    if (!isLoading && !singleSupplier) {
         return (
             <div className="h-[70vh] flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in duration-300">
                 <div className="p-6 bg-slate-50 rounded-full text-slate-300">
@@ -74,12 +27,11 @@ export default function SupplierView() {
                 <div>
                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">Supplier Not Found</h2>
                     <p className="text-slate-500 font-medium max-w-xs mx-auto">
-                        We couldn't find a vendor with ID: <span className="text-blue-600 font-bold">{id}</span>. 
-                        They may have been deleted or the link is broken.
+                        We couldn't find a vendor with ID: <span className="text-blue-600 font-bold">{id}</span>.
                     </p>
                 </div>
-                <Button 
-                    variant="outline" 
+                <Button
+                    variant="outline"
                     onClick={() => navigate('/suppliers')}
                     className="rounded-xl font-bold border-slate-200"
                 >
@@ -92,14 +44,11 @@ export default function SupplierView() {
 
     if (isLoading) return <Loading fullPage />;
 
-    // Destructure only after checking if supplier exists
-    const { name, phone, email, address, notes } = supplier!.data;
-
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header Controls */}
             <div className="flex items-center justify-between">
-                <button 
+                <button
                     onClick={() => navigate('/suppliers')}
                     className="flex items-center gap-2 text-slate-400 hover:text-slate-900 font-bold transition-all group"
                 >
@@ -108,7 +57,7 @@ export default function SupplierView() {
                     </div>
                     <span className="text-sm uppercase tracking-widest">Back to Directory</span>
                 </button>
-                <Button 
+                <Button
                     onClick={() => navigate(`/suppliers/edit/${id}`)}
                     className="bg-blue-600 hover:bg-blue-700 rounded-xl font-bold gap-2 shadow-lg shadow-blue-100"
                 >
@@ -118,13 +67,12 @@ export default function SupplierView() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
                 {/* SIDEBAR: Profile Card */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm sticky top-6">
                         <div className="flex flex-col items-center text-center pb-6 border-b border-slate-100">
                             <div className="w-24 h-24 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center text-4xl font-black mb-4 border border-blue-100 shadow-inner">
-                                {name.charAt(0)}
+                                {name?.charAt(0)}
                             </div>
                             <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">{name}</h1>
                             <div className="mt-2 flex items-center gap-2">
@@ -134,9 +82,9 @@ export default function SupplierView() {
                         </div>
 
                         <div className="py-6 space-y-5">
-                            <ContactItem icon={<Phone size={18}/>} label="Phone" value={phone} />
-                            <ContactItem icon={<Mail size={18}/>} label="Email" value={email || 'No email provided'} />
-                            <ContactItem icon={<MapPin size={18}/>} label="Address" value={address} />
+                            <ContactItem icon={<Phone size={18} />} label="Phone" value={phone || 'N/A'} />
+                            <ContactItem icon={<Mail size={18} />} label="Email" value={email || 'No email provided'} />
+                            <ContactItem icon={<MapPin size={18} />} label="Address" value={address || 'No address provided'} />
                         </div>
 
                         {notes && (
@@ -162,7 +110,7 @@ export default function SupplierView() {
                             </div>
                             <div className="flex flex-col items-end">
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Inventory Count</span>
-                                <span className="text-blue-600 font-black text-xl">{supplier!.productData?.length || 0}</span>
+                                <span className="text-blue-600 font-black text-xl">{productData?.length || 0}</span>
                             </div>
                         </div>
 
@@ -176,8 +124,8 @@ export default function SupplierView() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
-                                    {supplier && supplier.productData?.length && supplier.productData.length > 0 ? (
-                                        supplier.productData.map((product) => (
+                                    {productData && productData.length > 0 ? (
+                                        productData.map((product) => (
                                             <tr key={product._id} className="hover:bg-slate-50/50 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <p className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{product.name}</p>
@@ -199,7 +147,6 @@ export default function SupplierView() {
                                                         <TrendingUp size={32} />
                                                     </div>
                                                     <p className="font-bold text-slate-400">No products mapped to this supplier</p>
-                                                    <Button variant="link" size="sm" className="text-blue-600 font-bold">Link existing product?</Button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -209,17 +156,15 @@ export default function SupplierView() {
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );
 }
 
-// Helper component for cleaner code
 function ContactItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
     return (
         <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-slate-50 rounded-xl text-slate-400 border border-slate-100 group-hover:text-blue-500 transition-colors">
+            <div className="p-2.5 bg-slate-50 rounded-xl text-slate-400 border border-slate-100">
                 {icon}
             </div>
             <div>
