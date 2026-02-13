@@ -25,11 +25,14 @@ import Alert from "./features/alerts/pages/Alert";
 import ActivityLogs from "./features/activityLogs/pages/ActivityLogs";
 import ReportsHub from "./features/reports/pages/Report";
 import Transaction from "./features/transactions/pages/Transaction";
-import StockReport from "./features/stock/pages/Stock";
-import StockMovementReport from "./features/stock/pages/StockMovement";
+import StockReport from "./features/stock/pages/StockReport";
+import StockMovementReport from "./features/stock/pages/StockMovementReport";
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import SettingsLayout from "./layout/SettingLayout";
+import GeneralSettings from "./features/settings/pages/General";
+import CategoriesPage from "./features/category/pages/Categories";
+import UnitsPage from "./features/unit/pages/Unit";
 
 // Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
@@ -99,7 +102,9 @@ function App() {
           <Route element={<SettingsLayout />}>
             {/* Setting */}
             <Route path="/settings">
-            <Route path="users" element={<UserManagement/>}/>
+            <Route index element={<GeneralSettings/>}/>
+            <Route path="categories" element={<CategoriesPage/>}/>
+            <Route path="units" element={<UnitsPage/>}/>
             </Route>
           </Route>
 

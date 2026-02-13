@@ -22,7 +22,7 @@ export default function SettingsLayout() {
     <div className="flex min-h-screen bg-white overflow-hidden">
 
       {/* ---------- SMALL SETTINGS SIDEBAR ---------- */}
-      <aside className="w-56 shrink-0 border-r border-slate-100 flex flex-col bg-slate-50/60">
+      <aside className="w-56 shrink-0 border-r border-slate-300 flex flex-col bg-slate-50/60">
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
@@ -53,7 +53,7 @@ export default function SettingsLayout() {
                   cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200",
                     isActive
-                      ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200"
+                      ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-300"
                       : "text-slate-500 hover:bg-white hover:text-slate-800"
                   )
                 }

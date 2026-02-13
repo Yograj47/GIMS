@@ -10,7 +10,9 @@ export type CategoryFormData = z.infer<typeof categorySchema>
 export interface CategoryData {
     _id: string;
     name: string;
-    description: string
+    description: string;
+    updatedAt: string;
+    createdAt: string;
 }
 
 export interface CategoryAPIResponse {
