@@ -5,6 +5,7 @@ import errorHandler from "./middleware/errorHandler.js"
 import cors from "cors"
 
 // Import Routes
+import settingRoutes from "./routes/Setting.Route.js"
 import userRoutes from "./routes/User.Route.js"
 import authRoutes from "./routes/Auth.Route.js"
 import categoryRoutes from "./routes/Category.Route.js"
@@ -44,6 +45,8 @@ app.use(`${API}/stock-movements`, stockMovementRoutes);
 app.use(`${API}/transactions`, transactionRoutes);
 app.use(`${API}/activity-logs`, activityLogRoutes);
 app.use(`${API}/alerts`, alertRoutes);
+app.use(`${API}/settings`, settingRoutes);
+
 
 // Error Middleware
 app.use(errorHandler);
