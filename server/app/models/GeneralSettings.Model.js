@@ -14,7 +14,7 @@ const generalSettingsSchema = new mongoose.Schema(
       trim: true,
       default: "Main Branch",
     },
-    
+
     // Notification Logic
     enableEmailNotifications: {
       type: Boolean,
@@ -45,21 +45,18 @@ const generalSettingsSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { 
+  {
     timestamps: true,
     // This prevents Mongoose from creating multiple versions
-    versionKey: false 
+    versionKey: false
   }
 );
 
 generalSettingsSchema.pre('save', async function (next) {
-    const count = await mongoose.models.GeneralSettings.countDocuments();
-    if (count > 0 && this.isNew) {
-        const error = new Error('Only one settings document can exist.');
-        next(error);
-    } else {
-        next();
-    }
+  const count = await mongoose.models.GeneralSettings.countDocuments();
+  if (count > 0 && this.isNew) {
+    throw new Error('Only one settings document can exist.');
+  }
 });
 
 const GeneralSettings = mongoose.model("GeneralSettings", generalSettingsSchema);

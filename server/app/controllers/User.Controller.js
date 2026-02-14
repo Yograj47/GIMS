@@ -19,7 +19,7 @@ export const getMe = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         data: {
             name: user.name,
             role: user.role,

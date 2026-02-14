@@ -7,7 +7,7 @@ import { registerSchema, loginSchema, resetPasswordSchema } from "../validation/
 
 /**
  * @desc Register User
- * @route POST /api/v1/users/
+ * @route POST /api/v1/auths/
  */
 export const registerUser = asyncHandler(async (req, res) => {
     // 1. Zod Validation
@@ -52,14 +52,14 @@ export const registerUser = asyncHandler(async (req, res) => {
     }
 
     res.status(201).json({
-        status: "success",
+        status: "Success",
         message: "User registered successfully"
     });
 });
 
 /**
  * @desc Login User
- * @route POST /api/v1/users/login
+ * @route POST /api/v1/auths/login
  */
 export const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = loginSchema.parse(req.body);
@@ -81,18 +81,20 @@ export const loginUser = asyncHandler(async (req, res) => {
     });
 
     res.status(200).json({
-        status: "success",
+        status: "Success",
         message: "User logged in successfully",
     });
 });
 
 /**
  * @desc Send Verify OTP
- * @route POST /api/v1/users/send-verify-otp
+ * @route POST /api/v1/auths/send-verify-otp
  */
 export const sendVerifyOtp = asyncHandler(async (req, res) => {
     const user = await User.findById(req.userId);
 
+    console.log(user);
+    
     if (!user) {
         res.status(404);
         throw new Error("User not found");
@@ -115,7 +117,7 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
         text: `Your verification code is: ${otp}`
     });
 
-    res.status(200).json({ status: "success", message: "OTP sent to email" });
+    res.status(200).json({ status: "Success", message: "OTP sent to email" });
 });
 
 /**
@@ -140,28 +142,9 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     user.verifyOptExpiryAt = 0;
     await user.save();
 
-    res.status(200).json({ status: "success", message: "Email verified successfully" });
+    res.status(200).json({ status: "Success", message: "Email verified successfully" });
 });
 
-/**
- * @desc Check Auth User
- */
-export const verfiedUser = asyncHandler(async (req, res) => {
-    const userId = req.userId
-
-    const user = await User.findOne({ _id: userId });
-
-    if (!user) {
-        res.status(400);
-        throw new Error("User not found");
-    }
-
-    const verfied = user.isVerfied
-
-    if(!verfied){
-res.status
-    }
-})
 
 /**
  * @desc Logout User
@@ -171,7 +154,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         expires: new Date(0),
     });
-    res.status(200).json({ status: "success", message: "Logged out successfully" });
+    res.status(200).json({ status: "Success", message: "Logged out successfully" });
 });
 
 /**
@@ -202,7 +185,7 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
         text: `Your password reset code is: ${otp}`
     });
 
-    res.status(200).json({ status: "success", message: "Reset OTP sent to email" });
+    res.status(200).json({ status: "Success", message: "Reset OTP sent to email" });
 });
 
 /**
@@ -227,5 +210,5 @@ export const resetPassword = asyncHandler(async (req, res) => {
     user.resetOptExpiryAt = 0;
     await user.save();
 
-    res.status(200).json({ status: "success", message: "Password reset successfully" });
+    res.status(200).json({ status: "Success", message: "Password reset successfully" });
 });
