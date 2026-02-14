@@ -15,6 +15,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen
 } from "lucide-react";
+import { useAuthStore } from "@/store/useAuth";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -24,6 +25,7 @@ interface SidebarProps {
 function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const location = useLocation();
     const iconStyle = "h-6 w-6 shrink-0";
+    const { logout } = useAuthStore();
 
     const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
@@ -132,7 +134,7 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
                         !showLabel && "justify-center"
                     )}
                 >
-                    <LogOut className={iconStyle} />
+                    <LogOut onClick={() => logout()} className={iconStyle} />
                     {showLabel && "Logout"}
                 </button>
             </div>

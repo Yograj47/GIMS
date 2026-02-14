@@ -2,20 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react"; 
-import axios from "axios";
-import { useGlobalStore } from "@/store/globalStore";
-import { useNavigate } from "react-router-dom";
-import { useUserStore } from "@/store/userStore";
-import { notify } from "@/lib/toast";
+import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { loginSchema, type LoginFormData } from "@/types/Auth";
+import { useAuthStore } from "@/store/useAuth";
 
 function LoginForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { backendUrl } = useGlobalStore();
-  const { fetchUser } = useUserStore();
-  const navigate = useNavigate();
+  const { loginUser, isLoading, } = useAuthStore()
 
   const { handleSubmit, register, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -23,21 +16,7 @@ function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    try {
-      setIsLoading(true);
-      const response = await axios.post(`${backendUrl}/auths/login`, data);
-      if (response.data.status === "success") {
-        await fetchUser();
-        notify.success("Welcome back!");
-        navigate('/dashboard');
-      } else {
-        notify.error(response?.data?.message);
-      }
-    } catch (error: any) {
-      notify.error(error.response?.data?.message || "Login failed");
-    } finally {
-      setIsLoading(false);
-    }
+    await loginUser(data)
   };
 
   return (
@@ -69,7 +48,7 @@ function LoginForm() {
           <label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Password
           </label>
-          <button type="button" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+          <button onClick={() => window.location.href="/forget-password"} type="button" className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
             Forgot password?
           </button>
         </div>

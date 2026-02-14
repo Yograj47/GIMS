@@ -1,12 +1,17 @@
+import { useEffect } from "react"; // Added
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import axios from "axios";
 
 // Shadcn UI Components
 import { Toaster } from "sonner";
 
+// Auth Guard & Store
+import { useAuthStore } from "./store/useAuth"; // Added
+
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
 import AppLayout from "./layout/AppLayout";
+import SettingsLayout from "./layout/SettingLayout";
 
 // Pages
 import Login from "./features/auth/pages/Login";
@@ -29,82 +34,89 @@ import StockReport from "./features/stock/pages/StockReport";
 import StockMovementReport from "./features/stock/pages/StockMovementReport";
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
-import SettingsLayout from "./layout/SettingLayout";
 import GeneralSettings from "./features/settings/pages/General";
 import CategoriesPage from "./features/category/pages/Categories";
 import UnitsPage from "./features/unit/pages/Unit";
+import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
+import { PublicRoute } from "./features/auth/components/PublicRoute";
+import ForgotPassword from "./features/auth/pages/ForgetPassword";
 
-// Configure Axios outside the component to prevent re-runs on render
 axios.defaults.withCredentials = true;
 
 function App() {
+  const { fetchUser } = useAuthStore();
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
   return (
     <BrowserRouter>
-      {/* Standardizing the font and text rendering for the whole app.
-          Antialiased helps fonts look "sharper" on modern screens.
-      */}
       <div className="antialiased selection:bg-blue-100 selection:text-blue-700">
-
         <Routes>
-          {/* --- Public / Marketing / Auth Routes --- */}
+          {/* --- Public / Auth Routes --- */}
           <Route element={<AuthLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route element={<PublicRoute />} >
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
             <Route path="/verify" element={<VerifyAccount />} />
+            <Route path="/forget-password" element={<ForgotPassword />} />
           </Route>
+
 
           {/* --- Protected Inventory/Admin Routes --- */}
-          <Route element={<AppLayout />}>
-            {/* Dashboard placeholder - suggest creating a dedicated Dashboard feature soon */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/users" element={<UserManagement />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
 
+              {/* Only Admin/Owner can manage users */}
+              <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route path="/users" element={<UserManagement />} />
+              </Route>
 
-            {/* Product Management */}
-            <Route path="/products">
-              <Route index element={<Products />} />
-              <Route path="add" element={<ManageProduct />} />
-              <Route path="edit/:productId" element={<ManageProduct />} />
+              {/* Product Management */}
+              <Route path="/products">
+                <Route index element={<Products />} />
+                <Route path="add" element={<ManageProduct />} />
+                <Route path="edit/:productId" element={<ManageProduct />} />
+              </Route>
+
+              {/* Supplier Management */}
+              <Route path="/suppliers">
+                <Route index element={<Suppliers />} />
+                <Route path="v/:id" element={<SupplierView />} />
+                <Route path="add" element={<ManageSupplier />} />
+                <Route path="edit/:id" element={<ManageSupplier />} />
+              </Route>
+
+              {/* Stock Management */}
+              <Route path="/stock-movements">
+                <Route index element={<StockManagement />} />
+                <Route path="form" element={<StockMovementForm />} />
+              </Route>
+
+              {/* Alerts */}
+              <Route path="/alerts" element={<Alert />} />
+
+              {/* Reports */}
+              <Route path="/reports">
+                <Route index element={<ReportsHub />} />
+                <Route path="activity" element={<ActivityLogs />} />
+                <Route path="transactions" element={<Transaction />} />
+                <Route path="stock" element={<StockReport />} />
+                <Route path="movement" element={<StockMovementReport />} />
+              </Route>
             </Route>
 
-            {/* Supplier Management */}
-            <Route path="/suppliers">
-              <Route index element={<Suppliers />} />
-              <Route path="v/:id" element={<SupplierView />} />
-              <Route path="add" element={<ManageSupplier />} />
-              <Route path="edit/:id" element={<ManageSupplier />} />
-            </Route>
-
-            {/* Stock Management */}
-            <Route path="/stock-movements">
-              <Route index element={<StockManagement />} />
-              <Route path="form" element={<StockMovementForm />} />
-            </Route>
-
-            {/* Alerts */}
-            <Route path="/alerts">
-              <Route index element={<Alert />} />
-            </Route>
-
-
-            {/* Reports */}
-            <Route path="/reports">
-              <Route index element={<ReportsHub />} />
-              <Route path="activity" element={<ActivityLogs />} />
-              <Route path="transactions" element={<Transaction />} />
-              <Route path="stock" element={<StockReport />} />
-              <Route path="movement" element={<StockMovementReport />} />
-            </Route>
-
-          </Route>
-
-          <Route element={<SettingsLayout />}>
-            {/* Setting */}
-            <Route path="/settings">
-            <Route index element={<GeneralSettings/>}/>
-            <Route path="categories" element={<CategoriesPage/>}/>
-            <Route path="units" element={<UnitsPage/>}/>
+            {/* Nested Settings with Layout */}
+            <Route element={<SettingsLayout />}>
+              <Route path="/settings">
+                <Route index element={<GeneralSettings />} />
+                <Route path="categories" element={<CategoriesPage />} />
+                <Route path="units" element={<UnitsPage />} />
+              </Route>
             </Route>
           </Route>
 
@@ -112,8 +124,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        <Toaster position="top-right" richColors closeButton expand={false} />
-
+        <Toaster position="top-right" richColors closeButton />
       </div>
     </BrowserRouter>
   );

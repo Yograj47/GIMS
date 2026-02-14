@@ -27,7 +27,7 @@ export default function SettingsLayout() {
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors mb-6 group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />

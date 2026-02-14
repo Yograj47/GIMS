@@ -34,9 +34,6 @@ function AuthLayout() {
 
         {/* Actions: Grouped with slightly better spacing */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="text-slate-600 hover:text-blue-600 font-medium" asChild>
-            <Link to="/login">Sign In</Link>
-          </Button>
           <Button className="bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-100" asChild>
             <Link to="/register">Get Started</Link>
           </Button>

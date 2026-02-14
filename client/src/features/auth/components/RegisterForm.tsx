@@ -3,39 +3,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, User, Mail, Lock, ShieldCheck } from "lucide-react";
-import axios from "axios";
-import { useGlobalStore } from "@/store/globalStore";
-import { useNavigate } from "react-router-dom";
-import { notify } from "@/lib/toast";
 import { registerSchema, type RegisterFormData } from "@/types/Auth";
+import { useAuthStore } from "@/store/useAuth";
 
 function RegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { backendUrl } = useGlobalStore();
-  const navigate = useNavigate();
-
+  const { registerUser, isLoading } = useAuthStore()
   const { handleSubmit, register, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    try {
-      setIsLoading(true);
-      const response = await axios.post(`${backendUrl}/auths/`, data);
-
-      if (response?.data?.status === "success") {
-        notify.success("Account created!", "Please verify your email to continue.");
-        navigate("/verify");
-      } else {
-        notify.error(response?.data?.message || "Registration failed");
-      }
-    } catch (error: any) {
-      notify.error(error.response?.data?.message || "An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+    registerUser(data)
   };
 
   const inputClasses = (error: any) => `
@@ -46,7 +26,7 @@ function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
+
       {/* Full Name */}
       <div className="space-y-1.5">
         <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Full Name</label>
@@ -73,11 +53,11 @@ function RegisterForm() {
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Password</label>
           <div className="relative group">
             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-            <input 
-              type={isPasswordVisible ? "text" : "password"} 
-              {...register("password")} 
-              placeholder="••••••••" 
-              className={inputClasses(errors.password)} 
+            <input
+              type={isPasswordVisible ? "text" : "password"}
+              {...register("password")}
+              placeholder="••••••••"
+              className={inputClasses(errors.password)}
             />
           </div>
         </div>
@@ -86,11 +66,11 @@ function RegisterForm() {
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Confirm</label>
           <div className="relative group">
             <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-            <input 
-              type={isPasswordVisible ? "text" : "password"} 
-              {...register("confirmPassword")} 
-              placeholder="••••••••" 
-              className={inputClasses(errors.confirmPassword)} 
+            <input
+              type={isPasswordVisible ? "text" : "password"}
+              {...register("confirmPassword")}
+              placeholder="••••••••"
+              className={inputClasses(errors.confirmPassword)}
             />
             <button
               type="button"
