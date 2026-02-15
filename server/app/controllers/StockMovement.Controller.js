@@ -45,7 +45,6 @@ export const getStockMovements = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         status: "Success",
-        results: stockMovements.length,
         data: stockMovements
     });
 });

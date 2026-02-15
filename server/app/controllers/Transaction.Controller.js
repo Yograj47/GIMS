@@ -33,7 +33,6 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         status: "Success",
-        results: transactions.length,
         data: transactions
     });
 });
