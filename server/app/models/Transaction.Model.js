@@ -19,7 +19,8 @@ const ItemSchema = new mongoose.Schema({
 const transactionSchema = new mongoose.Schema({
     transactionType: {
         type: String,
-        enum: ['Purchase', 'Sale', 'Return', 'Damage', 'Fixed']
+        enum: ['Purchase', 'Sale', 'Return', 'Damage', 'Fixed'],
+        required: true 
     },
     items: [ItemSchema],
     grandTotal: {
@@ -31,12 +32,13 @@ const transactionSchema = new mongoose.Schema({
         default: false
     },
     partyDetails: {
-        name: String,
-        phone: String
-    }, 
+        name: { type: String, default: "" },
+        phone: { type: String, default: "" }
+    },
     notes: {
         type: String,
+        default: "" 
     }
-}, {timestamps: true})
+}, { timestamps: true });
 
 export default mongoose.model("Transactions", transactionSchema);

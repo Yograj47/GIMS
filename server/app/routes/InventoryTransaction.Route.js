@@ -1,17 +1,22 @@
 import express from "express";
 import {
-    createTransaction,
+    createUnifiedTransaction,
     getAllTransactions,
+    getStockMovements,
     updateCreditStatus
-} from "../controllers/Transaction.Controller.js"
+} from "../controllers/InventoryTransaction.Controller.js"
 import { userAuth } from "../middleware/userAuth.js"
 
 const router = express.Router();
 
 router
     .route("/")
-    .post(userAuth, createTransaction)
+    .post(userAuth, createUnifiedTransaction)
     .get(userAuth, getAllTransactions)
+
+router
+    .route("/movements")
+    .get(userAuth, getStockMovements)
 
 router
     .route("/:id")

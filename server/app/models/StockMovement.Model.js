@@ -1,10 +1,15 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const StockMovementSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         required: true
+    },
+    transactionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Transactions', 
+        required: false 
     },
     performedBy: {
         type: mongoose.Schema.Types.ObjectId,
@@ -20,6 +25,10 @@ const StockMovementSchema = new mongoose.Schema({
         enum: ['IN', 'OUT'],
         required: true
     },
+    reason: {
+        type: String,
+        required: false
+    },
     oldQuantity: {
         type: Number,
         required: true
@@ -28,10 +37,8 @@ const StockMovementSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    notes: {
-        type: String,
-        default: ""
-    },
-}, { timestamps: true })
+}, { 
+    timestamps: { createdAt: true, updatedAt: false } 
+});
 
-export default mongoose.model("StockMovements", StockMovementSchema)
+export default mongoose.model("StockMovements", StockMovementSchema);
