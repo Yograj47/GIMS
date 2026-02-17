@@ -19,7 +19,7 @@ router
     .get(userAuth, getStockMovements)
 
 router
-    .route("/:id")
+    .route("/:id/credit")
     .put(userAuth, updateCreditStatus)
 
 export default router;

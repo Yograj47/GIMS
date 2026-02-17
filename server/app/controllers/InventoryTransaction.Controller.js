@@ -67,6 +67,7 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 export const getStockMovements = asyncHandler(async (req, res) => {
     const stockMovements = await StockMovement.find()
         .populate("productId", "name")
+        .populate("performedBy", "name")
         .sort({ createdAt: -1 });
 
     res.status(200).json({ status: "Success", data: stockMovements });
