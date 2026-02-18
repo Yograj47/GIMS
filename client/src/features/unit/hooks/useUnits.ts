@@ -16,6 +16,7 @@ export const useUnits = () => {
             const response = await unitService.getAll();
             if (response.status === "Success") {
                 setunits(response.data as UnitData[]);
+                return true;
             }
         } catch (error: any) {
             // the error notification happens automatically!
@@ -43,9 +44,15 @@ export const useUnits = () => {
     const addUnit = async (payload: UnitFormData) => {
         try {
             setLoading(true);
-            const response = await unitService.create(payload);
+            const sanitizedPayload = {
+                ...payload,
+                // If it's a base unit, multiplier MUST be 1
+                multiplierToBase: payload.baseUnit ? 1 : payload.multiplierToBase
+            };
+            const response = await unitService.create(sanitizedPayload);
             if (response.status === "Success") {
                 notify.success("Unit added successfully");
+                setunits((prev) => [...prev, response.data as UnitData]);
                 return true;
             }
         } finally {
@@ -58,9 +65,15 @@ export const useUnits = () => {
     const updateUnit = async (id: string, payload: UnitFormData) => {
         try {
             setLoading(true);
-            const response = await unitService.updateById(id, payload);
+            const sanitizedPayload = {
+                ...payload,
+                // If it's a base unit, multiplier MUST be 1
+                multiplierToBase: payload.baseUnit ? 1 : payload.multiplierToBase
+            };
+            const response = await unitService.updateById(id, sanitizedPayload);
             if (response.status === "Success") {
                 notify.success("Unit updated successfully");
+                setunits((prev) => prev.map((u) => (u._id === id ? (response.data as UnitData) : u)));
                 return true;
             }
         } finally {

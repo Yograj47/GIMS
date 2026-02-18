@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Scale } from "lucide-react";
 import {
@@ -42,18 +42,30 @@ export default function UnitFormModal({
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors },
   } = useForm<UnitFormData>({
-    resolver: zodResolver(unitSchema),
+    resolver: zodResolver(unitSchema) as Resolver<UnitFormData>,
     defaultValues: {
       name: "",
       shortForm: "",
       unitType: "count",
+      multiplierToBase: 1,
       baseUnit: false,
       isFractional: false,
       isActive: true,
     },
   });
+
+  // Watch the baseUnit field to toggle the multiplier input
+  const isBaseUnit = useWatch({ control, name: "baseUnit" });
+
+  // Safety: If user toggles Base Unit ON, force multiplier to 1
+  useEffect(() => {
+    if (isBaseUnit) {
+      setValue("multiplierToBase", 1);
+    }
+  }, [isBaseUnit, setValue]);
 
   useEffect(() => {
     if (isOpen) {
@@ -89,12 +101,12 @@ export default function UnitFormModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</Label>
-              <Input {...register("name")} placeholder="Kilogram" className="h-11 rounded-xl border-slate-200" />
+              <Input {...register("name")} placeholder="Kilogram" className="h-11 rounded-xl border-slate-400" />
               {errors.name && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.name.message}</p>}
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Short Form</Label>
-              <Input {...register("shortForm")} placeholder="kg" className="h-11 rounded-xl border-slate-200" />
+              <Input {...register("shortForm")} placeholder="kg" className="h-11 rounded-xl border-slate-400" />
               {errors.shortForm && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.shortForm.message}</p>}
             </div>
           </div>
@@ -107,7 +119,7 @@ export default function UnitFormModal({
               name="unitType"
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-11 rounded-xl border-slate-200">
+                  <SelectTrigger className="h-11 rounded-xl border-slate-400">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
@@ -121,8 +133,22 @@ export default function UnitFormModal({
             />
           </div>
 
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              Multiplier (Eqv. to Base)
+            </Label>
+            <Input
+              type="number"
+              {...register("multiplierToBase")}
+              disabled={isBaseUnit}
+              placeholder={isBaseUnit ? "1" : "e.g. 1000"}
+              className={`h-11 rounded-xl border-slate-400 ${isBaseUnit ? 'bg-slate-100 opacity-50 cursor-not-allowed' : ''}`}
+            />
+            {errors.multiplierToBase && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.multiplierToBase.message}</p>}
+          </div>
+
           {/* SWITCHES SECTION */}
-          <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+          <div className="space-y-3 bg-slate-50/50 p-4 rounded-xl border border-slate-400">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-sm font-bold text-slate-700">Base Unit</Label>
@@ -160,7 +186,7 @@ export default function UnitFormModal({
             </div>
           </div>
 
-          <DialogFooter className="pt-2 sm:justify-end gap-2">
+          <DialogFooter className="pt-2 sm:justify-end gap-2 items-center">
             <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl font-bold text-slate-500">
               Cancel
             </Button>

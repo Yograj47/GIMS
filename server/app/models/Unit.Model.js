@@ -19,6 +19,12 @@ const unitSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    multiplierToBase: {
+        type: Number,
+        required: [true, "Please provide the conversion multiplier"],
+        min: [1, "Multiplier cannot be less than 1"],
+        default: 1 
+    },
     isFractional: {
         type: Boolean,
         default: false

@@ -19,28 +19,30 @@ export default function SettingsLayout() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-white overflow-hidden">
+    <div className="flex h-screen bg-white overflow-hidden">
 
-      {/* ---------- SMALL SETTINGS SIDEBAR ---------- */}
-      <aside className="w-56 shrink-0 border-r border-slate-300 flex flex-col bg-slate-50/60">
+      {/* ---------- SHARP SETTINGS SIDEBAR ---------- */}
+      {/* Increased border-r weight and changed background to a solid slate-100 */}
+      <aside className="w-60 shrink-0 border-r-2 border-slate-500 flex flex-col bg-slate-100">
 
         {/* Header */}
-        <div className="px-6 pt-6 pb-4">
+        <div className="px-6 pt-8 pb-6">
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors mb-6 group"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-6 group"
           >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-wider">
-              Back
+            {/* Thicker Icon Stroke */}
+            <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              Back to Store
             </span>
           </button>
 
-          <h1 className="text-xl font-black text-slate-800">Settings</h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Settings</h1>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 space-y-1">
+        <nav className="flex-1 px-4 space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
 
@@ -51,10 +53,10 @@ export default function SettingsLayout() {
                 end={item.exact}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-black transition-all duration-200 border-2",
                     isActive
-                      ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-300"
-                      : "text-slate-500 hover:bg-white hover:text-slate-800"
+                      ? "bg-white text-slate-900 border-slate-900 "
+                      : "text-slate-600 border-transparent hover:bg-white/50 hover:text-slate-900"
                   )
                 }
               >
@@ -62,16 +64,16 @@ export default function SettingsLayout() {
                   <>
                     <span
                       className={cn(
-                        "p-1.5 rounded-md",
+                        "p-1.5 rounded-lg border-2 transition-colors",
                         isActive
-                          ? "bg-indigo-50 text-indigo-600"
-                          : "bg-slate-100 text-slate-400"
+                          ? "bg-slate-900 text-white border-slate-900"
+                          : "bg-slate-200 text-slate-500 border-slate-300"
                       )}
                     >
-                      <Icon size={16} />
+                      <Icon size={16} strokeWidth={2.5} />
                     </span>
 
-                    <span>{item.label}</span>
+                    <span className="tracking-tight uppercase text-[12px]">{item.label}</span>
                   </>
                 )}
               </NavLink>
@@ -79,31 +81,31 @@ export default function SettingsLayout() {
           })}
         </nav>
 
-        {/* Footer Badge */}
-        <div className="p-6 border-t border-slate-100">
-          <div className="flex items-center gap-3 p-3 bg-slate-900 rounded-xl">
-            <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white text-[10px] font-black">
+        {/* Footer Badge - Darkened to match your Admin theme */}
+        <div className="p-4 border-t-2 border-slate-200">
+          <div className="flex items-center gap-3 p-4 bg-slate-900 rounded-2xl shadow-xl">
+            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-[12px] font-black ring-2 ring-white/20">
               A
             </div>
 
             <div>
-              <p className="text-[10px] font-black text-white leading-none">
-                Admin
+              <p className="text-[11px] font-black text-white leading-none tracking-tight">
+                ADMIN PANEL
               </p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase">
-                Full Access
+              <p className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">
+                System Manager
               </p>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* ---------- CONTENT AREA (WIDER) ---------- */}
+      {/* ---------- CONTENT AREA ---------- */}
       <main className="flex-1 min-w-0 flex flex-col bg-white">
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto py-10 px-8">
-            <Outlet />
-          </div>
+        <div className="flex-1 overflow-y-auto w-full">
+            <div className="max-w-6xl mx-auto py-12 px-10">
+                <Outlet />
+            </div>
         </div>
       </main>
     </div>

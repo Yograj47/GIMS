@@ -33,6 +33,7 @@ app.get("/", (req, res) => {
 
 const API = "/api/v1"
 
+
 // Routes
 app.use(`${API}/auths`, authRoutes);
 app.use(`${API}/users`, userRoutes);

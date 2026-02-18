@@ -6,6 +6,10 @@ export const unitSchema = z.object({
   unitType: z.enum(['weight', 'volume', 'count', 'pack'], {
     errorMap: () => ({ message: "Type must be weight, volume, count, or pack" })
   }),
+  multiplierToBase: z.coerce
+    .number()
+    .min(1, "Multiplier must be at least 1")
+    .default(1),
   baseUnit: z.boolean().optional(),
   isFractional: z.boolean().optional(),
   isActive: z.boolean().optional(),

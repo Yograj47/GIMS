@@ -12,6 +12,10 @@ import { unitSchema } from '../validation/Unit.validation.js';
 export const createUnit = asyncHandler(async (req, res) => {
     const validatedData = unitSchema.parse(req.body);
 
+    if (validatedData.baseUnit) {
+        validatedData.multiplierToBase = 1;
+    }
+
     const unitExists = await Unit.findOne({
         $or: [{ name: validatedData.name }, { shortForm: validatedData.shortForm }]
     });
@@ -69,6 +73,10 @@ export const getUnitById = asyncHandler(async (req, res) => {
  */
 export const updateUnitById = asyncHandler(async (req, res) => {
     const validatedData = unitSchema.partial().parse(req.body);
+
+    if (validatedData.baseUnit === true) {
+        validatedData.multiplierToBase = 1;
+    }
 
     const updatedUnit = await Unit.findByIdAndUpdate(
         req.params.id,
