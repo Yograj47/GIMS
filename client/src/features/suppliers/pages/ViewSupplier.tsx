@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Pencil, ArrowLeft, Phone, Mail, MapPin, Package, TrendingUp, SearchX } from 'lucide-react';
+import { Pencil, ArrowLeft, Phone, Mail, MapPin, Package, TrendingUp, SearchX, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/lib/loader';
 import { useSuppliers } from '../hooks/useSuppliers';
@@ -8,13 +8,23 @@ import { useSuppliers } from '../hooks/useSuppliers';
 export default function SupplierView() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { singleSupplier, productData, fetchSupplierById, isLoading } = useSuppliers();
+    const { singleSupplier, productData, fetchSupplierById, removeSupplier, isLoading } = useSuppliers();
 
     useEffect(() => {
         if (id) fetchSupplierById(id);
     }, [id, fetchSupplierById]);
 
     const { name, phone, email, address, notes } = singleSupplier || {};
+
+    const handleSupplierDeletion = async (supplierId: string) => {
+        if (window.confirm("Are you sure you want to delete this supplier? This action cannot be undone.")) {
+            const success = await removeSupplier(supplierId);
+
+            if (success) {
+                navigate('/suppliers');
+            }
+        }
+    }
 
     if (!isLoading && !singleSupplier) {
         return (
@@ -44,12 +54,20 @@ export default function SupplierView() {
                     <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                     <span className="text-xs font-bold uppercase tracking-widest">Directory</span>
                 </button>
-                <Button
-                    onClick={() => navigate(`/suppliers/edit/${id}`)}
-                    className="bg-blue-600 hover:bg-blue-700 rounded-lg font-bold shadow-md shadow-blue-100"
-                >
-                    <Pencil size={14} className="mr-2" /> Edit Details
-                </Button>
+                <div className='flex gap-3'>
+                    <Button
+                        onClick={() => handleSupplierDeletion(id!)}
+                        className="bg-red-600 hover:bg-red-700 rounded-lg font-bold shadow-md shadow-red-100"
+                    >
+                        <Trash2 size={14} className="mr-2" /> Delete
+                    </Button>
+                    <Button
+                        onClick={() => navigate(`/suppliers/edit/${id}`)}
+                        className="bg-blue-600 hover:bg-blue-700 rounded-lg font-bold shadow-md shadow-blue-100"
+                    >
+                        <Pencil size={14} className="mr-2" /> Edit Details
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

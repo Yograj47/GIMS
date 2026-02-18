@@ -45,6 +45,7 @@ export const useProducts = () => {
             setLoading(true);
             const response = await productService.create(payload);
             if (response.status === "Success") {
+                setProducts((prev) => [...prev, response.data as ProductData]);
                 notify.success("Product added successfully");
                 return true;
             }
@@ -60,6 +61,7 @@ export const useProducts = () => {
             setLoading(true);
             const response = await productService.updateById(id, payload);
             if (response.status === "Success") {
+                setProducts((prev) => prev.map((c) => (c._id === id ? (response.data as ProductData) : c)));
                 notify.success("Product updated successfully");
                 return true;
             }

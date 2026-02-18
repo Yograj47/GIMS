@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useSuppliers } from "../hooks/useSuppliers";
 import { useEffect } from "react";
 import { Loading } from "@/lib/loader";
+import type { SupplierFormData } from "@/types/Supplier";
 
 export default function ManageSupplier() {
     const { id } = useParams();
@@ -16,9 +17,18 @@ export default function ManageSupplier() {
         if (isEditMode && id) fetchSupplierById(id);
     }, [id, isEditMode, fetchSupplierById]);
 
-    const handleSubmit = async (data: any) => {
-        const success = isEditMode && id ? await updateSupplier(id, data) : await addSupplier(data);
-        if (success) navigate("/suppliers");
+    const handleSubmit = async (data: SupplierFormData) => {
+        let success = false;
+
+        if(isEditMode && id) {
+            success = await updateSupplier(id, data);
+        } else {
+            success = await addSupplier(data);
+        }
+
+        if (success) {
+            navigate("/suppliers");
+        }
     };
 
     if (isEditMode && !singleSupplier && isLoading) return <Loading fullPage />;
@@ -50,10 +60,9 @@ export default function ManageSupplier() {
                 <div className="lg:col-span-2">
                     <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
                         <div className="p-8">
-                            <SupplierForm 
-                                initialData={isEditMode && singleSupplier ? singleSupplier : undefined} 
-                                onSubmit={handleSubmit} 
-                                isLoading={isLoading} 
+                            <SupplierForm
+                                initialData={isEditMode && singleSupplier ? singleSupplier : undefined}
+                                onSubmit={handleSubmit}
                             />
                         </div>
 
@@ -62,10 +71,10 @@ export default function ManageSupplier() {
                             <Button variant="outline" onClick={() => navigate(-1)} className="rounded-xl font-bold px-6">
                                 Cancel
                             </Button>
-                            <Button 
-                                type="submit" 
-                                form="supplier-form" 
-                                disabled={isLoading} 
+                            <Button
+                                type="submit"
+                                form="supplier-form"
+                                disabled={isLoading}
                                 className="bg-blue-600 hover:bg-blue-700 rounded-xl font-bold px-8 shadow-lg shadow-blue-100"
                             >
                                 {isLoading ? <Loading /> : <Save size={16} className="mr-2" />}

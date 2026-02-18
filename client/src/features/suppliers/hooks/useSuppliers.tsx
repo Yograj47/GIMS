@@ -17,8 +17,8 @@ export const useSuppliers = () => {
             const response = await SupplierService.getAll();
             if (response.status === "Success") {
                 setSuppliers(response.data as SupplierData[]);
-                console.log("Hooks:",response.data);
-                
+                console.log("Hooks:", response.data);
+
             }
         } catch (error: any) {
             // the error notification happens automatically!
@@ -49,6 +49,7 @@ export const useSuppliers = () => {
             setLoading(true);
             const response = await SupplierService.create(payload);
             if (response.status === "Success") {
+                setSuppliers((prev) => [...prev, response.data as SupplierData]);
                 notify.success("Supplier added successfully");
                 return true;
             }
@@ -64,6 +65,7 @@ export const useSuppliers = () => {
             setLoading(true);
             const response = await SupplierService.updateById(id, payload);
             if (response.status === "Success") {
+                setSuppliers((prev) => prev.map((c) => (c._id === id ? (response.data as SupplierData) : c)));
                 notify.success("Supplier updated successfully");
                 return true;
             }
@@ -80,11 +82,13 @@ export const useSuppliers = () => {
             const response = await SupplierService.delete(id);
             if (response.success || response.status === "Success") {
                 setSuppliers((prev) => prev.filter((c) => c._id !== id));
-                notify.success("Product removed");
+                notify.success("Supplier removed");
+                return true;
             }
         } finally {
             setLoading(false);
         }
+        return false;
     };
 
     return {

@@ -1,26 +1,41 @@
-import { useForm, type Resolver } from "react-hook-form";
+import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { User, MapPin, Notebook, Phone, Mail} from "lucide-react";
 import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/Supplier"
 import { useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface SupplierFormProps {
     initialData?: SupplierData;
     onSubmit: (data: SupplierFormData) => void;
-    isLoading: boolean;
 }
 
-export default function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormProps) {
+export default function SupplierForm({ initialData, onSubmit}: SupplierFormProps) {
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<SupplierFormData>({
+    const { register, handleSubmit, control, reset, formState: { errors } } = useForm<SupplierFormData>({
         resolver: zodResolver(supplierSchema) as Resolver<SupplierFormData>,
-        defaultValues: initialData
+        defaultValues: {
+            name: initialData?.name ?? "",
+            phone: initialData?.phone ?? "",
+            email: initialData?.email ?? "",
+            address: initialData?.address ?? "",
+            notes: initialData?.notes ?? "",
+            isActive: initialData?.isActive ?? true,
+        }
     });
 
     useEffect(() => {
-        if (initialData) reset(initialData);
+        if (initialData) reset({
+            name: initialData.name,
+            phone: initialData.phone,
+            email: initialData.email,
+            address: initialData.address,
+            notes: initialData.notes,
+            isActive: initialData.isActive,
+        });
     }, [initialData, reset]);
 
     const labelStyle = "text-[13px] font-bold text-slate-700 flex items-center gap-2";
@@ -28,7 +43,7 @@ export default function SupplierForm({ initialData, onSubmit, isLoading }: Suppl
     const errorStyle = "text-xs text-red-500 font-medium mt-1 ml-1";
 
     return (
-        <form id="supplier-form" onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+        <form id="supplier-form" onSubmit={handleSubmit(onSubmit || (() => {}))} className="space-y-10">
             
             {/* SECTION 1: Identity */}
             <div className="space-y-4">
@@ -89,6 +104,18 @@ export default function SupplierForm({ initialData, onSubmit, isLoading }: Suppl
                         className="min-h-30 rounded-2xl border-slate-200 bg-slate-50/50 resize-none p-4" 
                     />
                 </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-bold text-slate-700">Active Status</Label>
+                <p className="text-[10px] text-slate-500 font-medium">Disable to hide from selection menus.</p>
+              </div>
+              <Controller
+                control={control}
+                name="isActive"
+                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
+              />
             </div>
         </form>
     );
