@@ -3,6 +3,7 @@ import Product from "../models/Product.Model.js"
 import Category from "../models/Category.Model.js"
 import Unit from "../models/Unit.Model.js"
 import { productSchema } from "../validation/Product.validation.js"
+import ProductUnit from "../models/ProductUnit.Model.js";
 
 /** 
  * @desc    Create new product
@@ -43,6 +44,15 @@ export const createProduct = asyncHandler(async (req, res) => {
         supplierId,
         basePrice,
         sellingPrice
+    });
+
+    await ProductUnit.create({
+        productId: product._id,
+        unitId: unitId,
+        multiplier: unitExist.multiplierToBase,
+        isDefault: true,
+        isFractionable: unitExist.isFractional,
+        isActive: true
     });
 
     res.status(201).json({

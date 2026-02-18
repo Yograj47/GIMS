@@ -45,6 +45,7 @@ export const useCategories = () => {
             setLoading(true);
             const response = await CategoryService.create(payload);
             if (response.status === "Success") {
+                setCategories((prev) => [...prev, response.data as CategoryData]);
                 notify.success("Category added successfully");
                 return true;
             }
@@ -60,6 +61,7 @@ export const useCategories = () => {
             setLoading(true);
             const response = await CategoryService.updateById(id, payload);
             if (response.status === "Success") {
+                setCategories((prev) => prev.map((c) => (c._id === id ? (response.data as CategoryData) : c)));
                 notify.success("Category updated successfully");
                 return true;
             }

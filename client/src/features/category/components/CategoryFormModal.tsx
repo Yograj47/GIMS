@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Tag } from "lucide-react";
 import {
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { categorySchema, type CategoryFormData, type CategoryData } from "@/types/Category";
+import { Switch } from "@/components/ui/switch";
 
 interface CategoryFormModalProps {
     isOpen: boolean;
@@ -35,12 +36,14 @@ export default function CategoryFormModal({
         register,
         handleSubmit,
         reset,
+        control,
         formState: { errors }
     } = useForm<CategoryFormData>({
         resolver: zodResolver(categorySchema),
         defaultValues: {
             name: "",
-            description: ""
+            description: "",
+            isActive: true
         }
     });
 
@@ -50,10 +53,11 @@ export default function CategoryFormModal({
             if (initialData) {
                 reset({
                     name: initialData.name,
-                    description: initialData.description || ""
+                    description: initialData.description || "",
+                    isActive: initialData.isActive ?? true
                 });
             } else {
-                reset({ name: "", description: "" });
+                reset({ name: "", description: "", isActive: true });
             }
         }
     }, [initialData, reset, isOpen]);
@@ -98,6 +102,18 @@ export default function CategoryFormModal({
                             {...register("description")}
                             placeholder="Provide a brief summary of this category..."
                             className="min-h-30 rounded-xl border-slate-200 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium resize-none"
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                        <div className="space-y-0.5">
+                            <Label className="text-sm font-bold text-slate-700">Active Status</Label>
+                            <p className="text-[10px] text-slate-500 font-medium">Is this category currently active?</p>
+                        </div>
+                        <Controller
+                            control={control}
+                            name="isActive"
+                            render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
                         />
                     </div>
 

@@ -11,4 +11,5 @@ export const categorySchema = z.object({
         .max(200, "Description cannot exceed 200 characters")
         .optional()
         .or(z.literal("")), 
+    isActive: z.boolean().optional()
 });
