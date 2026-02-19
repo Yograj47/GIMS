@@ -24,14 +24,13 @@ import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
 import SupplierView from "./features/suppliers/pages/ViewSupplier";
 import ManageSupplier from "./features/suppliers/pages/Manage";
-import StockManagement from "./features/stock/pages/StockHub";
-import StockMovementForm from "./features/stock/components/StockTransactionForm";
+import StockManagement from "./features/MovementTransaction/pages/MovementHub";
 import Alert from "./features/alerts/pages/Alert";
 import ActivityLogs from "./features/activityLogs/pages/ActivityLogs";
 import ReportsHub from "./features/reports/pages/Report";
-import Transaction from "./features/transactions/pages/Transaction";
-import StockReport from "./features/stock/pages/ProductStockReport";
-import StockMovementReport from "./features/stock/pages/StockMovementReport";
+import Transaction from "./features/MovementTransaction/pages/Transaction";
+import StockReport from "./features/MovementTransaction/pages/ProductStockReport";
+import StockMovementReport from "./features/MovementTransaction/pages/MovementReport";
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import GeneralSettings from "./features/settings/pages/General";
@@ -40,6 +39,7 @@ import UnitsPage from "./features/unit/pages/Unit";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
 import ForgotPassword from "./features/auth/pages/ForgetPassword";
+import StockMovementForm from "./features/MovementTransaction/components/MovementTransactionForm";
 
 axios.defaults.withCredentials = true;
 
