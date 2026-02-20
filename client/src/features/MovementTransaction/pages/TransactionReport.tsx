@@ -2,14 +2,16 @@ import { Search, Eye, ArrowDownLeft, ArrowUpRight, CheckCircle2, XCircle } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useMovementTransactions } from "../hooks/useMovementTransactions";
+import { useEffect } from "react";
+import { Loading } from "@/lib/loader";
 
 export default function Transaction() {
-    const transactions = [
-        { id: "TXN001", type: "Sale", amount: 1500, settled: false, notes: "Credit sale - Customer: Ram Bahadur..." },
-        { id: "TXN002", type: "Purchase", amount: 8200, settled: true, notes: "Paid cash - Supplier: ABC Wholesalers..." },
-        { id: "TXN003", type: "Sale", amount: 2500, settled: true, notes: "Cash sale - Customer: John Doe..." },
-        { id: "TXN004", type: "Purchase", amount: 5000, settled: false, notes: "Credit purchase - Supplier: XYZ Imports..." },
-    ];
+    const {fetchTransactions, transactions, isLoading} = useMovementTransactions();
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [fetchTransactions]);
 
     return (
         <div className="min-h-full space-y-6 animate-in fade-in duration-500">
@@ -60,24 +62,40 @@ export default function Transaction() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                        {transactions.map((txn) => (
-                            <tr key={txn.id} className="group hover:bg-slate-50/50 transition-colors">
-                                <td className="px-6 py-4 text-sm font-bold text-slate-700">{txn.id}</td>
+                        {
+                            transactions.length === 0 && !isLoading && (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-10 text-sm text-slate-400 font-medium">
+                                        No transactions found. Try adjusting your search or filters.
+                                    </td>
+                                </tr>
+                            ) 
+                        }
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={6} className="text-center py-10">
+                                    <Loading />
+                                </td>
+                            </tr>
+                        ) :
+                        (transactions.map((txn) => (
+                            <tr key={txn._id} className="group hover:bg-slate-50/50 transition-colors">
+                                <td className="px-6 py-4 text-sm font-bold text-slate-700">{txn._id}</td>
                                 <td className="px-6 py-4">
                                     <div className={cn(
                                         "flex items-center gap-1.5 px-2.5 py-1 rounded-lg w-fit text-[10px] font-black uppercase",
-                                        txn.type === 'Sale' ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
+                                        txn.transactionType === 'Sale' ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
                                     )}>
-                                        {txn.type === 'Sale' ? <ArrowUpRight size={12} /> : <ArrowDownLeft size={12} />}
-                                        {txn.type}
+                                        {txn.transactionType === 'Sale' ? <ArrowUpRight size={12} /> : <ArrowDownLeft size={12} />}
+                                        {txn.transactionType}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm font-black text-slate-900 text-center">
-                                    Rs {txn.amount.toLocaleString()}
+                                    Rs {txn.grandTotal.toLocaleString()}
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex justify-center">
-                                        {txn.settled ? (
+                                        {txn.isPaid ? (
                                             <div className="flex items-center gap-1 text-emerald-500 text-[11px] font-bold">
                                                 <CheckCircle2 size={16} /> Yes
                                             </div>
@@ -97,7 +115,7 @@ export default function Transaction() {
                                     </Button>
                                 </td>
                             </tr>
-                        ))}
+                        )))}
                     </tbody>
                 </table>
 

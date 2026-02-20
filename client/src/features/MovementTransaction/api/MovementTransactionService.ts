@@ -36,14 +36,13 @@ export const MovementTransactionService = {
         return data;
     },
 
-
     // --- MOVEMENT SECTION (Physical Stock Tracking) ---
 
     /**
      * Fetches the history of all physical stock movements (IN/OUT)
      */
     getAllMovements: async (): Promise<MovementAPIResponse> => {
-        const { data } = await api.get<MovementAPIResponse>("/transactions/movements");
+        const { data } = await api.get<MovementAPIResponse>("/movements");
         return data;
     },
 
@@ -51,7 +50,7 @@ export const MovementTransactionService = {
      * Fetches movements for a specific product (Useful for product audit pages)
      */
     getProductMovements: async (productId: string): Promise<MovementAPIResponse> => {
-        const { data } = await api.get<MovementAPIResponse>(`/transactions/movements/product/${productId}`);
+        const { data } = await api.get<MovementAPIResponse>(`/movements/product-history/${productId}`);
         return data;
     }
 };

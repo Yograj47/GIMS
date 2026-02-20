@@ -3,14 +3,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useMovementTransactions } from "../hooks/useMovementTransactions";
+import { useEffect } from "react";
+import { Loading } from "@/lib/loader";
 
 export default function StockMovementReport() {
-    const movementData = [
-        { date: "2025-01-15", product: "Basmati Rice", type: "In", qty: "50 kg", reason: "Supplier Delivery", user: "Admin" },
-        { date: "2025-01-15", product: "Wheat Flour", type: "Out", qty: "25 kg", reason: "Sold", user: "Shopkeeper" },
-        { date: "2025-01-14", product: "Refined Oil", type: "In", qty: "100 L", reason: "Supplier Delivery", user: "Admin" },
-        { date: "2025-01-14", product: "Salt", type: "Out", qty: "10 kg", reason: "Sold", user: "Shopkeeper" },
-    ];
+    const { fetchMovements, movements, isLoading } = useMovementTransactions();
+
+    useEffect(() => {
+        fetchMovements();
+    }, [fetchMovements]);
 
     return (
         <div className="min-h-full space-y-6 animate-in fade-in duration-500 pb-10">
@@ -77,43 +79,68 @@ export default function StockMovementReport() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                        {movementData.map((item, idx) => (
-                            <tr key={idx} className="group hover:bg-slate-50/30 transition-colors">
-                                <td className="px-6 py-5 text-xs font-mono font-medium text-slate-400">
-                                    {item.date}
+                        {
+                            movements.length === 0 && !isLoading && (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-10 text-center text-sm font-medium text-slate-500">
+                                        No movement transactions found.
+                                    </td>
+                                </tr>
+                            )
+                        }
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={6} className="text-center py-10">
+                                    <Loading />
                                 </td>
-                                <td className="px-6 py-5">
-                                    <span className="text-sm font-bold text-slate-700">{item.product}</span>
-                                </td>
-                                <td className="px-6 py-5">
-                                    <div className="flex justify-center">
-                                        <div className={cn(
-                                            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight",
-                                            item.type === 'In' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
-                                        )}>
-                                            {item.type === 'In' ? <ArrowDownLeft size={12} /> : <ArrowUpRight size={12} />}
-                                            Stock {item.type}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-5 text-center text-sm font-black text-slate-900">
-                                    {item.qty}
-                                </td>
-                                <td className="px-6 py-5">
-                                    <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none font-bold text-[10px] py-0.5">
-                                        {item.reason}
-                                    </Badge>
-                                </td>
-                                <td className="px-6 py-5 text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-black">
-                                            {item.user[0]}
-                                        </div>
-                                        <span className="text-xs font-bold text-slate-600">{item.user}</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                            </tr>) :
+                            (
+                                movements.map((item, idx) => (
+                                        <tr key={item._id || idx} className="group hover:bg-slate-50/30 transition-colors">
+                                            <td className="px-6 py-5 text-xs font-mono font-medium text-slate-400">
+                                                {/* Convert ISO string to readable date */}
+                                                {new Date(item.createdAt).toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                {/* Access the populated product name */}
+                                                <span className="text-sm font-bold text-slate-700">
+                                                    {item.productId?.name || "Unknown Product"}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex justify-center">
+                                                    <div className={cn(
+                                                        "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight",
+                                                        item.movementType === 'IN' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+                                                    )}>
+                                                        {item.movementType === 'IN' ? <ArrowDownLeft size={12} /> : <ArrowUpRight size={12} />}
+                                                        Stock {item.movementType}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5 text-center text-sm font-black text-slate-900">
+                                                {/* Display the quantity with the unit name if available */}
+                                                {item.quantity} {item.unitId?.name}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none font-bold text-[10px] py-0.5">
+                                                    {item.reason}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-5 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-black">
+                                                        {/* Use the populated user name for the avatar */}
+                                                        {(item.performedBy?.name || "U").charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className="text-xs font-bold text-slate-600">
+                                                        {item.performedBy?.name || "System"}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                            )}
                     </tbody>
                 </table>
 

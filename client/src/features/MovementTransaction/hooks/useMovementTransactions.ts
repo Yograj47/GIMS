@@ -50,7 +50,11 @@ export const useMovementTransactions = () => {
             setLoading(true);
             const response = await MovementTransactionService.getProductMovements(productId);
             if (response.status === "Success") {
+                console.log(response.data);
+                
                 setProductMovements((response.data as MovementData[]) || []);
+                console.log(productMovements);
+                
             }
         } catch (error) {
             console.error("Fetch Product Movements Error:", error);

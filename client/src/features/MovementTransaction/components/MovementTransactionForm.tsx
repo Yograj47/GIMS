@@ -45,7 +45,7 @@ export default function MovementForm() {
 
     const onFormSubmit = async (data: TransactionFormData) => {
         const success = await createTransaction(data);
-        if (success) navigate("/inventory/transactions");
+        if (success) navigate("/reports/transactions");
     };
 
     // Style Constants matching your image

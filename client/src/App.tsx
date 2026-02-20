@@ -28,8 +28,8 @@ import StockManagement from "./features/MovementTransaction/pages/MovementHub";
 import Alert from "./features/alerts/pages/Alert";
 import ActivityLogs from "./features/activityLogs/pages/ActivityLogs";
 import ReportsHub from "./features/reports/pages/Report";
-import Transaction from "./features/MovementTransaction/pages/Transaction";
-import StockReport from "./features/MovementTransaction/pages/ProductStockReport";
+import Transaction from "./features/MovementTransaction/pages/TransactionReport";
+import StockReport from "./features/MovementTransaction/pages/StockReport";
 import StockMovementReport from "./features/MovementTransaction/pages/MovementReport";
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
@@ -40,6 +40,7 @@ import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
 import ForgotPassword from "./features/auth/pages/ForgetPassword";
 import StockMovementForm from "./features/MovementTransaction/components/MovementTransactionForm";
+import ProductMovementHistory from "./features/MovementTransaction/pages/ProductMovementHistory";
 
 axios.defaults.withCredentials = true;
 
@@ -106,6 +107,7 @@ function App() {
                 <Route path="activity" element={<ActivityLogs />} />
                 <Route path="transactions" element={<Transaction />} />
                 <Route path="stock" element={<StockReport />} />
+                <Route path="stock/product-history/:productId" element={<ProductMovementHistory />} />
                 <Route path="movement" element={<StockMovementReport />} />
               </Route>
             </Route>
