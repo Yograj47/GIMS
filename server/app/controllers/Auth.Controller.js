@@ -94,7 +94,7 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id);
 
     console.log(user);
-    
+
     if (!user) {
         res.status(404);
         throw new Error("User not found");
@@ -211,4 +211,32 @@ export const resetPassword = asyncHandler(async (req, res) => {
     await user.save();
 
     res.status(200).json({ status: "Success", message: "Password reset successfully" });
+});
+
+
+/** * @desc Update User Role
+ * @route PUT /api/v1/auths/role/:id
+ * @access Private (Admin only)
+ */
+export const updateRole = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (req.user.id === id) {
+        res.status(400);
+        throw new Error("You cannot change your own role");
+    }
+
+    const user = await User.findByIdAndUpdate(id, { role }, { new: true }).lean();
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    res.status(200).json({
+        status: "Success",
+        data: user
+    });
+
 });

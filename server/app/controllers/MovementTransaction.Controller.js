@@ -5,6 +5,11 @@ import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
 import { transactionSchema } from "../validation/Transaction.validation.js";
 
+/**
+ * @desc Create a unified transaction (Purchase, Sale, Return) with automatic stock movement
+ * @route POST /api/v1/transactions/
+ * @access Private
+ */
 export const createUnifiedTransaction = asyncHandler(async (req, res) => {
     const validateResult = transactionSchema.parse(req.body);
     const session = await mongoose.startSession();
@@ -32,7 +37,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
 
             const isStockIN = ['Purchase', 'Return'].includes(validateResult.transactionType);
 
-            const oldQty = Number(product.quantity) || 0; 
+            const oldQty = Number(product.quantity) || 0;
             const stockImpact = Number(item.qty) * Number(item.multiplier);
             const newQty = isStockIN ? oldQty + stockImpact : oldQty - stockImpact;
 
@@ -51,7 +56,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
                 reason: `${validateResult.transactionType}: ${item.qty} ${item.unitName || 'units'}`
             }], { session });
 
-            product.quantity = newQty; 
+            product.quantity = newQty;
             await product.save({ session });
         }
 
@@ -69,6 +74,8 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
 
 /**
  * @desc Get all Transactions with their specific product names
+ * @route GET /api/v1/transactions/
+ * @access Private
  */
 export const getAllTransactions = asyncHandler(async (req, res) => {
     const transactions = await Transaction.find()
@@ -81,6 +88,8 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 
 /**
  * @desc Get all Stock Movements with Product, User, and Unit context
+ * @route GET /api/v1/transactions/movements/
+ * @access Private
  */
 export const getMovements = asyncHandler(async (req, res) => {
     const results = await Movement.find()
@@ -95,6 +104,10 @@ export const getMovements = asyncHandler(async (req, res) => {
 
 /**
  * @desc Update Credit Transaction Status (Paid/Unpaid)
+ * @route PUT /api/v1/transactions/:id/credit
+ * @access Private
+ * Note: This endpoint allows updating the payment status of a credit transaction. 
+ * When marking as paid, you can also add notes (e.g., "Paid 500 now, rest later") which will be appended to existing notes.
  */
 export const updateCreditStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -125,7 +138,10 @@ export const updateCreditStatus = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc Get movement history for a specific product (Audit Log)
+ * @desc Get movement history + current stock of products
+ * @route GET /api/v1/transactions/movements/product-history/:productId
+ * @access Private
+ * Note: This endpoint retrieves the complete movement history of a specific product, including the user who performed each movement, the unit involved, and the old/new stock levels. This is crucial for inventory tracking and auditing purposes.
  */
 export const getProductMovements = asyncHandler(async (req, res) => {
     const { productId } = req.params;
@@ -134,6 +150,9 @@ export const getProductMovements = asyncHandler(async (req, res) => {
         .populate("performedBy", "name")
         .populate("unitId", "name")
         .sort({ createdAt: -1 });
+
+        console.log(movements);
+        
 
     res.status(200).json({ status: "Success", data: movements });
 });
