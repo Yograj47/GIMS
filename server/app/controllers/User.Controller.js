@@ -9,7 +9,7 @@ import User from "../models/User.Model.js";
 * @returns {object} 200 - User profile data
 */
 export const getMe = asyncHandler(async (req, res) => {
-    const userId = req.userId;
+    const userId = req.user.id;
 
     const user = await User.findById(userId);
 
@@ -17,6 +17,9 @@ export const getMe = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("User not found");
     }
+
+    console.log(user);
+    
 
     res.status(200).json({
         status: "Success",

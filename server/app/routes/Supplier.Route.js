@@ -6,17 +6,18 @@ import {
     updateSupplier,
     deleteSupplier
 } from "../controllers/Supplier.Controller.js";
-import { userAuth } from "../middleware/userAuth.js";
+import { userAuth } from "../middleware/Auth.middleware.js";
+import rbac from "../middleware/Role.middleware.js";
 
 const router = express.Router();
 
 router.route("/")
-    .post(userAuth, createSupplier)
-    .get(getSuppliers);
+    .post(userAuth,rbac("supplier:write"), createSupplier)
+    .get(userAuth, rbac("supplier:read"), getSuppliers);
 
 router.route("/:id")
-    .get(getSupplierById)
-    .put(userAuth, updateSupplier)
-    .delete(userAuth, deleteSupplier);
+    .get(userAuth, rbac("supplier:read"), getSupplierById)
+    .put(userAuth, rbac("supplier:write"), updateSupplier)
+    .delete(userAuth, rbac("supplier:delete"), deleteSupplier);
 
 export default router;

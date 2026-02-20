@@ -1,0 +1,35 @@
+const ROLES = {
+    admin: "all",
+    owner: [
+        'transaction:read',
+        'transaction:write',
+        'product:read',
+        'product:write',
+        'product:delete',
+        'unit:read',
+        'productUnit:read',
+        'category:read',
+        'category:write',
+        'category:delete',
+        'supplier:read',
+        'supplier:write',
+        'supplier:delete',
+        'report:read',
+        'dashboard:read',
+        'user:read',
+        'generalSetting:read',
+        'generalSetting:write',
+        'alert:read',
+    ],
+    staff: [
+        'transaction:read',
+        'transaction:write',
+        'generalSetting:read',
+        'product:read',
+        'supplier:read',
+        'dashboard:read',
+        'report:read',
+        'alert:read',],
+}
+
+export default ROLES;

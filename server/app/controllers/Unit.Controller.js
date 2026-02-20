@@ -1,4 +1,5 @@
 import Unit from '../models/Unit.Model.js';
+import ProductUnit from '../models/ProductUnit.Model.js';
 import Product from '../models/Product.Model.js';
 import asyncHandler from 'express-async-handler';
 import { unitSchema } from '../validation/Unit.validation.js';
@@ -123,3 +124,19 @@ export const deleteUnitById = asyncHandler(async (req, res) => {
         message: "Unit deactivated successfully"
     });
 });
+
+export const getAllProductUnits = asyncHandler(async (req, res) => {
+    const productUnits = await ProductUnit.find()
+        .populate('product', 'name')
+        .populate('unit', 'name shortForm -_id')
+        .select('-__v');
+
+    res.status(200).json({ 
+        status: "Success",
+        data: productUnits
+    });
+});
+
+// export const createProductUnit = asyncHandler(async (req, res) => {
+
+// }

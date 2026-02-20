@@ -6,17 +6,17 @@ import {
     updateCategory,
     deleteCategory
 } from '../controllers/Category.Controller.js';
-import { userAuth } from '../middleware/userAuth.js';
+import { userAuth } from '../middleware/Auth.middleware.js';
+import rbac from '../middleware/Role.middleware.js';
 
 const router = express.Router();
 
-// Note: Route with middleware - Protected routes (Only logged in users can modify)
 router.route('/')
-    .post(userAuth, createCategory)
-    .get(getCategories);
+    .post(userAuth, rbac("category:write"),createCategory)
+    .get(userAuth, rbac("category:read"), getCategories);
 router.route('/:id')
-    .get(getCategoryById)
-    .put(userAuth, updateCategory)
-    .delete(userAuth, deleteCategory);
+    .get(userAuth, rbac("category:read"), getCategoryById)
+    .put(userAuth, rbac("category:write"), updateCategory)
+    .delete(userAuth, rbac("category:delete"), deleteCategory);
 
 export default router;

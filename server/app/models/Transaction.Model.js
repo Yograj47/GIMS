@@ -3,20 +3,20 @@ import mongoose from "mongoose";
 const ItemSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
+        ref: 'Products',
         required: true
     },
     unitId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Unit',
+        ref: 'Units',
         required: true
     },
-    unitName: { type: String }, // Useful for printing receipts without populating
-    multiplier: { type: Number, required: true }, // Crucial for stock math
+    unitName: { type: String }, 
+    multiplier: { type: Number, required: true }, 
     qty: {
         type: Number,
         required: true,
-        min: 0.001 // Changed from 1 to allow fractional sales (0.5kg etc)
+        min: 0.001 
     },
     rate: { type: Number, required: true, min: 0 },
     total: { type: Number, required: true }

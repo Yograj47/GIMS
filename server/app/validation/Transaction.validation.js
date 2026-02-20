@@ -20,8 +20,7 @@ export const ItemSchema = z.object({
 });
 
 export const transactionSchema = z.object({
-    // Updated enum to match your 'Adjustment'/ 'Fixed' logic
-    transactionType: z.enum(['Purchase', 'Sale', 'Return', 'Damage', 'Fixed', 'Adjustment']),
+    transactionType: z.enum(['Purchase', 'Sale', 'Return', 'Damage', 'Adjustment']),
     
     items: z.array(ItemSchema).min(1, "At least one item is required"),
     grandTotal: z.number().min(0),
@@ -30,7 +29,7 @@ export const transactionSchema = z.object({
     partyDetails: z.object({ 
         name: z.string().optional().default(""), 
         phone: z.string().optional().default("")
-    }).default({}),
+    }).optional().default({ name: "", phone: "" }),
     
     notes: z.string().optional().default("")
 });

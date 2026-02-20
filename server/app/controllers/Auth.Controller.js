@@ -28,7 +28,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         password: hashedPassword
     });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30d" });
 
     res.cookie("token", token, {
         httpOnly: true,
@@ -71,7 +71,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         throw new Error("Invalid email or password");
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30d" });
 
     res.cookie("token", token, {
         httpOnly: true,
@@ -91,7 +91,7 @@ export const loginUser = asyncHandler(async (req, res) => {
  * @route POST /api/v1/auths/send-verify-otp
  */
 export const sendVerifyOtp = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user.id);
 
     console.log(user);
     
@@ -126,7 +126,7 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
 export const verifyEmail = asyncHandler(async (req, res) => {
     const { otp } = req.body;
 
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user.id);
     if (!user) {
         res.status(404);
         throw new Error("User not found");

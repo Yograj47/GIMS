@@ -6,39 +6,44 @@ import mongoose from "mongoose";
 import { transactionSchema } from "../validation/Transaction.validation.js";
 
 export const createUnifiedTransaction = asyncHandler(async (req, res) => {
-    // 1. Validate with the updated Zod schema (includes multiplier)
     const validateResult = transactionSchema.parse(req.body);
     const session = await mongoose.startSession();
 
     try {
         session.startTransaction();
 
-        // 2. Create the Transaction record
-        const transaction = await Transaction.create([validateResult], { session });
+        const transaction = await Transaction.create([{
+            transactionType: validateResult.transactionType,
+            items: validateResult.items,
+            grandTotal: validateResult.grandTotal,
+            isPaid: validateResult.isPaid,
+            partyDetails: {
+                name: validateResult.partyDetails?.name || "",
+                phone: validateResult.partyDetails?.phone || ""
+            },
+            notes: validateResult.notes || ""
+        }], { session });
+
+        const transactionId = transaction[0]._id;
 
         for (const item of validateResult.items) {
-            // 3. Find Product in current session
             const product = await Product.findById(item.productId).session(session);
             if (!product) throw new Error(`Product ${item.productId} not found`);
 
-            // 4. Handle Movement Logic
-            // 'Fixed' or 'Adjustment' logic: if you want 'Fixed' to be an increase, add it to isStockIN
             const isStockIN = ['Purchase', 'Return'].includes(validateResult.transactionType);
 
-            // USE THE SNAPSHOT MULTIPLIER from validateResult (item.multiplier)
-            // Reality: If selling 0.5kg and multiplier is 1000g, stockImpact = 500
-            const stockImpact = item.qty * item.multiplier;
-
-            const oldQty = product.stock;
+            const oldQty = Number(product.quantity) || 0; 
+            const stockImpact = Number(item.qty) * Number(item.multiplier);
             const newQty = isStockIN ? oldQty + stockImpact : oldQty - stockImpact;
 
-            // 5. Create Stock Movement with Unit context
+            if (isNaN(newQty)) throw new Error(`Math Error for product ${product.name}`);
+
             await Movement.create([{
                 productId: item.productId,
-                transactionId: transaction[0]._id,
-                performedBy: req.user._id,
-                unitId: item.unitId, // Link the unit used
-                multiplier: item.multiplier, // Snapshot multiplier
+                transactionId: transactionId,
+                performedBy: req.user.id,
+                unitId: item.unitId,
+                multiplier: item.multiplier,
                 quantity: stockImpact,
                 movementType: isStockIN ? 'IN' : 'OUT',
                 oldQuantity: oldQty,
@@ -46,8 +51,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
                 reason: `${validateResult.transactionType}: ${item.qty} ${item.unitName || 'units'}`
             }], { session });
 
-            // 6. Update Product Stock
-            product.stock = newQty;
+            product.quantity = newQty; 
             await product.save({ session });
         }
 
@@ -55,7 +59,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
         res.status(201).json({ status: "Success", data: transaction[0] });
 
     } catch (error) {
-        await session.abortTransaction();
+        if (session.inAtomicityTransition()) await session.abortTransaction();
         res.status(400);
         throw new Error(error.message);
     } finally {
@@ -79,14 +83,14 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
  * @desc Get all Stock Movements with Product, User, and Unit context
  */
 export const getMovements = asyncHandler(async (req, res) => {
-    const Movements = await Movement.find()
-        .populate("productId", "name")      // See WHAT moved
-        .populate("unitId", "name")         // See WHICH UNIT was used (Sack, KG, etc.)
-        .populate("performedBy", "name")    // See WHO did it
-        .populate("transactionId", "transactionType grandTotal") 
+    const results = await Movement.find()
+        .populate("productId", "name")
+        .populate("unitId", "name")
+        .populate("performedBy", "name")
+        .populate("transactionId", "transactionType grandTotal")
         .sort({ createdAt: -1 });
 
-    res.status(200).json({ status: "Success", data: Movements });
+    res.status(200).json({ status: "Success", data: results });
 });
 
 /**
@@ -104,11 +108,11 @@ export const updateCreditStatus = asyncHandler(async (req, res) => {
     }
 
     transaction.isPaid = isPaid;
-    
+
     // If they provide a new note (e.g., "Paid 500 now, rest later"), append it
     if (notes) {
-        transaction.notes = transaction.notes 
-            ? `${transaction.notes} | Update: ${notes}` 
+        transaction.notes = transaction.notes
+            ? `${transaction.notes} | Update: ${notes}`
             : notes;
     }
 
@@ -118,4 +122,18 @@ export const updateCreditStatus = asyncHandler(async (req, res) => {
         status: "Success",
         data: transaction
     });
+});
+
+/**
+ * @desc Get movement history for a specific product (Audit Log)
+ */
+export const getProductMovements = asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+
+    const movements = await Movement.find({ productId })
+        .populate("performedBy", "name")
+        .populate("unitId", "name")
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({ status: "Success", data: movements });
 });

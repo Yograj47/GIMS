@@ -6,17 +6,17 @@ import {
     getUnits,
     updateUnitById
 } from '../controllers/Unit.Controller.js';
-import { userAuth } from '../middleware/userAuth.js';
+import { userAuth } from '../middleware/Auth.middleware.js';
+import rbac from '../middleware/Role.middleware.js';
 
 const router = express.Router();
 
-// Note: Route with middleware - Protected routes (Only logged in users can modify)
 router.route('/')
-    .post(userAuth, createUnit)
-    .get(getUnits);
+    .post(userAuth, rbac("unit:write"), createUnit)
+    .get(userAuth, rbac("unit:read"), getUnits);
 router.route('/:id')
-    .get(userAuth, getUnitById)
-    .put(userAuth, updateUnitById)
-    .delete(userAuth, deleteUnitById);
+    .get(userAuth, rbac("unit:read"), getUnitById)
+    .put(userAuth, rbac("unit:write"), updateUnitById)
+    .delete(userAuth, rbac("unit:delete"), deleteUnitById);
 
 export default router;

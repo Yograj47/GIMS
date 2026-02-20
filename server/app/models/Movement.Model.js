@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const MovementSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
+        ref: 'Products',
         required: true
     },
     transactionId: {
@@ -13,12 +13,12 @@ const MovementSchema = new mongoose.Schema({
     },
     performedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Users',
         required: true
     },
     unitId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Unit'
+        ref: 'Units'
     },
     multiplier: { type: Number, default: 1 }, 
     
