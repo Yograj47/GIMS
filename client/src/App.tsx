@@ -6,7 +6,7 @@ import axios from "axios";
 import { Toaster } from "sonner";
 
 // Auth Guard & Store
-import { useAuthStore } from "./store/useAuth"; // Added
+import { useAuthStore } from "./store/useAuth"; 
 
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
@@ -24,13 +24,13 @@ import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
 import SupplierView from "./features/suppliers/pages/ViewSupplier";
 import ManageSupplier from "./features/suppliers/pages/Manage";
-import StockManagement from "./features/MovementTransaction/pages/MovementHub";
+import StockManagement from "./features/MovementTransaction/pages/movements/MovementHub";
 import Alert from "./features/alerts/pages/Alert";
 import ActivityLogs from "./features/activityLogs/pages/ActivityLogs";
 import ReportsHub from "./features/reports/pages/Report";
-import Transaction from "./features/MovementTransaction/pages/TransactionReport";
-import StockReport from "./features/MovementTransaction/pages/StockReport";
-import StockMovementReport from "./features/MovementTransaction/pages/MovementReport";
+import Transaction from "./features/MovementTransaction/pages/transaction/TransactionReport";
+import StockReport from "./features/MovementTransaction/pages/movements/StockReport";
+import StockMovementReport from "./features/MovementTransaction/pages/movements/MovementReport";
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import GeneralSettings from "./features/settings/pages/General";
@@ -40,7 +40,8 @@ import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
 import ForgotPassword from "./features/auth/pages/ForgetPassword";
 import StockMovementForm from "./features/MovementTransaction/components/MovementTransactionForm";
-import ProductMovementHistory from "./features/MovementTransaction/pages/ProductMovementHistory";
+import ProductMovementHistory from "./features/MovementTransaction/pages/movements/ProductMovementHistory";
+import TransactionViewPage from "./features/MovementTransaction/pages/transaction/TransactionViewPage";
 
 axios.defaults.withCredentials = true;
 
@@ -106,6 +107,7 @@ function App() {
                 <Route index element={<ReportsHub />} />
                 <Route path="activity" element={<ActivityLogs />} />
                 <Route path="transactions" element={<Transaction />} />
+                <Route path="transaction/:id" element={<TransactionViewPage />} />
                 <Route path="stock" element={<StockReport />} />
                 <Route path="stock/product-history/:productId" element={<ProductMovementHistory />} />
                 <Route path="movement" element={<StockMovementReport />} />

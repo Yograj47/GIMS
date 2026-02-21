@@ -86,14 +86,14 @@ export const useMovementTransactions = () => {
     };
 
     // 5. Update Credit Status
-    const updateCreditStatus = async (id: string, isPaid: boolean) => {
+    const updateCreditStatus = async (id: string, payload: { isPaid: boolean; notes?: string }) => {
         try {
             setLoading(true);
-            const response = await MovementTransactionService.updateCreditStatus(id, { isPaid });
+            const response = await MovementTransactionService.updateCreditStatus(id, payload);
             if (response.status === "Success") {
                 notify.success("Payment status updated");
                 setTransactions((prev) =>
-                    prev.map((t) => (t._id === id ? { ...t, isPaid } : t))
+                    prev.map((t) => (t._id === id ? { ...t, ...payload } : t))
                 );
                 return true;
             }

@@ -2,12 +2,14 @@ import { Search, Eye, ArrowDownLeft, ArrowUpRight, CheckCircle2, XCircle } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useMovementTransactions } from "../hooks/useMovementTransactions";
+import { useMovementTransactions } from "../../hooks/useMovementTransactions";
 import { useEffect } from "react";
 import { Loading } from "@/lib/loader";
+import { useNavigate } from "react-router-dom";
 
 export default function Transaction() {
-    const {fetchTransactions, transactions, isLoading} = useMovementTransactions();
+    const { fetchTransactions, transactions, isLoading } = useMovementTransactions();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchTransactions();
@@ -22,9 +24,9 @@ export default function Transaction() {
                     <p className="text-sm font-medium text-slate-500 italic">History of all stock-related financial records</p>
                 </div>
                 <div className="flex gap-2">
-                   <Button variant="outline" className="rounded-xl font-bold text-xs border-slate-200 text-slate-600">
+                    <Button variant="outline" className="rounded-xl font-bold text-xs border-slate-200 text-slate-600">
                         Export PDF
-                   </Button>
+                    </Button>
                 </div>
             </div>
 
@@ -32,8 +34,8 @@ export default function Transaction() {
             <div className="flex gap-4 items-center bg-white p-2 rounded-2xl border border-slate-100 shadow-sm">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <Input 
-                        placeholder="Search by transaction ID or notes..." 
+                    <Input
+                        placeholder="Search by transaction ID or notes..."
                         className="pl-10 h-11 border-none bg-transparent font-medium focus-visible:ring-0 shadow-none"
                     />
                 </div>
@@ -69,7 +71,7 @@ export default function Transaction() {
                                         No transactions found. Try adjusting your search or filters.
                                     </td>
                                 </tr>
-                            ) 
+                            )
                         }
                         {isLoading ? (
                             <tr>
@@ -78,44 +80,46 @@ export default function Transaction() {
                                 </td>
                             </tr>
                         ) :
-                        (transactions.map((txn) => (
-                            <tr key={txn._id} className="group hover:bg-slate-50/50 transition-colors">
-                                <td className="px-6 py-4 text-sm font-bold text-slate-700">{txn._id}</td>
-                                <td className="px-6 py-4">
-                                    <div className={cn(
-                                        "flex items-center gap-1.5 px-2.5 py-1 rounded-lg w-fit text-[10px] font-black uppercase",
-                                        txn.transactionType === 'Sale' ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
-                                    )}>
-                                        {txn.transactionType === 'Sale' ? <ArrowUpRight size={12} /> : <ArrowDownLeft size={12} />}
-                                        {txn.transactionType}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-sm font-black text-slate-900 text-center">
-                                    Rs {txn.grandTotal.toLocaleString()}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex justify-center">
-                                        {txn.isPaid ? (
-                                            <div className="flex items-center gap-1 text-emerald-500 text-[11px] font-bold">
-                                                <CheckCircle2 size={16} /> Yes
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-1 text-rose-500 text-[11px] font-bold">
-                                                <XCircle size={16} /> No
-                                            </div>
-                                        )}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-xs font-medium text-slate-400 truncate max-w-50">
-                                    {txn.notes}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <Button variant="ghost" size="sm" className="rounded-lg h-8 w-8 p-0 hover:bg-indigo-50 hover:text-indigo-600">
-                                        <Eye size={16} />
-                                    </Button>
-                                </td>
-                            </tr>
-                        )))}
+                            (transactions.map((txn) => (
+                                <tr key={txn._id} className="group hover:bg-slate-50/50 transition-colors">
+                                    <td className="px-6 py-4 text-sm font-bold text-slate-700">{txn._id}</td>
+                                    <td className="px-6 py-4">
+                                        <div className={cn(
+                                            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg w-fit text-[10px] font-black uppercase",
+                                            txn.transactionType === 'Sale' ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
+                                        )}>
+                                            {txn.transactionType === 'Sale' ? <ArrowUpRight size={12} /> : <ArrowDownLeft size={12} />}
+                                            {txn.transactionType}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm font-black text-slate-900 text-center">
+                                        Rs {txn.grandTotal.toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex justify-center">
+                                            {txn.isPaid ? (
+                                                <div className="flex items-center gap-1 text-emerald-500 text-[11px] font-bold">
+                                                    <CheckCircle2 size={16} /> Yes
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1 text-rose-500 text-[11px] font-bold">
+                                                    <XCircle size={16} /> No
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-xs font-medium text-slate-400 truncate max-w-50">
+                                        {txn.notes}
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <Button variant="ghost" size="sm"
+                                            onClick={() => navigate(`/reports/transaction/${txn._id}`, { state: { transaction: txn } })}
+                                            className="rounded-lg h-8 w-8 p-0 hover:bg-indigo-50 hover:text-indigo-600">
+                                            <Eye size={16} />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            )))}
                     </tbody>
                 </table>
 

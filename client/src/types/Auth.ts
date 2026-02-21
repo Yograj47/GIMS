@@ -10,14 +10,12 @@ export const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
-export type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const loginSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
+  password: z.string(),
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
 
 export const verifyEmailSchema = z.object({
   otp: z.string().length(6, { message: "OTP must be 6 digits" }),
@@ -26,9 +24,6 @@ export const verifyEmailSchema = z.object({
 export const forgotPasswordSchema = z.object({
   email: z.email("Invalid email address"),
 });
-
-export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
-export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>;
 
 export const resetPasswordSchema = z.object({
   otp: z.string().min(6, "OTP must be 6 digits"),
@@ -39,6 +34,10 @@ export const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+export type RegisterFormData = z.infer<typeof registerSchema>;
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export interface ResetPasswordPayload {
@@ -48,15 +47,16 @@ export interface ResetPasswordPayload {
 }
 
 export interface UserData {
+  _id: string;
   name: string;
   role: "admin" | "owner" | "staff";
   password: string;
   email: string;
-  isVerfied: boolean;
+  isVerified: boolean;
 }
 
-export interface AuthResponse {
+export interface AuthResponse<T = UserData> {
   status: string;
   message?: string;
-  data?: UserData;
+  data?: T;
 }

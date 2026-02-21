@@ -25,9 +25,9 @@ export const ProtectedRoute = ({
   }
 
   // 3. Authenticated but Not Verified -> Redirect to Verify Page
-  // (Using "isVerfied" to match your backend typo)
-  if (requireVerified && user && !user.isVerfied) {
-    return <Navigate to="/verify-account" replace />;
+  // (Using "isVerified" to match your backend typo)
+  if (requireVerified && user && !user.isVerified) {
+    return <Navigate to="/verify" replace />;
   }
 
   // 4. Role Authorization Check
