@@ -11,7 +11,7 @@ const productUnitSchema = new mongoose.Schema({
         ref: "Units",
         required: true
     },
-    Multiper: {
+    multiplier: {
         type: Number,
         default: 1
     },

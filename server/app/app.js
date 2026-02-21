@@ -5,16 +5,17 @@ import errorHandler from "./middleware/errorHandler.js"
 import cors from "cors"
 
 // Import Routes
-import settingRoutes from "./routes/Setting.Route.js"
-import userRoutes from "./routes/User.Route.js"
-import authRoutes from "./routes/Auth.Route.js"
-import categoryRoutes from "./routes/Category.Route.js"
-import unitRoutes from "./routes/Unit.Route.js"
-import productRoutes from "./routes/Product.Route.js"
-import supplierRoutes from "./routes/Supplier.Route.js"
+import SettingRoutes from "./routes/Setting.Route.js"
+import UserRoutes from "./routes/User.Route.js"
+import AuthRoutes from "./routes/Auth.Route.js"
+import CategoryRoutes from "./routes/Category.Route.js"
+import UnitRoutes from "./routes/Unit.Route.js"
+import ProductRoutes from "./routes/Product.Route.js"
+import SupplierRoutes from "./routes/Supplier.Route.js"
 import MovementTransactionRoutes from "./routes/MovementTransaction.Route.js"
-import activityLogRoutes from "./routes/ActivityLog.Route.js"
-import alertRoutes from "./routes/Alert.Route.js"
+import ActivityLogRoutes from "./routes/ActivityLog.Route.js"
+import AlertRoutes from "./routes/Alert.Route.js"
+import ProductUnitRoutes from "./routes/ProductUnit.Route.js"
 
 const app = express();
 
@@ -34,16 +35,18 @@ app.get("/", (req, res) => {
 const API = "/api/v1"
 
 // Routes
-app.use(`${API}/auths`, authRoutes);
-app.use(`${API}/users`, userRoutes);
-app.use(`${API}/categories`, categoryRoutes);
-app.use(`${API}/units`, unitRoutes);
-app.use(`${API}/products`, productRoutes)
-app.use(`${API}/suppliers`, supplierRoutes);
+app.use(`${API}/auths`, AuthRoutes);
+app.use(`${API}/users`, UserRoutes);
+app.use(`${API}/categories`, CategoryRoutes);
+app.use(`${API}/units`, UnitRoutes);
+app.use(`${API}/products`, ProductRoutes)
+app.use(`${API}/suppliers`, SupplierRoutes);
+app.use(`${API}/product-units`, ProductUnitRoutes);
 app.use(`${API}`, MovementTransactionRoutes);
-app.use(`${API}/activity-logs`, activityLogRoutes);
-app.use(`${API}/alerts`, alertRoutes);
-app.use(`${API}/settings`, settingRoutes);
+app.use(`${API}/activity-logs`, ActivityLogRoutes);
+app.use(`${API}/alerts`, AlertRoutes);
+app.use(`${API}/settings`, SettingRoutes);
+app.use(`${API}/product-units`, ProductUnitRoutes);
 
 // Error Middleware
 app.use(errorHandler);
