@@ -42,6 +42,7 @@ import ForgotPassword from "./features/auth/pages/ForgetPassword";
 import StockMovementForm from "./features/MovementTransaction/components/MovementTransactionForm";
 import ProductMovementHistory from "./features/MovementTransaction/pages/movements/ProductMovementHistory";
 import TransactionViewPage from "./features/MovementTransaction/pages/transaction/TransactionViewPage";
+import { ProductUnitListing } from "./features/ProductUnit/pages/ProductUnit";
 
 axios.defaults.withCredentials = true;
 
@@ -120,6 +121,7 @@ function App() {
                 <Route index element={<GeneralSettings />} />
                 <Route path="categories" element={<CategoriesPage />} />
                 <Route path="units" element={<UnitsPage />} />
+                <Route path="uoms" element={<ProductUnitListing />} />
               </Route>
             </Route>
           </Route>
