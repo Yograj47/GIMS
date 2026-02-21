@@ -19,7 +19,7 @@ export const getMe = asyncHandler(async (req, res) => {
     }
 
     console.log(user);
-    
+
 
     res.status(200).json({
         status: "Success",
@@ -28,8 +28,18 @@ export const getMe = asyncHandler(async (req, res) => {
             role: user.role,
             password: user.password,
             email: user.email,
-            isVerfied: user.isVerfied
+            isVerified: user.isVerified
         }
     });
 })
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await User.find()
+        .select("-password -verifyOptExpiryAt -resetOptExpiryAt -verifyOpt -resetOpt");
+        
+    res.status(200).json({
+        status: "Success",
+        data: users
+    });
+});
 

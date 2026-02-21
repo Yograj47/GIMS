@@ -100,7 +100,7 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    if (user.isVerfied) {
+    if (user.isVerified) {
         res.status(400);
         throw new Error("User is already verified");
     }
@@ -137,7 +137,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
         throw new Error("Invalid or expired OTP");
     }
 
-    user.isVerfied = true;
+    user.isVerified = true;
     user.verifyOpt = '';
     user.verifyOptExpiryAt = 0;
     await user.save();
@@ -236,7 +236,13 @@ export const updateRole = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         status: "Success",
-        data: user
+        data: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            isVerified: user.isVerified
+        }
     });
 
 });
