@@ -39,11 +39,35 @@ export const createUnit = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const getUnits = asyncHandler(async (req, res) => {
-    const units = await Unit.find({ isActive: true }).sort({ name: 1 }).select('-__v');
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const search = req.query.search || '';
+
+    const query = {
+        $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { shortForm: { $regex: search, $options: 'i' } }
+        ]
+    }
+
+    const [items, totalItems] = await Promise.all([
+        Unit.find(query)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit).select('-__v'),
+        Unit.countDocuments(query)
+    ]);
+
 
     res.status(200).json({
         status: "Success",
-        data: units
+        data: items,
+        meta: {
+            totalItems,
+            itemsPerPage: items.length,
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+        }
     });
 });
 
