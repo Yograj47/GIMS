@@ -9,7 +9,7 @@ export const unitSchema = z.object({
     .number()
     .min(1, "Multiplier must be at least 1")
     .default(1),
-    
+
   baseUnit: z.boolean().optional().default(false),
   isFractional: z.boolean().optional().default(false),
   isActive: z.boolean().optional().default(true),
@@ -22,7 +22,7 @@ export interface UnitData {
   name: string;
   shortForm: string;
   unitType: 'weight' | 'volume' | 'count' | 'pack';
-  multiplierToBase: number; 
+  multiplierToBase: number;
   baseUnit: boolean;
   isFractional: boolean;
   isActive: boolean;
@@ -30,8 +30,17 @@ export interface UnitData {
   updatedAt?: string;
 }
 
+export interface PaginationMetadata {
+    totalItems: number;
+    itemsPerPage: number;
+    currentPage: number;
+    totalPages: number;
+}
+
 export interface UnitAPIResponse {
   status: string;
   message?: string;
   data: UnitData | UnitData[];
+  meta?: PaginationMetadata;
 }
+

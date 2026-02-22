@@ -2,8 +2,10 @@ import api from "@/lib/api";
 import type { UnitAPIResponse, UnitFormData } from "@/types/Unit";
 
 export const unitService = {
-    getAll: async () => {
-        const { data } = await api.get<UnitAPIResponse>("/units");
+    getAll: async (page: number = 1, limit: number = 10, search?: string) => {
+        const { data } = await api.get<UnitAPIResponse>("/units", {
+            params: { page, limit, search }
+        });
         return data;
     },
 

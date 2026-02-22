@@ -1,21 +1,23 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import type { UnitData, UnitFormData } from '@/types/Unit';
+import type { PaginationMetadata, UnitData, UnitFormData } from '@/types/Unit';
 import { unitService } from '../api/UnitService';
 
 export const useUnits = () => {
     const [units, setunits] = useState<UnitData[]>([]);
+    const [meta, setMeta] = useState<PaginationMetadata | null>(null);
     const [singleUnit, setSingleUnit] = useState<UnitData | null>(null);
     const { setLoading, isLoading } = useGlobalStore();
 
     // 1. Fetch All units
-    const fetchUnits = useCallback(async () => {
+    const fetchUnits = useCallback(async (page: number, limit: number, search?: string) => {
         try {
             setLoading(true);
-            const response = await unitService.getAll();
+            const response = await unitService.getAll(page, limit, search);
             if (response.status === "Success") {
                 setunits(response.data as UnitData[]);
+                setMeta(response.meta || null);
                 return true;
             }
         } catch (error: any) {
@@ -100,6 +102,7 @@ export const useUnits = () => {
         units,
         singleUnit,
         isLoading,
+        meta,
         fetchUnits,
         fetchUnitById,
         addUnit,
