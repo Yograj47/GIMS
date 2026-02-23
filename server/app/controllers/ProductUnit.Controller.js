@@ -6,19 +6,29 @@ import asyncHandler from 'express-async-handler';
  * @route   GET /api/v1/product-units
  */
 export const getAllProductUnits = asyncHandler(async (req, res) => {
-    const productUnits = await ProductUnit.aggregate([
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const search = req.query.search || '';
+    const shouldPaginate = req.query.paginate !== 'false';
+
+    const pipeline = [
         {
             $lookup: {
-                from: "products", 
+                from: "products",
                 localField: "productId",
                 foreignField: "_id",
                 as: "product"
             }
         },
         { $unwind: "$product" },
+        ...(search ? [{
+            $match: {
+                "product.name": { $regex: search, $options: 'i' }
+            }
+        }] : []),
         {
             $lookup: {
-                from: "units", 
+                from: "units",
                 localField: "unitId",
                 foreignField: "_id",
                 as: "unit"
@@ -31,7 +41,7 @@ export const getAllProductUnits = asyncHandler(async (req, res) => {
                 productName: { $first: "$product.name" },
                 conversions: {
                     $push: {
-                        _id: "$_id", 
+                        _id: "$_id",
                         unitName: "$unit.name",
                         shortName: "$unit.shortName",
                         multiplier: "$multiplier",
@@ -43,9 +53,36 @@ export const getAllProductUnits = asyncHandler(async (req, res) => {
             }
         },
         { $sort: { productName: 1 } }
-    ]);
+    ];
 
-    res.status(200).json({ status: "Success", data: productUnits });
+    let productUnits;
+    let totalItems;
+
+    if (shouldPaginate) {
+        const countPipeline = [...pipeline, { $count: "total" }];
+        const countResult = await ProductUnit.aggregate(countPipeline);
+        totalItems = countResult[0]?.total || 0;
+
+        pipeline.push({ $skip: (page - 1) * limit });
+        pipeline.push({ $limit: limit });
+    }
+
+    productUnits = await ProductUnit.aggregate(pipeline);
+
+    res.status(200).json({
+        status: "Success",
+        data: productUnits,
+        meta: shouldPaginate ? {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            itemsPerPage: limit
+        } : {
+            totalItems: productUnits.length,
+            paginationDisabled: true
+        }
+    });
+
 });
 
 /**
@@ -57,7 +94,7 @@ export const createProductUnit = asyncHandler(async (req, res) => {
     // 1. Logic Check: If this is set as default, unset previous default for this product
     if (isDefault) {
         await ProductUnit.updateMany(
-            { productId }, 
+            { productId },
             { isDefault: false }
         );
     }
@@ -82,14 +119,14 @@ export const updateProductUnit = asyncHandler(async (req, res) => {
     if (isDefault) {
         const unit = await ProductUnit.findById(id);
         await ProductUnit.updateMany(
-            { productId: unit.productId }, 
+            { productId: unit.productId },
             { isDefault: false }
         );
     }
 
-    const updated = await ProductUnit.findByIdAndUpdate(id, req.body, { 
-        new: true, 
-        runValidators: true 
+    const updated = await ProductUnit.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true
     });
 
     if (!updated) {

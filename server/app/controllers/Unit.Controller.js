@@ -42,6 +42,7 @@ export const getUnits = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 100;
     const search = req.query.search || '';
+    const shouldPaginate = req.query.paginate !== 'false';
 
     const query = {
         $or: [
@@ -50,11 +51,14 @@ export const getUnits = asyncHandler(async (req, res) => {
         ]
     }
 
+    let itemsQuery = Unit.find(query).sort({ createAt: -1 }).select('-__v');
+
+    if (shouldPaginate) {
+        itemsQuery = itemsQuery.skip((page - 1) * limit).limit(limit);
+    }
+
     const [items, totalItems] = await Promise.all([
-        Unit.find(query)
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit).select('-__v'),
+        itemsQuery,
         Unit.countDocuments(query)
     ]);
 
@@ -62,11 +66,15 @@ export const getUnits = asyncHandler(async (req, res) => {
     res.status(200).json({
         status: "Success",
         data: items,
-        meta: {
+        meta: shouldPaginate ? {
             totalItems,
             itemsPerPage: items.length,
             currentPage: page,
             totalPages: Math.ceil(totalItems / limit),
+        } : {
+            totalItems,
+            itemsPerPage: items.length,
+            paginationDisabled: true
         }
     });
 });
