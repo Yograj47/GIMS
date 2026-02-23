@@ -7,9 +7,13 @@ export const productUnitService = {
      * Gets all product units grouped by product.
      * Uses your MongoDB Aggregation controller logic.
      */
-    getGroupedUnits: async () => {
+    getGroupedUnits: async (page: number = 1, limit: number = 10, search?: string, all?: boolean) => {
         const { data } = await api.get<ProductUnitAPIResponse<GroupedProductUnit[]>>(
-            `${BASE_URL}/`
+            `${BASE_URL}/`, {
+            params: all
+                ? { paginate: false, search }
+                : { page, limit, search }
+        }
         );
         return data;
     },
@@ -19,7 +23,7 @@ export const productUnitService = {
      */
     create: async (payload: ProductUnitFormData) => {
         const { data } = await api.post<ProductUnitAPIResponse<ProductUnitData>>(
-            `${BASE_URL}/`, 
+            `${BASE_URL}/`,
             payload
         );
         return data;
@@ -30,7 +34,7 @@ export const productUnitService = {
      */
     update: async (id: string, payload: Partial<ProductUnitFormData>) => {
         const { data } = await api.put<ProductUnitAPIResponse<ProductUnitData>>(
-            `${BASE_URL}/${id}`, 
+            `${BASE_URL}/${id}`,
             payload
         );
         return data;

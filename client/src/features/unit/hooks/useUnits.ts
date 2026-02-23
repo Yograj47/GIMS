@@ -11,13 +11,13 @@ export const useUnits = () => {
     const { setLoading, isLoading } = useGlobalStore();
 
     // 1. Fetch All units
-    const fetchUnits = useCallback(async (page: number, limit: number, search?: string) => {
+    const fetchUnits = useCallback(async (page?: number, limit?: number, search?: string, all?:boolean) => {
         try {
             setLoading(true);
-            const response = await unitService.getAll(page, limit, search);
+            const response = await unitService.getAll(page, limit, search, all);
             if (response.status === "Success") {
                 setunits(response.data as UnitData[]);
-                setMeta(response.meta || null);
+                setMeta(all ? null : (response.meta || null));
                 return true;
             }
         } catch (error: any) {

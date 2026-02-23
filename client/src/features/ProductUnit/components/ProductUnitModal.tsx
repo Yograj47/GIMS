@@ -29,7 +29,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            fetchUnits();
+            fetchUnits(undefined, undefined, undefined, true);
             reset(initialData ? { ...initialData, productId } : { productId, multiplier: 1, isDefault: false });
         }
     }, [isOpen, initialData, productId, reset, fetchUnits]);

@@ -6,7 +6,7 @@ import axios from "axios";
 import { Toaster } from "sonner";
 
 // Auth Guard & Store
-import { useAuthStore } from "./store/useAuth"; 
+import { useAuthStore } from "./store/useAuth";
 
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
@@ -35,14 +35,14 @@ import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import GeneralSettings from "./features/settings/pages/General";
 import CategoriesPage from "./features/category/pages/Categories";
-import UnitsPage from "./features/unit/pages/Unit";
+import UnitPage from "./features/unit/pages/UnitPage";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
 import ForgotPassword from "./features/auth/pages/ForgetPassword";
 import StockMovementForm from "./features/MovementTransaction/components/MovementTransactionForm";
 import ProductMovementHistory from "./features/MovementTransaction/pages/movements/ProductMovementHistory";
 import TransactionViewPage from "./features/MovementTransaction/pages/transaction/TransactionViewPage";
-import { ProductUnitListing } from "./features/ProductUnit/pages/ProductUnit";
+import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
 
 axios.defaults.withCredentials = true;
 
@@ -120,8 +120,8 @@ function App() {
               <Route path="/settings">
                 <Route index element={<GeneralSettings />} />
                 <Route path="categories" element={<CategoriesPage />} />
-                <Route path="units" element={<UnitsPage />} />
-                <Route path="uoms" element={<ProductUnitListing />} />
+                <Route path="units" element={<UnitPage />} />
+                <Route path="uoms" element={<ProductUnitPage />} />
               </Route>
             </Route>
           </Route>

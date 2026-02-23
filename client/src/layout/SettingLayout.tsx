@@ -19,33 +19,26 @@ export default function SettingsLayout() {
   ];
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
-
-      {/* ---------- SHARP SETTINGS SIDEBAR ---------- */}
-      {/* Increased border-r weight and changed background to a solid slate-100 */}
-      <aside className="w-60 shrink-0 border-r-2 border-slate-500 flex flex-col bg-slate-100">
-
+    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+      {/* ---------- THEMED SIDEBAR ---------- */}
+      {/* Changed bg-slate-100 to a cleaner slate-50/white mix and softened borders */}
+      <aside className="w-64 shrink-0 border-r-2 border-slate-200 flex flex-col bg-white">
         {/* Header */}
         <div className="px-6 pt-8 pb-6">
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-6 group"
+            className="flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors mb-6 group"
           >
-            {/* Thicker Icon Stroke */}
             <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              Back to Store
-            </span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Back to Store</span>
           </button>
-
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Settings</h1>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-1.5">
+        <nav className="flex-1 px-4 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-
             return (
               <NavLink
                 key={item.id}
@@ -53,27 +46,22 @@ export default function SettingsLayout() {
                 end={item.exact}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-black transition-all duration-200 border-2",
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all border-2",
                     isActive
-                      ? "bg-white text-slate-900 border-slate-900 "
-                      : "text-slate-600 border-transparent hover:bg-white/50 hover:text-slate-900"
+                      ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
+                      : "text-slate-500 border-transparent hover:bg-slate-50 hover:text-slate-900"
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span
-                      className={cn(
-                        "p-1.5 rounded-lg border-2 transition-colors",
-                        isActive
-                          ? "bg-slate-900 text-white border-slate-900"
-                          : "bg-slate-200 text-slate-500 border-slate-300"
-                      )}
-                    >
+                    <span className={cn(
+                      "p-1.5 rounded-lg border-2 transition-colors",
+                      isActive ? "bg-blue-600 text-white border-blue-600" : "bg-slate-100 text-slate-400 border-slate-200"
+                    )}>
                       <Icon size={16} strokeWidth={2.5} />
                     </span>
-
-                    <span className="tracking-tight uppercase text-[12px]">{item.label}</span>
+                    <span className="tracking-tight uppercase text-[11px]">{item.label}</span>
                   </>
                 )}
               </NavLink>
@@ -81,31 +69,26 @@ export default function SettingsLayout() {
           })}
         </nav>
 
-        {/* Footer Badge - Darkened to match your Admin theme */}
-        <div className="p-4 border-t-2 border-slate-200">
-          <div className="flex items-center gap-3 p-4 bg-slate-900 rounded-2xl shadow-xl">
-            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-[12px] font-black ring-2 ring-white/20">
-              A
-            </div>
-
+        {/* Footer Badge - Refined to match the lighter theme */}
+        <div className="p-4 border-t-2 border-slate-100">
+          <div className="flex items-center gap-3 p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl">
+            <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-[12px] font-black">A</div>
             <div>
-              <p className="text-[11px] font-black text-white leading-none tracking-tight">
-                ADMIN PANEL
-              </p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">
-                System Manager
-              </p>
+              <p className="text-[10px] font-black text-slate-900 leading-none">ADMIN PANEL</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">System Manager</p>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* ---------- CONTENT AREA ---------- */}
-      <main className="flex-1 min-w-0 flex flex-col bg-white">
-        <div className="flex-1 overflow-y-auto w-full">
-            <div className="max-w-6xl mx-auto py-12 px-10">
-                <Outlet />
+      {/* ---------- MAIN CONTENT AREA ---------- */}
+      <main className="flex-1 flex flex-col min-w-0 bg-white overflow-hidden">
+        <div className="flex-1 flex flex-col px-10 py-8 overflow-hidden">
+          <div className="max-w-350 w-full mx-auto flex flex-col h-full min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0">
+              <Outlet />
             </div>
+          </div>
         </div>
       </main>
     </div>

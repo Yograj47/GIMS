@@ -2,9 +2,11 @@ import api from "@/lib/api";
 import type { UnitAPIResponse, UnitFormData } from "@/types/Unit";
 
 export const unitService = {
-    getAll: async (page: number = 1, limit: number = 10, search?: string) => {
+    getAll: async (page: number = 1, limit: number = 10, search?: string, all?: boolean) => {
         const { data } = await api.get<UnitAPIResponse>("/units", {
-            params: { page, limit, search }
+            params: all
+                ? { paginate: false, search }
+                : { page, limit, search }
         });
         return data;
     },

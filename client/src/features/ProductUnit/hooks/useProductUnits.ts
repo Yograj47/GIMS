@@ -6,18 +6,22 @@ import type {
     GroupedProductUnit, 
     ProductUnitFormData, 
 } from '@/types/ProductUnit';
+import type { PaginationMetadata } from '@/types/Unit';
 
 export const useProductUnits = () => {
     const [groupedUnits, setGroupedUnits] = useState<GroupedProductUnit[]>([]);
     const { setLoading, isLoading } = useGlobalStore();
+    const [meta, setMeta] = useState<PaginationMetadata | null>(null);
+        
 
     // 1. Fetch Grouped Product Units (Aggregation)
-    const fetchGroupedUnits = useCallback(async () => {
+    const fetchGroupedUnits = useCallback(async (page? : number, limit?: number, search?: string, all?:boolean) => {
         try {
             setLoading(true);
-            const response = await productUnitService.getGroupedUnits();
+            const response = await productUnitService.getGroupedUnits(page, limit, search, all);
             if (response.status === "Success") {
                 setGroupedUnits(response.data as GroupedProductUnit[]);
+                setMeta(all? null : (response.meta || null));
             }
         } catch (error: any) {
             // Error handled by global interceptor/store
@@ -91,6 +95,7 @@ export const useProductUnits = () => {
         fetchGroupedUnits,
         addProductUnit,
         updateProductUnit,
-        removeProductUnit
+        removeProductUnit,
+        meta
     };
 };
