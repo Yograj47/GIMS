@@ -34,12 +34,41 @@ export const createCategory = asyncHandler(async (req, res) => {
  * @access  Public
  */
 export const getCategories = asyncHandler(async (req, res) => {
-    // Sorting by name: 1 ensures a clean list for frontend dropdowns
-    const categories = await Category.find({}).sort({ name: 1 }).select('-__v');
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const search = req.query.search || '';
+    const shouldPaginate = req.query.paginate !== 'false';
+
+    const query = {
+        $or: [
+            { name: { $regex: search, $options: 'i' } },
+        ]
+    }
+
+    let itemsQuery = Category.find(query).sort({ createAt: -1 }).select('-__v');
+
+    if (shouldPaginate) {
+        itemsQuery = itemsQuery.skip((page - 1) * limit).limit(limit);
+    }
+
+    const [items, totalItems] = await Promise.all([
+        itemsQuery,
+        Category.countDocuments(query)
+    ])
 
     res.status(200).json({
         status: "Success",
-        data: categories
+        data: items,
+        meta: shouldPaginate ? {
+            totalItems,
+            itemsPerPage: items.length,
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+        } : {
+            totalItems,
+            itemsPerPage: items.length,
+            paginationDisabled: true
+        }
     });
 });
 
