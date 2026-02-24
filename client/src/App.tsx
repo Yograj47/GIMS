@@ -34,7 +34,7 @@ import StockMovementReport from "./features/MovementTransaction/pages/movements/
 import UserManagement from "./features/auth/pages/User";
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import GeneralSettings from "./features/settings/pages/General";
-import CategoriesPage from "./features/category/pages/Categories";
+import CategoryPage from "./features/category/pages/CategoryPage";
 import UnitPage from "./features/unit/pages/UnitPage";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
@@ -119,7 +119,7 @@ function App() {
             <Route element={<SettingsLayout />}>
               <Route path="/settings">
                 <Route index element={<GeneralSettings />} />
-                <Route path="categories" element={<CategoriesPage />} />
+                <Route path="categories" element={<CategoryPage />} />
                 <Route path="units" element={<UnitPage />} />
                 <Route path="uoms" element={<ProductUnitPage />} />
               </Route>

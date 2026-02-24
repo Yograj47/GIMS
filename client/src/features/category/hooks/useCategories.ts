@@ -3,19 +3,24 @@ import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
 import { CategoryService } from '../api/CategoryService';
 import type { CategoryData, CategoryFormData } from '@/types/Category';
+import type { PaginationMetadata } from '@/types/Unit';
 
 export const useCategories = () => {
     const [categories, setCategories] = useState<CategoryData[]>([]);
     const [singleCategory, setSingleCategory] = useState<CategoryData | null>(null);
     const { setLoading, isLoading } = useGlobalStore();
+    const [meta, setMeta] = useState<PaginationMetadata | null>(null);
+
 
     // 1. Fetch All Categories
-    const fetchCategories = useCallback(async () => {
+    const fetchCategories = useCallback(async (page?: number, limit?: number, search?: string, all?:boolean) => {
         try {
             setLoading(true);
-            const response = await CategoryService.getAll();
+            const response = await CategoryService.getAll(page, limit, search, all);
             if (response.status === "Success") {
                 setCategories(response.data as CategoryData[]);
+                setMeta(all ? null : (response.meta || null));
+                return true;
             }
         } catch (error: any) {
             // the error notification happens automatically!
@@ -93,6 +98,7 @@ export const useCategories = () => {
         fetchCategoryById,
         addCategory,
         updateCategory,
-        removeCategory
+        removeCategory,
+        meta
     };
 };

@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { PaginationMetadata } from "./Unit";
 
 export const categorySchema = z.object({
     name: z.string().min(2, "Category name must be at least 2 characters"),
@@ -21,4 +22,5 @@ export interface CategoryAPIResponse {
     status: string;
     message?: string;
     data: CategoryData | CategoryData[];
+    meta: PaginationMetadata
 }

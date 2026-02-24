@@ -2,8 +2,12 @@ import api from "@/lib/api";
 import type { CategoryAPIResponse, CategoryFormData } from "@/types/Category";
 
 export const CategoryService = {
-    getAll: async () => {
-        const { data } = await api.get<CategoryAPIResponse>("/categories");
+    getAll: async (page?: number, limit?: number, search?: string, all?: boolean) => {
+        const { data } = await api.get<CategoryAPIResponse>("/categories", {
+            params: all
+                ? { paginate: false, search }
+                : { page, limit, search }
+        });
         return data;
     },
 
