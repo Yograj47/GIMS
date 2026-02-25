@@ -91,15 +91,95 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
  * @route GET /api/v1/transactions/movements/
  * @access Private
  */
+/**
+ * @desc    Get all stock movements with filtering and pagination
+ * @route   GET /api/v1/movements
+ */
 export const getMovements = asyncHandler(async (req, res) => {
-    const results = await Movement.find()
-        .populate("productId", "name")
-        .populate("unitId", "name")
-        .populate("performedBy", "name")
-        .populate("transactionId", "transactionType grandTotal")
-        .sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const shouldPaginate = req.query.paginate !== 'false';
+    const movementType = (req.query.movementType && req.query.movementType !== 'ALL')
+        ? req.query.movementType
+        : null;
 
-    res.status(200).json({ status: "Success", data: results });
+    const conditions = [
+        ...(search ? [{
+            $or: [
+                { "product.name": { $regex: search, $options: 'i' } },
+                { "user.name": { $regex: search, $options: 'i' } },
+                { "reason": { $regex: search, $options: 'i' } }
+            ]
+        }] : []),
+        ...(movementType ? [{ movementType }] : [])
+    ];
+
+    const pipeline = [
+        {
+            $lookup: {
+                from: "products",
+                localField: "productId",
+                foreignField: "_id",
+                as: "product"
+            }
+        },
+        { $unwind: "$product" },
+
+        {
+            $lookup: {
+                from: "users",
+                localField: "performedBy",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        { $unwind: "$user" },
+
+        ...(conditions.length > 0 ? [{ $match: { $and: conditions } }] : []),
+        {
+            $project: {
+                _id: 1,
+                movementType: 1,
+                quantity: 1,
+                oldQuantity: 1,
+                newQuantity: 1,
+                reason: 1,
+                createdAt: 1,
+                productId: { _id: "$product._id", name: "$product.name" },
+                performedBy: { _id: "$user._id", name: "$user.name" }
+            }
+        },
+        { $sort: { createdAt: -1 } }
+    ];
+
+    let results;
+    let totalItems;
+
+    if (shouldPaginate) {
+        const countPipeline = [...pipeline, { $count: "total" }];
+        const countResult = await Movement.aggregate(countPipeline);
+        totalItems = countResult[0]?.total || 0;
+
+        pipeline.push({ $skip: (page - 1) * limit });
+        pipeline.push({ $limit: limit });
+    }
+
+    results = await Movement.aggregate(pipeline);
+
+    res.status(200).json({
+        status: "Success",
+        data: results,
+        meta: shouldPaginate ? {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            itemsPerPage: limit
+        } : {
+            totalItems: results.length,
+            paginationDisabled: true
+        }
+    });
 });
 
 /**
@@ -151,8 +231,8 @@ export const getProductMovements = asyncHandler(async (req, res) => {
         .populate("unitId", "name")
         .sort({ createdAt: -1 });
 
-        console.log(movements);
-        
+    console.log(movements);
+
 
     res.status(200).json({ status: "Success", data: movements });
 });
