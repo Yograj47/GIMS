@@ -1,10 +1,10 @@
 import api from "@/lib/api";
-import type { 
-  CreditTransactionInput, 
-  TransactionAPIResponse, 
-  TransactionFormData,
+import type {
+    CreditTransactionInput,
+    TransactionAPIResponse,
+    TransactionFormData,
 } from "@/types/Transaction";
-import type { MovementAPIResponse } from "@/types/Movement"; 
+import type { MovementAPIResponse } from "@/types/Movement";
 
 /**
  * Unified Service for handling Sales, Purchases, and physical Inventory Movements
@@ -41,8 +41,12 @@ export const MovementTransactionService = {
     /**
      * Fetches the history of all physical stock movements (IN/OUT)
      */
-    getAllMovements: async (): Promise<MovementAPIResponse> => {
-        const { data } = await api.get<MovementAPIResponse>("/movements");
+    getAllMovements: async (page: number = 1, limit: number = 10, search?: string, movementType?: string, all?: boolean): Promise<MovementAPIResponse> => {
+        const { data } = await api.get<MovementAPIResponse>("/movements", {
+            params: all
+                ? { paginate: false, search, movementType }
+                : { page, limit, search, movementType }
+        });
         return data;
     },
 

@@ -31,7 +31,7 @@ import ReportsHub from "./features/reports/pages/Report";
 import Transaction from "./features/MovementTransaction/pages/transaction/TransactionReport";
 import StockReport from "./features/MovementTransaction/pages/movements/StockReport";
 import StockMovementReport from "./features/MovementTransaction/pages/movements/MovementReport";
-import UserManagement from "./features/auth/pages/User";
+import UserManagement from "./features/auth/pages/UserManagement";
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import GeneralSettings from "./features/settings/pages/General";
 import CategoryPage from "./features/category/pages/CategoryPage";

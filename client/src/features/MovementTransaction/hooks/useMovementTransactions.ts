@@ -4,12 +4,14 @@ import { MovementTransactionService } from "../api/MovementTransactionService";
 import type { TransactionData, TransactionFormData } from "@/types/Transaction";
 import type { MovementData } from "@/types/Movement";
 import { notify } from "@/lib/toast";
+import type { PaginationMetadata } from "@/types/Unit";
 
 export const useMovementTransactions = () => {
     const [transactions, setTransactions] = useState<TransactionData[]>([]);
     const [movements, setMovements] = useState<MovementData[]>([]);
     const [productMovements, setProductMovements] = useState<MovementData[]>([]);
-    
+    const [meta, setMeta] = useState<PaginationMetadata | null>(null);
+
     const { isLoading, setLoading } = useGlobalStore();
 
     // 1. Fetch All Transactions
@@ -19,6 +21,7 @@ export const useMovementTransactions = () => {
             const response = await MovementTransactionService.getAllTransactions();
             if (response.status === "Success") {
                 setTransactions((response.data as TransactionData[]) || []);
+
             }
         } catch (error) {
             console.error("Fetch Transactions Error:", error);
@@ -29,12 +32,14 @@ export const useMovementTransactions = () => {
     }, [setLoading]);
 
     // 2. Fetch All Physical Movements
-    const fetchMovements = useCallback(async () => {
+    const fetchMovements = useCallback(async (page?: number, limit?: number, search?: string, movementType?: string, all?: boolean) => {
         try {
             setLoading(true);
-            const response = await MovementTransactionService.getAllMovements();
+            const response = await MovementTransactionService.getAllMovements(page, limit, search, movementType, all);
             if (response.status === "Success") {
                 setMovements((response.data as MovementData[]) || []);
+                setMeta(all ? null : (response.meta || null));
+                return true;
             }
         } catch (error) {
             console.error("Fetch Movements Error:", error);
@@ -51,10 +56,10 @@ export const useMovementTransactions = () => {
             const response = await MovementTransactionService.getProductMovements(productId);
             if (response.status === "Success") {
                 console.log(response.data);
-                
+
                 setProductMovements((response.data as MovementData[]) || []);
                 console.log(productMovements);
-                
+
             }
         } catch (error) {
             console.error("Fetch Product Movements Error:", error);
@@ -73,7 +78,7 @@ export const useMovementTransactions = () => {
                 notify.success("Transaction completed successfully");
                 const newTransaction = response.data as TransactionData;
                 setTransactions((prev) => [newTransaction, ...prev]);
-                fetchMovements(); 
+                fetchMovements();
                 return true;
             }
         } catch (error) {
@@ -109,11 +114,12 @@ export const useMovementTransactions = () => {
     return {
         transactions,
         movements,
-        productMovements, 
+        productMovements,
+        meta,
         isLoading,
         fetchTransactions,
         fetchMovements,
-        fetchProductMovements, 
+        fetchProductMovements,
         createTransaction,
         updateCreditStatus
     };

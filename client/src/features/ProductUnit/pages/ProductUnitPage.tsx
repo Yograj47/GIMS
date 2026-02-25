@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ProductUnitModal } from "../components/ProductUnitModal";
 import type { ProductUnitFormData } from "@/types/ProductUnit";
 import { DataTable } from "@/components/common/DataTable";
-import { getProductColumns } from "../components/ProductUnitColumn";
+import { getProductUnitColumns } from "../components/ProductUnitColumn";
 
 export default function ProductUnitPage(){
     const {
@@ -79,7 +79,7 @@ export default function ProductUnitPage(){
 
             <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
                 <DataTable
-                    columns={getProductColumns((id, name) => {
+                    columns={getProductUnitColumns((id, name) => {
                         setContext({ id, name });
                         setIsModalOpen(true);
                     })}

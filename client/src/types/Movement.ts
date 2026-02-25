@@ -1,3 +1,5 @@
+import type { PaginationMetadata } from "./Unit";
+
 export type MovementData = {
   _id: string;
   productId: {
@@ -25,4 +27,5 @@ export type MovementData = {
 export interface MovementAPIResponse {
   status: string;
   data: MovementData[] | null;
+  meta?: PaginationMetadata
 }
