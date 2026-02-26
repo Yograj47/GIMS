@@ -81,7 +81,7 @@ export default function StockMovementReport() {
             </div>
 
             {/* The DataTable Component */}
-            <div className="flex-1 min-h-0 bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 <DataTable
                     columns={getMovementColumns}
                     data={movements || []}

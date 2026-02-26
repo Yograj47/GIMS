@@ -29,9 +29,9 @@ export type Item = z.infer<typeof itemSchema>;
 
 export type TransactionData = Omit<TransactionFormData, 'items'> & {
   _id: string;
-  items: Array<Omit<Item, 'productId' | 'unitId'> & {
-    productId: { _id: string; name: string };
-    unitId: { _id: string; name: string };
+  items: Array<Omit<Item, 'product' | 'unit'> & {
+    product: { _id: string; name: string };
+    unit: { _id: string; name: string };
   }>;
   createdAt: string;
   updatedAt: string;

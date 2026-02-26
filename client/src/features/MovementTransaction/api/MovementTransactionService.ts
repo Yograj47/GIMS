@@ -15,8 +15,14 @@ export const MovementTransactionService = {
     /**
      * Fetches all transactions (Sales, Purchases, Returns)
      */
-    getAllTransactions: async (): Promise<TransactionAPIResponse> => {
-        const { data } = await api.get<TransactionAPIResponse>("/transactions");
+    getAllTransactions: async (page: number = 1, limit: number = 10, search?: string, transactionType?: string, startDate?: string,
+        endDate?: string, all?: boolean): Promise<TransactionAPIResponse> => {
+        const typeFilter = transactionType === "All Types" ? "" : transactionType;
+        const { data } = await api.get<TransactionAPIResponse>("/transactions", {
+            params: all
+                ? { paginate: false, search, transactionType: typeFilter, startDate, endDate }
+                : { page, limit, search, transactionType: typeFilter, startDate, endDate }
+        });
         return data;
     },
 

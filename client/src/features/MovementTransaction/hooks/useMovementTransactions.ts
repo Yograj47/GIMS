@@ -15,10 +15,18 @@ export const useMovementTransactions = () => {
     const { isLoading, setLoading } = useGlobalStore();
 
     // 1. Fetch All Transactions
-    const fetchTransactions = useCallback(async () => {
+    const fetchTransactions = useCallback(async (
+        page: number = 1,
+        limit: number = 10,
+        search?: string,
+        transactionType?: string,
+        startDate?: string,
+        endDate?: string,
+        all?: boolean,
+    ) => {
         try {
             setLoading(true);
-            const response = await MovementTransactionService.getAllTransactions();
+            const response = await MovementTransactionService.getAllTransactions(page, limit, search, transactionType, startDate, endDate, all);
             if (response.status === "Success") {
                 setTransactions((response.data as TransactionData[]) || []);
 
