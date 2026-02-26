@@ -78,11 +78,120 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
  * @access Private
  */
 export const getAllTransactions = asyncHandler(async (req, res) => {
-    const transactions = await Transaction.find()
-        .populate("items.productId", "name")
-        .populate("items.unitId", "name symbol")
-        .sort({ createdAt: -1 });
-    res.status(200).json({ status: "Success", data: transactions });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const shouldPaginate = req.query.paginate !== 'false';
+
+    // Fix: Ensure empty strings or "All Types" result in null so the condition is skipped
+    const transactionType = (req.query.transactionType &&
+        req.query.transactionType !== 'All Types' &&
+        req.query.transactionType !== '')
+        ? req.query.transactionType
+        : null;
+
+    const conditions = [
+        ...(search ? [{
+            $or: [
+                { "partyDetails.name": { $regex: search, $options: 'i' } },
+                { "partyDetails.phone": { $regex: search, $options: 'i' } },
+                { "notes": { $regex: search, $options: 'i' } }
+            ]
+        }] : []),
+        ...(transactionType ? [{ transactionType }] : []),
+        ...(startDate && endDate ? [{
+            createdAt: {
+                $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+                $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+            }
+        }] : [])
+    ];
+
+    const pipeline = [
+        ...(conditions.length > 0 ? [{ $match: { $and: conditions } }] : []),
+
+        // 1. Join Products
+        {
+            $lookup: {
+                from: "products",
+                localField: "items.productId",
+                foreignField: "_id",
+                as: "productInfo"
+            }
+        },
+        // 2. Join Units
+        {
+            $lookup: {
+                from: "units",
+                localField: "items.unitId",
+                foreignField: "_id",
+                as: "unitInfo"
+            }
+        },
+        // 3. Map lookup results back into the items array to match TransactionData type
+        {
+            $addFields: {
+                items: {
+                    $map: {
+                        input: "$items",
+                        as: "item",
+                        in: {
+                            $mergeObjects: [
+                                "$$item",
+                                {
+                                    product: {
+                                        $arrayElemAt: [
+                                            { $filter: { input: "$productInfo", as: "p", cond: { $eq: ["$$p._id", "$$item.productId"] } } },
+                                            0
+                                        ]
+                                    },
+                                    unit: {
+                                        $arrayElemAt: [
+                                            { $filter: { input: "$unitInfo", as: "u", cond: { $eq: ["$$u._id", "$$item.unitId"] } } },
+                                            0
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        // Clean up temporary lookup arrays
+        { $project: { productInfo: 0, unitInfo: 0 } },
+        { $sort: { createdAt: -1 } }
+    ];
+
+    let results;
+    let totalItems;
+
+    if (shouldPaginate) {
+        const countPipeline = [...pipeline, { $count: "total" }];
+        const countResult = await Transaction.aggregate(countPipeline);
+        totalItems = countResult[0]?.total || 0;
+
+        pipeline.push({ $skip: (page - 1) * limit });
+        pipeline.push({ $limit: limit });
+    }
+
+    results = await Transaction.aggregate(pipeline);
+
+    res.status(200).json({
+        status: "Success",
+        data: results,
+        meta: shouldPaginate ? {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            itemsPerPage: limit
+        } : {
+            totalItems: results.length,
+            paginationDisabled: true
+        }
+    });
 });
 
 
@@ -90,10 +199,6 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
  * @desc Get all Stock Movements with Product, User, and Unit context
  * @route GET /api/v1/transactions/movements/
  * @access Private
- */
-/**
- * @desc    Get all stock movements with filtering and pagination
- * @route   GET /api/v1/movements
  */
 export const getMovements = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
