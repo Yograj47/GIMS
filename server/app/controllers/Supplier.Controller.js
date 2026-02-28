@@ -21,21 +21,44 @@ export const createSupplier = asyncHandler(async (req, res) => {
 })
 
 export const getSuppliers = asyncHandler(async (req, res) => {
-    const suppliers = await Supplier.find().sort({ name: 1 }).select('-__v');
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const shouldPaginate = req.query.paginate !== 'false';
 
-    const formattedSuppliers = suppliers.map(s => ({
-            _id: s._id,
-            name: s.name,
-            phone: s.phone,
-            email: s.email,
-            address: s.address,
-            notes: s.notes,
-            isActive: s.isActive
-    }));
+    const query = {
+        $or: [
+            {
+                name: { $regex: search, $options: 'i' }
+            },
+        ]
+    }
+
+
+    let itemsQuery = Supplier.find(query).sort({ name: 1 }).select('-__v');
+
+    if (shouldPaginate) {
+        itemsQuery = itemsQuery.skip((page - 1) * limit).limit(limit);
+    }
+
+    const [items, totalItems] = await Promise.all([
+        itemsQuery,
+        Supplier.countDocuments(query)
+    ])
 
     res.status(200).json({
         status: "Success",
-        data: formattedSuppliers
+        data: items,
+        meta: shouldPaginate ? {
+            totalItems,
+            itemsPerPage: items.length,
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+        } : {
+            totalItems,
+            itemsPerPage: items.length,
+            paginationDisabled: true
+        }
     });
 });
 
@@ -104,6 +127,64 @@ export const updateSupplier = asyncHandler(async (req, res) => {
     });
 
 })
+
+/**
+ * @desc    Assign multiple products to a supplier
+ * @route   PATCH /api/v1/suppliers/:id/assign-products
+ * @access  Private
+ */
+export const assignProductsToSupplier = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { productIds } = req.body; // Expects an array of IDs: ["id1", "id2"]
+
+    if (!productIds || !Array.isArray(productIds)) {
+        res.status(400);
+        throw new Error("Please provide an array of product IDs");
+    }
+
+    // Verify supplier existence
+    const supplier = await Supplier.findById(id);
+    if (!supplier) {
+        res.status(404);
+        throw new Error("Supplier not found");
+    }
+
+    const result = await Product.updateMany(
+        { _id: { $in: productIds } },
+        { $set: { supplierId: id } }
+    );
+
+    res.status(200).json({
+        status: "Success",
+        message: `${result.modifiedCount} products successfully linked to ${supplier.name}`,
+        modifiedCount: result.modifiedCount
+    });
+});
+
+/**
+ * @desc    Unassign a single product from its supplier
+ * @route   PATCH /api/v1/suppliers/unassign-product/:productId
+ * @access  Private
+ */
+export const unassignProduct = asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+
+    const product = await Product.findByIdAndUpdate(
+        productId,
+        { $unset: { supplierId: "" } }, // Removes the field entirely
+        { new: true }
+    );
+
+    if (!product) {
+        res.status(404);
+        throw new Error("Product not found");
+    }
+
+    res.status(200).json({
+        status: "Success",
+        message: "Product removed from supplier catalog"
+    });
+});
 
 /** 
  * @desc    Delete a supplier by its MongoDB ID
