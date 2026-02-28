@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { PaginationMetadata } from "./Unit";
 
 export const supplierSchema = z.object({
     name: z.string().min(1, "Supplier name cannot be empty").trim(),
@@ -26,4 +27,5 @@ export interface SupplierAPIResponse {
     data: SupplierData | SupplierData[];
     productData?: SupplierProduct[];
     message?: string;
+    meta?: PaginationMetadata
 }
