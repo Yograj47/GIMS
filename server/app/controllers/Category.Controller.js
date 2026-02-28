@@ -45,7 +45,7 @@ export const getCategories = asyncHandler(async (req, res) => {
         ]
     }
 
-    let itemsQuery = Category.find(query).sort({ createAt: -1 }).select('-__v');
+    let itemsQuery = Category.find(query).sort({ createdAt: -1 }).select('-__v');
 
     if (shouldPaginate) {
         itemsQuery = itemsQuery.skip((page - 1) * limit).limit(limit);

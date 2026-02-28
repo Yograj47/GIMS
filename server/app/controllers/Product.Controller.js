@@ -67,43 +67,104 @@ export const createProduct = asyncHandler(async (req, res) => {
  * @route   GET /api/v1/products
  * @access  Private
  */
+/**
+ * @desc    Get all products with Advanced Filtering
+ * @route   GET /api/v1/products
+ * @access  Private
+ */
 export const getProducts = asyncHandler(async (req, res) => {
-    const products = await Product.find()
-        .populate({
-            path: "categoryId",
-            select: "name"
-        })
-        .populate({
-            path: "unitId",
-            select: "name shortForm"
-        })
-        .populate({
-            path: "supplierId",
-            select: "name"
-        })
-        .lean();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const shouldPaginate = req.query.paginate !== 'false';
 
-    const response = products.map(p => ({
-        _id: p._id,
-        name: p.name,
-        quantity: p.quantity,
-        threshold: p.threshold,
-        basePrice: p.basePrice,
-        sellingPrice: p.sellingPrice,
-        category: p.categoryId,
-        unit: p.unitId,
-        supplier: p.supplierId,
-        isActive: p.isActive,
-        createdAt: p.createdAt
-    }))
+    const stockLevel = (req.query.stockLevel &&
+        req.query.stockLevel !== 'All Levels' &&
+        req.query.stockLevel !== '')
+        ? req.query.stockLevel
+        : null;
 
+    // 1. Define Filter Conditions
+    const conditions = [
+        ...(search ? [{
+            name: { $regex: search, $options: 'i' }
+        }] : []),
+        ...(stockLevel === "Low Stock" ? [{
+            $expr: { $lte: ["$quantity", "$threshold"] }
+        }] : []),
+        ...(stockLevel === "Healthy" ? [{
+            $expr: { $gt: ["$quantity", "$threshold"] }
+        }] : [])
+    ];
+
+    // 2. Build Pipeline
+    const pipeline = [
+        ...(conditions.length > 0 ? [{ $match: { $and: conditions } }] : []),
+        {
+            $lookup: {
+                from: "categories",
+                localField: "categoryId",
+                foreignField: "_id",
+                as: "category"
+            }
+        },
+        { $unwind: "$category" },
+        {
+            $lookup: {
+                from: "units",
+                localField: "unitId",
+                foreignField: "_id",
+                as: "unit"
+            }
+        },
+        { $unwind: "$unit" },
+        {
+            $project: {
+                _id: 1,
+                name: 1,
+                quantity: 1,
+                threshold: 1,
+                basePrice: 1,
+                sellingPrice: 1,
+                isActive: 1,
+                createdAt: 1,
+                category: { _id: "$category._id", name: "$category.name" },
+                unit: { _id: "$unit._id", name: "$unit.name", shortForm: "$unit.shortForm" }
+            }
+        },
+        { $sort: { createdAt: -1 } }
+    ];
+
+    // 3. Handle Pagination
+    let results;
+    let totalItems;
+
+    if (shouldPaginate) {
+        const countResult = await Product.aggregate([...pipeline, { $count: "total" }]);
+        totalItems = countResult[0]?.total || 0;
+
+        pipeline.push({ $skip: (page - 1) * limit });
+        pipeline.push({ $limit: limit });
+    }
+
+    results = await Product.aggregate(pipeline);
+
+    // 4. Return Theme-Consistent Response
     res.status(200).json({
         status: "Success",
-        data: response
-    })
+        data: results,
+        meta: shouldPaginate ? {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            itemsPerPage: limit
+        } : {
+            totalItems: results.length,
+            paginationDisabled: true
+        }
+    });
+});
 
-
-})
 
 /**
  * @desc Get product by id

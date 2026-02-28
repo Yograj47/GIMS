@@ -251,7 +251,7 @@ export const getMovements = asyncHandler(async (req, res) => {
                 newQuantity: 1,
                 reason: 1,
                 createdAt: 1,
-                productId: { _id: "$product._id", name: "$product.name" },
+                product: { _id: "$product._id", name: "$product.name" },
                 performedBy: { _id: "$user._id", name: "$user.name" }
             }
         },
@@ -326,18 +326,85 @@ export const updateCreditStatus = asyncHandler(async (req, res) => {
  * @desc Get movement history + current stock of products
  * @route GET /api/v1/transactions/movements/product-history/:productId
  * @access Private
- * Note: This endpoint retrieves the complete movement history of a specific product, including the user who performed each movement, the unit involved, and the old/new stock levels. This is crucial for inventory tracking and auditing purposes.
  */
 export const getProductMovements = asyncHandler(async (req, res) => {
     const { productId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const shouldPaginate = req.query.paginate !== 'false';
 
-    const movements = await Movement.find({ productId })
-        .populate("performedBy", "name")
-        .populate("unitId", "name")
-        .sort({ createdAt: -1 });
+    const pipeline = [
+        { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+        
+        {
+            $lookup: {
+                from: "products",
+                localField: "productId",
+                foreignField: "_id",
+                as: "product"
+            }
+        },
+        { $unwind: "$product" },
 
-    console.log(movements);
+        {
+            $lookup: {
+                from: "users",
+                localField: "performedBy",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
 
+        {
+            $project: {
+                _id: 1,
+                movementType: 1,
+                quantity: 1,
+                oldQuantity: 1,
+                newQuantity: 1,
+                reason: 1,
+                createdAt: 1,
+                product: { 
+                    _id: "$product._id", 
+                    name: "$product.name" 
+                },
+                performedBy: { 
+                    _id: "$user._id", 
+                    name: "$user.name" 
+                }
+            }
+        },
+        { $sort: { createdAt: -1 } }
+    ];
 
-    res.status(200).json({ status: "Success", data: movements });
+    let results;
+    let totalItems;
+
+    if (shouldPaginate) {
+        const countResult = await Movement.aggregate([
+            { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+            { $count: "total" }
+        ]);
+        totalItems = countResult[0]?.total || 0;
+
+        pipeline.push({ $skip: (page - 1) * limit });
+        pipeline.push({ $limit: limit });
+    }
+
+    results = await Movement.aggregate(pipeline);
+
+    res.status(200).json({
+        status: "Success",
+        data: results,
+        meta: shouldPaginate ? {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            itemsPerPage: limit
+        } : {
+            totalItems: results.length,
+            paginationDisabled: true
+        }
+    });
 });
