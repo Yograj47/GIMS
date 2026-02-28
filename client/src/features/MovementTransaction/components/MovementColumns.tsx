@@ -13,12 +13,12 @@ export const getMovementColumns: ColumnDef<any>[] = [
         ),
     },
     {
-        accessorKey: "productId.name",
+        accessorKey: "product.name",
         header: "Personnel / Product",
         cell: ({ row }) => (
             <div className="flex flex-col">
                 <span className="font-black text-slate-800 uppercase tracking-tight">
-                    {row.original.productId?.name || "Unknown Product"}
+                    {row.original.product?.name || "Unknown Product"}
                 </span>
                 <span className="text-[10px] font-bold text-slate-400 italic">
                     {row.original.reason}

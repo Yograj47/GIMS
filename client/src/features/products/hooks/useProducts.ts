@@ -3,19 +3,23 @@ import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
 import { productService } from '../api/ProductService';
 import type { ProductData, ProductFormData } from '@/types/Product';
+import type { PaginationMetadata } from '@/types/Unit';
 
 export const useProducts = () => {
     const [products, setProducts] = useState<ProductData[]>([]);
     const [singleProduct, setSingleProduct] = useState<ProductData | null>(null);
     const { setLoading, isLoading } = useGlobalStore();
+    const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
     // 1. Fetch All Products
-    const fetchProducts = useCallback(async () => {
+    const fetchProducts = useCallback(async (page?: number, limit?: number, search?: string, stockLevel?: string, all?: boolean) => {
         try {
             setLoading(true);
-            const response = await productService.getAll();
+            const response = await productService.getAll(page, limit, search, stockLevel, all);
             if (response.status === "Success") {
                 setProducts(response.data as ProductData[]);
+                setMeta(all ? null : (response.meta || null));
+                return true;
             }
         } catch (error: any) {
             // the error notification happens automatically!
@@ -93,6 +97,7 @@ export const useProducts = () => {
         fetchProductById,
         addProduct,
         updateProduct,
-        removeProduct
+        removeProduct,
+        meta
     };
 };

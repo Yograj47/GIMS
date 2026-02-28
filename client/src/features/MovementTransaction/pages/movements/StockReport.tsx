@@ -1,146 +1,113 @@
-import { Search, Download, ChevronLeft, ChevronRight, Package, History } from "lucide-react";
+import { Search, Download, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/features/products/hooks/useProducts";
-import { Loading } from "@/lib/loader";
-import { useNavigate } from "react-router-dom"; // Assuming you use react-router
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { DataTable } from "@/components/common/DataTable";
+import { getStockColumns } from "../../components/StockColumns";
+import { cn } from "@/lib/utils";
 
 export default function StockReport() {
-    const { fetchProducts, products, isLoading } = useProducts();
+    const { fetchProducts, products, isLoading, meta } = useProducts();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [stockLevel, setStockLevel] = useState<string>("All Levels");
     const navigate = useNavigate();
 
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+
     useEffect(() => {
-        fetchProducts();
-    }, [fetchProducts]);
+        // Normalize "All Levels" for the API call
+        const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
+        fetchProducts(
+            pagination.pageIndex + 1,
+            pagination.pageSize,
+            searchQuery,
+            levelFilter
+        );
+    }, [fetchProducts, pagination, searchQuery, stockLevel]);
+
+    console.log(products);
+    
+
+    const columns = useMemo(() => getStockColumns(navigate), [navigate]);
 
     return (
         <div className="min-h-full space-y-6 animate-in fade-in duration-500 pb-10">
             {/* Header Section */}
             <div className="flex justify-between items-end">
                 <div className="space-y-1">
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">Stock Report</h1>
-                    <p className="text-sm font-medium text-slate-500 italic">Comprehensive view of current inventory status</p>
+                    <h1 className="text-2xl font-black text-slate-800 tracking-tight uppercase">
+                        Stock Report<span className="text-indigo-600">.</span>
+                    </h1>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        Comprehensive view of current inventory status
+                    </p>
                 </div>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-sm transition-all">
-                    <Download size={16} /> Export Report
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-lg shadow-indigo-100 transition-all">
+                    <Download size={16} /> Export CSV
                 </Button>
             </div>
 
-            {/* Filter Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Search Product</label>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <Input placeholder="Search products..." className="pl-9 h-10 bg-slate-50/50 border-slate-200 rounded-xl text-sm focus-visible:ring-indigo-500" />
+            {/* Filter Bar - Theme Consistent Pattern */}
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                {/* Search Group */}
+                <div className="relative flex-1 w-full">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <Input
+                        placeholder="SEARCH PRODUCTS..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-12 h-12 border-none bg-transparent font-bold text-xs tracking-widest focus-visible:ring-0 shadow-none placeholder:text-slate-400 uppercase"
+                    />
+                </div>
+                
+                <div className="hidden md:block h-8 w-px bg-slate-200" />
+                
+                {/* Properly Styled Select Group */}
+                <div className="relative w-full md:w-64 px-2">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Filter size={16} className="text-indigo-500" />
                     </div>
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Category</label>
-                    <select className="w-full h-10 bg-slate-50/50 border border-slate-200 rounded-xl px-3 text-sm font-medium text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/20">
-                        <option>All Categories</option>
+                    
+                    <select 
+                        value={stockLevel}
+                        onChange={(e) => setStockLevel(e.target.value)}
+                        className={cn(
+                            "w-full h-12 pl-10 pr-10 bg-slate-50/50 border border-transparent",
+                            "rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-700",
+                            "appearance-none cursor-pointer outline-none transition-all",
+                            "hover:bg-slate-100 focus:border-indigo-100"
+                        )}
+                    >
+                        <option value="All Levels">ALL LEVELS</option>
+                        <option value="Low Stock">LOW STOCK</option>
+                        <option value="Healthy">HEALTHY STOCK</option>
                     </select>
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Stock Status</label>
-                    <select className="w-full h-10 bg-slate-50/50 border border-slate-200 rounded-xl px-3 text-sm font-medium text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/20">
-                        <option>All Items</option>
-                        <option>Low Stock</option>
-                        <option>Healthy</option>
-                    </select>
+
+                    {/* Custom Chevron Arrow */}
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
-            {/* Stock Table */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                            <th className="px-6 py-4">Product</th>
-                            <th className="px-6 py-4 text-center">Category</th>
-                            <th className="px-6 py-4 text-center">Current Stock</th>
-                            <th className="px-6 py-4 text-center">Threshold</th>
-                            <th className="px-6 py-4 text-right">Status</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={6} className="py-20 text-center"><Loading /></td>
-                            </tr>
-                        ) : products.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="py-10 text-center text-slate-400 text-sm">No products found</td>
-                            </tr>
-                        ) : (
-                            products.map((product) => (
-                                <tr key={product._id} className="group hover:bg-slate-50/30 transition-colors">
-                                    <td className="px-6 py-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                                <Package size={16} />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-700">{product.name}</span>
-                                                <span className="text-[10px] text-slate-400 uppercase font-bold">{product.unit?.name}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-5 text-center">
-                                        <Badge variant="outline" className="rounded-lg border-slate-200 text-slate-500 font-bold text-[10px]">
-                                            {product.category?.name}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 py-5 text-center text-sm font-black text-slate-900">
-                                        {product.quantity}
-                                    </td>
-                                    <td className="px-6 py-5 text-center text-sm font-bold text-slate-400">
-                                        {product.threshold}
-                                    </td>
-                                    <td className="px-6 py-5 text-right">
-                                        {product.quantity <= product.threshold ? (
-                                            <span className="inline-flex items-center gap-1.5 text-rose-500 text-[10px] font-black uppercase">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                                                Low Stock
-                                            </span>
-                                        ) : (
-                                            <span className="text-emerald-500 text-[10px] font-black uppercase">Healthy</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-5 text-right">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
-                                            className="h-8 px-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 gap-1 font-bold text-[10px] uppercase"
-                                            onClick={() => navigate(`/reports/stock/product-history/${product._id}`)}
-                                        >
-                                            <History size={14} /> View History
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-
-                {/* Pagination Footer */}
-                <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Total Products: {products.length}
-                    </span>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="h-9 w-9 rounded-xl border-slate-200 p-0 text-slate-400" disabled>
-                            <ChevronLeft size={18} />
-                        </Button>
-                        <Button size="sm" className="h-9 w-9 rounded-xl bg-indigo-600 text-white font-black text-xs shadow-md shadow-indigo-100">1</Button>
-                        <Button variant="outline" size="sm" className="h-9 w-9 rounded-xl border-slate-200 p-0 text-slate-600">
-                            <ChevronRight size={18} />
-                        </Button>
-                    </div>
-                </div>
+            {/* The DataTable Component */}
+            <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                <DataTable
+                    columns={columns}
+                    data={products || []}
+                    rowCount={meta?.totalItems || 0}
+                    pageCount={meta?.totalPages || 0}
+                    pagination={pagination}
+                    setPagination={setPagination}
+                    isLoading={isLoading}
+                />
             </div>
         </div>
     );

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { PaginationMetadata } from "./Unit";
 
 // 1. Zod Schema for Form Validation (Data going TO backend)
 export const productSchema = z.object({
@@ -37,4 +38,5 @@ export interface ProductData {
 export interface ProductAPIResponse {
     status: string; 
     data: ProductData | ProductData[]; 
+    meta?: PaginationMetadata;
 }

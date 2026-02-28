@@ -32,6 +32,9 @@ export default function Transaction() {
 
     const columns = useMemo(() => getTransactionColumns(navigate), [navigate]);
 
+    console.log(meta);
+    
+
     return (
         <div className="min-h-full space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-end">
@@ -39,7 +42,7 @@ export default function Transaction() {
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">Transaction List</h1>
                     <p className="text-sm font-medium text-slate-500 italic">History of all stock-related financial records</p>
                 </div>
-                <Button variant="outline" className="rounded-xl font-bold text-xs border-slate-200 text-slate-600">
+                <Button variant="outline" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-sm transition-all">
                     Export PDF
                 </Button>
             </div>
@@ -89,8 +92,8 @@ export default function Transaction() {
                 <DataTable
                     columns={columns} 
                     data={transactions || []}
-                    rowCount={meta?.totalItems || 0}
                     pageCount={meta?.totalPages || 0}
+                    rowCount={meta?.totalItems || 0}
                     pagination={pagination}
                     setPagination={setPagination}
                     isLoading={isLoading}

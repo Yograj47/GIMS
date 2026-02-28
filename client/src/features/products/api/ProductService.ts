@@ -2,8 +2,12 @@ import api from "@/lib/api";
 import type { ProductAPIResponse, ProductFormData } from "@/types/Product";
 
 export const productService = {
-    getAll: async () => {
-        const { data } = await api.get<ProductAPIResponse>("/products");
+    getAll: async (page?: number, limit?: number, search?: string, stockLevel?: string, all?: boolean) => {
+        const { data } = await api.get<ProductAPIResponse>("/products", {
+            params: all
+                ? { paginate: false, search, stockLevel }
+                : { page, limit, search, stockLevel }
+        });
         return data;
     },
 

@@ -58,6 +58,9 @@ export function DataTable<TData>({
         getRowCanExpand: () => !!renderExpandedRow
     })
 
+    console.log(rowCount);
+    
+
     return (
         <div className="flex flex-col h-full min-h-0">
             {/* Table Container - Rounded with a more subtle border and soft shadow */}

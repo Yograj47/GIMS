@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { PaginationMetadata } from './Unit';
 
 const itemSchema = z.object({
   productName: z.string().optional(),
@@ -41,6 +42,7 @@ export interface TransactionAPIResponse {
   status: string;
   data: TransactionData | TransactionData[] | null;
   message?: string;
+  meta?: PaginationMetadata
 }
 
 export const creditTransactionSchema = z.object({

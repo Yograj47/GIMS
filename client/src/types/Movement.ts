@@ -2,7 +2,7 @@ import type { PaginationMetadata } from "./Unit";
 
 export type MovementData = {
   _id: string;
-  productId: {
+  product: {
     _id: string;
     name: string
   };
@@ -11,7 +11,7 @@ export type MovementData = {
     _id: string;
     name: string
   };
-  unitId?: {
+  unit?: {
     _id: string;
     name: string;
   };

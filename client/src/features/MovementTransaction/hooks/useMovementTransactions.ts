@@ -29,7 +29,8 @@ export const useMovementTransactions = () => {
             const response = await MovementTransactionService.getAllTransactions(page, limit, search, transactionType, startDate, endDate, all);
             if (response.status === "Success") {
                 setTransactions((response.data as TransactionData[]) || []);
-
+                setMeta(all ? null : (response.meta || null));
+                return true;
             }
         } catch (error) {
             console.error("Fetch Transactions Error:", error);
@@ -58,15 +59,15 @@ export const useMovementTransactions = () => {
     }, [setLoading]);
 
     // 3. Fetch Movements for a Specific Product (Audit Trail)
-    const fetchProductMovements = useCallback(async (productId: string) => {
+    const fetchProductMovements = useCallback(async (productId: string, page: number = 1,
+        limit: number = 10, all?: boolean) => {
         try {
             setLoading(true);
-            const response = await MovementTransactionService.getProductMovements(productId);
+            const response = await MovementTransactionService.getProductMovements(productId, page, limit, all);
             if (response.status === "Success") {
-                console.log(response.data);
-
                 setProductMovements((response.data as MovementData[]) || []);
-                console.log(productMovements);
+                setMeta(all ? null : (response.meta || null));
+                return true;
 
             }
         } catch (error) {

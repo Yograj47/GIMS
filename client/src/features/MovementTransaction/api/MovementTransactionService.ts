@@ -59,8 +59,12 @@ export const MovementTransactionService = {
     /**
      * Fetches movements for a specific product (Useful for product audit pages)
      */
-    getProductMovements: async (productId: string): Promise<MovementAPIResponse> => {
-        const { data } = await api.get<MovementAPIResponse>(`/movements/product-history/${productId}`);
+    getProductMovements: async (productId: string, page: number = 1,
+        limit: number = 10, all?: boolean): Promise<MovementAPIResponse> => {
+        const { data } = await api.get<MovementAPIResponse>(`/movements/product-history/${productId}`, {
+            params: all
+                ? { paginate: false, productId } : { productId, page, limit }
+        });
         return data;
     }
 };
