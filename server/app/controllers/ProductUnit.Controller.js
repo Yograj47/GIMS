@@ -1,5 +1,6 @@
 import ProductUnit from '../models/ProductUnit.Model.js';
 import asyncHandler from 'express-async-handler';
+import { createLog } from "../config/Logger.js"
 
 /**
  * @desc    Get all product-unit conversions grouped by product
@@ -101,6 +102,14 @@ export const createProductUnit = asyncHandler(async (req, res) => {
 
     const newUnit = await ProductUnit.create(req.body);
 
+    // LOG: Conversion Creation
+    await createLog(
+        req.user.id,
+        "CREATE",
+        "INVENTORY_CONFIG",
+        `Added new unit conversion (Multiplier: ${newUnit.multiplier}) for Product ID: ${productId}`
+    );
+
     res.status(201).json({
         status: "Success",
         message: "Product unit created successfully",
@@ -113,7 +122,7 @@ export const createProductUnit = asyncHandler(async (req, res) => {
  */
 export const updateProductUnit = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { isDefault, productId } = req.body;
+    const { isDefault } = req.body;
 
     // 1. Safety: If updating to default, remove other defaults first
     if (isDefault) {
@@ -133,6 +142,14 @@ export const updateProductUnit = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Conversion not found");
     }
+
+    // LOG: Conversion Update
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "INVENTORY_CONFIG",
+        `Updated unit conversion parameters for Product ID: ${currentUnit.productId}`
+    );
 
     res.status(200).json({ status: "Success", data: updated });
 });
@@ -158,6 +175,14 @@ export const deleteProductUnit = asyncHandler(async (req, res) => {
     }
 
     await ProductUnit.findByIdAndDelete(id);
+
+    // LOG: Conversion Deletion
+    await createLog(
+        req.user.id,
+        "DELETE",
+        "INVENTORY_CONFIG",
+        `Removed unit conversion (Multiplier: ${productUnit.multiplier}) from Product ID: ${productUnit.productId}`
+    );
 
     res.status(200).json({
         status: "Success",

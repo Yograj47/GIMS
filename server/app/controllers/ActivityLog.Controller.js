@@ -1,40 +1,63 @@
+import ActivityLog from "../models/ActivityLog.Model.js";
 import asyncHandler from "express-async-handler";
-import { activityLogSchema } from "../validation/ActivityLog.validation.js"
-import ActivityLog from "../models/ActivityLog.Model.js"
 
 /**
- * @desc    Create Activity Log (System/Internal Use)
- * @route   POST /api/v1/activity-logs
- * @access  Private
- */
-export const createActivityLog = asyncHandler(async (req, res) => {
-    const validatedData = activityLogSchema.parse(req.body);
-
-    const log = await ActivityLog.create(validatedData);
-
-    res.status(201).json({
-        status: "success",
-        data: log
-    });
-});
-
-
-/**
- * @desc    Get All Activity Logs
+ * @desc    Get all activity logs with standardized pagination & search
  * @route   GET /api/v1/activity-logs
- * @access  Private (Admin / Owner recommended)
+ * @access  Private/Admin
  */
 export const getActivityLogs = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 100, search = '', type, startDate, endDate, paginate } = req.query;
+    const shouldPaginate = paginate !== 'false';
 
-    const logs = await ActivityLog
-        .find()
-        .populate("performedBy", "name email role")
-        .sort({ timestamp: -1 })
-        .select("-__v");
+    // 1. Build Query Object
+    const query = {};
+
+    // Search Logic
+    if (search) {
+        query.$or = [
+            { message: { $regex: search, $options: 'i' } },
+            { action: { $regex: search, $options: 'i' } },
+        ];
+    }
+
+    // Type Logic (Supports single or multiple types)
+    if (type) {
+        const typeArray = type.split(',');
+        query.type = { $in: typeArray };
+    }
+
+    // Date Range Logic
+    if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) query.createdAt.$gte = new Date(new Date(startDate).setHours(0, 0, 0, 0));
+        if (endDate) query.createdAt.$lte = new Date(new Date(endDate).setHours(23, 59, 59, 999));
+    }
+
+    // 2. Execute Query
+    let itemsQuery = ActivityLog.find(query)
+        .populate("performedBy", "name role") // Just get what's needed for the UI badge
+        .sort({ createdAt: -1 })
+        .lean(); // Use lean() for faster read-only BI queries
+
+    if (shouldPaginate) {
+        itemsQuery = itemsQuery.skip((parseInt(page) - 1) * parseInt(limit)).limit(parseInt(limit));
+    }
+
+    const [items, totalItems] = await Promise.all([
+        itemsQuery,
+        ActivityLog.countDocuments(query)
+    ]);
 
     res.status(200).json({
-        status: "success",
-        results: logs.length,
-        data: logs
+        status: "Success",
+        data: items,
+        meta: {
+            totalItems,
+            ...(shouldPaginate && {
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: parseInt(page)
+            })
+        }
     });
 });

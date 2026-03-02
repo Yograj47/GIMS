@@ -1,6 +1,6 @@
 import Alert from "../models/Alert.Model.js";
 import User from "../models/User.Model.js"
-import transporter from "../config/emailConfig.js";
+import transporter from "./emailConfig.js";
 
 export const processProductAlert = async (product, userId) => {
     const { _id, name, quantity, threshold} = product;

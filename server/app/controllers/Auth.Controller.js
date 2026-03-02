@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
 import { registerSchema, loginSchema, resetPasswordSchema } from "../validation/User.validation.js";
+import { createLog } from "../config/Logger.js";
 
 /**
  * @desc Register User
@@ -51,6 +52,13 @@ export const registerUser = asyncHandler(async (req, res) => {
         console.error("Email error:", err.message);
     }
 
+    await createLog(
+        user._id,
+        "CREATE",
+        "AUTH",
+        `New user account registered: ${user.name}`
+    );
+
     res.status(201).json({
         status: "Success",
         message: "User registered successfully"
@@ -79,6 +87,13 @@ export const loginUser = asyncHandler(async (req, res) => {
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 30 * 24 * 60 * 60 * 1000
     });
+
+    await createLog(
+        user._id,
+        "LOGIN",
+        "AUTH",
+        `User logged in successfully`
+    );
 
     res.status(200).json({
         status: "Success",
@@ -142,6 +157,13 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     user.verifyOptExpiryAt = 0;
     await user.save();
 
+    await createLog(
+        user._id,
+        "UPDATE",
+        "AUTH",
+        "Email address verified via OTP"
+    );
+
     res.status(200).json({ status: "Success", message: "Email verified successfully" });
 });
 
@@ -150,10 +172,21 @@ export const verifyEmail = asyncHandler(async (req, res) => {
  * @desc Logout User
  */
 export const logoutUser = asyncHandler(async (req, res) => {
+
+    if (req.user) {
+        await createLog(
+            req.user.id,
+            "LOGOUT",
+            "AUTH",
+            "User successfully ended their session"
+        );
+    }
+
     res.cookie("token", "", {
         httpOnly: true,
         expires: new Date(0),
     });
+
     res.status(200).json({ status: "Success", message: "Logged out successfully" });
 });
 
@@ -210,6 +243,13 @@ export const resetPassword = asyncHandler(async (req, res) => {
     user.resetOptExpiryAt = 0;
     await user.save();
 
+    await createLog(
+        user._id,
+        "UPDATE",
+        "AUTH",
+        "Password reset successfully using OTP"
+    );
+
     res.status(200).json({ status: "Success", message: "Password reset successfully" });
 });
 
@@ -233,6 +273,13 @@ export const updateRole = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("User not found");
     }
+
+    await createLog(
+        req.user.id, // The Admin who performed the action
+        "UPDATE",
+        "AUTH",
+        `Changed role of user ${user.name} to ${role}`
+    );
 
     res.status(200).json({
         status: "Success",

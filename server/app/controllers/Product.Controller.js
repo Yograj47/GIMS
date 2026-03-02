@@ -4,6 +4,8 @@ import Category from "../models/Category.Model.js"
 import Unit from "../models/Unit.Model.js"
 import { productSchema } from "../validation/Product.validation.js"
 import ProductUnit from "../models/ProductUnit.Model.js";
+import { createLog } from "../config/Logger.js"
+
 
 /** 
  * @desc    Create new product
@@ -55,6 +57,14 @@ export const createProduct = asyncHandler(async (req, res) => {
         isActive: true
     });
 
+    // LOG: Product Entry
+    await createLog(
+        req.user.id,
+        "CREATE",
+        "INVENTORY",
+        `Cataloged new product: ${name} with initial stock of ${product.quantity}`
+    );
+
     res.status(201).json({
         status: "Success",
         data: product
@@ -62,11 +72,6 @@ export const createProduct = asyncHandler(async (req, res) => {
 });
 
 
-/**
- * @desc    Get all the products
- * @route   GET /api/v1/products
- * @access  Private
- */
 /**
  * @desc    Get all products with Advanced Filtering
  * @route   GET /api/v1/products
@@ -228,6 +233,14 @@ export const UpdateProductById = asyncHandler(async (req, res) => {
         { new: true, runValidators: true }
     ).lean();
 
+    // LOG: Product Modification
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "INVENTORY",
+        `Modified product specifications for: ${updatedProduct.name} (Stock: ${updatedProduct.quantity})`
+    );
+
     res.status(200).json({
         status: "Success",
         data: updatedProduct
@@ -249,6 +262,14 @@ export const deleteProductById = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Product not found");
     }
+
+    // LOG: Product Removal
+    await createLog(
+        req.user.id,
+        "DELETE",
+        "INVENTORY",
+        `Permanently purged product from catalog: ${product.name}`
+    );
 
     res.status(200).json({
         status: "Success",

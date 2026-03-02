@@ -2,6 +2,7 @@ import Category from '../models/Category.Model.js';
 import Product from '../models/Product.Model.js';
 import asyncHandler from 'express-async-handler';
 import { categorySchema } from '../validation/Category.validation.js';
+import { createLog } from "../config/Logger.js";
 
 /**
  * @desc    Create a new category
@@ -21,6 +22,14 @@ export const createCategory = asyncHandler(async (req, res) => {
     }
 
     const createdCategory = await Category.create(validatedData);
+
+    // LOG: Category Creation
+    await createLog(
+        req.user.id,
+        "CREATE",
+        "CATEGORY",
+        `Created new product category: ${createdCategory.name}`
+    );
 
     res.status(201).json({
         status: "Success",
@@ -110,6 +119,14 @@ export const updateCategory = asyncHandler(async (req, res) => {
         throw new Error('Category not found');
     }
 
+    // LOG: Category Update
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "CATEGORY",
+        `Renamed/Modified category: ${updatedCategory.name}`
+    );
+
     res.status(200).json({
         status: "Success",
         message: "Category updated successfully",
@@ -142,6 +159,14 @@ export const deleteCategory = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Category not found');
     }
+
+    // LOG: Category Deletion
+    await createLog(
+        req.user.id,
+        "DELETE",
+        "CATEGORY",
+        `Deleted category: ${category.name}`
+    );
 
     res.status(200).json({
         status: "Success",

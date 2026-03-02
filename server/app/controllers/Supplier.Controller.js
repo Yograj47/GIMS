@@ -2,6 +2,7 @@ import Supplier from "../models/Supplier.Model.js";
 import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
 import { supplierSchema } from "../validation/Supplier.validation.js";
+import { createLog } from "../config/Logger.js";
 
 /**
  * @desc    Create a new supplier
@@ -14,12 +15,23 @@ export const createSupplier = asyncHandler(async (req, res) => {
 
     const supplier = await Supplier.create(validatedData);
 
+    // LOG: Supplier Creation
+    await createLog(
+        req.user.id,
+        "CREATE",
+        "SUPPLIER",
+        `Registered new supplier: ${supplier.name}`
+    );
+
     res.status(201).json({
         status: "success",
         data: supplier
     });
 })
 
+/**
+ * @desc    Get all suppliers (Standard pagination)
+ */
 export const getSuppliers = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -121,6 +133,14 @@ export const updateSupplier = asyncHandler(async (req, res) => {
         throw new Error("Supplier not found");
     }
 
+    // LOG: Supplier Update
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "SUPPLIER",
+        `Updated information for supplier: ${supplier.name}`
+    );
+
     res.status(200).json({
         status: "Success",
         data: supplier
@@ -154,6 +174,14 @@ export const assignProductsToSupplier = asyncHandler(async (req, res) => {
         { $set: { supplierId: id } }
     );
 
+    // LOG: Bulk Assignment
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "SUPPLIER",
+        `Linked ${result.modifiedCount} products to supplier: ${supplier.name}`
+    );
+
     res.status(200).json({
         status: "Success",
         message: `${result.modifiedCount} products successfully linked to ${supplier.name}`,
@@ -180,6 +208,14 @@ export const unassignProduct = asyncHandler(async (req, res) => {
         throw new Error("Product not found");
     }
 
+    // LOG: Product Unassignment
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "SUPPLIER",
+        `Removed product "${product.name}" from its supplier catalog`
+    );
+
     res.status(200).json({
         status: "Success",
         message: "Product removed from supplier catalog"
@@ -198,6 +234,14 @@ export const deleteSupplier = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Supplier not found");
     }
+
+    // LOG: Supplier Deletion
+    await createLog(
+        req.user.id,
+        "DELETE",
+        "SUPPLIER",
+        `Permanently removed supplier: ${supplier.name}`
+    );
 
     res.status(200).json({
         status: "Success",

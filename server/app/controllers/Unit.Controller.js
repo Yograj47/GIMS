@@ -2,6 +2,7 @@ import Unit from '../models/Unit.Model.js';
 import Product from '../models/Product.Model.js';
 import asyncHandler from 'express-async-handler';
 import { unitSchema } from '../validation/Unit.validation.js';
+import { createLog } from "../config/Logger.js"
 
 /**
  * @desc    Create a new measurement unit
@@ -26,6 +27,14 @@ export const createUnit = asyncHandler(async (req, res) => {
     }
 
     const unit = await Unit.create(validatedData);
+
+    // LOG: Unit Creation
+    await createLog(
+        req.user.id,
+        "CREATE",
+        "UNIT",
+        `Created new unit: ${unit.name} (${unit.shortForm})`
+    );
 
     res.status(201).json({
         status: "Success",
@@ -121,6 +130,14 @@ export const updateUnitById = asyncHandler(async (req, res) => {
         throw new Error("Unit not found");
     }
 
+    // LOG: Unit Update
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "UNIT",
+        `Updated details for unit: ${updatedUnit.name}`
+    );
+
     res.status(200).json({
         status: "Success",
         data: updatedUnit
@@ -150,9 +167,17 @@ export const deleteUnitById = asyncHandler(async (req, res) => {
     unit.isActive = false;
     await unit.save();
 
+    // LOG: Unit Deactivation
+    await createLog(
+        req.user.id,
+        "DELETE",
+        "UNIT",
+        `Deleted unit: ${unit.name}`
+    );
+
     res.status(200).json({
         status: "Success",
-        message: "Unit deactivated successfully"
+        message: "Unit deleted successfully"
     });
 });
 

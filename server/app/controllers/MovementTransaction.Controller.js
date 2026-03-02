@@ -4,7 +4,8 @@ import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
 import { transactionSchema } from "../validation/Transaction.validation.js";
-import { processProductAlert } from "../service/Alert.Service.js";
+import { processProductAlert } from "../config/Alert.js";
+import { createLog } from "../config/Logger.js"
 
 /**
  * @desc Create a unified transaction (Purchase, Sale, Return) with automatic stock movement
@@ -67,6 +68,14 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
 
         await session.commitTransaction();
         session.endSession();
+
+        // Log the financial event for BI Dashboard
+        await createLog(
+            req.user.id,
+            "TRANSACTION",
+            "FINANCE",
+            `Processed ${validateResult.transactionType} of ${validateResult.items.length} items. Total: ${validateResult.grandTotal}`
+        );
 
         Promise.all(productsToAlert.map(p => processProductAlert(p, req.user.id)))
             .catch(err => console.error("Alert Processing Error", err));
@@ -323,6 +332,14 @@ export const updateCreditStatus = asyncHandler(async (req, res) => {
     }
 
     await transaction.save();
+
+    // --- LOGGING LOGIC ---
+    await createLog(
+        req.user.id,
+        "PAYMENT_UPDATE",
+        "FINANCE",
+        `Updated payment status to ${isPaid ? 'PAID' : 'UNPAID'} for transaction ${id}`
+    );
 
     res.status(200).json({
         status: "Success",

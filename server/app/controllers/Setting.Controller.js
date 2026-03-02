@@ -1,5 +1,6 @@
 import GeneralSettings from "../models/GeneralSettings.Model.js";
 import asyncHandler from "express-async-handler";
+import { createLog } from "../config/Logger.js"
 
 /**
  * @desc    Get general settings
@@ -34,6 +35,14 @@ export const updateGeneralSettings = asyncHandler(async (req, res) => {
             runValidators: true,
             setDefaultsOnInsert: true
         }
+    );
+
+    // LOG: Settings Change
+    await createLog(
+        req.user.id,
+        "UPDATE",
+        "SYSTEM",
+        "Updated global application settings and business configuration"
     );
 
     res.status(200).json({

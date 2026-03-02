@@ -17,9 +17,9 @@ const router = express.Router();
 // Authentication / Management
 router.post("/", registerUser);
 router.post("/login", loginUser);
-router.post("/logout", logoutUser);
 
 // Verification (Protected)
+router.post("/logout", userAuth, logoutUser);
 router.post('/send-verify-otp', userAuth, sendVerifyOtp);
 router.post('/verify-account', userAuth, verifyEmail);
 
