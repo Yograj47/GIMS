@@ -1,79 +1,67 @@
-import { Package, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { ShieldAlert } from "lucide-react";
+import { DataTable } from "@/components/common/DataTable";
+import { getAlertColumns } from "../components/AlertColumns";
+import { useAlerts } from "../hooks/UseAlerts";
 
-export default function Alert() {
-    // Mock data based on your screenshot
-    const lowStockItems = [
-        { id: 1, name: "Refined Oil", current: "30 L", threshold: "50 L", status: "Critical" },
-        { id: 2, name: "Salt", current: "45 kg", threshold: "100 kg", status: "Warning" },
-    ];
+export default function AlertPage() {
+    const {
+        alerts,
+        fetchAllAlerts,
+        markAsResolved,
+        isLoading,
+        meta,
+        activeCount,
+        fetchActiveAlerts
+    } = useAlerts();
+
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+
+    // Standardized Debounced Fetch
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchAllAlerts(pagination.pageIndex + 1, pagination.pageSize);
+            fetchActiveAlerts();
+
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [fetchAllAlerts, pagination.pageIndex, pagination.pageSize, fetchActiveAlerts]);
 
     return (
-        <div className="min-h-full space-y-6 animate-in fade-in duration-500">
-            {/* Header Section */}
-            <div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Alerts</h1>
-                <p className="text-sm font-medium text-slate-500">Monitor and resolve inventory issues</p>
+        <div className="w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 min-h-0 px-1">
+
+            {/* 1. Header Section */}
+            <div className="flex items-end justify-between mb-4 shrink-0">
+                <div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">
+                        Alerts<span className="text-rose-600">!</span>
+                    </h1>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+                        System Integrity & Stock Monitoring
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3 bg-rose-50 border-2 border-rose-100 px-6 py-3 rounded-2xl shadow-sm">
+                    <ShieldAlert className="text-rose-600" size={20} strokeWidth={3} />
+                    <div className="flex flex-col">
+                        <span className="text-rose-600 font-black text-lg leading-none">{activeCount}</span>
+                        <span className="text-[8px] font-black uppercase text-rose-400 tracking-tighter">Active Issues</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Summary Stat Card */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-sm">
-                <div className="flex items-center gap-3 text-blue-600 mb-2">
-                    <Package size={20} strokeWidth={2.5} />
-                    <h2 className="font-bold text-sm uppercase tracking-wider">Low Stock Items</h2>
-                </div>
-                <div className="space-y-1">
-                    <span className="text-4xl font-black text-slate-900">{lowStockItems.length}</span>
-                    <p className="text-xs font-bold text-slate-400 uppercase">Items below threshold</p>
-                </div>
-            </div>
 
-            {/* Alerts Table Card */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="p-1">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50/80">
-                            <tr className="text-[10px] font-black text-slate-400 uppercase border-b border-slate-100">
-                                <th className="px-6 py-4">Product</th>
-                                <th className="px-6 py-4">Current Stock</th>
-                                <th className="px-6 py-4">Threshold</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {lowStockItems.map((item) => (
-                                <tr key={item.id} className="text-sm font-bold text-slate-700 hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-6 py-4">{item.name}</td>
-                                    <td className="px-6 py-4 text-slate-900">{item.current}</td>
-                                    <td className="px-6 py-4 text-slate-400 font-medium">{item.threshold}</td>
-                                    <td className="px-6 py-4">
-                                        <Badge 
-                                            variant="secondary" 
-                                            className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${
-                                                item.status === 'Critical' 
-                                                ? 'bg-rose-100 text-rose-600' 
-                                                : 'bg-amber-100 text-amber-600'
-                                            }`}
-                                        >
-                                            {item.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            className="rounded-xl border-slate-200 font-bold text-xs hover:bg-blue-50 hover:text-blue-600 transition-all"
-                                        >
-                                            Resolve <ArrowRight size={14} className="ml-1" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            {/* 3. DataTable Section */}
+            <div className="flex-1 min-h-0 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm mb-4">
+                <DataTable
+                    columns={getAlertColumns(markAsResolved)}
+                    data={alerts}
+                    isLoading={isLoading}
+                    pageCount={meta?.totalPages || 0}
+                    rowCount={meta?.totalItems || 0}
+                    pagination={pagination}
+                    setPagination={setPagination}
+                />
             </div>
         </div>
     );
