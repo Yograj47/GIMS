@@ -4,6 +4,7 @@ import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
 import { transactionSchema } from "../validation/Transaction.validation.js";
+import { processProductAlert } from "../service/Alert.Service.js";
 
 /**
  * @desc Create a unified transaction (Purchase, Sale, Return) with automatic stock movement
@@ -13,6 +14,8 @@ import { transactionSchema } from "../validation/Transaction.validation.js";
 export const createUnifiedTransaction = asyncHandler(async (req, res) => {
     const validateResult = transactionSchema.parse(req.body);
     const session = await mongoose.startSession();
+
+    const productsToAlert = [];
 
     try {
         session.startTransaction();
@@ -58,17 +61,22 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
 
             product.quantity = newQty;
             await product.save({ session });
+
+            productsToAlert.push(product);vvvb
         }
 
         await session.commitTransaction();
+        session.endSession();
+
+        Promise.all(productsToAlert.map(p => processProductAlert(p, req.user.id)))
+            .catch(err => console.error("Alert Processing Error", err));
+
         res.status(201).json({ status: "Success", data: transaction[0] });
 
     } catch (error) {
         if (session.inAtomicityTransition()) await session.abortTransaction();
         res.status(400);
         throw new Error(error.message);
-    } finally {
-        session.endSession();
     }
 });
 
@@ -335,7 +343,7 @@ export const getProductMovements = asyncHandler(async (req, res) => {
 
     const pipeline = [
         { $match: { productId: new mongoose.Types.ObjectId(productId) } },
-        
+
         {
             $lookup: {
                 from: "products",
@@ -365,13 +373,13 @@ export const getProductMovements = asyncHandler(async (req, res) => {
                 newQuantity: 1,
                 reason: 1,
                 createdAt: 1,
-                product: { 
-                    _id: "$product._id", 
-                    name: "$product.name" 
+                product: {
+                    _id: "$product._id",
+                    name: "$product.name"
                 },
-                performedBy: { 
-                    _id: "$user._id", 
-                    name: "$user.name" 
+                performedBy: {
+                    _id: "$user._id",
+                    name: "$user.name"
                 }
             }
         },

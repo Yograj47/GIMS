@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const alertSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
+    ref: "Products",
     required: true
   },
 
@@ -12,7 +12,6 @@ const alertSchema = new mongoose.Schema({
     enum: [
       "low-stock",
       "out-of-stock",
-      "expiry-warning",
       "price-change"
     ],
     required: true
@@ -31,5 +30,7 @@ const alertSchema = new mongoose.Schema({
   resolvedAt: Date
 
 }, { timestamps: true });
+
+alertSchema.index({productId: 1, resolved: 1})
 
 export default mongoose.model("Alerts", alertSchema)

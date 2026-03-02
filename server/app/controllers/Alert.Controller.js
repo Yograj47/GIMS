@@ -1,76 +1,83 @@
 import Alert from "../models/Alert.Model.js";
-import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
-import {
-  alertValidator,
-  updateAlertValidator
-} from "../validation/Alert.validation.js";
-
 
 /**
- * @desc    Create new alert
- * @route   POST /api/v1/alerts
- * @access  Private / Internal
+ * @desc Get all active/unresolved alerts (For Dashboard & Sidebar Badge)
+ * @route GET /api/v1/alerts/active
  */
-export const createAlert = asyncHandler(async (req, res) => {
-  const validatedData = alertValidator.parse(req.body);
+export const getActiveAlerts = asyncHandler(async (req, res) => {
+    const alerts = await Alert.find({ resolved: false })
+        .populate("productId", "name quantity threshold")
+        .sort({ createdAt: -1 });
 
-  const productExists = await Product.findById(validatedData.productId);
-
-  if (!productExists) {
-    res.status(404);
-    throw new Error("Product not found");
-  }
-
-  const alert = await Alert.create(validatedData);
-
-  res.status(201).json({
-    status: "success",
-    data: alert
-  });
+    res.status(200).json({
+        status: "Success",
+        data: alerts,
+        meta: {
+            totalItems: alerts.length,
+            paginationDisabled: true
+        }
+    });
 });
 
-
 /**
- * @desc    Get all alerts
- * @route   GET /api/v1/alerts
- * @access  Private
+ * @desc Get all alerts with standardized pagination
+ * @route GET /api/v1/alerts
  */
-export const getAlerts = asyncHandler(async (req, res) => {
-  const alerts = await Alert.find()
-    .populate("productId", "name quantity threshold")
-    .sort({ createdAt: -1 })
-    .select("-__v");
+export const getAllAlerts = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const shouldPaginate = req.query.paginate !== 'false';
 
-  res.status(200).json({
-    status: "success",
-    results: alerts.length,
-    data: alerts
-  });
+
+    // Use Promise.all for faster execution
+    const [items, totalItems] = await Promise.all([
+        Alert.find()
+            .populate("productId", "name quantity unit threshold")
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .select('-__v'),
+        Alert.countDocuments()
+    ]);
+
+    res.status(200).json({
+        status: "Success",
+        data: items,
+        meta: shouldPaginate ? {
+            totalItems,
+            itemsPerPage: items.length,
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+        } : {
+            totalItems,
+            itemsPerPage: items.length,
+            paginationDisabled: true
+        }
+    });
 });
 
-
 /**
- * @desc    Resolve / Update alert
- * @route   PUT /api/v1/alerts/:id
- * @access  Private
+ * @desc Manually resolve an alert
  */
-export const updateAlertById = asyncHandler(async (req, res) => {
-  const validatedData = updateAlertValidator.parse(req.body);
+export const resolveAlert = asyncHandler(async (req, res) => {
+    const alert = await Alert.findByIdAndUpdate(
+        req.params.id,
+        {
+            resolved: true,
+            resolvedAt: new Date()
+        },
+        { new: true }
+    );
 
-  const updatedAlert = await Alert.findByIdAndUpdate(
-    req.params.id,
-    validatedData,
-    { new: true, runValidators: true }
-  ).select("-__v");
+    if (!alert) {
+        res.status(404);
+        throw new Error("Alert not found");
+    }
 
-  if (!updatedAlert) {
-    res.status(404);
-    throw new Error("Alert not found");
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: updatedAlert
-  });
+    res.status(200).json({
+        status: "Success",
+        message: "Alert marked as resolved",
+        data: alert
+    });
 });
