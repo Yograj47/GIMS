@@ -3,7 +3,7 @@ import User from "../models/User.Model.js"
 import transporter from "./emailConfig.js";
 
 export const processProductAlert = async (product, userId) => {
-    const { _id, name, quantity, threshold} = product;
+    const { _id, name, quantity, threshold } = product;
 
     const user = await User.findById(userId);
     if (!user) return;
@@ -61,7 +61,11 @@ export const processProductAlert = async (product, userId) => {
     }
     else {
         await Alert.updateMany(
-            { productId: _id, resolved: false },
+            {
+                productId: _id,
+                resolved: false,
+                type: { $in: ['low-stock', 'out-of-stock'] }
+            },
             { resolved: true, resolvedAt: new Date() }
         );
     }

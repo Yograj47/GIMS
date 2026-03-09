@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const activityLogSchema = new mongoose.Schema({
   performedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
     required: true
   },
 

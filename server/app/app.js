@@ -16,6 +16,7 @@ import MovementTransactionRoutes from "./routes/MovementTransaction.Route.js"
 import ActivityLogRoutes from "./routes/ActivityLog.Route.js"
 import AlertRoutes from "./routes/Alert.Route.js"
 import ProductUnitRoutes from "./routes/ProductUnit.Route.js"
+import AnalyticsRoutes from "./routes/Analytics.routes.js";
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use(`${API}/activity-logs`, ActivityLogRoutes);
 app.use(`${API}/alerts`, AlertRoutes);
 app.use(`${API}/settings`, SettingRoutes);
 app.use(`${API}/product-units`, ProductUnitRoutes);
+app.use(`${API}/analytics`, AnalyticsRoutes);
 
 // Error Middleware
 app.use(errorHandler);

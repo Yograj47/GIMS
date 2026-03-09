@@ -63,11 +63,10 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
             product.quantity = newQty;
             await product.save({ session });
 
-            productsToAlert.push(product);vvvb
+            productsToAlert.push(product);
         }
 
         await session.commitTransaction();
-        session.endSession();
 
         // Log the financial event for BI Dashboard
         await createLog(
@@ -83,9 +82,13 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
         res.status(201).json({ status: "Success", data: transaction[0] });
 
     } catch (error) {
-        if (session.inAtomicityTransition()) await session.abortTransaction();
+        if (session.inTransaction()) await session.abortTransaction();
+
         res.status(400);
         throw new Error(error.message);
+    }
+    finally {
+        session.endSession();
     }
 });
 

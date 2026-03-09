@@ -7,14 +7,23 @@ import asyncHandler from "express-async-handler";
  */
 export const getActiveAlerts = asyncHandler(async (req, res) => {
     const alerts = await Alert.find({ resolved: false })
-        .populate("productId", "name quantity threshold")
+        .populate("productId", "name quantity threshold unit")
         .sort({ createdAt: -1 });
+
+    const formattedAlerts = alerts.map(alert => {
+        const doc = alert.toObject();
+        return {
+            ...doc,
+            severity: doc.severity || (doc.productId?.quantity === 0 ? "critical" : "warning"),
+            snapshotValue: doc.snapshotValue || doc.productId?.quantity || 0
+        };
+    });
 
     res.status(200).json({
         status: "Success",
-        data: alerts,
+        data: formattedAlerts,
         meta: {
-            totalItems: alerts.length,
+            totalItems: formattedAlerts.length,
             paginationDisabled: true
         }
     });
@@ -29,29 +38,36 @@ export const getAllAlerts = asyncHandler(async (req, res) => {
     const limit = parseInt(req.query.limit) || 100;
     const shouldPaginate = req.query.paginate !== 'false';
 
-
-    // Use Promise.all for faster execution
     const [items, totalItems] = await Promise.all([
         Alert.find()
-            .populate("productId", "name quantity unit threshold")
+            .populate({ path: "productId", select: "name quantity unitId threshold", populate: { path: "unitId", select: "name" } })
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
-            .select('-__v'),
+            .lean(),
         Alert.countDocuments()
     ]);
 
+    const formattedItems = items.map(alert => ({
+        ...alert,
+        severity: alert.severity || (alert.productId?.quantity === 0 ? "critical" : "warning"),
+
+        snapshotValue: alert.snapshotValue || alert.productId?.quantity || 0,
+
+        type: alert.type || "low-stock"
+    }));
+
     res.status(200).json({
         status: "Success",
-        data: items,
+        data: formattedItems,
         meta: shouldPaginate ? {
             totalItems,
-            itemsPerPage: items.length,
+            itemsPerPage: formattedItems.length,
             currentPage: page,
             totalPages: Math.ceil(totalItems / limit),
         } : {
             totalItems,
-            itemsPerPage: items.length,
+            itemsPerPage: formattedItems.length,
             paginationDisabled: true
         }
     });
