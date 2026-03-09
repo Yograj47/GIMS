@@ -35,8 +35,8 @@ export default function ManageProduct() {
     } = useUnits();
 
     useEffect(() => {
-        fetchCategories();
-        fetchUnits();
+        fetchCategories(undefined, undefined, undefined, true);
+        fetchUnits(undefined, undefined, undefined, true);
 
         if (isEditMode && productId) {
             fetchProductById(productId);

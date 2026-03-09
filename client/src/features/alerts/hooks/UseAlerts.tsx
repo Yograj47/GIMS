@@ -5,7 +5,7 @@ import { AlertService } from '../api/AlertService';
 import type { AlertData, PaginationMetadata } from '@/types/Alert';
 
 export const useAlerts = () => {
-    const [alerts, setAlerts] = useState<AlertData[]>([]);
+    const [alerts, setAlerts] = useState<AlertData[] >([]);
     const [activeAlerts, setActiveAlerts] = useState<AlertData[]>([]);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
     const { setLoading, isLoading } = useGlobalStore();
@@ -33,7 +33,7 @@ export const useAlerts = () => {
             // We usually don't want the big global loading spinner for background/badge updates
             const response = await AlertService.getActiveAlerts();
             if (response.status === "Success") {
-                setActiveAlerts(response.data);
+                setActiveAlerts(response.data as AlertData[]);
                 return response.data;
             }
         } finally {

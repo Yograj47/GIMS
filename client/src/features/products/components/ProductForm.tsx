@@ -1,10 +1,11 @@
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, type Resolver, Controller } from "react-hook-form"; // Added Controller
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData, type ProductData } from "@/types/Product";
 import { TrendingUp, BadgeIndianRupee, Package, AlertCircle } from "lucide-react";
 import type { CategoryData } from "@/types/Category";
 import type { UnitData } from "@/types/Unit";
 import { useEffect } from "react";
+import Select from "react-select";
 
 type ProductFormProps = {
     initialData?: ProductData;
@@ -19,6 +20,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
         handleSubmit,
         watch,
         reset,
+        control, // Added control for the Controller component
         formState: { errors },
     } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
@@ -34,6 +36,23 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
             isActive: initialData?.isActive ?? true,
         },
     });
+
+    // Formatting options for react-select
+    const categoryOptions = categories?.map(c => ({ value: c._id, label: c.name })) || [];
+    const unitOptions = units?.map(u => ({ value: u._id, label: `${u.name} (${u.shortForm})` })) || [];
+
+    // Custom styles for react-select to match your UI
+    const customSelectStyles = {
+        control: (base: any, state: any) => ({
+            ...base,
+            borderRadius: '0.75rem',
+            padding: '2px',
+            border: state.isFocused ? '1px solid #3b82f6' : '1px solid #e2e8f0',
+            boxShadow: state.isFocused ? '0 0 0 4px rgba(59, 130, 246, 0.1)' : 'none',
+            backgroundColor: '#f8fafc80',
+            '&:hover': { border: '1px solid #3b82f6' }
+        }),
+    };
 
     useEffect(() => {
         if (initialData) {
@@ -51,7 +70,6 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
         }
     }, [initialData, reset]);
 
-    // Watch prices to calculate profit in real-time
     const buyPrice = watch("basePrice") || 0;
     const sellPrice = watch("sellingPrice") || 0;
     const profit = sellPrice - buyPrice;
@@ -74,33 +92,47 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2 space-y-2">
                         <label className={labelStyle}>Product Name <span className="text-red-500">*</span></label>
-                        <input {...register("name")} placeholder="e.g. Premium Basmati Rice" className={inputStyle} />
+                        <input {...register("name")} placeholder="e.g. Premium Basmati Rice" className={inputStyle} spellCheck="true" autoComplete="on" />
                         {errors.name && <p className={errorStyle}>{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label className={labelStyle}>Category <span className="text-red-500">*</span></label>
-                        <select {...register("categoryId")} className={inputStyle}>
-                            <option value="">Select category</option>
-                            {
-                                categories && categories.map((c) => (
-                                    <option key={c._id} value={c._id}>{c.name}</option>
-                                ))
-                            }
-                        </select>
+                        <Controller
+                            name="categoryId"
+                            control={control}
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    options={categoryOptions}
+                                    value={categoryOptions.find(opt => opt.value === field.value)}
+                                    onChange={(val) => field.onChange(val?.value)}
+                                    placeholder="Search category..."
+                                    styles={customSelectStyles}
+                                    isClearable
+                                />
+                            )}
+                        />
                         {errors.categoryId && <p className={errorStyle}>{errors.categoryId.message}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label className={labelStyle}>Unit of Measure <span className="text-red-500">*</span></label>
-                        <select {...register("unitId")} className={inputStyle}>
-                            <option value="">Select unit</option>
-                            {
-                                units && units.map((u) => (
-                                    <option key={u._id} value={u._id}>{u.name}({u.shortForm})</option>
-                                ))
-                            }
-                        </select>
+                        <Controller
+                            name="unitId"
+                            control={control}
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    options={unitOptions}
+                                    value={unitOptions.find(opt => opt.value === field.value)}
+                                    onChange={(val) => field.onChange(val?.value)}
+                                    placeholder="Search unit..."
+                                    styles={customSelectStyles}
+                                    isClearable
+                                />
+                            )}
+                        />
                         {errors.unitId && <p className={errorStyle}>{errors.unitId.message}</p>}
                     </div>
                 </div>
@@ -155,6 +187,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                     </div>
                 </div>
             </div>
+
 
             {/* Section 3: Inventory */}
             <div className="space-y-4">

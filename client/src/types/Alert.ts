@@ -8,7 +8,7 @@ export interface AlertData {
         name: string;
         quantity: number;
         threshold: number;
-        unit?: {
+        unitId?: {
             name: string;
         };
     };
