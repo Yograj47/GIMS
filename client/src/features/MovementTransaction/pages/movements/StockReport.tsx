@@ -20,7 +20,6 @@ export default function StockReport() {
     });
 
     useEffect(() => {
-        // Normalize "All Levels" for the API call
         const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
         fetchProducts(
             pagination.pageIndex + 1,
@@ -30,8 +29,6 @@ export default function StockReport() {
         );
     }, [fetchProducts, pagination, searchQuery, stockLevel]);
 
-    console.log(products);
-    
 
     const columns = useMemo(() => getStockColumns(navigate), [navigate]);
 

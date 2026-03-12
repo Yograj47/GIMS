@@ -1,4 +1,4 @@
-import type { PaginationMetadata } from "./Unit";
+import type { PaginationMetadata } from "./Pagination";
 
 export type MovementData = {
   _id: string;

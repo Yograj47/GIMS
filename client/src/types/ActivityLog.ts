@@ -1,4 +1,4 @@
-import type { PaginationMetadata } from "./Unit";
+import type { PaginationMetadata } from "./Pagination";
 
 export interface ActivityLogData {
     _id: string;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PaginationMetadata } from "./Unit";
+import type { PaginationMetadata } from "./Pagination";
 
 export const productUnitSchema = z.object({
     productId: z

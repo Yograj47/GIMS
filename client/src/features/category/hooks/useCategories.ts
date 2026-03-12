@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { CategoryService } from '../api/CategoryService';
+import { CategoryService } from '../../../apis/CategoryService';
 import type { CategoryData, CategoryFormData } from '@/types/Category';
-import type { PaginationMetadata } from '@/types/Unit';
+import type { pagination, PaginationMetadata } from '@/types/Pagination';
 
 export const useCategories = () => {
     const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -13,7 +13,7 @@ export const useCategories = () => {
 
 
     // 1. Fetch All Categories
-    const fetchCategories = useCallback(async (page?: number, limit?: number, search?: string, all?:boolean) => {
+    const fetchCategories = useCallback(async ({ page, limit, search, all }: pagination) => {
         try {
             setLoading(true);
             const response = await CategoryService.getAll(page, limit, search, all);
@@ -23,7 +23,6 @@ export const useCategories = () => {
                 return true;
             }
         } catch (error: any) {
-            // the error notification happens automatically!
         } finally {
             setLoading(false);
         }

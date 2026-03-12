@@ -27,8 +27,6 @@ export default function UserManagement() {
         fetchUsers();
     }, [fetchUsers]);
 
-    console.log(users);
-
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         try {

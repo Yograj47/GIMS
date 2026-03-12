@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import type { WeeklyMovementData } from '@/types/Analytics';
-import { AnalyticsService } from '../api/AnalyticsService';
+import { AnalyticsService } from '../../../apis/AnalyticsService';
 
 export const useAnalytics = () => {
     const [weeklyStats, setWeeklyStats] = useState<WeeklyMovementData[]>([]);

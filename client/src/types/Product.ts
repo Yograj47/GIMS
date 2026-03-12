@@ -1,7 +1,6 @@
 import { z } from "zod";
-import type { PaginationMetadata } from "./Unit";
+import type { PaginationMetadata } from "./Pagination";
 
-// 1. Zod Schema for Form Validation (Data going TO backend)
 export const productSchema = z.object({
     name: z.string().min(1, "Product name cannot be empty").trim(),
     categoryId: z.string(),
@@ -20,7 +19,6 @@ export const productSchema = z.object({
 
 export type ProductFormData = z.infer<typeof productSchema>;
 
-// 2. Individual Product Data Structure (Nested inside the "data" field)
 export interface ProductData {
     _id: string;
     name: string;

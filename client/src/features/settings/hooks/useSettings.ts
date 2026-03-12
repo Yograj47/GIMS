@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { notify } from '@/lib/toast';
 import type { GeneralSettingsData, GeneralSettingsFormData } from '@/types/Setting';
-import { SettingsService } from '../api/SettingService';
+import { SettingsService } from '../../../apis/SettingService';
 
 export const useSettings = () => {
     const [generalData, setGeneralData] = useState<GeneralSettingsData | null>(null);

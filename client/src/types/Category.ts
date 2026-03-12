@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { PaginationMetadata } from "./Unit";
+import type { PaginationMetadata } from "./Pagination";
 
 export const categorySchema = z.object({
     name: z.string().min(2, "Category name must be at least 2 characters"),

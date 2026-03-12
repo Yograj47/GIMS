@@ -1,30 +1,29 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { productUnitService } from '../api/ProductUnitService';
-import type { 
-    GroupedProductUnit, 
-    ProductUnitFormData, 
+import { productUnitService } from '../../../apis/ProductUnitService';
+import type {
+    GroupedProductUnit,
+    ProductUnitFormData,
 } from '@/types/ProductUnit';
-import type { PaginationMetadata } from '@/types/Unit';
+import type { PaginationMetadata, pagination } from '@/types/Pagination';
 
 export const useProductUnits = () => {
     const [groupedUnits, setGroupedUnits] = useState<GroupedProductUnit[]>([]);
     const { setLoading, isLoading } = useGlobalStore();
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
-        
+
 
     // 1. Fetch Grouped Product Units (Aggregation)
-    const fetchGroupedUnits = useCallback(async (page? : number, limit?: number, search?: string, all?:boolean) => {
+    const fetchGroupedUnits = useCallback(async ({ page, limit, search, all }: pagination = {}) => {
         try {
             setLoading(true);
             const response = await productUnitService.getGroupedUnits(page, limit, search, all);
             if (response.status === "Success") {
                 setGroupedUnits(response.data as GroupedProductUnit[]);
-                setMeta(all? null : (response.meta || null));
+                setMeta(all ? null : (response.meta || null));
             }
         } catch (error: any) {
-            // Error handled by global interceptor/store
         } finally {
             setLoading(false);
         }
@@ -36,7 +35,6 @@ export const useProductUnits = () => {
             setLoading(true);
             const response = await productUnitService.create(payload);
             if (response.status === "Success") {
-                // Since data is grouped, it's safer to re-fetch to ensure correct UI grouping
                 await fetchGroupedUnits();
                 notify.success("Unit conversion added");
                 return true;
@@ -53,8 +51,7 @@ export const useProductUnits = () => {
             setLoading(true);
             const response = await productUnitService.update(id, payload);
             if (response.status === "Success") {
-                // Re-fetching ensures that 'isDefault' flags are synced across all units
-                await fetchGroupedUnits();
+                await fetchGroupedUnits({ all: true });
                 notify.success("Conversion updated");
                 return true;
             }
@@ -70,8 +67,7 @@ export const useProductUnits = () => {
             setLoading(true);
             const response = await productUnitService.delete(id);
             if (response.status === "Success") {
-                // Optimistic UI Update: Filter nested conversions without full re-fetch
-                setGroupedUnits((prev) => 
+                setGroupedUnits((prev) =>
                     prev.map((group) => {
                         if (group._id === productId) {
                             return {

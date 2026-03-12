@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { useGlobalStore } from "@/store/globalStore";
-import { MovementTransactionService } from "../api/MovementTransactionService";
+import { MovementTransactionService } from "../../../apis/MovementTransactionService";
 import type { TransactionData, TransactionFormData } from "@/types/Transaction";
 import type { MovementData } from "@/types/Movement";
 import { notify } from "@/lib/toast";
-import type { PaginationMetadata } from "@/types/Unit";
+import type { PaginationMetadata } from "@/types/Pagination";
 
 export const useMovementTransactions = () => {
     const [transactions, setTransactions] = useState<TransactionData[]>([]);

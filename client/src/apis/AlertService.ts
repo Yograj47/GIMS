@@ -1,9 +1,6 @@
 import api from "@/lib/api";
 import type { AlertAPIResponse, AlertData } from "@/types/Alert";
 
-/**
- * Service for managing system-generated alerts (Low stock, out of stock, etc.)
- */
 export const AlertService = {
     /**
      * Fetches all alerts with standard pagination and search

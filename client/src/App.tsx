@@ -16,9 +16,9 @@ import SettingsLayout from "./layout/SettingLayout";
 // Pages
 import Login from "./features/auth/pages/Login";
 import Register from "./features/auth/pages/Register";
-import Home from "./features/NormalPages/Home";
+import Home from "./features/DefaultPages/Home";
 import VerifyAccount from "./features/auth/pages/VerifyAccount";
-import NotFound from "./features/NormalPages/NotFound";
+import NotFound from "./features/DefaultPages/NotFound";
 import Products from "./features/products/pages/Products";
 import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
@@ -43,7 +43,7 @@ import StockMovementForm from "./features/MovementTransaction/components/Movemen
 import ProductMovementHistory from "./features/MovementTransaction/pages/movements/ProductMovementHistory";
 import TransactionViewPage from "./features/MovementTransaction/pages/transaction/TransactionViewPage";
 import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
-import ProfilePage from "./features/NormalPages/Profile";
+import ProfilePage from "./features/DefaultPages/Profile";
 
 axios.defaults.withCredentials = true;
 

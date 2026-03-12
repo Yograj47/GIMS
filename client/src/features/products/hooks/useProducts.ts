@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { productService } from '../api/ProductService';
+import { productService } from '../../../apis/ProductService';
 import type { ProductData, ProductFormData } from '@/types/Product';
-import type { PaginationMetadata } from '@/types/Unit';
+import type { PaginationMetadata } from '@/types/Pagination';
 
 export const useProducts = () => {
     const [products, setProducts] = useState<ProductData[]>([]);

@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 // Our New Components
 import StatCard from "../components/StatCard";
 import ActionTile from "../components/ActionTile";
-import ChartSection from "../components//ChartSection";
-import LiveFeedCard from "../components//LiveFeedCard";
-import AlertCard from "../components//AlertCard";
+import ChartSection from "../components/ChartSection";
+import LiveFeedCard from "../components/LiveFeedCard";
+import AlertCard from "../components/AlertCard";
 import { useActivityLogs } from "@/features/activityLogs/hooks/useActivityLogs";
 import { chartData, chartOptions } from "@/lib/dashboardCharts";
 import { useAlerts } from "@/features/alerts/hooks/UseAlerts";
@@ -17,7 +17,7 @@ import { useAnalytics } from "../hooks/useAnalystics";
 export default function Dashboard() {
     const navigate = useNavigate();
     const { logs, fetchRecentLogs } = useActivityLogs();
-    const { activeAlerts, fetchActiveAlerts, isLoading: alertLoading } = useAlerts();
+    const { activeAlerts, fetchActiveAlerts, markAsResolved, isLoading: alertLoading } = useAlerts();
     const { weeklyStats, fetchWeeklyStats, summary, fetchSummary } = useAnalytics();
 
     useEffect(() => {
@@ -47,6 +47,11 @@ export default function Dashboard() {
 
         return chartData(stockIn, stockOut, labels);
     }, [weeklyStats]); // Only re-runs if weeklyStats changes
+
+
+    const handleResolve = async (id: string) => {
+        await markAsResolved(id);
+    };
 
     const criticalAlert = activeAlerts.length > 0 ? activeAlerts[0] : null;
 
@@ -119,7 +124,8 @@ export default function Dashboard() {
                     <AlertCard
                         productName={criticalAlert.productId.name}
                         remainingQty={`${criticalAlert.snapshotValue} ${criticalAlert.productId.unitId?.name || ''}`}
-                        onAction={() => navigate(`/inventory`)}
+                        onAction={() => handleResolve(criticalAlert._id)
+                        }
                     />
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50 p-8 text-center">

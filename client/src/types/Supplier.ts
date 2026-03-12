@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PaginationMetadata } from "./Unit";
+import type { PaginationMetadata } from "./Pagination";
 
 export const supplierSchema = z.object({
     name: z.string().min(1, "Supplier name cannot be empty").trim(),

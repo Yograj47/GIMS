@@ -1,33 +1,35 @@
-import { useState } from "react";
-import { 
-    User, Mail, ShieldCheck, Key, Camera, Save, LogOut, 
-    ShieldAlert, X, Eye, EyeOff, Lock, CheckCircle2 
+import { useEffect, useState } from "react";
+import {
+    User, Mail, ShieldCheck, Key, Camera, Save, LogOut,
+    ShieldAlert, X, Eye, EyeOff, Lock, CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/useAuth";
+import { Loading } from "@/lib/loader";
 
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const { fetchUser, isLoading, user } = useAuthStore();
 
-    // Mock data
-    const user = {
-        name: "Yograj Rijal",
-        email: "yograj@example.com",
-        role: "Super Admin",
-        joined: "March 2024",
-        avatar: "YR"
-    };
+    useEffect(() => {
+        fetchUser();
+    }, [fetchUser])
+
+    if (isLoading) {
+        return <Loading fullPage />
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10 pt-4 px-4">
-            
+
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row items-center gap-6 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden group/header">
+            <div className="flex flex-col md:flex-row items-center gap-6 p-8 border-b border-slate-200 ">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50 transition-transform group-hover/header:scale-110 duration-700" />
-                
+
                 <div className="relative">
                     <div className="w-24 h-24 rounded-3xl bg-linear-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-100 ring-4 ring-white">
-                        {user.avatar}
+                        {user?.name[0]}
                     </div>
                     <button className="absolute -bottom-2 -right-2 p-2 bg-white rounded-xl shadow-lg border border-slate-100 text-slate-600 hover:text-blue-600 hover:scale-110 transition-all">
                         <Camera size={16} />
@@ -35,13 +37,10 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex-1 text-center md:text-left">
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">{user.name}</h1>
+                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">{user?.name}</h1>
                     <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest border border-blue-100">
-                            <ShieldCheck size={12} /> {user.role}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center">
-                            Member since {user.joined}
+                            <ShieldCheck size={12} /> {user?.role}
                         </span>
                     </div>
                 </div>
@@ -59,7 +58,7 @@ export default function ProfilePage() {
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                                 <User size={16} className="text-blue-500" /> Account Details
                             </h3>
-                            <button 
+                            <button
                                 onClick={() => setIsEditing(!isEditing)}
                                 className={cn(
                                     "text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all",
@@ -74,10 +73,10 @@ export default function ProfilePage() {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
                                 <div className="relative group">
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         disabled={!isEditing}
-                                        defaultValue={user.name}
+                                        defaultValue={user?.name}
                                         className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-50 focus:border-blue-200 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     />
                                     <User className="absolute left-4 top-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
@@ -87,10 +86,10 @@ export default function ProfilePage() {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                                 <div className="relative group">
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         disabled={!isEditing}
-                                        defaultValue={user.email}
+                                        defaultValue={user?.email}
                                         className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-50 focus:border-blue-200 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     />
                                     <Mail className="absolute left-4 top-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
@@ -120,7 +119,7 @@ export default function ProfilePage() {
                                     <p className="text-[11px] text-slate-400 font-bold mt-0.5">Last updated 3 months ago</p>
                                 </div>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setShowPasswordModal(true)}
                                 className="px-6 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
                             >
@@ -160,9 +159,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Password Modal */}
-            <PasswordUpdateModal 
-                isOpen={showPasswordModal} 
-                onClose={() => setShowPasswordModal(false)} 
+            <PasswordUpdateModal
+                isOpen={showPasswordModal}
+                onClose={() => setShowPasswordModal(false)}
             />
         </div>
     );
@@ -177,7 +176,7 @@ function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
-            
+
             <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative z-10 p-8 border border-slate-200 animate-in zoom-in-95 slide-in-from-bottom-8 duration-300">
                 <button onClick={onClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
                     <X size={20} />
@@ -195,7 +194,7 @@ function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
                         <div className="relative group">
-                            <input 
+                            <input
                                 type={showPass ? "text" : "password"}
                                 className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-200 outline-none transition-all"
                                 placeholder="••••••••"
@@ -207,13 +206,13 @@ function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Password</label>
                         <div className="relative group">
-                            <input 
+                            <input
                                 type={showPass ? "text" : "password"}
                                 className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-200 outline-none transition-all"
                                 placeholder="Min. 8 characters"
                             />
                             <Lock className="absolute left-4 top-4 text-slate-300" size={18} />
-                            <button 
+                            <button
                                 type="button"
                                 onClick={() => setShowPass(!showPass)}
                                 className="absolute right-4 top-4 text-slate-300 hover:text-slate-600 transition-colors"

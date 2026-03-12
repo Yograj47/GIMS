@@ -11,11 +11,9 @@ import {
     BarChart3,
     Users,
     Settings,
-    LogOut,
     PanelLeftClose,
     PanelLeftOpen
 } from "lucide-react";
-import { useAuthStore } from "@/store/useAuth";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -25,7 +23,6 @@ interface SidebarProps {
 function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const location = useLocation();
     const iconStyle = "h-6 w-6 shrink-0";
-    const { logout } = useAuthStore();
 
     const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
@@ -125,19 +122,6 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     );
                 })}
             </nav>
-
-            {/* ---------- Logout ---------- */}
-            <div className="p-4 border-t border-slate-700/50">
-                <button
-                    className={cn(
-                        "flex items-center w-full gap-4 p-2 rounded text-red-400 hover:bg-red-500/10",
-                        !showLabel && "justify-center"
-                    )}
-                >
-                    <LogOut onClick={() => logout()} className={iconStyle} />
-                    {showLabel && "Logout"}
-                </button>
-            </div>
         </aside>
     );
 }

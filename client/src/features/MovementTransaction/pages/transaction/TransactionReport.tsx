@@ -32,8 +32,6 @@ export default function Transaction() {
 
     const columns = useMemo(() => getTransactionColumns(navigate), [navigate]);
 
-    console.log(meta);
-    
 
     return (
         <div className="min-h-full space-y-6 animate-in fade-in duration-500">

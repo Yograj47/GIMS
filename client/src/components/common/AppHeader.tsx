@@ -14,6 +14,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useGlobalStore } from "@/store/globalStore";
+import { useAuthStore } from "@/store/useAuth";
 dayjs.extend(relativeTime);
 
 function AppHeader() {
@@ -21,11 +23,24 @@ function AppHeader() {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
     const isProfilePage = location.pathname === "/me";
-
-    // State and Hooks
     const [showNotifications, setShowNotifications] = useState(false);
-    const { activeAlerts, markAsResolved, isLoading } = useAlerts();
+
+    const { activeAlerts, fetchActiveAlerts, isLoading, markAsResolved } = useAlerts();
+    const { fetchSettings, settings} = useGlobalStore();
+    const {user} = useAuthStore();
+
     const alertCount = activeAlerts.length;
+
+    // 2. Fetch both Alerts and Settings on Mount
+    useEffect(() => {
+        fetchActiveAlerts();
+        if (!settings) {
+            fetchSettings();
+        }
+
+        const interval = setInterval(() => fetchActiveAlerts(), 60000);
+        return () => clearInterval(interval);
+    }, [fetchActiveAlerts, fetchSettings, settings]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -39,19 +54,18 @@ function AppHeader() {
     }, []);
 
     const handleResolve = async (e: React.MouseEvent, id: string) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         await markAsResolved(id);
     };
 
-    console.log("This is form sidebar:", activeAlerts);
-    
     return (
         <header className="w-full h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-50">
             {/* Left: Branch Info */}
             <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                    Main Branch
+                    {/* 3. DYNAMIC LOCATION */}
+                    {settings?.location || "Main Branch"}
                 </h2>
             </div>
 
@@ -115,7 +129,7 @@ function AppHeader() {
                                                             {alert.message}
                                                         </p>
                                                         <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-tighter">
-                                                            dayjs(alert.createdAt).fromNow();
+                                                            {dayjs(alert.createdAt).fromNow()}
                                                         </p>
                                                     </div>
                                                     <button
@@ -169,7 +183,7 @@ function AppHeader() {
                             "bg-linear-to-tr from-blue-600 to-indigo-500",
                             "shadow-blue-100 group-hover:shadow-blue-200 group-hover:scale-105"
                         )}>
-                            YR
+                            {user?.name[0]}
                         </div>
 
                         {/* User Text */}
@@ -178,10 +192,10 @@ function AppHeader() {
                                 "text-xs font-bold transition-colors",
                                 isProfilePage ? "text-blue-600" : "text-slate-900 group-hover:text-blue-600"
                             )}>
-                                Yograj Rijal
+                                {user?.name}
                             </span>
                             <span className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">
-                                Super Admin
+                                {user?.role}
                             </span>
                         </div>
 

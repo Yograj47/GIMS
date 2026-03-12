@@ -21,7 +21,6 @@ export const productService = {
         return data;
     },
 
-    // Fixed: Added productId to the URL path
     updateById: async (id: string, payload: ProductFormData) => {
         const { data } = await api.put<ProductAPIResponse>(`/products/${id}`, payload);
         return data;

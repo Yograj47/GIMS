@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import type { PaginationMetadata, UnitData, UnitFormData } from '@/types/Unit';
-import { unitService } from '../api/UnitService';
+import type { UnitData, UnitFormData } from '@/types/Unit';
+import { unitService } from '../../../apis/UnitService';
+import type { pagination, PaginationMetadata } from '@/types/Pagination';
 
 export const useUnits = () => {
     const [units, setunits] = useState<UnitData[]>([]);
@@ -11,7 +12,7 @@ export const useUnits = () => {
     const { setLoading, isLoading } = useGlobalStore();
 
     // 1. Fetch All units
-    const fetchUnits = useCallback(async (page?: number, limit?: number, search?: string, all?:boolean) => {
+    const fetchUnits = useCallback(async ({ page, limit, search, all }: pagination = {}) => {
         try {
             setLoading(true);
             const response = await unitService.getAll(page, limit, search, all);
@@ -21,7 +22,6 @@ export const useUnits = () => {
                 return true;
             }
         } catch (error: any) {
-            // the error notification happens automatically!
         } finally {
             setLoading(false);
         }
@@ -48,7 +48,6 @@ export const useUnits = () => {
             setLoading(true);
             const sanitizedPayload = {
                 ...payload,
-                // If it's a base unit, multiplier MUST be 1
                 multiplierToBase: payload.baseUnit ? 1 : payload.multiplierToBase
             };
             const response = await unitService.create(sanitizedPayload);
@@ -69,7 +68,6 @@ export const useUnits = () => {
             setLoading(true);
             const sanitizedPayload = {
                 ...payload,
-                // If it's a base unit, multiplier MUST be 1
                 multiplierToBase: payload.baseUnit ? 1 : payload.multiplierToBase
             };
             const response = await unitService.updateById(id, sanitizedPayload);
