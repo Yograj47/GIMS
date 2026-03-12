@@ -10,13 +10,14 @@ import { userAuth } from '../middleware/Auth.middleware.js';
 import rbac from '../middleware/Role.middleware.js';
 
 const router = express.Router();
+router.use(userAuth);
 
 router.route('/')
-    .post(userAuth, rbac("category:write"),createCategory)
-    .get(userAuth, rbac("category:read"), getCategories);
+    .post(rbac("category:write"), createCategory)
+    .get(rbac("category:read"), getCategories);
 router.route('/:id')
-    .get(userAuth, rbac("category:read"), getCategoryById)
-    .put(userAuth, rbac("category:write"), updateCategory)
-    .delete(userAuth, rbac("category:delete"), deleteCategory);
+    .get(rbac("category:read"), getCategoryById)
+    .put(rbac("category:write"), updateCategory)
+    .delete(rbac("category:delete"), deleteCategory);
 
 export default router;

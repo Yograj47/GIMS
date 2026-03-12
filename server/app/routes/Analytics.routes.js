@@ -1,10 +1,12 @@
 import express from "express";
-import { getWeeklyMovementStats,getDashboardSummary } from "../controllers/Analytics.controller.js";
+import { getWeeklyMovementStats, getDashboardSummary } from "../controllers/Analytics.controller.js";
 import { userAuth } from "../middleware/Auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/weekly-movements", userAuth, getWeeklyMovementStats);
-router.get("/summary", userAuth, getDashboardSummary);
+router.use(userAuth);
+
+router.get("/weekly-movements", getWeeklyMovementStats);
+router.get("/summary", getDashboardSummary);
 
 export default router;

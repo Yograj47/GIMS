@@ -12,26 +12,25 @@ import { userAuth } from "../middleware/Auth.middleware.js";
 import rbac from "../middleware/Role.middleware.js";
 
 const router = express.Router();
+router.use(userAuth);
 
 router.route("/")
-    .post(userAuth, rbac("supplier:write"), createSupplier)
-    .get(userAuth, rbac("supplier:read"), getSuppliers);
+    .post(rbac("supplier:write"), createSupplier)
+    .get(rbac("supplier:read"), getSuppliers);
 
 router.route("/:id")
-    .get(userAuth, rbac("supplier:read"), getSupplierById)
-    .put(userAuth, rbac("supplier:write"), updateSupplier)
-    .delete(userAuth, rbac("supplier:delete"), deleteSupplier);
+    .get(rbac("supplier:read"), getSupplierById)
+    .put(rbac("supplier:write"), updateSupplier)
+    .delete(rbac("supplier:delete"), deleteSupplier);
 
 router.patch(
     "/:id/assign-products",
-    userAuth,
     rbac("supplier:write"),
     assignProductsToSupplier
 );
 
 router.patch(
     "/unassign-product/:productId",
-    userAuth,
     rbac("supplier:write"),
     unassignProduct
 );

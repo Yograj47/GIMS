@@ -4,9 +4,9 @@ import { userAuth } from '../middleware/Auth.middleware.js';
 import rbac from "../middleware/Role.middleware.js";
 
 const router = express.Router();
+router.use(userAuth);
 
-// Example route: Get user profile
-router.get('/profile', userAuth, getMe);
-router.get('/all', userAuth, rbac("all"), getAllUsers);
+router.get('/profile', getMe);
+router.get('/all', rbac("all"), getAllUsers);
 
 export default router;

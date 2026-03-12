@@ -10,13 +10,14 @@ import { userAuth } from '../middleware/Auth.middleware.js';
 import rbac from '../middleware/Role.middleware.js';
 
 const router = express.Router();
+router.use(userAuth);
 
 router.route('/')
-    .post(userAuth, rbac("unit:write"), createUnit)
-    .get(userAuth, rbac("unit:read"), getUnits);
+    .post(rbac("unit:write"), createUnit)
+    .get(rbac("unit:read"), getUnits);
 router.route('/:id')
-    .get(userAuth, rbac("unit:read"), getUnitById)
-    .put(userAuth, rbac("unit:write"), updateUnitById)
-    .delete(userAuth, rbac("unit:delete"), deleteUnitById);
+    .get(rbac("unit:read"), getUnitById)
+    .put(rbac("unit:write"), updateUnitById)
+    .delete(rbac("unit:delete"), deleteUnitById);
 
 export default router;

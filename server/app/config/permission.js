@@ -2,7 +2,7 @@ const ROLES = {
     admin: "all",
     owner: [
         'transaction:read',
-        'transaction:write',
+        // 'transaction:write',
         'product:read',
         'product:write',
         'product:delete',

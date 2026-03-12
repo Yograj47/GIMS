@@ -1,11 +1,13 @@
 import express from "express";
-const router = express.Router();
 import { userAuth } from "../middleware/Auth.middleware.js";
 import { getGeneralSettings, updateGeneralSettings } from "../controllers/Setting.Controller.js";
 import rbac from "../middleware/Role.middleware.js";
 
+const router = express.Router();
+router.use(userAuth);
+
 router.route("/general")
-    .get(userAuth, rbac("generalSetting:read"), getGeneralSettings)
-    .put(userAuth, rbac("generalSetting:write"), updateGeneralSettings);
+    .get(rbac("generalSetting:read"), getGeneralSettings)
+    .put(rbac("generalSetting:write"), updateGeneralSettings);
 
 export default router;

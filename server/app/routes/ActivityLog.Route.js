@@ -6,9 +6,10 @@ import { userAuth } from "../middleware/Auth.middleware.js";
 import rbac from "../middleware/Role.middleware.js";
 
 const router = express.Router();
+router.use(userAuth);
 
 router
     .route("/")
-    .get(userAuth, rbac("report:read"), getActivityLogs);
+    .get(rbac("report:read"), getActivityLogs);
 
 export default router;

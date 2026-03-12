@@ -34,8 +34,6 @@ const generalSettingsSchema = new mongoose.Schema(
         "Please fill a valid email address",
       ],
     },
-
-    // Localization (Future Proofing)
     currency: {
       type: String,
       default: "NPR",
@@ -47,7 +45,6 @@ const generalSettingsSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    // This prevents Mongoose from creating multiple versions
     versionKey: false
   }
 );

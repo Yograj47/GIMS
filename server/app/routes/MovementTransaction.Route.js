@@ -10,22 +10,23 @@ import { userAuth } from "../middleware/Auth.middleware.js"
 import rbac from "../middleware/Role.middleware.js";
 
 const router = express.Router();
+router.use(userAuth);
 
 router
     .route("/transactions/")
-    .post(userAuth, rbac("transaction:write"), createUnifiedTransaction)
-    .get(userAuth, rbac("transaction:read"), getAllTransactions)
+    .post(rbac("transaction:write"), createUnifiedTransaction)
+    .get(rbac("transaction:read"), getAllTransactions)
 
 router
     .route("/movements")
-    .get(userAuth, rbac("transaction:read"), getMovements)
+    .get(rbac("transaction:read"), getMovements)
 
 router
     .route("/transactions/:id/credit")
-    .put(userAuth, rbac("transaction:write"), updateCreditStatus)
+    .put(rbac("transaction:write"), updateCreditStatus)
 
 router
     .route("/movements/product-history/:productId")
-    .get(userAuth, rbac("transaction:read"), getProductMovements)
+    .get(rbac("transaction:read"), getProductMovements)
 
 export default router;
