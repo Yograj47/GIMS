@@ -17,6 +17,7 @@ import ActivityLogRoutes from "./routes/ActivityLog.Route.js"
 import AlertRoutes from "./routes/Alert.Route.js"
 import ProductUnitRoutes from "./routes/ProductUnit.Route.js"
 import AnalyticsRoutes from "./routes/Analytics.routes.js";
+import { injectSettings } from "./middleware/Setting.middleware.js";
 
 const app = express();
 
@@ -51,6 +52,6 @@ app.use(`${API}/product-units`, ProductUnitRoutes);
 app.use(`${API}/analytics`, AnalyticsRoutes);
 
 // Error Middleware
-app.use(errorHandler);
+app.use(errorHandler, injectSettings);
 
 export default app;

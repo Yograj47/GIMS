@@ -76,7 +76,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
             `Processed ${validateResult.transactionType} of ${validateResult.items.length} items. Total: ${validateResult.grandTotal}`
         );
 
-        Promise.all(productsToAlert.map(p => processProductAlert(p, req.user.id)))
+        Promise.all(productsToAlert.map(p => processProductAlert(p, req.user.id, req.settings)))
             .catch(err => console.error("Alert Processing Error", err));
 
         res.status(201).json({ status: "Success", data: transaction[0] });
@@ -105,7 +105,6 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
     const endDate = req.query.endDate;
     const shouldPaginate = req.query.paginate !== 'false';
 
-    // Fix: Ensure empty strings or "All Types" result in null so the condition is skipped
     const transactionType = (req.query.transactionType &&
         req.query.transactionType !== 'All Types' &&
         req.query.transactionType !== '')
