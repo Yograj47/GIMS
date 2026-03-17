@@ -7,12 +7,9 @@ import {
 } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/store/useAuth";
 
 export default function SettingsLayout() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
-  const isAdmin = user?.role === "admin";
 
   const menuItems = [
     { id: "general", label: "General", path: "/settings", icon: Store, exact: true },
@@ -89,7 +86,7 @@ export default function SettingsLayout() {
         <div className="flex-1 flex flex-col px-10 py-8 overflow-hidden">
           <div className="max-w-350 w-full mx-auto flex flex-col h-full min-h-0 overflow-hidden">
             <div className="flex-1 min-h-0">
-              <Outlet context={{ isAdmin }} />
+              <Outlet />
             </div>
           </div>
         </div>

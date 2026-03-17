@@ -10,7 +10,7 @@ import { Loading } from "@/lib/loader";
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const { fetchUser, isLoading, user } = useAuthStore();
+    const { fetchUser, isLoading, user, logout } = useAuthStore();
 
     useEffect(() => {
         fetchUser();
@@ -45,7 +45,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <button className="px-6 py-3 bg-rose-50 text-rose-600 border border-rose-100 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all flex items-center gap-2 group">
+                <button onClick={logout} className="px-6 py-3 bg-rose-50 text-rose-600 border border-rose-100 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all flex items-center gap-2 group">
                     <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" /> Sign Out
                 </button>
             </div>

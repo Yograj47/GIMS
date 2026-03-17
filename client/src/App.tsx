@@ -1,4 +1,4 @@
-import { useEffect } from "react"; 
+import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import axios from "axios";
 
@@ -44,6 +44,7 @@ import ProductMovementHistory from "./features/MovementTransaction/pages/movemen
 import TransactionViewPage from "./features/MovementTransaction/pages/transaction/TransactionViewPage";
 import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
 import ProfilePage from "./features/StaticPage/Profile";
+import Unauthorized from "./features/StaticPage/Unauthorized";
 
 axios.defaults.withCredentials = true;
 
@@ -60,34 +61,35 @@ function App() {
         <Routes>
           {/* --- Public / Auth Routes --- */}
           <Route element={<AuthLayout />}>
-            <Route element={<PublicRoute />} >
+            <Route element={<PublicRoute />}>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Route>
             <Route path="/verify" element={<VerifyAccount />} />
             <Route path="/forget-password" element={<ForgotPassword />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
           </Route>
-
 
           {/* --- Protected Inventory/Admin Routes --- */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/me" element={<ProfilePage />} />
+              <Route path="/alerts" element={<Alert />} />
 
-              {/* Only Admin/Owner can manage users */}
+              {/* 1. Admin/Owner Only: User Management */}
               <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
                 <Route path="/users" element={<UserManagement />} />
               </Route>
 
-              {/* Product Management */}
+              {/* 2. Admin/Owner/Staff: Products & Suppliers (Internal logic hides buttons) */}
               <Route path="/products">
                 <Route index element={<Products />} />
                 <Route path="add" element={<ManageProduct />} />
                 <Route path="edit/:productId" element={<ManageProduct />} />
               </Route>
 
-              {/* Supplier Management */}
               <Route path="/suppliers">
                 <Route index element={<Suppliers />} />
                 <Route path="v/:id" element={<SupplierView />} />
@@ -95,41 +97,44 @@ function App() {
                 <Route path="edit/:id" element={<ManageSupplier />} />
               </Route>
 
-              {/* Stock Management */}
-              <Route path="/stock-movements">
-                <Route index element={<StockManagement />} />
-                <Route path="form" element={<StockMovementForm />} />
+              {/* 3. Admin/Staff Only: Stock Movements (Owner blocked) */}
+              <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
+                <Route path="/stock-movements">
+                  <Route index element={<StockManagement />} />
+                  <Route path="form" element={<StockMovementForm />} />
+                </Route>
               </Route>
 
-              {/* Alerts */}
-              <Route path="/alerts" element={<Alert />} />
+              {/* 4. Admin/Owner Only: Reports */}
+              <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route path="/reports">
+                  <Route index element={<ReportsHub />} />
+                  <Route path="activity" element={<ActivityLogs />} />
+                  <Route path="transactions" element={<Transaction />} />
+                  <Route path="transaction/:id" element={<TransactionViewPage />} />
+                  <Route path="stock" element={<StockReport />} />
+                  <Route path="stock/product-history/:productId" element={<ProductMovementHistory />} />
+                  <Route path="movement" element={<StockMovementReport />} />
+                </Route>
 
-              {/* Reports */}
-              <Route path="/reports">
-                <Route index element={<ReportsHub />} />
-                <Route path="activity" element={<ActivityLogs />} />
-                <Route path="transactions" element={<Transaction />} />
-                <Route path="transaction/:id" element={<TransactionViewPage />} />
-                <Route path="stock" element={<StockReport />} />
-                <Route path="stock/product-history/:productId" element={<ProductMovementHistory />} />
-                <Route path="movement" element={<StockMovementReport />} />
+
               </Route>
             </Route>
 
-            {/* Nested Settings with Layout */}
-            <Route element={<SettingsLayout />}>
-              <Route path="/settings">
-                <Route index element={<GeneralSettings />} />
-                <Route path="categories" element={<CategoryPage />} />
-                <Route path="units" element={<UnitPage />} />
-                <Route path="uoms" element={<ProductUnitPage />} />
+            <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+              <Route element={<SettingsLayout />}>
+                <Route path="/settings">
+                  <Route index element={<GeneralSettings />} />
+                  <Route path="categories" element={<CategoryPage />} />
+                  <Route path="units" element={<UnitPage />} />
+                  <Route path="uoms" element={<ProductUnitPage />} />
+                </Route>
               </Route>
             </Route>
           </Route>
 
           {/* --- 404 Route --- */}
           <Route path="*" element={<NotFound />} />
-          <Route path="/me" element={<ProfilePage />} />
         </Routes>
 
         <Toaster position="top-right" richColors closeButton />

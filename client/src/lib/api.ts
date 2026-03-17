@@ -12,28 +12,36 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Check if the request failed because the user is not logged in
-        const isUnauthorized = error.response?.status === 401;
+        const { status, config } = error.response || {};
         
-        // Check if this was the initial profile check (the 'silent' check)
-        // Adjust the string to match your actual profile endpoint path
-        const isProfileCheck = error.config.url?.includes("/users/profile");
+        // 1. Handle 401 Unauthorized (Not logged in)
+        const isUnauthorized = status === 401;
+        const isProfileCheck = config?.url?.includes("/users/profile");
 
         if (isUnauthorized) {
             if (isProfileCheck) {
-                // Return silently. useAuthStore will catch this and set isAuthenticated: false
-                // No toast notification is shown.
+                // Silent fail for initial auth check
                 return Promise.reject(error);
             }
-            
+            // Optional: Redirect to login or clear store here
         }
 
-        // Show error notification for everything else
+        // 2. Handle 403 Forbidden (Permissions changed/Stale Token)
+        if (status === 403) {
+            const message = error.response?.data?.message || "Access denied: Permissions updated.";
+            notify.error(`${message} Please re-login if this persists.`);
+            
+            // Logic: If they hit a 403, they likely have a stale token. 
+            // You could optionally trigger a logout here if you want to be strict.
+            return Promise.reject(error);
+        }
+
+        // 3. Show error notification for everything else (500, 400, etc.)
         const message = error.response?.data?.message || "Something went wrong";
         notify.error(message);
         
         return Promise.reject(error);
     }
-)
+);
 
 export default api;
