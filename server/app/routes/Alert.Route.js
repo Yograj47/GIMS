@@ -1,16 +1,17 @@
-import express from "express"
+import express from "express";
 import {
     getActiveAlerts,
     getAllAlerts,
     resolveAlert
-} from "../controllers/Alert.Controller.js"
+} from "../controllers/Alert.Controller.js";
 import { userAuth } from "../middleware/Auth.middleware.js";
+import rbac from "../middleware/Role.middleware.js"; // Import rbac
+
 const router = express.Router();
 
-router.use(userAuth)
-
-router.get("/", getAllAlerts);
-router.get("/active", getActiveAlerts);
-router.patch("/:id/resolve", resolveAlert);
+router.use(userAuth);
+router.get("/", rbac("alert:read"), getAllAlerts);
+router.get("/active", rbac("alert:read"), getActiveAlerts);
+router.patch("/:id/resolve", rbac("alert:write"), resolveAlert);
 
 export default router;

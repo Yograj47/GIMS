@@ -7,6 +7,6 @@ const router = express.Router();
 router.use(userAuth);
 
 router.get('/profile', getMe);
-router.get('/all', rbac("all"), getAllUsers);
+router.get('/all', rbac("user:read"), getAllUsers);
 
 export default router;

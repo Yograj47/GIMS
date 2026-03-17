@@ -23,7 +23,7 @@ router
 
 router
     .route("/transactions/:id/credit")
-    .put(rbac("transaction:write"), updateCreditStatus)
+    .put(rbac("transaction:audit"), updateCreditStatus)
 
 router
     .route("/movements/product-history/:productId")

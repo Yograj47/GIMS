@@ -27,7 +27,6 @@ router.post('/verify-account', userAuth, verifyEmail);
 router.post('/reset-password-otp', resetPasswordOtp);
 router.post('/reset-password', resetPassword);
 
-// Update Role (Admin only)
-router.put('/role/:id', userAuth, rbac("all"), updateRole);
+router.put('/role/:id', userAuth, rbac("user:write"), updateRole);
 
 export default router;
