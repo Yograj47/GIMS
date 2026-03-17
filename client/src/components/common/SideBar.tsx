@@ -14,6 +14,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen
 } from "lucide-react";
+import { useAuthStore } from "@/store/useAuth";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -25,6 +26,7 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const iconStyle = "h-6 w-6 shrink-0";
 
     const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
+    const { user } = useAuthStore();
 
     // ---------- Screen Detection ----------
     useEffect(() => {
@@ -51,15 +53,20 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
     // ---------- Menu ----------
     const menu = [
-        { name: "Dashboard", icon: <LayoutDashboard className={iconStyle} />, path: "/dashboard" },
-        { name: "Products", icon: <Box className={iconStyle} />, path: "/products" },
-        { name: "Suppliers", icon: <Truck className={iconStyle} />, path: "/suppliers" },
-        { name: "Stock Movement", icon: <ArrowLeftRight className={iconStyle} />, path: "/stock-movements" },
-        { name: "Alerts", icon: <Bell className={iconStyle} />, path: "/alerts" },
-        { name: "Reports", icon: <BarChart3 className={iconStyle} />, path: "/reports" },
-        { name: "Users", icon: <Users className={iconStyle} />, path: "/users" },
-        { name: "Settings", icon: <Settings className={iconStyle} />, path: "/settings" },
+        { name: "Dashboard", icon: <LayoutDashboard className={iconStyle} />, path: "/dashboard", roles: ['admin', 'owner', 'staff'] },
+        { name: "Products", icon: <Box className={iconStyle} />, path: "/products", roles: ['admin', 'owner', 'staff'] },
+        { name: "Suppliers", icon: <Truck className={iconStyle} />, path: "/suppliers", roles: ['admin', 'owner'] },
+        { name: "Stock Movement", icon: <ArrowLeftRight className={iconStyle} />, path: "/stock-movements", roles: ['admin', 'staff'] },
+        { name: "Alerts", icon: <Bell className={iconStyle} />, path: "/alerts", roles: ['admin', 'staff'] },
+        { name: "Reports", icon: <BarChart3 className={iconStyle} />, path: "/reports", roles: ['admin', 'owner'] },
+        { name: "Users", icon: <Users className={iconStyle} />, path: "/users", roles: ['admin'] },
+        { name: "Settings", icon: <Settings className={iconStyle} />, path: "/settings", roles: ['admin', 'owner'] },
     ];
+
+
+    const filteredNavigation = menu.filter(item =>
+        item.roles.includes(user?.role.toLowerCase() || "")
+    );
 
     return (
         <aside
@@ -101,7 +108,7 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
             {/* ---------- Navigation ---------- */}
             <nav className="flex-1 mt-4 flex flex-col gap-2 px-2 overflow-y-auto">
-                {menu.map(item => {
+                {filteredNavigation.map(item => {
                     const active = location.pathname.startsWith(item.path);
 
                     return (

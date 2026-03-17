@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, CheckCircle2, XCircle, Eye } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CheckCircle2, Newspaper, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -73,12 +73,12 @@ export const getTransactionColumns = (navigate: any): ColumnDef<any>[] => [
         <Button
           variant="ghost"
           size="sm"
+          className="h-8 px-3 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 gap-1.5 font-black text-[10px] uppercase tracking-widest transition-all rounded-lg"
           onClick={() => navigate(`/reports/transaction/${row.original._id}`, { state: { transaction: row.original } })}
-          className="rounded-lg h-8 w-8 p-0 hover:bg-indigo-50 hover:text-indigo-600"
         >
-          <Eye size={16} />
+         <Newspaper/> View Bill
         </Button>
       </div>
     ),
   },
-  ];
+];

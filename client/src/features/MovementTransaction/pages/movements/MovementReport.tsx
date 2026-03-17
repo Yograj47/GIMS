@@ -6,11 +6,15 @@ import { getMovementColumns } from "../../components/MovementColumns"
 import { DataTable } from "@/components/common/DataTable"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { notify } from "@/lib/toast"
+import { Loading } from "@/lib/loader"
+import { exportToCSV } from "@/lib/csvExport"
 
 export default function StockMovementReport() {
     const { fetchMovements, movements, isLoading, meta } = useMovementTransactions()
     const [searchQuery, setSearchQuery] = useState("")
     const [movementType, setMovementType] = useState<string>("All Movements")
+    const [IsExporting, setIsExporting] = useState<boolean>(false);
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -18,10 +22,40 @@ export default function StockMovementReport() {
     })
 
     useEffect(() => {
-        // Normalize "All Movements" to empty string for API
+        if (!IsExporting) {
+            const typeFilter = movementType === "All Movements" ? "" : movementType;
+            fetchMovements(pagination.pageIndex + 1, pagination.pageSize, searchQuery, typeFilter);
+        }
+    }, [pagination, searchQuery, movementType, IsExporting]);
+
+    const handleExport = () => {
+        setIsExporting(true);
         const typeFilter = movementType === "All Movements" ? "" : movementType;
-        fetchMovements(pagination.pageIndex + 1, pagination.pageSize, searchQuery, typeFilter)
-    }, [fetchMovements, pagination, searchQuery, movementType])
+        fetchMovements(1, 1000, searchQuery, typeFilter, true);
+    };
+
+    useEffect(() => {
+        if (IsExporting && !isLoading && movements.length > 0) {
+
+            const rows = movements.map(m => ({
+                "Date": new Date(m.createdAt).toLocaleString(),
+                "Product": m.product?.name || "N/A",
+                "Type": m.movementType,
+                "Qty": m.movementType === "IN" ? `+${m.quantity}` : `-${m.quantity}`,
+                "Unit": m.unit?.name || "Pcs",
+                "Reason": m.reason,
+                "Operator": m.performedBy?.name || "System"
+            }));
+
+            exportToCSV(rows, `Stock_Movement_${new Date().toISOString().split('T')[0]}`);
+            setIsExporting(false);
+
+            const typeFilter = movementType === "All Movements" ? "" : movementType;
+            fetchMovements(pagination.pageIndex + 1, pagination.pageSize, searchQuery, typeFilter);
+            notify.success("Export Complete");
+        }
+    }, [IsExporting, isLoading, movements]);
+
 
     return (
         <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500 pb-10">
@@ -31,8 +65,15 @@ export default function StockMovementReport() {
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">Movement Ledger</h1>
                     <p className="text-sm font-medium text-slate-500 italic">Inventory transaction audit trail</p>
                 </div>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-sm transition-all">
-                    <Download size={16} /> Export CSV
+                <Button onClick={handleExport} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-sm transition-all" disabled={IsExporting}>
+                    {
+                        IsExporting ? (
+                            <>
+                                <Loading size="sm" className="mr-2" /> Exporting...
+                            </>)
+                            :
+                            (<><Download size={16} /> Export CSV</>)
+                    }
                 </Button>
             </div>
 

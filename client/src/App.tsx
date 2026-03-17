@@ -1,4 +1,4 @@
-import { useEffect } from "react"; // Added
+import { useEffect } from "react"; 
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import axios from "axios";
 
@@ -16,9 +16,9 @@ import SettingsLayout from "./layout/SettingLayout";
 // Pages
 import Login from "./features/auth/pages/Login";
 import Register from "./features/auth/pages/Register";
-import Home from "./features/DefaultPages/Home";
+import Home from "./features/StaticPage/Home";
 import VerifyAccount from "./features/auth/pages/VerifyAccount";
-import NotFound from "./features/DefaultPages/NotFound";
+import NotFound from "./features/StaticPage/NotFound";
 import Products from "./features/products/pages/Products";
 import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
@@ -43,7 +43,7 @@ import StockMovementForm from "./features/MovementTransaction/components/Movemen
 import ProductMovementHistory from "./features/MovementTransaction/pages/movements/ProductMovementHistory";
 import TransactionViewPage from "./features/MovementTransaction/pages/transaction/TransactionViewPage";
 import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
-import ProfilePage from "./features/DefaultPages/Profile";
+import ProfilePage from "./features/StaticPage/Profile";
 
 axios.defaults.withCredentials = true;
 

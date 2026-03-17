@@ -7,12 +7,17 @@ import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/common/DataTable";
 import { getStockColumns } from "../../components/StockColumns";
 import { cn } from "@/lib/utils";
+import { exportToCSV } from "@/lib/csvExport";
+import { notify } from "@/lib/toast";
+import { Loading } from "@/lib/loader";
 
 export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
     const [searchQuery, setSearchQuery] = useState("");
     const [stockLevel, setStockLevel] = useState<string>("All Levels");
     const navigate = useNavigate();
+    const [IsExporting, setIsExporting] = useState<boolean>(false);
+
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -20,14 +25,56 @@ export default function StockReport() {
     });
 
     useEffect(() => {
+        if (!IsExporting) {
+            const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
+            fetchProducts(
+                pagination.pageIndex + 1,
+                pagination.pageSize,
+                searchQuery,
+                levelFilter
+            );
+        }
+    }, [fetchProducts, pagination, searchQuery, stockLevel]);
+
+    const handleExport = () => {
+
+        setIsExporting(true);
         const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
         fetchProducts(
-            pagination.pageIndex + 1,
-            pagination.pageSize,
+            1,
+            1000,
             searchQuery,
-            levelFilter
+            levelFilter,
+            true
         );
-    }, [fetchProducts, pagination, searchQuery, stockLevel]);
+    };
+
+    useEffect(() => {
+        if (IsExporting && !isLoading && products.length > 0) {
+
+            const rows = products.map(p => ({
+                "Date": new Date(p.createdAt).toLocaleString(),
+                "Product": p.name || "N/A",
+                "Base Price": p.basePrice,
+                "Selling Price": p.sellingPrice,
+                "Quantity": p.quantity,
+                "Threshold": p.threshold,
+                "Stock Value": p.sellingPrice * p.quantity
+            }));
+
+            exportToCSV(rows, `Stock_Movement_${new Date().toISOString().split('T')[0]}`);
+            setIsExporting(false);
+
+            const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
+            fetchProducts(
+                pagination.pageIndex + 1,
+                pagination.pageSize,
+                searchQuery,
+                levelFilter
+            );
+            notify.success("Export Complete");
+        }
+    }, [IsExporting, isLoading, products]);
 
 
     const columns = useMemo(() => getStockColumns(navigate), [navigate]);
@@ -44,8 +91,15 @@ export default function StockReport() {
                         Comprehensive view of current inventory status
                     </p>
                 </div>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-lg shadow-indigo-100 transition-all">
-                    <Download size={16} /> Export CSV
+                <Button onClick={handleExport} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 font-bold text-xs gap-2 h-11 shadow-sm transition-all" disabled={IsExporting}>
+                    {
+                        IsExporting ? (
+                            <>
+                                <Loading size="sm" className="mr-2" /> Exporting...
+                            </>)
+                            :
+                            (<><Download size={16} /> Export CSV</>)
+                    }
                 </Button>
             </div>
 
@@ -61,16 +115,16 @@ export default function StockReport() {
                         className="pl-12 h-12 border-none bg-transparent font-bold text-xs tracking-widest focus-visible:ring-0 shadow-none placeholder:text-slate-400 uppercase"
                     />
                 </div>
-                
+
                 <div className="hidden md:block h-8 w-px bg-slate-200" />
-                
+
                 {/* Properly Styled Select Group */}
                 <div className="relative w-full md:w-64 px-2">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                         <Filter size={16} className="text-indigo-500" />
                     </div>
-                    
-                    <select 
+
+                    <select
                         value={stockLevel}
                         onChange={(e) => setStockLevel(e.target.value)}
                         className={cn(
@@ -88,7 +142,7 @@ export default function StockReport() {
                     {/* Custom Chevron Arrow */}
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
                 </div>

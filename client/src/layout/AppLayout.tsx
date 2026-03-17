@@ -26,10 +26,12 @@ function AppLayout() {
 
     return (
         <div className="flex h-screen w-full bg-[#f1f5f9] overflow-hidden">
-            <Sidebar
-                isOpen={sidebarOpen}
-                onToggle={() => setSidebarOpen(!sidebarOpen)}
-            />
+            <div className="no-print">
+                <Sidebar
+                    isOpen={sidebarOpen}
+                    onToggle={() => setSidebarOpen(!sidebarOpen)}
+                />
+            </div>
 
             <div
                 className={cn(
@@ -37,7 +39,9 @@ function AppLayout() {
                     collapsed ? "ml-16" : "ml-64"
                 )}
             >
-                <AppHeader />
+                <div className="no-print">
+                    <AppHeader />
+                </div>
 
                 <main className="h-[90%] overflow-y-auto px-3 py-4">
                     <div className="max-w-7xl mx-auto">
