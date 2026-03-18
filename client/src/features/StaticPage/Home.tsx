@@ -1,44 +1,51 @@
 import { Link } from "react-router-dom";
+import { ArrowRight, Info, PackageSearch } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Home = () => {
     return (
-        <>
-            <div className="max-w-3xl text-center">
-                {/* Heading */}
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Welcome to <span className="text-gray-700">GIMS</span>
-                </h1>
+        <div className="max-w-3xl text-center animate-in fade-in duration-700">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
+                <PackageSearch className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">
+                    Inventory Ecosystem
+                </span>
+            </div>
 
-                {/* Description */}
-                <p className="text-lg text-gray-600 mb-4 leading-relaxed">
-                    GIMS helps you manage grocery inventory, stock movements, suppliers,
-                    and transactions in a simple and organized way.
-                </p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 tracking-tight leading-[1.1]">
+                Master Your Stock <br />
+                <span className="text-blue-500">Simplify Your Business.</span>
+            </h1>
 
-                <p className="text-gray-500 mb-10">
-                    Everything you need to track stock, sales, and purchases — all in one
-                    system.
-                </p>
+            <p className="text-base md:text-lg text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
+                GIMS provides the professional tools you need to manage grocery inventory,
+                track stock movements, and audit transactions in one secure, real-time system.
+            </p>
 
-                {/* Actions */}
-                <div className="flex items-center justify-center gap-4">
-                    <Link
-                        to="/login"
-                        className="px-6 py-3 rounded-md bg-gray-800 text-white text-sm font-medium hover:bg-gray-700 transition"
-                    >
-                        Sign In
+            <p className="text-slate-500 mb-8 text-sm font-medium italic">
+                The ultimate control center for stock, sales, and supplier management.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-blue-900/20 group">
+                    <Link to="/login" className="flex items-center gap-2">
+                        Sign In to Dashboard
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
-
-                    <Link
-                        to="/about"
-                        className="px-6 py-3 rounded-md border border-gray-400 text-gray-700 text-sm font-medium hover:bg-gray-200 transition"
-                    >
+                </Button>
+                <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full sm:w-auto text-slate-400 hover:text-white hover:bg-white/5 h-12 px-8 rounded-xl transition-all"
+                >
+                    <Link to="/about" className="flex items-center gap-2">
+                        <Info className="w-4 h-4" />
                         Learn More
                     </Link>
-                </div>
+                </Button>
             </div>
-        </>
+        </div>
     );
 };
-
 export default Home;

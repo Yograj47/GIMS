@@ -4,28 +4,32 @@ export const notify = {
   success: (message: string, description?: string) => {
     toast.success(message, {
       description,
-      className: "rounded-xl border-emerald-100 bg-emerald-50 text-emerald-900",
+      className: "rounded-2xl border-emerald-500/20 bg-slate-900/90 backdrop-blur-xl text-emerald-400 shadow-2xl shadow-emerald-900/20 font-sans",
+      descriptionClassName: "text-slate-400 font-medium",
     });
   },
   
   error: (message: string, description?: string) => {
     toast.error(message, {
       description,
-      className: "rounded-xl border-red-100 bg-red-50 text-red-900",
+      className: "rounded-2xl border-red-500/20 bg-slate-900/90 backdrop-blur-xl text-red-400 shadow-2xl shadow-red-900/20 font-sans",
+      descriptionClassName: "text-slate-400 font-medium",
     });
   },
 
   info: (message: string, description?: string) => {
     toast(message, {
       description,
-      className: "rounded-xl border-blue-100 bg-blue-50 text-blue-900",
+      className: "rounded-2xl border-blue-500/20 bg-slate-900/90 backdrop-blur-xl text-blue-400 shadow-2xl shadow-blue-900/20 font-sans",
+      descriptionClassName: "text-slate-400 font-medium",
     });
   },
 
   warning: (message: string, description?: string) => {
     toast.warning(message, {
       description,
-      className: "rounded-xl border-amber-100 bg-amber-50 text-amber-900",
+      className: "rounded-2xl border-amber-500/20 bg-slate-900/90 backdrop-blur-xl text-amber-400 shadow-2xl shadow-amber-900/20 font-sans",
+      descriptionClassName: "text-slate-400 font-medium",
     });
   }
 };

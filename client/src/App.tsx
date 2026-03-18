@@ -45,6 +45,7 @@ import TransactionViewPage from "./features/MovementTransaction/pages/transactio
 import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
 import ProfilePage from "./features/StaticPage/Profile";
 import Unauthorized from "./features/StaticPage/Unauthorized";
+import HelpPage from "./features/StaticPage/Helper";
 
 axios.defaults.withCredentials = true;
 
@@ -65,6 +66,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/help" element={<HelpPage/>} />
             </Route>
             <Route path="/verify" element={<VerifyAccount />} />
             <Route path="/forget-password" element={<ForgotPassword />} />
@@ -137,7 +139,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        <Toaster position="top-right" richColors closeButton />
+        <Toaster position="top-right" theme="dark" closeButton richColors />
       </div>
     </BrowserRouter>
   );
