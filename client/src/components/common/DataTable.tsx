@@ -42,7 +42,6 @@ export function DataTable<TData>({
     isLoading,
     renderExpandedRow
 }: DataTableProps<TData>) {
-
     const [expanded, setExpanded] = React.useState({})
 
     const table = useReactTable({
@@ -59,93 +58,70 @@ export function DataTable<TData>({
     })
 
     return (
-        <div className="flex flex-col h-full min-h-0">
-            {/* Table Container - Rounded with a more subtle border and soft shadow */}
-            <div className="flex flex-col flex-1 min-h-0 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-
-                {/* Scroll Area */}
-                <div className="flex-1 min-h-0 overflow-auto custom-scrollbar">
-                    <Table noWrapper className="w-full border-separate border-spacing-0">
-                        {/* Header: Using a darker slate for a "Control Center" feel */}
-                        <TableHeader className="sticky top-0 z-20">
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
-                                    {headerGroup.headers.map((header) => (
-                                        <TableHead
-                                            key={header.id}
-                                            className="h-14 px-8 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40"
-                                        >
-                                            {flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                <TableRow className="hover:bg-transparent border-none">
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className="h-100 text-center"
+        <div className="flex flex-col h-full bg-white border border-slate-200">
+            <div className="flex-1 overflow-auto custom-scrollbar">
+                <Table className="w-full border-separate border-spacing-0">
+                    <TableHeader className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-sm">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead
+                                        key={header.id}
+                                        className="h-11 px-6 text-[11px] font-bold text-slate-500 uppercase tracking-tight border-b border-slate-200"
                                     >
-                                        <div className="flex flex-col items-center justify-center gap-4">
-                                            <Loading size="lg" />
-                                            <div className="flex flex-col gap-1">
-                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">
-                                                    Retrieving Data
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : table.getRowModel().rows.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <React.Fragment key={row.id}>
-                                        <TableRow
-                                            className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors group cursor-pointer"
-                                            onClick={() => row.toggleExpanded()} // Make the whole row clickable
-                                        >
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id} className="px-8 py-4 text-sm text-slate-700">
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </TableCell>
-                                            ))}
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-64 text-center">
+                                    <div className="flex flex-col items-center justify-center gap-2">
+                                        <Loading size="md" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            Synchronizing...
+                                        </span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <React.Fragment key={row.id}>
+                                    <TableRow
+                                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors cursor-default"
+                                        onClick={() => row.toggleExpanded()} 
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id} className="px-6 py-3 text-sm text-slate-600 border-b border-slate-100">
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                    {row.getIsExpanded() && renderExpandedRow && (
+                                        <TableRow className="bg-slate-50/30">
+                                            <TableCell colSpan={columns.length} className="p-0 border-b border-slate-200">
+                                                {renderExpandedRow(row)}
+                                            </TableCell>
                                         </TableRow>
-                                        {/* RENDER EXPANDED CONTENT HERE */}
-                                        {row.getIsExpanded() && renderExpandedRow && (
-                                            <TableRow className="hover:bg-transparent border-none">
-                                                <TableCell colSpan={columns.length} className="p-0">
-                                                    {renderExpandedRow(row)}
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </React.Fragment>
-                                ))
-                            ) : (
-                                <TableRow className="hover:bg-transparent">
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className="h-100 p-0"
-                                    >
-                                        <div className="flex flex-col items-center justify-center h-full w-full gap-2">
-                                            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">
-                                                No results found
-                                            </span>
-                                            <p className="text-slate-300 text-xs font-medium italic">
-                                                Try adjusting your filters
-                                            </p>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                                    )}
+                                </React.Fragment>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-32 text-center text-slate-400 text-xs italic">
+                                    No records found for the current criteria.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
-                {/* Pagination - Simplified footer */}
-                <div className="border-t border-slate-100 bg-white px-6 py-4 shrink-0">
-                    <DataTablePagination table={table} totalItems={rowCount} />
-                </div>
+            <div className="border-t border-slate-200 bg-white px-4 py-3">
+                <DataTablePagination table={table} totalItems={rowCount} />
             </div>
         </div>
     )

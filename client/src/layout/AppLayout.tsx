@@ -21,14 +21,14 @@ function AppLayout() {
         return () => window.removeEventListener("resize", update);
     }, []);
 
-    // Matches the new Sidebar logic: 
-    // Desktop can toggle, Tablet/Mobile are always collapsed (icon only)
     const collapsed = screen === "desktop" ? !sidebarOpen : true;
 
     return (
-        <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden">
+        
+        <div className="flex h-screen w-full bg-[#f1f5f9] overflow-hidden font-sans antialiased text-slate-900">
+            
             {/* 1. SIDEBAR WRAPPER */}
-            <div className="no-print">
+            <div className="no-print relative z-60">
                 <Sidebar
                     isOpen={sidebarOpen}
                     onToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -39,20 +39,17 @@ function AppLayout() {
             <div
                 className={cn(
                     "flex flex-col flex-1 min-w-0 transition-all duration-500 ease-in-out",
-                    // Adjusted margins to match the new Sidebar widths (20 and 64)
                     collapsed ? "ml-20" : "ml-64",
-                    // On mobile, we might want to hide the margin entirely if you 
-                    // implement a drawer, but for now, this keeps it consistent:
-                    screen === "mobile" && "ml-20" 
+                    screen === "mobile" && "ml-0" 
                 )}
             >
-                <div className="no-print">
+    
+                <div className="no-print border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-50">
                     <AppHeader />
                 </div>
 
-                {/* 3. SCROLLABLE CANVAS */}
-                <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 md:px-8">
-                    <div className="max-w-400 mx-auto animate-in fade-in duration-700">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden">
+                    <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <Outlet />
                     </div>
                 </main>

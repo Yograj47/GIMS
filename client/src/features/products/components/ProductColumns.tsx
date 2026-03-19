@@ -1,137 +1,109 @@
-import { Calculator, Edit3, Layers } from "lucide-react";
+import { Edit3, AlertCircle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ProductData } from "@/types/Product";
 import type { NavigateFunction } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGlobalStore } from "@/store/globalStore";
+import { cn } from "@/lib/utils";
 
 export const getProductColumns = (navigate: NavigateFunction): ColumnDef<ProductData>[] => {
     const settings = useGlobalStore.getState().settings;
     const currency = settings?.currency || "Rs";
+
     return [
         {
             accessorKey: "name",
             header: "Product Details",
-            cell: ({ row }) => {
-                const product = row.original;
-                const isLowStock = product.quantity <= product.threshold;
-                return (
-                    <div className="flex items-center gap-4 group">
-                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 font-black text-xs border transition-all shadow-sm ${isLowStock
-                            ? "bg-red-50 text-red-500 border-red-100 group-hover:bg-red-500 group-hover:text-white"
-                            : "bg-blue-50 text-blue-600 border-blue-100 group-hover:bg-blue-600 group-hover:text-white"
-                            }`}>
-                            {product.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="font-black text-slate-900 text-sm uppercase tracking-tight">
-                                {product.name}
-                            </span>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5 flex items-center gap-1">
-                                SKU-{product._id.slice(-6).toUpperCase()}
-                            </span>
-                        </div>
-                    </div>
-                );
-            },
+            cell: ({ row }) => (
+                <div className="flex flex-col py-1">
+                    <span className="font-bold text-slate-900 text-[13px] leading-tight">
+                        {row.original.name}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                        SKU · {row.original._id.slice(-6).toUpperCase()}
+                    </span>
+                </div>
+            ),
         },
         {
             accessorKey: "category.name",
             header: "Category",
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <Layers size={14} className="text-slate-300" />
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-black text-[10px] uppercase px-2 py-0.5 rounded-md tracking-tighter">
-                        {row.original.category.name}
-                    </Badge>
-                </div>
+                <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm uppercase tracking-tighter">
+                    {row.original.category.name}
+                </span>
             ),
         },
         {
             accessorKey: "quantity",
-            header: "Stock Level",
+            header: "Inventory",
             cell: ({ row }) => {
-                const product = row.original;
-                const isLowStock = product.quantity <= product.threshold;
+                const isLow = row.original.quantity <= row.original.threshold;
                 return (
-                    <div className="flex flex-col gap-1.5 min-w-25">
-                        <div className="flex items-center gap-2">
-                            <span className={`text-sm font-black ${isLowStock ? "text-red-600" : "text-slate-900"}`}>
-                                {product.quantity} {product.unit.name}
-                            </span>
-                            {isLowStock && (
-                                <Badge className="bg-red-50 text-red-600 hover:bg-red-50 border-none text-[9px] font-black h-4 px-1">
-                                    LOW
-                                </Badge>
-                            )}
-                        </div>
-                        <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
-                            <div
-                                className={`h-full transition-all duration-500 ${isLowStock ? "bg-red-500" : "bg-blue-500"}`}
-                                style={{ width: `${Math.min((product.quantity / (product.threshold * 2)) * 100, 100)}%` }}
-                            />
-                        </div>
+                    <div className="flex items-center gap-2 tabular-nums">
+                        <span className={cn(
+                            "text-[13px] font-bold px-2 py-0.5 rounded",
+                            isLow ? "text-red-700 bg-red-50" : "text-blue-700 bg-blue-50"
+                        )}>
+                            {row.original.quantity}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase">
+                            {row.original.unit.name}
+                        </span>
+                        {isLow && <AlertCircle size={12} className="text-red-500 animate-pulse" />}
                     </div>
                 );
             },
         },
         {
             id: "pricing",
-            header: () => <div className="text-right">Pricing (INR)</div>,
-            cell: ({ row }) => {
-                const product = row.original;
-                return (
-                    <div className="flex items-center gap-4 justify-end">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Buy</span>
-                            <span className="text-xs font-bold text-slate-500">₹{product.basePrice}</span>
-                        </div>
-                        <div className="flex flex-col items-end border-l border-slate-100 pl-4">
-                            <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">Sell</span>
-                            <span className="text-sm font-black text-slate-900">₹{product.sellingPrice}</span>
-                        </div>
+            header: () => <div className="text-right">Unit Pricing</div>,
+            cell: ({ row }) => (
+                <div className="text-right tabular-nums">
+                    <div className="text-[13px] font-bold text-blue-600">
+                        {currency}{row.original.sellingPrice.toLocaleString()}
                     </div>
-                );
-            },
+                    <div className="text-[10px] text-slate-400 font-medium uppercase">
+                        Cost: {currency}{row.original.basePrice}
+                    </div>
+                </div>
+            ),
         },
         {
             id: "valuation",
-            header: () => <div className="text-right uppercase tracking-widest text-[10px] font-black text-slate-400">Inventory Value</div>,
+            header: () => <div className="text-right">Total Valuation</div>,
             cell: ({ row }) => {
-                const product = row.original;
-                const totalValuation = product.quantity * product.sellingPrice;
+                const totalVal = row.original.quantity * row.original.sellingPrice;
                 return (
-                    <div className="flex flex-col items-end justify-center">
-                        <div className="flex items-center gap-1 text-slate-400 mb-0.5">
-                            <Calculator size={10} />
-                            <span className="text-[9px] font-black uppercase tracking-tighter">Total Value</span>
-                        </div>
-                        <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
-                            {currency} {totalValuation.toLocaleString()}
+                    <div className="text-right tabular-nums">
+                        <span className="text-[13px] font-black text-emerald-600">
+                            {currency}{totalVal.toLocaleString()}
                         </span>
+                        <div className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                            Gross Value
+                        </div>
                     </div>
                 );
             },
         },
         {
             id: "actions",
-            header: () => <div className="text-right">Actions</div>,
+            header: "",
             cell: ({ row }) => (
-                <div className="text-right">
+                <div className="flex justify-end">
                     <Button
                         variant="ghost"
-                        size="sm"
-                        className="rounded-xl hover:bg-slate-100 h-9 w-9 p-0 text-slate-400 hover:text-blue-600"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
                         onClick={(e) => {
-                            e.stopPropagation(); // Prevent row expansion if applicable
+                            e.stopPropagation();
                             navigate(`/products/edit/${row.original._id}`);
                         }}
                     >
-                        <Edit3 size={16} strokeWidth={2.5} />
+                        <Edit3 size={14} />
                     </Button>
                 </div>
             ),
         },
-    ]
+    ];
 };

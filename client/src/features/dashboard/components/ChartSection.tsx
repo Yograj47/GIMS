@@ -8,18 +8,18 @@ interface ChartSectionProps {
 
 export default function ChartSection({ data, options }: ChartSectionProps) {
     return (
-        <Card className="xl:col-span-3 border-slate-300 shadow-xl shadow-slate-100/50 rounded-[2rem] overflow-hidden bg-white">
-            <CardHeader className="flex flex-row items-center justify-between px-8 pt-8">
+        <Card className="xl:col-span-3 border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white">
+            <CardHeader className="flex flex-row items-center justify-between px-8 pt-8 pb-4">
                 <div>
-                    <CardTitle className="text-xl font-black text-slate-800 tracking-tight">Sales vs Purchases</CardTitle>
-                    <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">7-Day Performance Window</p>
+                    <CardTitle className="text-lg font-black text-slate-900 tracking-tight uppercase">Performance Analytics</CardTitle>
+                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">7-Day Operational Window</p>
                 </div>
-                <div className="flex gap-4">
-                    <LegendItem color="bg-indigo-600" label="STOCK IN" />
+                <div className="flex gap-6">
+                    <LegendItem color="bg-blue-600" label="STOCK IN" />
                     <LegendItem color="bg-emerald-500" label="STOCK OUT" />
                 </div>
             </CardHeader>
-            <CardContent className="px-6 pb-8 h-87.5">
+            <CardContent className="px-6 pb-6 h-87.5">
                 <Line data={data} options={options} />
             </CardContent>
         </Card>

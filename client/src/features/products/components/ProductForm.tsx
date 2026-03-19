@@ -1,7 +1,7 @@
-import { useForm, type Resolver, Controller } from "react-hook-form"; // Added Controller
+import { useForm, type Resolver, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData, type ProductData } from "@/types/Product";
-import { TrendingUp, BadgeIndianRupee, Package, AlertCircle } from "lucide-react";
+import { TrendingUp, BadgeIndianRupee, Package, AlertCircle, Percent } from "lucide-react";
 import type { CategoryData } from "@/types/Category";
 import type { UnitData } from "@/types/Unit";
 import { useEffect } from "react";
@@ -15,14 +15,7 @@ type ProductFormProps = {
 };
 
 export default function ProductForm({ initialData, categories, units, onSubmit }: ProductFormProps) {
-    const {
-        register,
-        handleSubmit,
-        watch,
-        reset,
-        control, // Added control for the Controller component
-        formState: { errors },
-    } = useForm<ProductFormData>({
+    const { register, handleSubmit, watch, reset, control, formState: { errors } } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
         defaultValues: {
             name: initialData?.name ?? "",
@@ -37,20 +30,19 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
         },
     });
 
-    // Formatting options for react-select
     const categoryOptions = categories?.map(c => ({ value: c._id, label: c.name })) || [];
     const unitOptions = units?.map(u => ({ value: u._id, label: `${u.name} (${u.shortForm})` })) || [];
 
-    // Custom styles for react-select to match your UI
     const customSelectStyles = {
         control: (base: any, state: any) => ({
             ...base,
-            borderRadius: '0.75rem',
+            borderRadius: '0.125rem', // Match rounded-sm
             padding: '2px',
-            border: state.isFocused ? '1px solid #3b82f6' : '1px solid #e2e8f0',
-            boxShadow: state.isFocused ? '0 0 0 4px rgba(59, 130, 246, 0.1)' : 'none',
-            backgroundColor: '#f8fafc80',
-            '&:hover': { border: '1px solid #3b82f6' }
+            fontSize: '13px',
+            border: state.isFocused ? '1px solid #2563eb' : '1px solid #e2e8f0',
+            boxShadow: 'none',
+            backgroundColor: 'white',
+            '&:hover': { border: '1px solid #cbd5e1' }
         }),
     };
 
@@ -73,31 +65,28 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const buyPrice = watch("basePrice") || 0;
     const sellPrice = watch("sellingPrice") || 0;
     const profit = sellPrice - buyPrice;
-    const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(0) : 0;
+    const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(1) : 0;
 
-    const inputStyle = "w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium";
-    const labelStyle = "text-[13px] font-bold text-slate-700 flex items-center gap-2";
-    const errorStyle = "text-xs text-red-500 font-medium mt-1 ml-1";
+    const inputStyle = "w-full rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
+    const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
+    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-blue-600 mb-4 flex items-center gap-2";
 
     return (
         <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => { }))} className="w-full space-y-8">
-
             {/* Section 1: Basic Info */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 text-blue-600 mb-2">
-                    <Package size={18} strokeWidth={2.5} />
-                    <h2 className="font-black uppercase tracking-wider text-xs">General Information</h2>
+            <div>
+                <div className={sectionTitle}>
+                    <Package size={14} strokeWidth={3} /> Basic Identity
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="md:col-span-2 space-y-2">
-                        <label className={labelStyle}>Product Name <span className="text-red-500">*</span></label>
-                        <input {...register("name")} placeholder="e.g. Premium Basmati Rice" className={inputStyle} spellCheck="true" autoComplete="on" />
-                        {errors.name && <p className={errorStyle}>{errors.name.message}</p>}
+                        <label className={labelStyle}>Full Product Name <span className="text-red-500">*</span></label>
+                        <input {...register("name")} placeholder="Search or enter product name..." className={inputStyle} />
+                        {errors.name && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
-                        <label className={labelStyle}>Category <span className="text-red-500">*</span></label>
+                        <label className={labelStyle}>Classification <span className="text-red-500">*</span></label>
                         <Controller
                             name="categoryId"
                             control={control}
@@ -107,17 +96,15 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                                     options={categoryOptions}
                                     value={categoryOptions.find(opt => opt.value === field.value)}
                                     onChange={(val) => field.onChange(val?.value)}
-                                    placeholder="Search category..."
                                     styles={customSelectStyles}
                                     isClearable
                                 />
                             )}
                         />
-                        {errors.categoryId && <p className={errorStyle}>{errors.categoryId.message}</p>}
                     </div>
 
                     <div className="space-y-2">
-                        <label className={labelStyle}>Unit of Measure <span className="text-red-500">*</span></label>
+                        <label className={labelStyle}>Standard Unit <span className="text-red-500">*</span></label>
                         <Controller
                             name="unitId"
                             control={control}
@@ -127,81 +114,69 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                                     options={unitOptions}
                                     value={unitOptions.find(opt => opt.value === field.value)}
                                     onChange={(val) => field.onChange(val?.value)}
-                                    placeholder="Search unit..."
                                     styles={customSelectStyles}
                                     isClearable
                                 />
                             )}
                         />
-                        {errors.unitId && <p className={errorStyle}>{errors.unitId.message}</p>}
                     </div>
                 </div>
             </div>
 
-            {/* Section 2: Pricing & Profit Calculator */}
-            <div className="space-y-4 bg-blue-50/30 p-6 rounded-2xl border border-blue-100">
-                <div className="flex items-center gap-2 text-blue-600 mb-2">
-                    <BadgeIndianRupee size={18} strokeWidth={2.5} />
-                    <h2 className="font-black uppercase tracking-wider text-xs">Pricing & Profit</h2>
+            {/* Section 2: Pricing Logic */}
+            <div className="bg-slate-50 border border-slate-200 p-5 rounded-sm">
+                <div className={sectionTitle}>
+                    <BadgeIndianRupee size={14} strokeWidth={3} /> Valuation Logic
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                        <label className={labelStyle}>Buying Price (Cost)</label>
+                        <label className={labelStyle}>Base Cost (Unit)</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
-                            <input type="number" {...register("basePrice", { valueAsNumber: true })} className={`${inputStyle} pl-8`} />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
+                            <input type="number" {...register("basePrice", { valueAsNumber: true })} className={`${inputStyle} pl-10`} />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className={labelStyle}>Selling Price (Retail)</label>
+                        <label className={labelStyle}>Market Price (Retail)</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-600 font-bold">₹</span>
-                            <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-8 border-blue-200 focus:ring-blue-500/20`} />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 font-bold text-xs">Rs.</span>
+                            <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-10 border-blue-100`} />
                         </div>
                     </div>
 
-                    {/* LIVE PROFIT PREVIEW CARD */}
-                    <div className={`md:col-span-2 flex items-center justify-between p-4 rounded-xl border-2 border-dashed transition-all ${profit >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"
-                        }`}>
+                    <div className={`md:col-span-2 flex items-center justify-between p-4 bg-white border ${profit >= 0 ? "border-emerald-100" : "border-red-100"}`}>
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${profit >= 0 ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
-                                <TrendingUp size={20} />
-                            </div>
+                            <TrendingUp size={18} className={profit >= 0 ? "text-emerald-500" : "text-red-500"} />
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 leading-none mb-1">Estimated Profit</p>
-                                <p className={`text-xl font-black ${profit >= 0 ? "text-emerald-700" : "text-red-700"}`}>
-                                    ₹{profit} <span className="text-sm font-medium opacity-70">per unit</span>
+                                <p className="text-[9px] font-bold uppercase text-slate-400 leading-none mb-1">Projected Net Margin</p>
+                                <p className={`text-lg font-black ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                                    Rs.{profit.toLocaleString()}
                                 </p>
                             </div>
                         </div>
-                        {profit > 0 && (
-                            <div className="text-right">
-                                <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Margin</p>
-                                <span className="bg-emerald-200 text-emerald-800 px-3 py-1 rounded-full font-black text-xs">
-                                    {profitPercentage}%
-                                </span>
-                            </div>
-                        )}
+                        <div className="text-right flex items-center gap-2">
+                            <Percent size={12} className="text-slate-300" />
+                            <span className={`px-2 py-0.5 rounded-sm font-black text-[11px] ${profit >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+                                {profitPercentage}%
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-
-            {/* Section 3: Inventory */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 text-blue-600 mb-2">
-                    <AlertCircle size={18} strokeWidth={2.5} />
-                    <h2 className="font-black uppercase tracking-wider text-xs">Inventory Controls</h2>
+            {/* Section 3: Stock Control */}
+            <div>
+                <div className={sectionTitle}>
+                    <AlertCircle size={14} strokeWidth={3} /> Stock Parameters
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                        <label className={labelStyle}>Current Stock Amount</label>
+                        <label className={labelStyle}>In-Hand Quantity</label>
                         <input type="number" {...register("quantity", { valueAsNumber: true })} className={inputStyle} />
                     </div>
                     <div className="space-y-2">
-                        <label className={labelStyle}>Low Stock Alert at</label>
+                        <label className={labelStyle}>Critical Alert Level</label>
                         <input type="number" {...register("threshold", { valueAsNumber: true })} className={inputStyle} />
                     </div>
                 </div>

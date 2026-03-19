@@ -1,8 +1,6 @@
 import {
     ChevronLeft,
     ChevronRight,
-    ChevronsLeft,
-    ChevronsRight
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -15,6 +13,7 @@ import {
 } from "@/components/ui/select"
 import { generatePaginationRange } from "@/lib/pagination"
 import type { Table } from "@tanstack/react-table"
+import { cn } from "@/lib/utils"
 
 interface DataTablePaginationProps<TData> {
     table: Table<TData>
@@ -28,32 +27,35 @@ export function DataTablePagination<TData>({
     const meta = table.getState().pagination
     const currentPage = meta.pageIndex + 1
     const totalPages = table.getPageCount()
-
-    // Using your logic here!
     const paginationRange = generatePaginationRange(currentPage, totalPages)
 
     return (
-        <div className="flex items-center justify-between px-2">
-            {/* 1. Left side: Selection status */}
-            <div className="flex-1 text-sm text-muted-foreground">
-                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                {totalItems} row(s) selected.
+        <div className="flex items-center justify-between">
+            {/* Context Stats */}
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
+                {table.getFilteredSelectedRowModel().rows.length > 0 ? (
+                    <span className="text-blue-600">
+                        {table.getFilteredSelectedRowModel().rows.length} rows selected
+                    </span>
+                ) : (
+                    `Total Results: ${totalItems}`
+                )}
             </div>
 
-            <div className="flex items-center space-x-6 lg:space-x-8">
-                {/* 2. Middle: Rows per page */}
-                <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium">Rows per page</p>
+            <div className="flex items-center gap-6">
+                {/* Page Size Selector */}
+                <div className="flex items-center gap-2">
+                    <p className="text-[11px] font-bold text-slate-500 uppercase">Size</p>
                     <Select
                         value={`${meta.pageSize}`}
                         onValueChange={(value) => table.setPageSize(Number(value))}
                     >
-                        <SelectTrigger className="h-8 w-17.5">
-                            <SelectValue placeholder={meta.pageSize} />
+                        <SelectTrigger className="h-8 w-16 text-xs border-slate-200 rounded-sm">
+                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent side="top">
-                            {[10, 20, 30, 40, 50].map((pageSize) => (
-                                <SelectItem key={pageSize} value={`${pageSize}`}>
+                            {[10, 20, 50].map((pageSize) => (
+                                <SelectItem key={pageSize} value={`${pageSize}`} className="text-xs">
                                     {pageSize}
                                 </SelectItem>
                             ))}
@@ -61,32 +63,28 @@ export function DataTablePagination<TData>({
                     </Select>
                 </div>
 
-                {/* 3. Right: Page Navigation using your Range */}
-                <div className="flex items-center space-x-2">
+                {/* Navigation Buttons */}
+                <div className="flex items-center gap-1">
                     <Button
-                        variant="outline"
-                        className="hidden h-8 w-8 p-0 lg:flex"
-                        onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        className="h-8 w-8 p-0"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-slate-400"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                     >
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft size={16} />
                     </Button>
 
-                    {/* Render the Range numbers */}
                     <div className="flex items-center gap-1">
                         {paginationRange.map((page, i) => (
                             <Button
                                 key={i}
-                                variant={currentPage === page ? "default" : "outline"}
-                                className="h-8 w-8 p-0"
+                                variant={currentPage === page ? "secondary" : "ghost"}
+                                className={cn(
+                                    "h-8 min-w-8 px-2 text-[11px] font-bold rounded-sm",
+                                    currentPage === page 
+                                        ? "bg-slate-900 text-white hover:bg-slate-800" 
+                                        : "text-slate-500"
+                                )}
                                 disabled={page === "..."}
                                 onClick={() => typeof page === "number" && table.setPageIndex(page - 1)}
                             >
@@ -96,20 +94,12 @@ export function DataTablePagination<TData>({
                     </div>
 
                     <Button
-                        variant="outline"
-                        className="h-8 w-8 p-0"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-slate-400"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        className="hidden h-8 w-8 p-0 lg:flex"
-                        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        <ChevronsRight className="h-4 w-4" />
+                        <ChevronRight size={16} />
                     </Button>
                 </div>
             </div>

@@ -9,26 +9,26 @@ interface AlertCardProps {
 }
 
 export default function AlertCard({ productName, remainingQty, onAction }: AlertCardProps) {
-    
     return (
-        <Card className="border-rose-300 bg-rose-50/30 rounded-[2rem] p-8 flex flex-col justify-center relative overflow-hidden border-2 border-dashed h-full">
-            <div className="flex items-start gap-6 relative z-10">
-                <div className="p-4 rounded-2xl bg-white shadow-md text-rose-600 animate-bounce">
+        <Card className="border-rose-200 bg-rose-50/20 rounded-xl p-8 flex flex-col justify-center relative overflow-hidden border-2 border-dashed h-full">
+            <div className="flex items-center gap-5 relative z-10">
+                <div className="w-14 h-14 shrink-0 rounded-xl bg-white shadow-md flex items-center justify-center text-rose-600 border border-rose-100">
                     <AlertCircle size={28} />
                 </div>
-                <div className="space-y-2">
-                    <h4 className="text-lg font-black text-slate-800 tracking-tight">Critical Alert</h4>
-                    <p className="text-sm font-medium text-slate-600 leading-relaxed">
-                        <span className="font-black text-rose-600">{productName}</span> is almost empty! Only {remainingQty} left.
+                <div>
+                    <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em] mb-1">Stock Alert</h4>
+                    <p className="text-lg font-black text-slate-900 tracking-tight leading-tight uppercase">
+                        {productName} 
                     </p>
-                    <Button 
-                        onClick={onAction}
-                        className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-6 rounded-xl h-10 shadow-lg shadow-rose-200 mt-2"
-                    >
-                        REORDER NOW
-                    </Button>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Critical: {remainingQty} units left</p>
                 </div>
             </div>
+            <Button 
+                onClick={onAction}
+                className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.2em] h-12 rounded-lg shadow-lg shadow-blue-200"
+            >
+                Restock Asset
+            </Button>
         </Card>
     );
 }

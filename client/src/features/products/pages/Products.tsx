@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Plus, PackageSearch, Search, FilterX, AlertTriangle } from "lucide-react";
+import { Plus, PackageSearch, Search, RotateCcw } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,116 +12,113 @@ const Products: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [stockLevel, setStockLevel] = useState<string>("All Levels");
-    
-    // Limits API calls while typing
-    const debouncedSearch = useDebounce(searchQuery, 600);
+    const debouncedSearch = useDebounce(searchQuery, 400);
 
     const { products, fetchProducts, isLoading, meta } = useProducts();
-    
-    const [pagination, setPagination] = useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
     useEffect(() => {
         fetchProducts(
-            pagination.pageIndex + 1, 
-            pagination.pageSize, 
-            debouncedSearch, 
+            pagination.pageIndex + 1,
+            pagination.pageSize,
+            debouncedSearch,
             stockLevel === "All Levels" ? "" : stockLevel
         );
     }, [fetchProducts, pagination.pageIndex, pagination.pageSize, debouncedSearch, stockLevel]);
 
     const columns = useMemo(() => getProductColumns(navigate), [navigate]);
 
-    const resetFilters = () => {
-        setSearchQuery("");
-        setStockLevel("All Levels");
-        setPagination(prev => ({ ...prev, pageIndex: 0 }));
-    };
-
     return (
-        <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
-            
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-                <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
-                        <PackageSearch className="text-blue-600" size={28} />
-                        Inventory Catalog
-                    </h1>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">
-                        Total Items: {meta?.totalItems || 0}
-                    </p>
-                </div>
-                <Button
-                    onClick={() => navigate("/products/add")}
-                    className="bg-blue-600 hover:bg-blue-700 h-11 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-100 active:scale-95 transition-all"
-                >
-                    <Plus className="mr-2 h-4 w-4" strokeWidth={4} />
-                    New Product
-                </Button>
-            </div>
+        <div className="h-full bg-slate-50/50 animate-in fade-in duration-500">
+            <div className="max-w-400 mx-auto space-y-6">
 
-            {/* Toolbar */}
-            <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3">
-                
-                {/* Search Bar (Handles Name & Category) */}
-                <div className="relative flex-1 min-w-70">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} strokeWidth={3} />
-                    <Input
-                        placeholder="SEARCH NAME OR CATEGORY..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                            setSearchQuery(e.target.value);
-                            setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                        }}
-                        className="pl-11 h-11 rounded-xl text-[10px] font-black uppercase tracking-wide border-none outline-0 focus-within::outline-0"
+                {/* 1. Minimal Header */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-slate-900 rounded-sm text-white">
+                            <PackageSearch size={20} />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                                Products
+                            </h1>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {meta?.totalItems || 0} Total Records • System Active
+                            </p>
+                        </div>
+                    </div>
+
+                    <Button
+                        onClick={() => navigate("/products/add")}
+                        className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                    >
+                        <Plus className="mr-2 h-4 w-4" strokeWidth={3} /> Add Product
+                    </Button>
+                </div>
+
+                {/* 2. Precision Toolbar */}
+                <div className="flex flex-col lg:flex-row gap-3">
+                    
+                    {/* Search Field */}
+                    <div className="relative flex-1 group">
+                        <Search
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                            size={14}
+                            strokeWidth={2.5}
+                        />
+                        <Input
+                            placeholder="Filter by name, category or SKU..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setPagination(prev => ({ ...prev, pageIndex: 0 }));
+                            }}
+                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-all shadow-none"
+                        />
+                    </div>
+
+                    {/* Stock Filter */}
+                    <div className="relative min-w-50">
+                        <select
+                            value={stockLevel}
+                            onChange={(e) => {
+                                setStockLevel(e.target.value);
+                                setPagination(prev => ({ ...prev, pageIndex: 0 }));
+                            }}
+                            className="w-full h-10 bg-white border border-slate-200 rounded-sm px-3 text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-blue-500 appearance-none cursor-pointer transition-all"
+                        >
+                            <option>All Levels</option>
+                            <option value="low">Low Stock Warning</option>
+                            <option value="out">Out of Stock</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                            <svg width="8" height="8" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 1L5 5L9 1" /></svg>
+                        </div>
+                    </div>
+
+                    {/* Reset Action */}
+                    <Button
+                        variant="outline"
+                        disabled={!searchQuery && stockLevel === "All Levels"}
+                        onClick={() => { setSearchQuery(""); setStockLevel("All Levels") }}
+                        className="h-10 border-slate-200 text-slate-500 hover:bg-slate-50 rounded-sm text-[11px] font-bold uppercase"
+                    >
+                        <RotateCcw className="mr-2 h-3 w-3" /> Reset
+                    </Button>
+                </div>
+
+                {/* 3. The Data Table Wrapper */}
+                <div className="bg-white border border-slate-200 shadow-sm">
+                    <DataTable
+                        columns={columns}
+                        data={products || []}
+                        isLoading={isLoading}
+                        rowCount={meta?.totalItems || 0}
+                        pageCount={meta?.totalPages || 0}
+                        pagination={pagination}
+                        setPagination={setPagination}
                     />
                 </div>
-
-                <div className="h-8 w-px bg-slate-100 hidden md:block" />
-
-                {/* Stock Level Filter */}
-                <div className="relative">
-                    <AlertTriangle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} strokeWidth={3} />
-                    <select 
-                        value={stockLevel}
-                        onChange={(e) => {
-                            setStockLevel(e.target.value);
-                            setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                        }}
-                        className="h-11 w-48 bg-slate-50/50 border border-slate-100 rounded-xl text-[12px] font-black text-slate-600 uppercase tracking-widest pl-10 pr-8 appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-blue-500/10"
-                    >
-                        <option>All Levels</option>
-                        <option value="low">Low Stock</option>
-                        <option value="out">Out of Stock</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1L5 5L9 1"/></svg>
-                    </div>
-                </div>
-
-                <Button 
-                    variant="ghost" 
-                    onClick={resetFilters}
-                    className="h-11 w-11 p-0 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50"
-                >
-                    <FilterX size={18} strokeWidth={2.5} />
-                </Button>
-            </div>
-
-            {/* Table */}
-            <div className="flex-1 min-h-0">
-                <DataTable 
-                    columns={columns} 
-                    data={products || []} 
-                    isLoading={isLoading}
-                    rowCount={meta?.totalItems || 0}
-                    pageCount={meta?.totalPages || 0}
-                    pagination={pagination}
-                    setPagination={setPagination}
-                />
             </div>
         </div>
     );
