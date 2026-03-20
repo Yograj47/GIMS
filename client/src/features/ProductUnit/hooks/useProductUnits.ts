@@ -6,7 +6,7 @@ import type {
     GroupedProductUnit,
     ProductUnitFormData,
 } from '@/types/ProductUnit';
-import type { PaginationMetadata, pagination } from '@/types/Pagination';
+import type { PaginationMetadata} from '@/types/Pagination';
 
 export const useProductUnits = () => {
     const [groupedUnits, setGroupedUnits] = useState<GroupedProductUnit[]>([]);
@@ -15,7 +15,7 @@ export const useProductUnits = () => {
 
 
     // 1. Fetch Grouped Product Units (Aggregation)
-    const fetchGroupedUnits = useCallback(async ({ page, limit, search, all }: pagination = {}) => {
+    const fetchGroupedUnits = useCallback(async (page?:number, limit?:number, search?:string, all?:boolean) => {
         try {
             setLoading(true);
             const response = await productUnitService.getGroupedUnits(page, limit, search, all);
@@ -51,7 +51,7 @@ export const useProductUnits = () => {
             setLoading(true);
             const response = await productUnitService.update(id, payload);
             if (response.status === "Success") {
-                await fetchGroupedUnits({ all: true });
+                await fetchGroupedUnits();
                 notify.success("Conversion updated");
                 return true;
             }

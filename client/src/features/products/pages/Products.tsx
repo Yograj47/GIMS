@@ -35,7 +35,7 @@ const Products: React.FC = () => {
                 {/* 1. Minimal Header */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
                     <div className="flex items-center gap-4">
-                        <div className="p-2 bg-slate-900 rounded-sm text-white">
+                        <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
                             <PackageSearch size={20} />
                         </div>
                         <div>

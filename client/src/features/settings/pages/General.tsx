@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Store, Bell, Loader2, ShieldCheck, Mail } from "lucide-react";
+import { Store, Bell, Loader2, ShieldCheck, Mail, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch"; 
@@ -37,119 +37,117 @@ export default function GeneralSettings() {
   const isNotificationsEnabled = watch("enableEmailNotifications");
 
   return (
-    <div className="w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 min-h-0 px-1 overflow-y-scroll">
+    <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
       
-      {/* HEADER SECTION */}
-      <div className="flex items-end justify-between mb-8 shrink-0">
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase ">
-            System Settings<span className="text-blue-600">.</span>
-          </h1>
-          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
-            Global Environment Configuration
-          </p>
+      {/* 1. HEADER SECTION - Minimalized */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b border-slate-200 pb-6">
+        <div className="flex items-center gap-4">
+          <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm">
+            <Globe size={18} />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">
+              General Registry
+            </h1>
+            <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] mt-1.5">
+              Global System Parameters & Localization
+            </p>
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl space-y-4 pb-10">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-5xl">
         
-        {/* SECTION 1: CORE IDENTITY */}
-        <div className="group bg-white border-2 border-slate-100 rounded-[2rem] p-8 shadow-sm transition-all hover:border-slate-200">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-slate-900 text-white rounded-2xl shadow-lg rotate-3">
-              <Store size={22} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">Core Identity</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Storefront & Location Specs</p>
-            </div>
+        {/* SECTION 1: CORE IDENTITY - Sharp & Industrial */}
+        <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+            <Store size={14} className="text-slate-900" strokeWidth={3} />
+            <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-widest">Core Identity</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Official Store Name</Label>
+              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-0.5">Store Identifier</Label>
               <Input 
                 {...register("storeName")} 
                 placeholder="PRO-TECH SYSTEMS" 
-                className="h-12 rounded-xl border-2 border-slate-100 bg-slate-50/50 font-bold focus:bg-white focus:border-slate-900 transition-all placeholder:text-slate-300" 
+                className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs uppercase focus-visible:ring-blue-600 transition-all placeholder:text-slate-300" 
               />
-              {errors.storeName && <p className="text-[10px] text-red-600 font-black uppercase italic ml-1">{errors.storeName.message}</p>}
+              {errors.storeName && <p className="text-[9px] text-red-600 font-black uppercase tracking-tighter mt-1">{errors.storeName.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Operations Hub</Label>
+              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-0.5">Physical Hub</Label>
               <Input 
                 {...register("location")} 
                 placeholder="KATHMANDU HQ" 
-                className="h-12 rounded-xl border-2 border-slate-100 bg-slate-50/50 font-bold focus:bg-white focus:border-slate-900 transition-all placeholder:text-slate-300" 
+                className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs uppercase focus-visible:ring-blue-600 transition-all placeholder:text-slate-300" 
               />
-              {errors.location && <p className="text-[10px] text-red-600 font-black uppercase italic ml-1">{errors.location.message}</p>}
+              {errors.location && <p className="text-[9px] text-red-600 font-black uppercase tracking-tighter mt-1">{errors.location.message}</p>}
             </div>
           </div>
         </div>
 
-        {/* SECTION 2: AUTOMATION & ALERTS */}
-        <div className="group bg-white border-2 border-slate-100 rounded-[2rem] p-8 shadow-sm transition-all hover:border-slate-200">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg -rotate-3">
-              <Bell size={22} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">Automation & Alerts</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Inventory Threshold Management</p>
-            </div>
+        {/* SECTION 2: AUTOMATION - Matched to Stock Status Logic */}
+        <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+            <Bell size={14} className="text-blue-600" strokeWidth={3} />
+            <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-widest">Alert Protocols</h3>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border-2 border-slate-100">
+          <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-sm">
               <div className="flex items-center gap-4">
-                <div className={cn("p-2 rounded-lg transition-colors", isNotificationsEnabled ? "bg-blue-100 text-blue-600" : "bg-slate-200 text-slate-400")}>
+                <div className={cn(
+                  "w-10 h-10 rounded-sm flex items-center justify-center transition-all border",
+                  isNotificationsEnabled ? "bg-white border-blue-200 text-blue-600 shadow-sm" : "bg-slate-100 border-slate-200 text-slate-400"
+                )}>
                   <Mail size={18} />
                 </div>
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-black text-slate-800 uppercase tracking-tight">Email Protocols</Label>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Trigger notifications for low-stock events</p>
+                <div>
+                  <Label className="text-[11px] font-black text-slate-900 uppercase tracking-tight">Email Dispatch</Label>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">Automated Low-Stock Transmissions</p>
                 </div>
               </div>
               <Switch 
                 checked={isNotificationsEnabled}
                 onCheckedChange={(checked) => setValue("enableEmailNotifications", checked, { shouldDirty: true })} 
-                className="data-[state=checked]:bg-blue-600"
+                className="data-[state=checked]:bg-blue-600 rounded-full"
               />
             </div>
 
             {isNotificationsEnabled && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2 animate-in slide-in-from-top-4 duration-500">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Critical Threshold (Units)</Label>
+                  <Label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-0.5">Critical Floor (Units)</Label>
                   <Input 
                     type="number" 
                     {...register("lowStockThreshold", { valueAsNumber: true })} 
-                    className="h-12 rounded-xl border-2 border-slate-100 bg-slate-50/50 font-black focus:border-slate-900 transition-all" 
+                    className="rounded-sm border-slate-200 font-black text-xs h-10" 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Admin Dispatch Email</Label>
+                  <Label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-0.5">Primary Dispatch Target</Label>
                   <Input 
                     {...register("adminEmail")} 
                     placeholder="ADMIN@SYSTEM.COM" 
-                    className="h-12 rounded-xl border-2 border-slate-100 bg-slate-50/50 font-bold focus:border-slate-900 transition-all" 
+                    className="rounded-sm border-slate-200 font-bold text-xs h-10 uppercase" 
                   />
-                  {errors.adminEmail && <p className="text-[10px] text-red-600 font-black uppercase italic ml-1">{errors.adminEmail.message}</p>}
+                  {errors.adminEmail && <p className="text-[9px] text-red-600 font-black uppercase tracking-tighter mt-1">{errors.adminEmail.message}</p>}
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* FOOTER ACTION */}
-        <div className="flex justify-end pt-6">
+        {/* FOOTER ACTION - Integrated & Professional */}
+        <div className="flex justify-end pt-4">
           <Button 
             disabled={!isDirty || isLoading}
             type="submit" 
-            className="bg-slate-900 hover:bg-blue-600 h-14 rounded-2xl px-12 font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-100 transition-all active:scale-95 disabled:opacity-30 disabled:grayscale"
+            className="bg-blue-600 hover:bg-slate-900 text-white h-10 rounded-sm px-8 font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50"
           >
-            {isLoading ? <Loader2 className="animate-spin" size={20} /> : <ShieldCheck size={20} className="mr-2" />}
-            Deploy Configuration
+            {isLoading ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={16} className="mr-2" strokeWidth={3} />}
+            Commit Changes
           </Button>
         </div>
       </form>

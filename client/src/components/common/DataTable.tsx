@@ -57,6 +57,7 @@ export function DataTable<TData>({
         getRowCanExpand: () => !!renderExpandedRow
     })
 
+
     return (
         <div className="flex flex-col h-full bg-white border border-slate-200">
             <div className="flex-1 overflow-auto custom-scrollbar">

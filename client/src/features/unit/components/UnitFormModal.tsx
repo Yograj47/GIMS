@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Scale, Loader2 } from "lucide-react";
-import { unitSchema, type UnitFormData, type UnitData } from "@/types/Unit";
+import { X, Loader2, AlertCircle } from "lucide-react";
+import { unitSchema, type UnitData, type UnitFormData } from "@/types/Unit";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -53,9 +53,7 @@ export default function UnitFormModal({
   const isBaseUnit = useWatch({ control, name: "baseUnit" });
 
   useEffect(() => {
-    if (isBaseUnit) {
-      setValue("multiplierToBase", 1);
-    }
+    if (isBaseUnit) setValue("multiplierToBase", 1);
   }, [isBaseUnit, setValue]);
 
   useEffect(() => {
@@ -75,125 +73,126 @@ export default function UnitFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
-        
-        {/* Header Section */}
-        <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-110 rounded-md shadow-xl border border-slate-200">
+
+        {/* Header - Simple & Clean */}
+        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-black text-slate-800">
-              {initialData ? 'Update Configuration' : 'Define New Unit'}
+            <h2 className="text-sm font-bold text-slate-900">
+              {initialData ? "Edit Unit" : "New Unit"}
             </h2>
-            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
-              Measurement Engine v1.0
-            </p>
+            <p className="text-[11px] text-slate-500">Configure measurement settings</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-xl text-slate-400 transition-colors">
-            <X size={20} />
+          <button onClick={onClose} className="p-1 hover:bg-slate-50 rounded text-slate-400 transition-colors">
+            <X size={18} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-          
-          {/* Name & Shortcode Row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name</label>
-              <Input 
-                {...register("name")} 
-                placeholder="Kilogram" 
-                className="h-11 rounded-xl font-bold border-slate-200 bg-slate-50/50 focus:bg-white transition-all" 
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2 space-y-1.5">
+              <label className="text-[11px] font-medium text-slate-500 ml-0.5">Unit Name</label>
+              <Input
+                {...register("name")}
+                placeholder="e.g. Kilogram"
+                className="h-9 rounded-md border-slate-200 text-sm focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500 transition-all"
               />
-              {errors.name && <p className="text-rose-500 text-[9px] font-bold mt-1 ml-1 uppercase">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-[10px] text-rose-500 mt-1 flex items-center gap-1">
+                  <AlertCircle size={10} /> {errors.name.message}
+                </p>
+              )}
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Shortcode</label>
-              <Input 
-                {...register("shortForm")} 
-                placeholder="kg" 
-                className="h-11 rounded-xl font-bold border-slate-200 bg-slate-50/50 focus:bg-white transition-all" 
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium text-slate-500 ml-0.5">Symbol</label>
+              <Input
+                {...register("shortForm")}
+                placeholder="e.g. kg"
+                className="h-9 rounded-md border-slate-200 text-sm font-medium focus-visible:ring-1 text-center"
               />
-              {errors.shortForm && <p className="text-rose-500 text-[9px] font-bold mt-1 ml-1 uppercase">{errors.shortForm.message}</p>}
             </div>
           </div>
 
-          {/* Type & Multiplier Row */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Category</label>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium text-slate-500 ml-0.5">Type</label>
               <Controller
                 control={control}
                 name="unitType"
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="h-11 rounded-xl font-bold border-slate-200 bg-slate-50/50 transition-all">
-                      <SelectValue placeholder="Select type" />
+                    <SelectTrigger className="h-9 rounded-md border-slate-200 text-sm focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500">
+                      <SelectValue placeholder="Type" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 shadow-xl font-bold">
-                      <SelectItem value="weight">Weight (Mass)</SelectItem>
-                      <SelectItem value="volume">Volume (Liquid)</SelectItem>
-                      <SelectItem value="count">Count (Pieces)</SelectItem>
-                      <SelectItem value="pack">Pack (Bundles)</SelectItem>
+                    <SelectContent className="rounded-md border-slate-200 shadow-lg text-sm">
+                      <SelectItem value="weight">Weight</SelectItem>
+                      <SelectItem value="volume">Volume</SelectItem>
+                      <SelectItem value="count">Count</SelectItem>
+                      <SelectItem value="pack">Pack</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Multiplier</label>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium text-slate-500 ml-0.5">Multiplier</label>
               <div className="relative">
-                <Scale className={cn("absolute left-3 top-1/2 -translate-y-1/2", isBaseUnit ? "text-slate-300" : "text-slate-400")} size={16} />
-                <Input 
-                  type="number" 
-                  step="any" 
-                  {...register("multiplierToBase", { valueAsNumber: true })} 
+                <Input
+                  type="number"
+                  step="any"
+                  {...register("multiplierToBase", { valueAsNumber: true })}
                   disabled={isBaseUnit}
                   className={cn(
-                    "pl-10 h-11 rounded-xl font-black transition-all",
-                    isBaseUnit ? "bg-slate-100 text-slate-400 border-slate-100" : "bg-slate-50/50 border-slate-200"
-                  )} 
+                    "h-9 rounded-md text-sm tabular-nums text-right pr-3",
+                    isBaseUnit ? "bg-slate-50 text-slate-400 border-slate-100" : "bg-white border-slate-200 focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500"
+                  )}
                 />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">×</span>
               </div>
             </div>
           </div>
 
-          {/* Toggle Switches */}
           <div className="space-y-2">
             {[
-              { id: "baseUnit", label: "Set as Base Unit", desc: "Primary reference for category" },
-              { id: "isFractional", label: "Allow Decimals", desc: "Enable partial sales (e.g. 0.5)" },
-              { id: "isActive", label: "Active Status", desc: "Availability in system" }
+              { id: "baseUnit", label: "Master Base Unit", desc: "Reference for this type" },
+              { id: "isFractional", label: "Allow Fractions", desc: "Enable decimal quantities" },
+              { id: "isActive", label: "Active Status", desc: "Available for selection" }
             ].map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 px-4 rounded-2xl border border-slate-100 bg-slate-50/30">
+              <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50/50 border border-slate-100 rounded-md">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight">{item.label}</span>
-                  <span className="text-[8px] font-bold text-slate-400 uppercase">{item.desc}</span>
+                  <span className="text-[11px] font-semibold text-slate-700">{item.label}</span>
+                  <span className="text-[10px] text-slate-400">{item.desc}</span>
                 </div>
                 <Controller
                   control={control}
                   name={item.id as any}
                   render={({ field }) => (
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="data-[state=checked]:bg-blue-600 scale-75"
+                    />
                   )}
                 />
               </div>
             ))}
           </div>
 
-          {/* Actions */}
           <div className="pt-2 flex gap-3">
-            <Button type="button" onClick={onClose} variant="ghost" className="flex-1 font-bold text-slate-500 hover:text-slate-800">
-              Discard
+            <Button type="button" onClick={onClose} variant="ghost" className="flex-1 h-10 text-slate-500 font-medium hover:bg-slate-50">
+              Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading || isSubmitting} 
-              className="flex-1 bg-slate-900 text-white font-bold rounded-xl shadow-lg shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95"
+            <Button
+              type="submit"
+              disabled={isLoading || isSubmitting}
+              className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all active:scale-95 shadow-sm rounded-md"
             >
               {isLoading || isSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                initialData ? 'Update Unit' : 'Save Unit'
+                initialData ? "Save Changes" : "Create Unit"
               )}
             </Button>
           </div>

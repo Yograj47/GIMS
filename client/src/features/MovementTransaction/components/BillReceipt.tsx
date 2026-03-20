@@ -1,11 +1,20 @@
+import { useGlobalStore } from "@/store/globalStore";
 import type { TransactionData } from "@/types/Transaction";
+import { useEffect } from "react";
 
 export const BillReceipt = ({ txn }: { txn: TransactionData }) => {
+
+  const { settings, fetchSettings } = useGlobalStore();
+
+  useEffect(() => {
+    fetchSettings()
+  }, [fetchSettings])
+
   return (
     <div className="mt-8 border-b-2 border-dashed border-slate-200 no-screen print:block hidden">
       <div className="text-center border-b pb-4 mb-4">
-        <h2 className="text-xl font-bold uppercase tracking-tighter">GROCERY PRO</h2>
-        <p className="text-[10px]">123 Main St, Your City | Ph: 9876543210</p>
+        <h2 className="text-xl font-bold uppercase tracking-tighter">{settings?.storeName}</h2>
+        <p className="text-[10px]">{settings?.location} | Ph: {settings?.adminEmail}</p>
       </div>
 
       <div className="flex justify-between text-[10px] mb-4">

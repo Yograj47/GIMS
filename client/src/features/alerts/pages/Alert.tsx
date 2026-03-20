@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
-import { ShieldAlert } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ShieldAlert, RotateCcw, Search, Activity } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { DataTable } from "@/components/common/DataTable";
 import { getAlertColumns } from "../components/AlertColumns";
 import { useAlerts } from "../hooks/UseAlerts";
 
-export default function AlertPage() {
+const AlertPage: React.FC = () => {
     const {
         alerts,
         fetchAllAlerts,
@@ -15,54 +17,87 @@ export default function AlertPage() {
         fetchActiveAlerts
     } = useAlerts();
 
+    const [searchQuery, setSearchQuery] = useState("");
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-    // Standardized Debounced Fetch
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchAllAlerts(pagination.pageIndex + 1, pagination.pageSize);
             fetchActiveAlerts();
-
         }, 400);
         return () => clearTimeout(timer);
     }, [fetchAllAlerts, pagination.pageIndex, pagination.pageSize, fetchActiveAlerts]);
 
     return (
-        <div className="w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 min-h-0 px-1">
+        <div className="h-full animate-in fade-in duration-500">
+            <div className="max-w-400 mx-auto space-y-6">
 
-            {/* 1. Header Section */}
-            <div className="flex items-end justify-between mb-4 shrink-0">
-                <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">
-                        Alerts<span className="text-rose-600">!</span>
-                    </h1>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
-                        System Integrity & Stock Monitoring
-                    </p>
-                </div>
+                {/* 1. Precision Header (Matches Products Pattern) */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-red-600 rounded-lg text-white shadow-lg shadow-blue-100">
+                            <ShieldAlert size={20} />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                                System Alerts
+                            </h1>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {meta?.totalItems || 0} Total Logs • <span className="text-rose-600 italic">Integrity Check</span>
+                            </p>
+                        </div>
+                    </div>
 
-                <div className="flex items-center gap-3 bg-rose-50 border-2 border-rose-100 px-6 py-3 rounded-2xl shadow-sm">
-                    <ShieldAlert className="text-rose-600" size={20} strokeWidth={3} />
-                    <div className="flex flex-col">
-                        <span className="text-rose-600 font-black text-lg leading-none">{activeCount}</span>
-                        <span className="text-[8px] font-black uppercase text-rose-400 tracking-tighter">Active Issues</span>
+                    {/* Active Issues Badge */}
+                    <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-sm shadow-sm">
+                        <Activity size={14} className="text-rose-600 animate-pulse" />
+                        <span className="text-[11px] font-black uppercase tracking-wider text-slate-600">
+                            {activeCount} Issues Pending
+                        </span>
                     </div>
                 </div>
-            </div>
 
+                {/* 2. Precision Toolbar */}
+                <div className="flex flex-col lg:flex-row gap-3">
+                    <div className="relative flex-1 group">
+                        <Search
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                            size={14}
+                            strokeWidth={2.5}
+                        />
+                        <Input
+                            placeholder="Search by product name or alert message..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 transition-all shadow-none"
+                        />
+                    </div>
 
-            {/* 3. DataTable Section */}
-            <div className="flex-1 min-h-0 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm mb-4">
-                <DataTable
-                    columns={getAlertColumns(markAsResolved)}
-                    data={alerts}
-                    isLoading={isLoading}
-                    pageCount={meta?.totalPages || 0}
-                    rowCount={meta?.totalItems || 0}
-                    pagination={pagination}
-                    setPagination={setPagination}
-                />
+                    <Button
+                        variant="outline"
+                        disabled={!searchQuery}
+                        onClick={() => setSearchQuery("")}
+                        className="h-10 border-slate-200 text-slate-500 hover:bg-slate-50 rounded-sm text-[11px] font-bold uppercase"
+                    >
+                        <RotateCcw className="mr-2 h-3 w-3" /> Reset
+                    </Button>
+                </div>
+
+                {/* 3. The Data Table Wrapper */}
+                <div className="bg-white border border-slate-200 shadow-sm">
+                    <DataTable
+                        columns={getAlertColumns(markAsResolved)}
+                        data={alerts}
+                        isLoading={isLoading}
+                        pageCount={meta?.totalPages || 0}
+                        rowCount={meta?.totalItems || 0}
+                        pagination={pagination}
+                        setPagination={setPagination}
+                    />
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default AlertPage;

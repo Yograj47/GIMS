@@ -40,17 +40,17 @@ export const Loading = ({ className, size = "md", fullPage = false }: LoadingPro
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-100 flex flex-col items-center justify-center bg-[#0f172a]/80 backdrop-blur-xl animate-in fade-in duration-500">
+      <div className="fixed inset-0 z-100 flex flex-col items-center justify-center bg-white backdrop-blur-xl animate-in fade-in duration-500">
         <div className="relative">
           <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
           {loader}
         </div>
         
         <div className="mt-8 flex flex-col items-center gap-1">
-          <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] ml-[0.4em]">
+          <p className="text-[12px] font-black text-slate-600 uppercase tracking-[0.4em] ml-[0.4em]">
             System Loading
           </p>
-          <p className="text-sm font-black text-white tracking-widest uppercase">
+          <p className="text-sm font-black text-slate-400 tracking-widest uppercase">
             GROCERY<span className="text-blue-500">PRO</span>
           </p>
         </div>

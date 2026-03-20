@@ -1,20 +1,16 @@
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { User, MapPin, Notebook, Phone, Mail} from "lucide-react";
+import { User, MapPin, Notebook, Phone, Mail, Power } from "lucide-react";
 import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/Supplier"
 import { useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 interface SupplierFormProps {
     initialData?: SupplierData;
     onSubmit: (data: SupplierFormData) => void;
 }
 
-export default function SupplierForm({ initialData, onSubmit}: SupplierFormProps) {
-
+export default function SupplierForm({ initialData, onSubmit }: SupplierFormProps) {
     const { register, handleSubmit, control, reset, formState: { errors } } = useForm<SupplierFormData>({
         resolver: zodResolver(supplierSchema) as Resolver<SupplierFormData>,
         defaultValues: {
@@ -28,94 +24,79 @@ export default function SupplierForm({ initialData, onSubmit}: SupplierFormProps
     });
 
     useEffect(() => {
-        if (initialData) reset({
-            name: initialData.name,
-            phone: initialData.phone,
-            email: initialData.email,
-            address: initialData.address,
-            notes: initialData.notes,
-            isActive: initialData.isActive,
-        });
+        if (initialData) reset(initialData);
     }, [initialData, reset]);
 
-    const labelStyle = "text-[13px] font-bold text-slate-700 flex items-center gap-2";
-    const sectionHeaderStyle = "flex items-center gap-2 text-blue-600 mb-4";
-    const errorStyle = "text-xs text-red-500 font-medium mt-1 ml-1";
+    const inputStyle = "w-full rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
+    const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
+    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-blue-600 mb-4 flex items-center gap-2";
 
     return (
-        <form id="supplier-form" onSubmit={handleSubmit(onSubmit || (() => {}))} className="space-y-10">
+        <form id="supplier-form" onSubmit={handleSubmit(onSubmit)} className="w-full space-y-8">
             
-            {/* SECTION 1: Identity */}
-            <div className="space-y-4">
-                <div className={sectionHeaderStyle}>
-                    <User size={18} strokeWidth={2.5} />
-                    <h2 className="font-black uppercase tracking-wider text-xs">Supplier Identity</h2>
+            {/* Section 1: Basic Identity */}
+            <div>
+                <div className={sectionTitle}>
+                    <User size={14} strokeWidth={3} /> Partner Identity
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Supplier Name <span className="text-red-500">*</span></label>
-                        <Input {...register("name")} placeholder="e.g. ABC Wholesalers" className="rounded-xl border-slate-200 bg-slate-50/50 h-12" />
-                        {errors.name && <p className={errorStyle}>{errors.name.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="md:col-span-2 space-y-2">
+                        <label className={labelStyle}>Full Company Name <span className="text-red-500">*</span></label>
+                        <input {...register("name")} placeholder="Legal entity name..." className={inputStyle} />
+                        {errors.name && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.name.message}</p>}
                     </div>
+
                     <div className="space-y-2">
-                        <label className={labelStyle}>
-                            <Phone size={14} className="text-slate-400" /> Phone Number <span className="text-red-500">*</span>
-                        </label>
-                        <Input {...register("phone")} placeholder="+977-1-XXXXXXX" className="rounded-xl border-slate-200 bg-slate-50/50 h-12" />
-                        {errors.phone && <p className={errorStyle}>{errors.phone.message}</p>}
+                        <label className={labelStyle}><Phone size={12}/> Direct Contact <span className="text-red-500">*</span></label>
+                        <input {...register("phone")} placeholder="+977-1-XXXXXXX" className={inputStyle} />
+                        {errors.phone && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.phone.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className={labelStyle}><Mail size={12}/> Email Registry</label>
+                        <input {...register("email")} type="email" placeholder="vendor@domain.com" className={inputStyle} />
                     </div>
                 </div>
             </div>
 
-            {/* SECTION 2: Location */}
-            <div className="space-y-4 bg-blue-50/30 p-6 rounded-2xl border border-blue-100">
-                <div className={sectionHeaderStyle}>
-                    <MapPin size={18} strokeWidth={2.5} />
-                    <h2 className="font-black uppercase tracking-wider text-xs">Contact & Location</h2>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className={labelStyle}>
-                            <Mail size={14} className="text-slate-400" /> Email Address
-                        </label>
-                        <Input {...register("email")} type="email" placeholder="supplier@example.com" className="rounded-xl border-blue-200 focus:ring-blue-500/20 h-12" />
-                        {errors.email && <p className={errorStyle}>{errors.email.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Full Address <span className="text-red-500">*</span></label>
-                        <Input {...register("address")} placeholder="Street name, City, Area" className="rounded-xl border-blue-200 focus:ring-blue-500/20 h-12" />
-                        {errors.address && <p className={errorStyle}>{errors.address.message}</p>}
-                    </div>
-                </div>
-            </div>
-
-            {/* SECTION 3: Notes */}
-            <div className="space-y-4">
-                <div className={sectionHeaderStyle}>
-                    <Notebook size={18} strokeWidth={2.5} />
-                    <h2 className="font-black uppercase tracking-wider text-xs">Internal Notes</h2>
+            {/* Section 2: Geographic Parameters (Styled like Product Valuation Box) */}
+            <div className="bg-slate-50 border border-slate-200 p-5 rounded-sm">
+                <div className={sectionTitle}>
+                    <MapPin size={14} strokeWidth={3} /> Geographic Parameters
                 </div>
                 <div className="space-y-2">
-                    <Textarea 
-                        {...register("notes")} 
-                        placeholder="Add any specific delivery instructions or credit terms..." 
-                        className="min-h-30 rounded-2xl border-slate-200 bg-slate-50/50 resize-none p-4" 
-                    />
+                    <label className={labelStyle}>Full Physical Address <span className="text-red-500">*</span></label>
+                    <input {...register("address")} placeholder="Warehouse location, Street, City..." className={inputStyle} />
+                    {errors.address && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.address.message}</p>}
                 </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-bold text-slate-700">Active Status</Label>
-                <p className="text-[10px] text-slate-500 font-medium">Disable to hide from selection menus.</p>
-              </div>
-              <Controller
-                control={control}
-                name="isActive"
-                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
-              />
+            {/* Section 3: Internal Notes */}
+            <div>
+                <div className={sectionTitle}>
+                    <Notebook size={14} strokeWidth={3} /> Procurement Notes
+                </div>
+                <textarea 
+                    {...register("notes")} 
+                    placeholder="Enter credit terms, delivery windows, or historical notes..." 
+                    className={`${inputStyle} min-h-25 resize-none`}
+                />
+            </div>
+
+            {/* Status Check */}
+            <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-sm">
+                <div className="flex items-center gap-3">
+                    <Power size={18} className="text-slate-400" />
+                    <div>
+                        <p className="text-[9px] font-bold uppercase text-slate-400 leading-none mb-1">System Visibility</p>
+                        <p className="text-sm font-black text-slate-900 uppercase">Partner Active Status</p>
+                    </div>
+                </div>
+                <Controller
+                    control={control}
+                    name="isActive"
+                    render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
+                />
             </div>
         </form>
     );

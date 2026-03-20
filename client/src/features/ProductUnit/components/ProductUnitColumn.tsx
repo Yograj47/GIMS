@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Plus, ChevronRight, ChevronDown, Package, Box, Hash } from "lucide-react";
+import { Plus, ChevronRight, ChevronDown, Package, Box } from "lucide-react";
 
 type AddUnitCallback = (id: string, name: string) => void;
 
@@ -15,13 +15,13 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any
                         e.stopPropagation();
                         row.toggleExpanded();
                     }}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 transition-all active:scale-90"
+                    className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 transition-all active:scale-90"
                     type="button"
                 >
                     {row.getIsExpanded() ? (
-                        <ChevronDown size={18} strokeWidth={3} className="text-blue-600 animate-in spin-in-12 duration-300" />
+                        <ChevronDown size={18} className="text-blue-600" />
                     ) : (
-                        <ChevronRight size={18} strokeWidth={3} className="text-slate-300 hover:text-slate-600 transition-colors" />
+                        <ChevronRight size={18} />
                     )}
                 </button>
             </div>
@@ -30,22 +30,21 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any
     {
         accessorKey: "productName",
         header: () => (
-            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-                Product Specification
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                Product Info
             </span>
         ),
         cell: ({ row }) => (
             <div className="flex items-center gap-3 py-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm shrink-0">
-                    <Package size={14} strokeWidth={3} />
+                <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+                    <Package size={14} />
                 </div>
                 <div>
-                    <div className="font-black text-slate-900 uppercase text-sm tracking-tight leading-tight">
+                    <div className="font-bold text-slate-900 text-sm">
                         {row.original.productName}
                     </div>
-                    <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1 mt-0.5">
-                        <Hash size={8} strokeWidth={4} />
-                        ID: {row.original._id.slice(-6)}
+                    <div className="text-[10px] font-medium text-slate-400">
+                        REF: {row.original._id.slice(-6).toUpperCase()}
                     </div>
                 </div>
             </div>
@@ -54,15 +53,15 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any
     {
         accessorKey: "conversions",
         header: () => (
-            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-                Mapped Protocols
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                Conversion Count
             </span>
         ),
         cell: ({ row }) => (
             <div className="flex items-center gap-2">
-                <Box size={12} className="text-slate-400" />
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter bg-slate-100 border-2 border-slate-200 px-2 py-0.5 rounded-md">
-                    {row.original.conversions?.length || 0} UNITS
+                <Box size={14} className="text-slate-300" />
+                <span className="text-[12px] font-semibold text-slate-700">
+                    {row.original.conversions?.length || 0} Units
                 </span>
             </div>
         ),
@@ -70,22 +69,22 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any
     {
         id: "actions",
         header: () => (
-            <div className="text-right text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 pr-4">
+            <div className="text-right text-[11px] font-bold text-slate-500 uppercase tracking-tight pr-4">
                 Operations
             </div>
         ),
         cell: ({ row }) => (
-            <div className="flex justify-end">
+            <div className="flex justify-end pr-2">
                 <Button
                     onClick={(e) => {
                         e.stopPropagation();
                         onAddUnit(row.original._id, row.original.productName);
                     }}
                     size="sm"
-                    className="h-8 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-black text-[9px] uppercase tracking-widest px-4 shadow-lg shadow-slate-200 transition-all active:scale-95 flex items-center gap-2"
+                    className="h-8 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 transition-all active:scale-95 flex items-center gap-2"
                 >
-                    <Plus size={12} strokeWidth={4} />
-                    Attach Unit
+                    <Plus size={14} strokeWidth={2.5} />
+                    Map Unit
                 </Button>
             </div>
         ),

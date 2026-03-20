@@ -16,8 +16,8 @@ export const useMovementTransactions = () => {
 
     // 1. Fetch All Transactions
     const fetchTransactions = useCallback(async (
-        page: number = 1,
-        limit: number = 10,
+        page?: number,
+        limit?: number,
         search?: string,
         transactionType?: string,
         startDate?: string,

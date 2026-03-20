@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Scale } from "lucide-react";
 import { useUnits } from "../hooks/useUnits";
 import UnitFormModal from "../components/UnitFormModal";
 import type { UnitFormData, UnitData } from "@/types/Unit";
@@ -16,8 +16,7 @@ export default function UnitPage() {
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchUnits(pagination.pageIndex + 1, pagination.pageSize, searchQuery);
-        }, 400)
-
+        }, 400);
         return () => clearTimeout(timer);
     }, [fetchUnits, pagination.pageIndex, pagination.pageSize, searchQuery]);
 
@@ -41,53 +40,51 @@ export default function UnitPage() {
     };
 
     return (
-        <div className="w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 min-h-0 px-1">
+        <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-            {/* 1. Header Section - Cleaner alignment */}
-            <div className="flex items-end justify-between mb-4 shrink-0">
-                <div>
-                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase ">
-                        Units<span className="text-blue-600">.</span>
-                    </h2>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
-                        Measurement Configuration Engine
-                    </p>
+            {/* 1. HEADER - Unified Registry Style */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-slate-200 pb-6">
+                <div className="flex items-center gap-4">
+                    <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm">
+                        <Scale size={18} />
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">
+                            Measurement Registry (Unit)
+                        </h1>
+                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] mt-1.5">
+                            Unit Specification & Scale Configuration
+                        </p>
+                    </div>
                 </div>
 
                 <button
                     onClick={handleAddClick}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest px-6 py-3 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-slate-200"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.15em] px-6 h-10 rounded-sm transition-all active:scale-95 flex items-center gap-2"
                 >
                     <Plus size={14} strokeWidth={4} />
-                    Define Unit
+                    Define Unit 
                 </button>
             </div>
 
-            {/* 2. Search Section - Matching the Sharp Theme */}
-            <div className="mb-2 group shrink-0">
-                <div className="bg-white border-2 border-slate-200 group-within:border-slate-800 rounded-2xl p-3 flex items-center gap-4 transition-all shadow-sm">
-                    <div className="pl-2 text-slate-400 group-within:text-slate-800 transition-colors">
-                        <Search size={20} strokeWidth={3} />
+            {/* 2. SEARCH - Sharp Industrial */}
+            <div className="mb-4 group">
+                <div className="bg-white border border-slate-200 group-within:border-blue-600 rounded-sm p-2 flex items-center gap-3 transition-all">
+                    <div className="pl-2 text-slate-400 group-within:text-blue-600 transition-colors">
+                        <Search size={16} strokeWidth={3} />
                     </div>
                     <input
                         type="text"
-                        placeholder="SEARCH BY UNIT NAME OR SHORTCODE..."
+                        placeholder="SEARCH BY NAME OR CODE..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent border-none outline-none font-black text-xs uppercase tracking-widest placeholder:text-slate-300 text-slate-800"
+                        className="flex-1 bg-transparent border-none outline-none font-bold text-[11px] uppercase tracking-widest placeholder:text-slate-300 text-slate-900"
                     />
-                    {searchQuery && (
-                        <button
-                            onClick={() => setSearchQuery("")}
-                            className="pr-2 text-slate-300 hover:text-red-500 font-bold text-xs"
-                        >
-                            CLEAR
-                        </button>
-                    )}
                 </div>
             </div>
 
-            <div className="flex-1 min-h-0 bg-slate-50/50 rounded-3xl p-1">
+            {/* 3. DATATABLE - Flattened */}
+            <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
                 <DataTable
                     columns={getUnitColumns(handleEditClick, removeUnit)}
                     data={units}

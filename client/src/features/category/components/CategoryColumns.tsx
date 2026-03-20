@@ -1,4 +1,4 @@
-import { Edit3, Trash2, Calendar, Hash } from "lucide-react";
+import { Edit3, Trash2, Calendar} from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import type { CategoryData } from "@/types/Category";
@@ -17,15 +17,15 @@ export const getCategoryColumns = (
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm">
-            <Hash size={14} strokeWidth={3} />
+          <div className="w-8 h-8 rounded-sm bg-blue-600 flex items-center justify-center text-white shrink-0 group-hover:bg-blue-600 transition-colors">
+            <span className="font-black text-[10px] uppercase">{row.original.name.charAt(0)}</span>
           </div>
-          <div>
-            <div className="font-black text-slate-900 uppercase text-sm tracking-tight">
+          <div className="flex flex-col">
+            <div className="font-black text-slate-600 uppercase text-[12px] tracking-tight leading-none mb-1">
               {row.original.name}
             </div>
-            <div className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">
-              ID: {row.original._id.slice(-6)}
+            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+              ID · {row.original._id.slice(-6).toUpperCase()}
             </div>
           </div>
         </div>
@@ -35,12 +35,12 @@ export const getCategoryColumns = (
       accessorKey: "description",
       header: () => (
         <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-          Definition
+          Definition / Specs
         </span>
       ),
       cell: ({ row }) => (
         <div className="max-w-75">
-          <p className="text-xs font-bold text-slate-500 line-clamp-1 italic">
+          <p className="text-[11px] font-bold text-slate-500 line-clamp-1 uppercase tracking-tight">
             {row.original.description || "NO SPECIFICATION PROVIDED"}
           </p>
         </div>
@@ -49,14 +49,16 @@ export const getCategoryColumns = (
     {
       accessorKey: "createdAt",
       header: () => (
-        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-          Initialized
-        </span>
+        <div className="text-center">
+          <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+            Initialized
+          </span>
+        </div>
       ),
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-slate-400">
-          <Calendar size={12} strokeWidth={3} />
-          <span className="text-[10px] font-black uppercase">
+        <div className="flex items-center justify-center gap-2 text-slate-400 tabular-nums">
+          <Calendar size={10} strokeWidth={3} />
+          <span className="text-[10px] font-black uppercase tracking-tight">
             {format(new Date(row.original.createdAt), "dd MMM yyyy")}
           </span>
         </div>
@@ -65,17 +67,17 @@ export const getCategoryColumns = (
     {
       id: "actions",
       header: () => (
-        <div className="text-right text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+        <div className="text-right pr-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
           Control
         </div>
       ),
       cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-1 pr-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onEdit(row.original)}
-            className="p-2 border-2 border-transparent hover:border-slate-800 rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+            className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
           >
             <Edit3 size={14} strokeWidth={2.5} />
           </Button>
@@ -83,7 +85,7 @@ export const getCategoryColumns = (
             variant="ghost"
             size="sm"
             onClick={() => onDelete(row.original._id)}
-            className="p-2 border-2 border-transparent hover:border-rose-600 rounded-xl text-slate-400 hover:text-rose-600 transition-all active:scale-90"
+            className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all"
           >
             <Trash2 size={14} strokeWidth={2.5} />
           </Button>

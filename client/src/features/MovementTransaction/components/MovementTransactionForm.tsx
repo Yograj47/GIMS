@@ -1,16 +1,16 @@
 import { useMemo } from "react";
-import { ArrowLeft, Trash2, Loader2, CreditCard, Info, ReceiptText, ShoppingCart, TrendingUp } from "lucide-react";
+import { ArrowLeft, Trash2, Loader2, CreditCard, Info, ReceiptText, ShoppingCart, PackagePlus, PackageMinus, Hash } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// UI Components (Assuming standard shadcn/ui or similar)
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ProductItemModal from "./ProductItemModal";
 
 import { transactionSchema, type TransactionFormData } from "@/types/Transaction";
 import { useMovementTransactions } from "../hooks/useMovementTransactions";
+import { cn } from "@/lib/utils";
 
 export default function MovementForm() {
     const [searchParams] = useSearchParams();
@@ -48,88 +48,116 @@ export default function MovementForm() {
         if (success) navigate("/reports/transactions");
     };
 
-    // Style Constants matching your image
-    const sectionHeader = "flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-blue-600 mb-4";
-    const cardBase = "bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-6";
-    const labelBase = "text-sm font-bold text-slate-700 mb-1.5 block";
-    const inputBase = "bg-slate-50 border-slate-200 rounded-lg h-12 focus:bg-white transition-all";
+    const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
+    const themeBg = isStockIn ? "bg-blue-600" : "bg-rose-600";
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} className="p-8 max-w-350 mx-auto">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto px-6 py-8 space-y-8 animate-in fade-in duration-500">
             
-            {/* PAGE HEADER */}
-            <div className="flex items-center gap-4 mb-8">
-                <Button variant="outline" size="icon" onClick={() => navigate(-1)} className="rounded-full h-10 w-10 border-slate-200 bg-white">
-                    <ArrowLeft size={18} />
-                </Button>
-                <div>
-                    <h1 className="text-2xl font-black text-slate-900 leading-none mb-1">
-                        {isStockIn ? "Inventory Entry" : "Inventory Release"}
-                    </h1>
-                    <p className="text-sm text-slate-500">Record a new stock movement for the main branch</p>
+            {/* --- TOP BAR / HEADER --- */}
+            <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+                <div className="flex items-center gap-4">
+                    <button 
+                        type="button"
+                        onClick={() => navigate(-1)} 
+                        className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors"
+                    >
+                        <ArrowLeft size={16} strokeWidth={3} className="text-slate-400" />
+                    </button>
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className={cn("text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest text-white", themeBg)}>
+                                {isStockIn ? "Inflow" : "Outflow"}
+                            </span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Module</span>
+                        </div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">
+                            {isStockIn ? "Stock Entry" : "Stock Release"}
+                        </h1>
+                    </div>
+                </div>
+
+                <div className="hidden md:flex flex-col items-end">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Timestamp</span>
+                    <span className="text-xs font-mono font-bold text-slate-600">{new Date().toLocaleDateString()}</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* LEFT: MAIN FORM */}
-                <div className="lg:col-span-8">
+                {/* LEFT COLUMN: PRIMARY INPUTS */}
+                <div className="lg:col-span-8 space-y-6">
                     
-                    {/* SECTION 1: GENERAL INFO */}
-                    <div className={cardBase}>
-                        <div className={sectionHeader}>
-                            <Info size={14} /> General Information
+                    {/* SECTION: CONFIGURATION */}
+                    <section className="bg-white border border-slate-200 rounded-xl p-5 overflow-hidden relative">
+                        <div className="absolute top-0 right-0 p-2 opacity-[0.03]">
+                            {isStockIn ? <PackagePlus size={80} /> : <PackageMinus size={80} />}
                         </div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-5 flex items-center gap-2">
+                           <Info size={14} /> Movement Parameters
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className={labelBase}>Movement Reason *</label>
-                                <select {...register("transactionType")} className={`w-full px-3 ${inputBase}`}>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Transaction Category *</label>
+                                <select 
+                                    {...register("transactionType")} 
+                                    className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all"
+                                >
                                     {isStockIn ? (
                                         <>
-                                            <option value="Purchase">Purchase (New Stock)</option>
+                                            <option value="Purchase">Purchase (Restock)</option>
                                             <option value="Return">Sales Return</option>
                                             <option value="Adjustment">Stock Adjustment (+)</option>
                                         </>
                                     ) : (
                                         <>
-                                            <option value="Sale">Sale (Outbound)</option>
-                                            <option value="Damage">Damage / Expiry</option>
+                                            <option value="Sale">Sale (Direct)</option>
+                                            <option value="Damage">Wastage / Damage</option>
                                             <option value="Adjustment">Stock Adjustment (-)</option>
                                         </>
                                     )}
                                 </select>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* SECTION 2: ITEMS */}
-                    <div className={cardBase}>
-                        <div className="flex justify-between items-center mb-6">
-                            <div className={sectionHeader}><ShoppingCart size={14} /> Items Selection</div>
+                    {/* SECTION: ITEM LEDGER */}
+                    <section className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                                <ShoppingCart size={14} /> Item Selection List
+                            </h3>
                             <ProductItemModal isStockIn={isStockIn} onAdd={(newItem) => append(newItem)} />
                         </div>
 
-                        <div className="space-y-3 min-h-25">
+                        <div className="divide-y divide-slate-100 min-h-30">
                             {fields.length === 0 ? (
-                                <div className="text-center py-10 border-2 border-dashed border-slate-100 rounded-xl">
-                                    <p className="text-sm text-slate-400 font-medium">No items added yet. Click the button above to add products.</p>
+                                <div className="py-12 text-center">
+                                    <Hash size={24} className="mx-auto text-slate-200 mb-2" />
+                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">Waiting for entries...</p>
                                 </div>
                             ) : (
                                 fields.map((field, index) => (
-                                    <div key={field.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-lg group">
+                                    <div key={field.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors group">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 bg-white border border-slate-200 rounded flex items-center justify-center font-bold text-slate-400">
-                                                {(field as any).productName?.charAt(0)}
+                                            <div className="h-10 w-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center font-mono font-black text-slate-400">
+                                                {String(index + 1).padStart(2, '0')}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900">{(field as any).productName}</p>
-                                                <p className="text-xs text-slate-500">Rate: ₹{field.rate} | Qty: {field.qty} {field.unitName}</p>
+                                                <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{(field as any).productName}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                    Rate: ₹{field.rate} <span className="mx-1">×</span> Qty: {field.qty} {field.unitName}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-6">
-                                            <p className="font-black text-slate-900">₹{field.total}</p>
-                                            <button type="button" onClick={() => remove(index)} className="text-slate-300 hover:text-red-500 transition-colors">
-                                                <Trash2 size={18} />
+                                            <p className="font-mono font-black text-xs text-slate-700">₹{field.total}</p>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => remove(index)} 
+                                                className="text-slate-300 hover:text-rose-500 transition-colors"
+                                            >
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     </div>
@@ -137,69 +165,107 @@ export default function MovementForm() {
                             )}
                         </div>
 
-                        {/* TOTAL PREVIEW */}
-                        <div className="mt-6 pt-6 border-t border-slate-100 flex justify-end">
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 flex items-center gap-4 min-w-60">
-                                <div className="h-10 w-10 bg-emerald-500 rounded flex items-center justify-center text-white">
-                                    <TrendingUp size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-emerald-600 uppercase">Estimated Total</p>
-                                    <p className="text-xl font-black text-emerald-700">₹{grandTotal}</p>
-                                </div>
+                        {/* SUB-TOTAL BAR */}
+                        <div className="p-5 border-t border-slate-100 bg-slate-50/30 flex justify-end">
+                            <div className="flex items-center gap-4">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aggregate Total</span>
+                                <span className={cn("text-xl font-mono font-black", themeColor)}>₹{grandTotal}</span>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* SECTION 3: NOTES */}
-                    <div className={cardBase}>
-                        <div className={sectionHeader}><ReceiptText size={14} /> Additional Notes</div>
-                        <textarea {...register("notes")} className={`${inputBase} w-full p-3 h-24 resize-none`} placeholder="Optional notes for internal tracking..." />
-                    </div>
+                    {/* SECTION: NOTES */}
+                    <section className="bg-white border border-slate-200 rounded-xl p-5">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
+                           <ReceiptText size={14} /> Internal Remarks
+                        </h3>
+                        <textarea 
+                            {...register("notes")} 
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-bold focus:bg-white outline-none transition-all h-20 resize-none" 
+                            placeholder="Specify details for this movement..." 
+                        />
+                    </section>
                 </div>
 
-                {/* RIGHT: SIDEBAR (SETTLEMENT) */}
-                <div className="lg:col-span-4 space-y-6">
+                {/* RIGHT COLUMN: SETTLEMENT SIDEBAR */}
+                <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
                     
                     {showSettlement ? (
                         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                            <div className="bg-blue-600 p-4 text-white">
-                                <h2 className="font-black text-sm flex items-center gap-2">
-                                    <CreditCard size={16} /> Settlement Details
+                            <div className={cn("px-5 py-3 text-white flex items-center justify-between", themeBg)}>
+                                <h2 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                                    <CreditCard size={14} /> Counterparty Info
                                 </h2>
+                                <ActivityIndicator />
                             </div>
-                            <div className="p-6 space-y-5">
-                                <div className="flex gap-2 p-1 bg-slate-100 rounded-lg">
-                                    <button type="button" onClick={() => setValue("isPaid", true)} className={`flex-1 py-2 rounded-md text-xs font-black transition-all ${watch("isPaid") ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>PAID</button>
-                                    <button type="button" onClick={() => setValue("isPaid", false)} className={`flex-1 py-2 rounded-md text-xs font-black transition-all ${!watch("isPaid") ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>CREDIT</button>
+                            <div className="p-5 space-y-5">
+                                <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setValue("isPaid", true)} 
+                                        className={cn(
+                                            "flex-1 py-1.5 rounded-md text-[10px] font-black tracking-widest transition-all",
+                                            watch("isPaid") ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
+                                        )}
+                                    >
+                                        CASH/PAID
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setValue("isPaid", false)} 
+                                        className={cn(
+                                            "flex-1 py-1.5 rounded-md text-[10px] font-black tracking-widest transition-all",
+                                            !watch("isPaid") ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
+                                        )}
+                                    >
+                                        CREDIT
+                                    </button>
                                 </div>
-                                <div>
-                                    <label className={labelBase}>{isStockIn ? 'Supplier Name' : 'Customer Name'}</label>
-                                    <Input {...register("partyDetails.name")} className={inputBase} placeholder="Enter name" />
-                                </div>
-                                <div>
-                                    <label className={labelBase}>Phone Number</label>
-                                    <Input {...register("partyDetails.phone")} className={inputBase} placeholder="Enter contact" />
+                                
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entity Name</label>
+                                        <Input {...register("partyDetails.name")} className="h-9 text-xs font-bold rounded-lg border-slate-200 bg-slate-50/50" placeholder="e.g. Acme Corp" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Hash</label>
+                                        <Input {...register("partyDetails.phone")} className="h-9 text-xs font-mono font-bold rounded-lg border-slate-200 bg-slate-50/50" placeholder="+91 00000 00000" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 border-dashed text-center">
-                            <Info size={24} className="mx-auto text-slate-300 mb-2" />
-                            <p className="text-xs font-bold text-slate-500 uppercase tracking-tight">No Payment Info Required</p>
-                            <p className="text-[10px] text-slate-400 mt-1">This is an internal stock adjustment.</p>
+                        <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-8 text-center">
+                            <div className="w-10 h-10 bg-white border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <Info size={16} className="text-slate-300" />
+                            </div>
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Internal Adj.</p>
+                            <p className="text-[10px] text-slate-400 font-bold mt-1 leading-tight">No external settlement required for this category.</p>
                         </div>
                     )}
 
                     <Button 
-                        type="submit" 
+                        type="button" 
                         disabled={isLoading || fields.length === 0} 
-                        className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 text-base font-black shadow-lg shadow-blue-100"
+                        className={cn(
+                            "w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-none",
+                            themeBg, "hover:opacity-90 text-white"
+                        )}
                     >
-                        {isLoading ? <Loader2 className="animate-spin mr-2" /> : "Complete Transaction"}
+                        {isLoading ? <Loader2 className="animate-spin mr-2" size={14} /> : "Finalize Transaction"}
                     </Button>
                 </div>
             </div>
         </form>
+    );
+}
+
+function ActivityIndicator() {
+    return (
+        <div className="flex gap-1">
+            <div className="w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
+            <div className="w-1 h-1 rounded-full bg-white/60 animate-pulse [animation-delay:0.2s]"></div>
+            <div className="w-1 h-1 rounded-full bg-white animate-pulse [animation-delay:0.4s]"></div>
+        </div>
     );
 }

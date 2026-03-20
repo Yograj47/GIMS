@@ -3,7 +3,7 @@ import { useGlobalStore } from '@/store/globalStore';
 import { ActivityLogService } from '../../../apis/ActivityLogService';
 import type { ActivityAPIResponse, ActivityLogData } from '@/types/ActivityLog';
 import api from '@/lib/api';
-import type { pagination, PaginationMetadata } from '@/types/Pagination';
+import type { PaginationMetadata } from '@/types/Pagination';
 
 export const useActivityLogs = () => {
     const [logs, setLogs] = useState<ActivityLogData[]>([]);
@@ -12,7 +12,7 @@ export const useActivityLogs = () => {
 
     // 1. Fetch Logs (Supports Dashboard live feed and full Audit page)
     const fetchLogs = useCallback(async (
-        { page, limit, type, search, startDate, endDate }: pagination) => {
+        page?: number, limit?: number, type?: string, search?: string, startDate?: string, endDate?: string) => {
         try {
             setLoading(true);
             const { data } = await api.get<ActivityAPIResponse>("/activity-logs", {

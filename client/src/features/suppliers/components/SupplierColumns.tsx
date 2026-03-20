@@ -1,71 +1,83 @@
-import { Eye, Phone, MapPin, Building2 } from "lucide-react";
+import { Edit3, MapPin, Phone } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { SupplierData } from "@/types/Supplier";
-import type{ NavigateFunction } from "react-router-dom";
+import type { NavigateFunction } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export const getSupplierColumns = (navigate: NavigateFunction): ColumnDef<SupplierData>[] => [
     {
         accessorKey: "name",
         header: "Supplier Details",
-        cell: ({ row }) => {
-            const supplier = row.original;
-            return (
-                <div className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-black text-xs border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                        {supplier.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <div className="font-black text-slate-900 text-sm uppercase tracking-tight">
-                            {supplier.name}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.15em] flex items-center gap-1 mt-0.5">
-                            <Building2 size={10} strokeWidth={3} />
-                            Partner Vendor
-                        </div>
-                    </div>
-                </div>
-            );
-        }
+        cell: ({ row }) => (
+            <div className="flex flex-col py-1">
+                <span className="font-bold text-slate-900 text-[13px] leading-tight hover:text-blue-600 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/suppliers/v/${row.original._id}`)}>
+                    {row.original.name}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                    REF · {row.original._id.slice(-6).toUpperCase()}
+                </span>
+            </div>
+        ),
     },
     {
         accessorKey: "phone",
-        header: "Phone Number",
+        header: "Contact Info",
         cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-slate-100 rounded-lg text-slate-400 border border-slate-200">
-                    <Phone size={14} />
+            <div className="flex flex-col tabular-nums">
+                <div className="flex items-center gap-1.5 text-blue-600 font-bold text-[12px]">
+                    <Phone size={10} strokeWidth={3} />
+                    {row.original.phone}
                 </div>
-                <span className="text-sm font-bold text-slate-700 font-mono tracking-tighter">
-                    {row.getValue("phone")}
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                    Primary Line
                 </span>
             </div>
-        )
+        ),
     },
     {
         accessorKey: "address",
-        header: "Address",
+        header: "Location",
         cell: ({ row }) => (
-            <div className="flex items-start gap-2 max-w-62.5">
-                <MapPin size={14} className="text-slate-300 mt-0.5 shrink-0" />
-                <span className="text-xs text-slate-500 font-bold leading-snug line-clamp-1 italic">
-                    {row.getValue("address")}
+            <div className="flex flex-col max-w-62.5">
+                <div className="flex items-center gap-1 text-slate-700 font-bold text-[11px] truncate">
+                    <MapPin size={10} className="shrink-0" />
+                    {row.original.address}
+                </div>
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                    Registered Hub
                 </span>
             </div>
-        )
+        ),
+    },
+    {
+        id: "status",
+        header: () => <div className="text-right">Registry Status</div>,
+        cell: () => (
+            <div className="text-right">
+                <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm uppercase tracking-widest border border-emerald-100">
+                    Active Partner
+                </span>
+            </div>
+        ),
     },
     {
         id: "actions",
-        header: () => <div className="text-right">Actions</div>,
+        header: "",
         cell: ({ row }) => (
-            <div className="text-right">
-                <button 
-                    onClick={() => navigate(`/suppliers/v/${row.original._id}`)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm active:scale-95"
+            <div className="flex justify-end">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/suppliers/edit/${row.original._id}`);
+                    }}
                 >
-                    <Eye size={14} strokeWidth={3} />
-                    View Details
-                </button>
+                    <Edit3 size={14} />
+                </Button>
             </div>
-        )
-    }
+        ),
+    },
 ];

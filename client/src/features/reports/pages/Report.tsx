@@ -1,34 +1,39 @@
-"use client";
-
-import { BarChart3, ArrowRightLeft, FileText, ClipboardList, ChevronRight } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { BarChart3, ArrowRightLeft, FileText, ClipboardList, ChevronRight, ChartBar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const REPORT_CONFIG = [
   {
     title: "Stock Report",
-    description: "Detailed breakdown of current inventory and valuation.",
+    description: "Inventory levels, valuation, and threshold analysis.",
     icon: BarChart3,
     path: "/reports/stock",
+    color: "text-blue-600",
+    bg: "bg-blue-50"
   },
   {
     title: "Transaction Report",
-    description: "Audit sales, purchases, and settlement statuses.",
+    description: "Audit ledger for sales, purchases, and settlements.",
     icon: FileText,
     path: "/reports/transactions",
+    color: "text-emerald-600",
+    bg: "bg-emerald-50"
   },
   {
     title: "Movement Report",
-    description: "Trace every stock adjustment and transfer history.",
+    description: "Full traceability of stock adjustments and transfers.",
     icon: ArrowRightLeft,
     path: "/reports/movement",
+    color: "text-amber-600",
+    bg: "bg-amber-50"
   },
   {
     title: "Activity Logs",
-    description: "Monitor user actions and system-wide changes.",
+    description: "System-wide audit trail and user action history.",
     icon: ClipboardList,
     path: "/reports/activity",
+    color: "text-slate-600",
+    bg: "bg-slate-50"
   },
 ];
 
@@ -36,75 +41,85 @@ export default function ReportsHub() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-full space-y-6 animate-in fade-in duration-500 pb-10">
-      
-      {/* THEMED HEADER */}
-      <div className="flex justify-between items-end border-b border-slate-100 pb-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">
-            Analytics Hub<span className="text-blue-600">.</span>
-          </h1>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Data Intelligence & Reporting</p>
-        </div>
-      </div>
+    <div className="h-full animate-in fade-in duration-700 px-6 py-6">
+      <div className="max-w-400 mx-auto space-y-8">
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {REPORT_CONFIG.map((report) => (
-          <Card 
-            key={report.path} 
-            onClick={() => navigate(report.path)}
-            className={cn(
-              "group relative cursor-pointer border-slate-200 bg-white transition-all duration-200",
-              "hover:border-blue-600/30 hover:shadow-md",
-              "rounded-2xl overflow-hidden"
-            )}
-          >
-            <CardContent className="p-6 flex items-center gap-5">
-              {/* Icon Wrapper - Transitions to Blue-600 */}
-              <div className={cn(
-                "w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm",
-                "bg-slate-50 text-slate-900",
-                "group-hover:bg-blue-600 group-hover:text-white group-hover:-rotate-2"
-              )}>
-                <report.icon 
-                  size={24} 
-                  strokeWidth={2.5}
-                />
-              </div>
+        {/* --- 1. PRECISION HEADER --- */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-8">
+          <div className="flex items-center gap-4">
+            <div className="p-2 bg-blue-600 rounded-sm text-white transition-transform hover:rotate-3">
+              <ChartBar size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                Analytics Hub
+              </h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                Data Intelligence • <span className="text-blue-600 italic font-black">Ready</span>
+              </p>
+            </div>
+          </div>
 
-              {/* Text Content */}
-              <div className="flex-1 space-y-0.5">
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
-                  {report.title}
-                </h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-relaxed max-w-60">
-                  {report.description}
-                </p>
-              </div>
-
-              {/* Indicator */}
-              <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
-                <ChevronRight size={18} strokeWidth={3} />
-              </div>
-            </CardContent>
-            
-            {/* Bottom Accent Line - Blue-600 */}
-            <div className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 bg-blue-600" />
-          </Card>
-        ))}
-      </div>
-
-      {/* Footer Info */}
-      <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
-        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
-          Terminal Status: Ready
-        </p>
-        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-sm shadow-sm">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-tighter">
-                System Online
-            </p>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Secure Node</span>
+          </div>
+        </div>
+
+        {/* --- 2. SMOOTH REPORT GRID --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {REPORT_CONFIG.map((report) => (
+            <div
+              key={report.path}
+              onClick={() => navigate(report.path)}
+              className={cn(
+                "group relative cursor-pointer overflow-hidden rounded-sm border border-slate-200 bg-white transition-all duration-300 ease-out",
+                "hover:border-slate-400 hover:shadow-[4px_4px_20px_-10px_rgba(0,0,0,0.1)]"
+              )}
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-0.75 bg-blue-600 -translate-x-0.75 group-hover:translate-x-0 transition-transform duration-300" />
+
+              <div className="flex items-stretch h-28">
+                <div className={cn(
+                  "flex w-20 items-center justify-center border-r border-slate-100 transition-colors duration-500",
+                  "bg-slate-50/50 text-slate-400 group-hover:bg-slate-100 group-hover:text-blue-600"
+                )}>
+                  <report.icon 
+                    size={22} 
+                    strokeWidth={1.5} 
+                    className="transition-transform duration-500 group-hover:scale-110" 
+                  />
+                </div>
+
+                {/* CONTENT AREA */}
+                <div className="flex flex-1 flex-col justify-center px-6 transition-transform duration-300 group-hover:translate-x-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-[12px] font-black uppercase tracking-tight text-slate-900 transition-colors group-hover:text-blue-600">
+                      {report.title}
+                    </h3>
+                    <ChevronRight
+                      size={14}
+                      className="opacity-0 -translate-x-2 text-blue-600 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0"
+                      strokeWidth={3}
+                    />
+                  </div>
+                  <p className="max-w-60 text-[9px] font-bold uppercase leading-tight text-slate-400 tracking-tight">
+                    {report.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* --- 3. FOOTER --- */}
+        <div className="pt-8 border-t border-slate-200 flex justify-between items-center opacity-60">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
+            Core.Analytical_Services
+          </p>
+          <p className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-tighter">
+            Build_ID: 1.0.0_S
+          </p>
         </div>
       </div>
     </div>

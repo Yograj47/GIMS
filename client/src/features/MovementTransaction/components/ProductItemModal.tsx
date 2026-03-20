@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Package, Loader2, Search, Hash, IndianRupee, Tag } from "lucide-react";
+import { Plus, Package, Loader2, Tag } from "lucide-react";
 import Select from "react-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,8 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
     const [tempItem, setTempItem] = useState<Partial<Item>>(initialItem);
 
     useEffect(() => {
-        if (open && products.length === 0) {
-            fetchProducts();
-        }
-            if (!open) setTempItem(initialItem); 
+        if (open && products.length === 0) fetchProducts();
+        if (!open) setTempItem(initialItem); 
     }, [open]);
 
     const filterProduct = products.filter(p => p.quantity > 0 || isStockIn);
@@ -60,64 +58,67 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
         setTempItem(updatedItem);
     };
 
-    // UI Styles matching GroceryPro
-    const sectionHeader = "flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-blue-600 mb-3 mt-2";
+    const labelStyle = "text-sm font-bold text-slate-700 mb-1.5 block";
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button type="button" variant="outline" className="border-2 border-dashed h-11 border-blue-100 text-blue-600 hover:bg-blue-50 hover:border-blue-200 rounded-xl px-6 font-bold transition-all">
+                <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="h-11 border-2 border-dashed border-blue-100 text-blue-600 hover:bg-blue-50 hover:border-blue-200 rounded-xl px-6 font-bold transition-all"
+                >
                     <Plus size={18} className="mr-2" /> Select Product
                 </Button>
             </DialogTrigger>
             
-            <DialogContent className="sm:max-w-112.5 rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
-                <div className="bg-blue-600 p-6 text-white">
+            <DialogContent className="sm:max-w-md rounded-2xl p-0 overflow-hidden border-none shadow-2xl bg-white">
+                {/* --- STANDARD HEADER --- */}
+                <div className="px-8 pt-8 pb-4">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-3 text-white">
-                            <div className="bg-white/20 p-2 rounded-lg">
-                                <Package className="w-5 h-5 text-white" />
+                        <DialogTitle className="flex items-center gap-3 text-slate-900 text-xl font-black tracking-tight">
+                            <div className="bg-blue-50 p-2 rounded-lg">
+                                <Package className="w-5 h-5 text-blue-600" />
                             </div>
-                            <span className="font-black tracking-tight">Add Product to List</span>
+                            Add Item to Table
                         </DialogTitle>
                     </DialogHeader>
                 </div>
 
-                <div className="p-8 space-y-6 bg-white">
-                    {/* STEP 1: SELECT */}
+                <div className="px-8 pb-8 space-y-6">
+                    {/* PRODUCT SEARCH */}
                     <div>
-                        <div className={sectionHeader}><Search size={14} /> 1. Search Item</div>
+                        <label className={labelStyle}>Search Product</label>
                         <Select
-                            className="text-sm font-bold"
+                            className="text-sm font-medium"
                             isLoading={productsLoading}
                             options={productOptions}
                             isSearchable
-                            placeholder="Search by name..."
+                            placeholder="Search by name or SKU..."
                             onChange={handleProductChange}
                             styles={{
                                 control: (base, state) => ({
                                     ...base,
                                     borderRadius: '12px',
-                                    padding: '6px',
-                                    border: '2px solid',
-                                    borderColor: state.isFocused ? '#2563eb' : '#f1f5f9',
+                                    padding: '4px',
+                                    border: '1px solid',
+                                    borderColor: state.isFocused ? '#2563eb' : '#e2e8f0',
                                     backgroundColor: '#f8fafc',
                                     boxShadow: 'none',
                                     '&:hover': { borderColor: '#cbd5e1' }
-                                }),
-                                placeholder: (base) => ({ ...base, color: '#94a3b8' })
+                                })
                             }}
                         />
                     </div>
 
-                    {/* STEP 2: QUANTITY & UNIT */}
                     <div className="grid grid-cols-2 gap-4">
+                        {/* QUANTITY */}
                         <div>
-                            <div className={sectionHeader}><Hash size={14} /> 2. Quantity</div>
+                            <label className={labelStyle}>Quantity</label>
                             <div className="relative">
                                 <Input 
                                     type="number" 
-                                    className="font-black rounded-xl h-12 bg-slate-50 border-2 border-slate-50 focus:bg-white focus:border-blue-500 transition-all pl-4" 
+                                    className="font-bold rounded-xl h-12 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 transition-all pl-4 pr-12" 
                                     value={tempItem.qty} 
                                     onChange={(e) => handleQtyRateChange("qty", Number(e.target.value))} 
                                 />
@@ -126,30 +127,34 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
                                 </span>
                             </div>
                         </div>
+
+                        {/* RATE */}
                         <div>
-                            <div className={sectionHeader}><IndianRupee size={14} /> 3. Rate</div>
-                            <Input 
-                                type="number" 
-                                className="font-black rounded-xl h-12 bg-slate-50 border-2 border-slate-50 focus:bg-white focus:border-blue-500 transition-all text-emerald-600" 
-                                value={tempItem.rate} 
-                                onChange={(e) => handleQtyRateChange("rate", Number(e.target.value))} 
-                            />
+                            <label className={labelStyle}>Unit Rate</label>
+                            <div className="relative">
+                                <Input 
+                                    type="number" 
+                                    className="font-bold rounded-xl h-12 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 transition-all pl-8" 
+                                    value={tempItem.rate} 
+                                    onChange={(e) => handleQtyRateChange("rate", Number(e.target.value))} 
+                                />
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* SUB-TOTAL DISPLAY */}
-                    <div className="bg-slate-900 rounded-2xl p-5 flex justify-between items-center group overflow-hidden relative">
-                        <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
-                            <Tag size={80} className="text-white" />
+                    {/* --- TOTAL DISPLAY (GREENISH) --- */}
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 flex justify-between items-center group relative overflow-hidden">
+                        <div className="absolute -right-2 -bottom-2 opacity-10 group-hover:scale-110 transition-transform">
+                            <Tag size={60} className="text-emerald-600" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Calculated Sub-total</p>
-                            <p className="text-2xl font-black text-white">₹{(tempItem.total || 0).toLocaleString()}</p>
+                            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-wider mb-1">Total Amount</p>
+                            <p className="text-2xl font-black text-emerald-700">₹{(tempItem.total || 0).toLocaleString()}</p>
                         </div>
-                        <div className="h-10 w-px bg-slate-800 mx-2"></div>
                         <div className="text-right">
-                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest text-right">Unit</p>
-                            <p className="text-sm font-bold text-blue-400 uppercase">{tempItem.unitName || "---"}</p>
+                             <p className="text-[10px] font-black uppercase text-emerald-600 tracking-wider mb-1">Unit</p>
+                             <p className="text-sm font-bold text-emerald-700 uppercase">{tempItem.unitName || "---"}</p>
                         </div>
                     </div>
 
@@ -158,10 +163,10 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
                         type="button" 
                         disabled={!tempItem.productId || !tempItem.qty || productsLoading}
                         onClick={() => { onAdd(tempItem as Item); setOpen(false); }} 
-                        className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl text-white font-black text-md shadow-xl shadow-blue-100 transition-all active:scale-95 flex gap-2"
+                        className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl text-white font-black text-base shadow-xl shadow-blue-100 transition-all active:scale-95 flex gap-2"
                     >
                         {productsLoading ? <Loader2 className="animate-spin" /> : (
-                            <>Confirm & Add Item <Plus size={20} /></>
+                            <>Add Item <Plus size={18} /></>
                         )}
                     </Button>
                 </div>

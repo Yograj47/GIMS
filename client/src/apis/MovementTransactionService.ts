@@ -63,7 +63,8 @@ export const MovementTransactionService = {
         limit: number = 10, all?: boolean): Promise<MovementAPIResponse> => {
         const { data } = await api.get<MovementAPIResponse>(`/movements/product-history/${productId}`, {
             params: all
-                ? { paginate: false, productId } : { productId, page, limit }
+                ? { paginate: false, productId } 
+                : { productId, page, limit }
         });
         return data;
     }

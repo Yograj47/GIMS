@@ -3,7 +3,7 @@ import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
 import { SupplierService } from '../../../apis/SupplierService';
 import type { SupplierProduct, SupplierData, SupplierFormData, } from '@/types/Supplier';
-import type { pagination, PaginationMetadata } from '@/types/Pagination';
+import type { PaginationMetadata } from '@/types/Pagination';
 
 export const useSuppliers = () => {
     const [Suppliers, setSuppliers] = useState<SupplierData[]>([]);
@@ -13,7 +13,7 @@ export const useSuppliers = () => {
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
     // 1. Fetch All Suppliers
-    const fetchSuppliers = useCallback(async ({ page, limit, search, all }: pagination = {}) => {
+    const fetchSuppliers = useCallback(async (page? : number, limit?:number, search?:string, all? :boolean ) => {
         try {
             setLoading(true);
             const response = await SupplierService.getAll(page, limit, search, all);
