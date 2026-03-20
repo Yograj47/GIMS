@@ -198,6 +198,7 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 
     results = await Transaction.aggregate(pipeline);
 
+
     res.status(200).json({
         status: "Success",
         data: results,
@@ -222,6 +223,8 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 export const getMovements = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    console.log(limit);
+
     const search = req.query.search || '';
     const shouldPaginate = req.query.paginate !== 'false';
     const movementType = (req.query.movementType && req.query.movementType !== 'ALL')
@@ -285,11 +288,17 @@ export const getMovements = asyncHandler(async (req, res) => {
         const countResult = await Movement.aggregate(countPipeline);
         totalItems = countResult[0]?.total || 0;
 
-        pipeline.push({ $skip: (page - 1) * limit });
-        pipeline.push({ $limit: limit });
+        const dataPipeline = [
+            ...pipeline,
+            { $skip: (page - 1) * limit },
+            { $limit: limit }
+        ];
+
+        results = await Movement.aggregate(dataPipeline);
+    } else {
+        results = await Movement.aggregate(pipeline);
     }
 
-    results = await Movement.aggregate(pipeline);
 
     res.status(200).json({
         status: "Success",

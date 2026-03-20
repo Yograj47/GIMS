@@ -7,7 +7,7 @@ import asyncHandler from "express-async-handler";
  * @access  Private/Admin
  */
 export const getActivityLogs = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 100, search = '', type, startDate, endDate, paginate } = req.query;
+    const { page, limit, search = '', type, startDate, endDate, paginate } = req.query;
     const shouldPaginate = paginate !== 'false';
 
     // 1. Build Query Object
@@ -36,9 +36,9 @@ export const getActivityLogs = asyncHandler(async (req, res) => {
 
     // 2. Execute Query
     let itemsQuery = ActivityLog.find(query)
-        .populate("performedBy", "name role") // Just get what's needed for the UI badge
+        .populate("performedBy", "name role") 
         .sort({ createdAt: -1 })
-        .lean(); // Use lean() for faster read-only BI queries
+        .lean(); 
 
     if (shouldPaginate) {
         itemsQuery = itemsQuery.skip((parseInt(page) - 1) * parseInt(limit)).limit(parseInt(limit));
