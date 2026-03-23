@@ -5,13 +5,12 @@ import jwt from "jsonwebtoken";
 import transporter from "../config/emailConfig.js";
 import { registerSchema, loginSchema, resetPasswordSchema } from "../validation/User.validation.js";
 import { createLog } from "../config/Logger.js";
+import { wrapEmail } from "../config/emailTemplate.js";
 
 /**
  * @desc Register User
- * @route POST /api/v1/auths/
  */
 export const registerUser = asyncHandler(async (req, res) => {
-    // 1. Zod Validation
     const { name, email, password } = registerSchema.parse(req.body);
 
     const userExist = await User.findOne({ email });
@@ -38,12 +37,20 @@ export const registerUser = asyncHandler(async (req, res) => {
         maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
-    // Send Welcome Email
+
+    const html = wrapEmail(
+        `Welcome, ${user.name}!`,
+        `<p>Your account is ready. You can now start managing inventory levels and tracking stock movements.</p>`,
+        'Go to Dashboard',
+        `${process.env.CLIENT_URL}/dashboard`
+    );
+
     const mailOptions = {
-        from: process.env.SENDER_EMAIL,
+        from: `"GIMS System" <${process.env.SENDER_EMAIL}>`,
         to: user.email,
-        subject: 'Welcome to GIMS!',
-        text: `Hello ${user.name},\n\nWelcome to GIMS!`
+        subject: 'Welcome to GIMS! 🚀',
+        html: html,
+        text: `Welcome to GIMS, ${user.name}! Login at ${process.env.CLIENT_URL}/dashboard`
     };
 
     try {
@@ -67,7 +74,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 
 /**
  * @desc Login User
- * @route POST /api/v1/auths/login
  */
 export const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = loginSchema.parse(req.body);
@@ -103,7 +109,6 @@ export const loginUser = asyncHandler(async (req, res) => {
 
 /**
  * @desc Send Verify OTP
- * @route POST /api/v1/auths/send-verify-otp
  */
 export const sendVerifyOtp = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id);
@@ -125,11 +130,19 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
     user.verifyOptExpiryAt = Date.now() + 10 * 60 * 1000;
     await user.save();
 
+    const html = wrapEmail(
+        'Verify Your Email',
+        `<p>Your verification code is below. It will expire in 10 minutes.</p>
+     <h1 style="text-align:center; letter-spacing:5px; color:#2563eb; background:#f8fafc; padding:20px; border-radius:8px;">${otp}</h1>`,
+        'Verify Account',
+        `${process.env.CLIENT_URL}/verify`
+    );
+
     await transporter.sendMail({
-        from: process.env.SENDER_EMAIL,
+        from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
         to: user.email,
         subject: 'Account Verification OTP',
-        text: `Your verification code is: ${otp}`
+        html: html
     });
 
     res.status(200).json({ status: "Success", message: "OTP sent to email" });
@@ -184,7 +197,9 @@ export const logoutUser = asyncHandler(async (req, res) => {
 
     res.cookie("token", "", {
         httpOnly: true,
-        expires: new Date(0),
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        expires: new Date(0)
     });
 
     res.status(200).json({ status: "Success", message: "Logged out successfully" });
@@ -211,10 +226,23 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
     user.resetOptExpiryAt = Date.now() + 10 * 60 * 1000;
     await user.save();
 
+    const html = wrapEmail(
+        'Password Reset Request',
+        `<p>We received a request to reset your password for your GIMS account.</p>
+         <p>Please use the verification code below to proceed. <b>This code is valid for 10 minutes.</b></p>
+         <div style="background:#f1f5f9; padding:20px; text-align:center; margin:20px 0; border-radius:8px; border:1px dashed #cbd5e1;">
+            <span style="font-size:32px; font-weight:bold; letter-spacing:8px; color:#2563eb;">${otp}</span>
+         </div>
+         <p style="font-size:13px; color:#64748b;">If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>`,
+        'Reset Password',
+        `${process.env.CLIENT_URL}/reset-password`
+    );
+
     await transporter.sendMail({
-        from: process.env.SENDER_EMAIL,
+        from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
         to: user.email,
-        subject: 'Password Reset OTP',
+        subject: 'Password Reset OTP 🔐',
+        html: html,
         text: `Your password reset code is: ${otp}`
     });
 

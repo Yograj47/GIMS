@@ -50,7 +50,6 @@ app.use(`${API}`, MovementTransactionRoutes);
 app.use(`${API}/activity-logs`, ActivityLogRoutes);
 app.use(`${API}/alerts`, AlertRoutes);
 app.use(`${API}/settings`, SettingRoutes);
-app.use(`${API}/product-units`, ProductUnitRoutes);
 app.use(`${API}/analytics`, AnalyticsRoutes);
 
 // Error Middleware
