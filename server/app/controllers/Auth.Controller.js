@@ -7,6 +7,16 @@ import { registerSchema, loginSchema, resetPasswordSchema } from "../validation/
 import { createLog } from "../config/Logger.js";
 import { wrapEmail } from "../config/emailTemplate.js";
 
+// ─── Shared Cookie Config ─────────────────────────────────────────────────────
+const cookieConfig = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 30 * 24 * 60 * 60 * 1000
+};
+
+const VALID_ROLES = ["owner", "admin", "staff"];
+
 /**
  * @desc Register User
  */
@@ -22,22 +32,17 @@ export const registerUser = asyncHandler(async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await User.create({
-        name,
-        email,
-        password: hashedPassword
-    });
+    const user = await User.create({ name, email, password: hashedPassword });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30d" });
+    const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "30d" }
+    );
 
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000
-    });
+    res.cookie("token", token, cookieConfig);
 
-
+    // FIX: Fire and forget — don't await, prevents SMTP timeout from blocking response
     const html = wrapEmail(
         `Welcome, ${user.name}!`,
         `<p>Your account is ready. You can now start managing inventory levels and tracking stock movements.</p>`,
@@ -45,26 +50,15 @@ export const registerUser = asyncHandler(async (req, res) => {
         `${process.env.CLIENT_URL}/dashboard`
     );
 
-    const mailOptions = {
+    transporter.sendMail({
         from: `"GIMS System" <${process.env.SENDER_EMAIL}>`,
         to: user.email,
         subject: 'Welcome to GIMS! 🚀',
-        html: html,
+        html,
         text: `Welcome to GIMS, ${user.name}! Login at ${process.env.CLIENT_URL}/dashboard`
-    };
+    }).catch(err => console.error("Welcome email error:", err.message));
 
-    try {
-        await transporter.sendMail(mailOptions);
-    } catch (err) {
-        console.error("Email error:", err.message);
-    }
-
-    await createLog(
-        user._id,
-        "CREATE",
-        "AUTH",
-        `New user account registered: ${user.name}`
-    );
+    await createLog(user._id, "CREATE", "AUTH", `New user account registered: ${user.name}`);
 
     res.status(201).json({
         status: "Success",
@@ -79,31 +73,24 @@ export const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = loginSchema.parse(req.body);
 
     const user = await User.findOne({ email });
-    // Use generic "Invalid Credentials" for security so users can't fish for emails
     if (!user || !(await bcrypt.compare(password, user.password))) {
         res.status(401);
         throw new Error("Invalid email or password");
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30d" });
-
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 30 * 24 * 60 * 60 * 1000
-    });
-
-    await createLog(
-        user._id,
-        "LOGIN",
-        "AUTH",
-        `User logged in successfully`
+    const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "30d" }
     );
+
+    res.cookie("token", token, cookieConfig);
+
+    await createLog(user._id, "LOGIN", "AUTH", `User logged in successfully`);
 
     res.status(200).json({
         status: "Success",
-        message: "User logged in successfully",
+        message: "User logged in successfully"
     });
 });
 
@@ -112,8 +99,6 @@ export const loginUser = asyncHandler(async (req, res) => {
  */
 export const sendVerifyOtp = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id);
-
-    console.log(user);
 
     if (!user) {
         res.status(404);
@@ -133,17 +118,22 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
     const html = wrapEmail(
         'Verify Your Email',
         `<p>Your verification code is below. It will expire in 10 minutes.</p>
-     <h1 style="text-align:center; letter-spacing:5px; color:#2563eb; background:#f8fafc; padding:20px; border-radius:8px;">${otp}</h1>`,
+         <h1 style="text-align:center; letter-spacing:5px; color:#2563eb; background:#f8fafc; padding:20px; border-radius:8px;">${otp}</h1>`,
         'Verify Account',
         `${process.env.CLIENT_URL}/verify`
     );
 
-    await transporter.sendMail({
-        from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
-        to: user.email,
-        subject: 'Account Verification OTP',
-        html: html
-    });
+    // FIX: Wrapped in try/catch — OTP is already saved, email failure shouldn't crash request
+    try {
+        await transporter.sendMail({
+            from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
+            to: user.email,
+            subject: 'Account Verification OTP',
+            html
+        });
+    } catch (err) {
+        console.error("Verify OTP email error:", err.message);
+    }
 
     res.status(200).json({ status: "Success", message: "OTP sent to email" });
 });
@@ -160,7 +150,8 @@ export const verifyEmail = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    if (!user.verifyOpt || user.verifyOpt !== otp || Date.now() > user.verifyOptExpiryAt) {
+    // FIX: String conversion for safe OTP comparison
+    if (!user.verifyOpt || user.verifyOpt !== String(otp) || Date.now() > user.verifyOptExpiryAt) {
         res.status(400);
         throw new Error("Invalid or expired OTP");
     }
@@ -170,35 +161,24 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     user.verifyOptExpiryAt = 0;
     await user.save();
 
-    await createLog(
-        user._id,
-        "UPDATE",
-        "AUTH",
-        "Email address verified via OTP"
-    );
+    await createLog(user._id, "UPDATE", "AUTH", "Email address verified via OTP");
 
     res.status(200).json({ status: "Success", message: "Email verified successfully" });
 });
-
 
 /**
  * @desc Logout User
  */
 export const logoutUser = asyncHandler(async (req, res) => {
-
     if (req.user) {
-        await createLog(
-            req.user.id,
-            "LOGOUT",
-            "AUTH",
-            "User successfully ended their session"
-        );
+        await createLog(req.user.id, "LOGOUT", "AUTH", "User successfully ended their session");
     }
 
+    // FIX: Use same sameSite/secure settings as login so browser clears the correct cookie
     res.cookie("token", "", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         expires: new Date(0)
     });
 
@@ -238,19 +218,24 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
         `${process.env.CLIENT_URL}/reset-password`
     );
 
-    await transporter.sendMail({
-        from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
-        to: user.email,
-        subject: 'Password Reset OTP 🔐',
-        html: html,
-        text: `Your password reset code is: ${otp}`
-    });
+    // FIX: Wrapped in try/catch — OTP is already saved, email failure shouldn't crash request
+    try {
+        await transporter.sendMail({
+            from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
+            to: user.email,
+            subject: 'Password Reset OTP 🔐',
+            html,
+            text: `Your password reset code is: ${otp}`
+        });
+    } catch (err) {
+        console.error("Reset OTP email error:", err.message);
+    }
 
     res.status(200).json({ status: "Success", message: "Reset OTP sent to email" });
 });
 
 /**
- * @desc Reset Password 
+ * @desc Reset Password
  */
 export const resetPassword = asyncHandler(async (req, res) => {
     const { email, otp, newPassword } = resetPasswordSchema.parse(req.body);
@@ -261,7 +246,8 @@ export const resetPassword = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    if (!user.resetOpt || user.resetOpt !== otp || Date.now() > user.resetOptExpiryAt) {
+    // FIX: String conversion for safe OTP comparison
+    if (!user.resetOpt || user.resetOpt !== String(otp) || Date.now() > user.resetOptExpiryAt) {
         res.status(400);
         throw new Error("Invalid or expired OTP");
     }
@@ -271,24 +257,23 @@ export const resetPassword = asyncHandler(async (req, res) => {
     user.resetOptExpiryAt = 0;
     await user.save();
 
-    await createLog(
-        user._id,
-        "UPDATE",
-        "AUTH",
-        "Password reset successfully using OTP"
-    );
+    await createLog(user._id, "UPDATE", "AUTH", "Password reset successfully using OTP");
 
     res.status(200).json({ status: "Success", message: "Password reset successfully" });
 });
 
-
-/** * @desc Update User Role
- * @route PUT /api/v1/auths/role/:id
- * @access Private (Admin only)
+/**
+ * @desc Update User Role
  */
 export const updateRole = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
+
+    // FIX: Validate role before hitting DB
+    if (!VALID_ROLES.includes(role)) {
+        res.status(400);
+        throw new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(", ")}`);
+    }
 
     if (req.user.id === id) {
         res.status(400);
@@ -303,7 +288,7 @@ export const updateRole = asyncHandler(async (req, res) => {
     }
 
     await createLog(
-        req.user.id, // The Admin who performed the action
+        req.user.id,
         "UPDATE",
         "AUTH",
         `Changed role of user ${user.name} to ${role}`
@@ -319,5 +304,4 @@ export const updateRole = asyncHandler(async (req, res) => {
             isVerified: user.isVerified
         }
     });
-
 });
