@@ -51,21 +51,21 @@ export const processProductAlert = async (product, userId, settings) => {
                 const recipientEmail = settings.adminEmail || user.email;
 
                 try {
+
+                    const alertColor = severity === 'critical' ? '#e11d48' : '#f59e0b';
+                    const html = wrapEmail(
+                        `Stock Alert: ${name}`,
+                        `<p><b>Location:</b> ${settings.location}</p><p>${message}</p>`,
+                        'View Product',
+                        `${process.env.CLIENT_URL}/products/`,
+                        alertColor
+                    );
+
                     await transporter.sendMail({
-                        from: `"${settings.storeName || 'Inventory System'}" <${process.env.SENDER_EMAIL}>`,
+                        from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
                         to: recipientEmail,
                         subject: `⚠️ Stock Alert: ${name}`,
-                        html: `
-                        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-                            <h2 style="color: ${severity === 'critical' ? '#e11d48' : '#f59e0b'};">
-                                ${settings.storeName || 'Inventory'} Alert
-                            </h2>
-                            <p><b>Location:</b> ${settings.location || 'Main Branch'}</p>
-                            <p>${message}</p>
-                            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-                            <small style="color: #64748b;">Automated message from ${settings.storeName}. Settings managed by Admin.</small>
-                        </div>
-                    `
+                        html: html
                     });
                 } catch (emailError) {
                     console.error("Email failed to send, but alert was recorded:", emailError);
