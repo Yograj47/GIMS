@@ -72,6 +72,8 @@ export const createProduct = asyncHandler(async (req, res) => {
 });
 
 
+import mongoose from 'mongoose';
+
 /**
  * @desc    Get all products with Advanced Filtering
  * @route   GET /api/v1/products
@@ -81,6 +83,7 @@ export const getProducts = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || '';
+    const category = req.query.category || '';
     const shouldPaginate = req.query.paginate !== 'false';
 
     const stockLevel = (req.query.stockLevel &&
@@ -89,58 +92,73 @@ export const getProducts = asyncHandler(async (req, res) => {
         ? req.query.stockLevel
         : null;
 
-    // 1. Define Filter Conditions
-    const conditions = [
-        ...(search ? [{
-            name: { $regex: search, $options: 'i' }
-        }] : []),
-        ...(stockLevel === "Low Stock" ? [{
-            $expr: { $lte: ["$quantity", "$threshold"] }
-        }] : []),
-        ...(stockLevel === "Healthy" ? [{
-            $expr: { $gt: ["$quantity", "$threshold"] }
-        }] : [])
-    ];
+    // 1. Build Initial Match (Filters)
+    const matchConditions = {};
+
+    // Filter by exact Category ID if provided from dropdown
+    if (category && mongoose.Types.ObjectId.isValid(category)) {
+        matchConditions.categoryId = new mongoose.Types.ObjectId(category);
+    }
+
+    // Filter by Stock Level
+    if (stockLevel === "low") matchConditions.$expr = { $lte: ["$quantity", "$threshold"] };
+    if (stockLevel === "healthy") matchConditions.$expr = { $gt: ["$quantity", "$threshold"] };
+    if (stockLevel === "out") matchConditions.quantity = { $lte: 0 };
 
     // 2. Build Pipeline
     const pipeline = [
-        ...(conditions.length > 0 ? [{ $match: { $and: conditions } }] : []),
+        { $match: matchConditions },
+
         {
             $lookup: {
                 from: "categories",
                 localField: "categoryId",
                 foreignField: "_id",
-                as: "category"
+                as: "categoryDoc"
             }
         },
-        { $unwind: "$category" },
+        { $unwind: "$categoryDoc" },
+
         {
             $lookup: {
                 from: "units",
                 localField: "unitId",
                 foreignField: "_id",
-                as: "unit"
+                as: "unitDoc"
             }
         },
-        { $unwind: "$unit" },
-        {
-            $project: {
-                _id: 1,
-                name: 1,
-                quantity: 1,
-                threshold: 1,
-                basePrice: 1,
-                sellingPrice: 1,
-                isActive: 1,
-                createdAt: 1,
-                category: { _id: "$category._id", name: "$category.name" },
-                unit: { _id: "$unit._id", name: "$unit.name", shortForm: "$unit.shortForm" }
-            }
-        },
-        { $sort: { createdAt: -1 } }
+        { $unwind: "$unitDoc" }
     ];
 
-    // 3. Handle Pagination
+    if (search) {
+        pipeline.push({
+            $match: {
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { 'categoryDoc.name': { $regex: search, $options: 'i' } }
+                ]
+            }
+        });
+    }
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    pipeline.push({
+        $project: {
+            _id: 1,
+            name: 1,
+            quantity: 1,
+            threshold: 1,
+            basePrice: 1,
+            sellingPrice: 1,
+            isActive: 1,
+            createdAt: 1,
+            category: { _id: "$categoryDoc._id", name: "$categoryDoc.name" },
+            unit: { _id: "$unitDoc._id", name: "$unitDoc.name", shortForm: "$unitDoc.shortForm" }
+        }
+    });
+
+    // 3. Execution & Pagination Logic
     let results;
     let totalItems;
 
@@ -154,7 +172,7 @@ export const getProducts = asyncHandler(async (req, res) => {
 
     results = await Product.aggregate(pipeline);
 
-    // 4. Return Theme-Consistent Response
+    // 4. Return Response
     res.status(200).json({
         status: "Success",
         data: results,
@@ -169,7 +187,6 @@ export const getProducts = asyncHandler(async (req, res) => {
         }
     });
 });
-
 
 /**
  * @desc Get product by id

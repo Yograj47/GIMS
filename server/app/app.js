@@ -3,6 +3,7 @@ import express from "express"
 import cookieParser from "cookie-parser";
 import errorHandler from "./middleware/errorHandler.js"
 import cors from "cors"
+import { rateLimit } from 'express-rate-limit'
 
 // Import Routes
 import SettingRoutes from "./routes/Setting.Route.js"
@@ -27,9 +28,18 @@ app.use(cookieParser());
 app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }))
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: "Too many requests from this IP, please try again after 15 minutes",
+})
+
+app.use(injectSettings);
+app.use(limiter);
 
 // Test Route
 app.get("/", (req, res) => {
@@ -53,6 +63,6 @@ app.use(`${API}/settings`, SettingRoutes);
 app.use(`${API}/analytics`, AnalyticsRoutes);
 
 // Error Middleware
-app.use(errorHandler, injectSettings);
+app.use(errorHandler);
 
 export default app;

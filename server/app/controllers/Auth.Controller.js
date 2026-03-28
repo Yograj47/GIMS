@@ -2,10 +2,9 @@ import User from "../models/User.Model.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import transporter from "../config/emailConfig.js";
+import transporter, { wrapEmail } from "../config/emailConfig.js";
 import { registerSchema, loginSchema, resetPasswordSchema } from "../validation/User.validation.js";
 import { createLog } from "../config/Logger.js";
-import { wrapEmail } from "../config/emailTemplate.js";
 
 // ─── Shared Cookie Config ─────────────────────────────────────────────────────
 const cookieConfig = {
@@ -42,7 +41,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     res.cookie("token", token, cookieConfig);
 
-    // FIX: Fire and forget — don't await, prevents SMTP timeout from blocking response
     const html = wrapEmail(
         `Welcome, ${user.name}!`,
         `<p>Your account is ready. You can now start managing inventory levels and tracking stock movements.</p>`,

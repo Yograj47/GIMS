@@ -10,6 +10,9 @@ export const getActiveAlerts = asyncHandler(async (req, res) => {
         .populate("productId", "name quantity threshold unit")
         .sort({ createdAt: -1 });
 
+    console.log(alerts);
+    
+
     const formattedAlerts = alerts.map(alert => {
         const doc = alert.toObject();
         return {
