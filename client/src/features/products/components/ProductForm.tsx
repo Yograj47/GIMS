@@ -36,7 +36,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const customSelectStyles = {
         control: (base: any, state: any) => ({
             ...base,
-            borderRadius: '0.125rem', // Match rounded-sm
+            borderRadius: '0.125rem', 
             padding: '2px',
             fontSize: '13px',
             border: state.isFocused ? '1px solid #2563eb' : '1px solid #e2e8f0',
@@ -67,7 +67,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const profit = sellPrice - buyPrice;
     const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(1) : 0;
 
-    const inputStyle = "w-full rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
+    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
     const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
     const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-blue-600 mb-4 flex items-center gap-2";
 

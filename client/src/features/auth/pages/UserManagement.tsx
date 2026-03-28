@@ -1,20 +1,10 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Loader2, SearchX, ShieldCheck } from "lucide-react";
-
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Loader2, SearchX, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuth";
 import UserListing from "../components/UserListing";
+import { DeleteConfirmDialog } from "@/lib/deleteAlert";
 
 export default function UserManagement() {
     const { users, fetchUsers, isLoading, updateRole, user: currentUser } = useAuthStore();
@@ -52,7 +42,7 @@ export default function UserManagement() {
     return (
         <div className="h-full animate-in fade-in duration-500">
             <div className="max-w-400 mx-auto space-y-6">
-                
+
                 {/* 1. PRECISION HEADER (Stock Report Style) */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
                     <div className="flex items-center gap-4">
@@ -137,33 +127,13 @@ export default function UserManagement() {
                 </div>
             </div>
 
-            {/* Confirmation Dialog - Sharp corners matched */}
-            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogContent className="rounded-sm border-slate-200">
-                    <AlertDialogHeader>
-                        <div className="w-10 h-10 rounded-sm bg-rose-50 text-rose-600 flex items-center justify-center mb-4 border border-rose-100">
-                            <AlertTriangle size={20} />
-                        </div>
-                        <AlertDialogTitle className="text-lg font-bold text-slate-900 uppercase tracking-tight">
-                            Confirm Personnel Removal
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="text-slate-500 text-xs font-medium">
-                            Purging <span className="text-slate-900 font-bold uppercase tracking-tight">{userToDelete?.name}</span> from the system is permanent. This cannot be reversed.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="gap-2 mt-4">
-                        <AlertDialogCancel className="rounded-sm border-slate-200 font-bold text-[10px] uppercase tracking-widest h-9 px-4">
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={confirmDelete}
-                            className="rounded-sm bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] uppercase tracking-widest h-9 px-4"
-                        >
-                            Delete Records
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <DeleteConfirmDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                title="Confirm Personnel Removal"
+                itemName={userToDelete?.name}
+            />
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Save, Trash2, ArrowLeft, Lightbulb, ShieldAlert } from "lucide-react";
 import ProductForm from "../components/ProductForm";
@@ -8,11 +8,15 @@ import type { ProductFormData } from "@/types/Product";
 import { useCategories } from "@/features/category/hooks/useCategories";
 import { useUnits } from "@/features/unit/hooks/useUnits";
 import { Loading } from "@/lib/loader";
+import { DeleteConfirmDialog } from "@/lib/deleteAlert"; // Your new utility
 
 export default function ManageProduct() {
     const { productId } = useParams();
     const isEditMode = Boolean(productId);
     const navigate = useNavigate();
+
+    // 1. Dialog State
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const {
         addProduct,
@@ -36,44 +40,45 @@ export default function ManageProduct() {
     }, [productId, isEditMode, fetchProductById, fetchCategories, fetchUnits]);
 
     const handleFormSubmit = async (data: ProductFormData) => {
-        let finalPayload = (!data.supplierId || data.supplierId === "") 
-            ? (() => { const { supplierId, ...rest } = data; return rest; })() 
+        let finalPayload = (!data.supplierId || data.supplierId === "")
+            ? (() => { const { supplierId, ...rest } = data; return rest; })()
             : data;
 
-        let success = isEditMode && productId 
-            ? await updateProduct(productId, finalPayload) 
+        let success = isEditMode && productId
+            ? await updateProduct(productId, finalPayload)
             : await addProduct(data);
 
         if (success) navigate("/products");
     };
 
-    if (isEditMode && isLoading) return <Loading fullPage />;
-
-    const handleDelete = async () => {
-        if (!productId || !window.confirm("Are you sure you want to delete this product?")) return;
+    const confirmDelete = async () => {
+        if (!productId) return;
         await removeProduct(productId);
+        setIsDeleteDialogOpen(false);
         navigate("/products");
     };
 
+    if (isEditMode && isLoading) return <Loading fullPage />;
+
     return (
         <div className="h-full space-y-6 animate-in fade-in duration-500">
-            {/* Header: Sharp & Professional */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-300 pb-6">
                 <div className="flex items-center gap-4">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="rounded-full border-3 border-slate-200 hover:bg-white hover:border-slate-600 transition-all"
                         onClick={() => navigate("/products")}
+                        className="text-slate-500 hover:text-blue-600 group"
                     >
-                        <ArrowLeft size={16} strokeWidth={3} />
+                        <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                        </div>
                     </Button>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
-                                {isEditMode ? "Modify Product" : "System Entry"}
-                            </h1>
-                        </div>
+                        <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                            {isEditMode ? "Modify Product" : "System Entry"}
+                        </h1>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                             {isEditMode ? `ID: ${productId?.slice(-8)}` : "Product Creation"}
                         </p>
@@ -82,8 +87,7 @@ export default function ManageProduct() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                {/* Main Form Section */}
-                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm shadow-sm overflow-hidden">
                     <div className="p-6">
                         {isEditMode && !singleProduct ? (
                             <div className="py-20 text-center text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">
@@ -100,17 +104,28 @@ export default function ManageProduct() {
                     </div>
 
                     {/* Action Footer */}
-                    <div className="flex items-center justify-between bg-slate-50/50 border-t border-slate-100 px-6 py-4">
+                    <div className="flex items-center justify-between bg-slate-50/50 border-t border-slate-300 px-6 py-4">
                         <div>
                             {isEditMode && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={handleDelete}
-                                    className="text-red-600 hover:bg-red-50 text-[11px] font-bold uppercase gap-2"
-                                >
-                                    <Trash2 size={14} /> Remove Item
-                                </Button>
+                                <>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() => setIsDeleteDialogOpen(true)}
+                                        className="text-red-600 hover:bg-red-50 hover:text-red-500 text-[11px] font-bold uppercase gap-2 transition-colors"
+                                    >
+                                        <Trash2 size={14} /> Remove Item
+                                    </Button>
+
+                                    <DeleteConfirmDialog
+                                        open={isDeleteDialogOpen}
+                                        onOpenChange={setIsDeleteDialogOpen}
+                                        onConfirm={confirmDelete}
+                                        title="Confirm Product Deletion"
+                                        itemName={singleProduct?.name || "this product"}
+                                        isLoading={isLoading}
+                                    />
+                                </>
                             )}
                         </div>
 
@@ -148,7 +163,7 @@ export default function ManageProduct() {
                         </p>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-sm p-5">
+                    <div className="bg-white border border-slate-300 rounded-sm p-5">
                         <div className="flex items-center gap-2 mb-4 text-slate-900">
                             <ShieldAlert size={16} strokeWidth={3} />
                             <h3 className="font-bold text-[11px] uppercase tracking-widest text-slate-900">Validations</h3>
@@ -156,7 +171,7 @@ export default function ManageProduct() {
                         <div className="space-y-4">
                             <div className="flex gap-3">
                                 <div className="h-4 w-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-black shrink-0">1</div>
-                                <p className="text-slate-500 text-[11px] font-medium leading-tight">Threshold determines "Low Stock" alerts in the dashboard.</p>
+                                <p className="text-slate-500 text-[11px] font-medium leading-tight">Threshold determines "Low Stock" alerts.</p>
                             </div>
                             <div className="flex gap-3">
                                 <div className="h-4 w-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-black shrink-0">2</div>

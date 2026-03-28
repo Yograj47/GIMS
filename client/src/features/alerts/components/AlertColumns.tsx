@@ -15,7 +15,8 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
                 <div className="flex items-center gap-3 py-1">
                     <div className={cn(
                         "w-8 h-8 rounded-sm flex items-center justify-center text-white",
-                        isCritical ? "bg-rose-600" : "bg-blue-400"
+                        row.original.resolved ? "bg-blue-600" :
+                        isCritical ? "bg-rose-600" : "bg-orange-600"
                     )}>
                         <Bell size={14} strokeWidth={3} />
                     </div>
@@ -25,7 +26,7 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
                         </span>
                         <span className={cn(
                             "text-[9px] font-bold uppercase tracking-tight",
-                            isCritical ? "text-rose-500" : "text-blue-500"
+                            isCritical ? "text-rose-600" : "text-blue-600"
                         )}>
                             VAL: {row.original.snapshotValue}
                         </span>

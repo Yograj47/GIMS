@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export default function StatCard({ title, value, desc, trend, trendUp, icon, color, bgColor }: any) {
     return (
-        <Card className="border-slate-200 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50 bg-white group overflow-hidden">
+        <Card className="border-slate-300 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50 bg-white group overflow-hidden">
             <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                     <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shadow-sm", bgColor, color)}>
@@ -15,9 +15,9 @@ export default function StatCard({ title, value, desc, trend, trendUp, icon, col
                     </div>
                 </div>
                 <h2 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{title}</p>
+                <p className="text-[12px] font-bold text-slate-600 uppercase tracking-widest mt-1">{title}</p>
                 <div className="mt-4 pt-4 border-t border-slate-50">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight opacity-70">{desc}</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight opacity-70">{desc}</p>
                 </div>
             </CardContent>
         </Card>

@@ -25,7 +25,7 @@ function AppLayout() {
 
     return (
         
-        <div className="flex h-screen w-full bg-[#f1f5f9] overflow-hidden font-sans antialiased text-slate-900">
+        <div className="flex h-screen w-full overflow-hidden font-sans antialiased text-slate-900">
             
             {/* 1. SIDEBAR WRAPPER */}
             <div className="no-print relative z-60">
@@ -44,7 +44,7 @@ function AppLayout() {
                 )}
             >
     
-                <div className="no-print border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+                <div className="no-print border-b border-slate-300 bg-white/80 backdrop-blur-md sticky top-0 z-50">
                     <AppHeader />
                 </div>
 

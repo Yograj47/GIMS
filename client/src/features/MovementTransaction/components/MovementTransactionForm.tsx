@@ -49,7 +49,7 @@ export default function MovementForm() {
     };
 
     const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
-    const themeBg = isStockIn ? "bg-blue-600" : "bg-rose-600";
+    const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-600 hover:bg-rose-700";
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto px-6 py-8 space-y-8 animate-in fade-in duration-500">
@@ -245,7 +245,7 @@ export default function MovementForm() {
                     )}
 
                     <Button 
-                        type="button" 
+                        type="submit" 
                         disabled={isLoading || fields.length === 0} 
                         className={cn(
                             "w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-none",

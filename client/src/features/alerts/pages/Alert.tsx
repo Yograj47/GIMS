@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShieldAlert, RotateCcw, Search, Activity } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { ShieldAlert, Activity } from "lucide-react";
 import { DataTable } from "@/components/common/DataTable";
 import { getAlertColumns } from "../components/AlertColumns";
 import { useAlerts } from "../hooks/UseAlerts";
@@ -17,7 +15,6 @@ const AlertPage: React.FC = () => {
         fetchActiveAlerts
     } = useAlerts();
 
-    const [searchQuery, setSearchQuery] = useState("");
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
     useEffect(() => {
@@ -43,7 +40,7 @@ const AlertPage: React.FC = () => {
                                 System Alerts
                             </h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                {meta?.totalItems || 0} Total Logs • <span className="text-rose-600 italic">Integrity Check</span>
+                                {meta?.totalItems || 0} Total Logs • <span className="text-red-600 italic">Integrity Check</span>
                             </p>
                         </div>
                     </div>
@@ -57,33 +54,8 @@ const AlertPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* 2. Precision Toolbar */}
-                <div className="flex flex-col lg:flex-row gap-3">
-                    <div className="relative flex-1 group">
-                        <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
-                            size={14}
-                            strokeWidth={2.5}
-                        />
-                        <Input
-                            placeholder="Search by product name or alert message..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 transition-all shadow-none"
-                        />
-                    </div>
 
-                    <Button
-                        variant="outline"
-                        disabled={!searchQuery}
-                        onClick={() => setSearchQuery("")}
-                        className="h-10 border-slate-200 text-slate-500 hover:bg-slate-50 rounded-sm text-[11px] font-bold uppercase"
-                    >
-                        <RotateCcw className="mr-2 h-3 w-3" /> Reset
-                    </Button>
-                </div>
-
-                {/* 3. The Data Table Wrapper */}
+                {/* 2. The Data Table Wrapper */}
                 <div className="bg-white border border-slate-200 shadow-sm">
                     <DataTable
                         columns={getAlertColumns(markAsResolved)}

@@ -10,13 +10,13 @@ interface AlertCardProps {
 
 export default function AlertCard({ productName, remainingQty, onAction }: AlertCardProps) {
     return (
-        <Card className="border-rose-200 bg-rose-50/20 rounded-xl p-8 flex flex-col justify-center relative overflow-hidden border-2 border-dashed h-full">
+        <Card className="border-rose-600 bg-rose-100/20 rounded-xl p-8 flex flex-col justify-center relative overflow-hidden border-2 border-dashed h-full">
             <div className="flex items-center gap-5 relative z-10">
                 <div className="w-14 h-14 shrink-0 rounded-xl bg-white shadow-md flex items-center justify-center text-rose-600 border border-rose-100">
                     <AlertCircle size={28} />
                 </div>
                 <div>
-                    <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em] mb-1">Stock Alert</h4>
+                    <h4 className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-1">Stock Alert</h4>
                     <p className="text-lg font-black text-slate-900 tracking-tight leading-tight uppercase">
                         {productName} 
                     </p>
@@ -25,7 +25,7 @@ export default function AlertCard({ productName, remainingQty, onAction }: Alert
             </div>
             <Button 
                 onClick={onAction}
-                className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.2em] h-12 rounded-lg shadow-lg shadow-blue-200"
+                className="w-full mt-8 bg-sky-500 hover:bg-sky-600 text-white font-black text-[12px] uppercase tracking-[0.2em] h-12 rounded-lg shadow-lg shadow-blue-200"
             >
                 Restock Asset
             </Button>

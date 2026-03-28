@@ -2,17 +2,17 @@ import { Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ChartSectionProps {
-    data: any; // Later we will type this properly with ChartData
+    data: any; 
     options: any;
 }
 
 export default function ChartSection({ data, options }: ChartSectionProps) {
     return (
-        <Card className="xl:col-span-3 border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white">
+        <Card className="xl:col-span-3 border-slate-200">
             <CardHeader className="flex flex-row items-center justify-between px-8 pt-8 pb-4">
                 <div>
                     <CardTitle className="text-lg font-black text-slate-900 tracking-tight uppercase">Performance Analytics</CardTitle>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">7-Day Operational Window</p>
+                    <p className="text-[10px] font-bold text-slate-600 mt-1 uppercase tracking-[0.2em]">7-Day Operational Window</p>
                 </div>
                 <div className="flex gap-6">
                     <LegendItem color="bg-blue-600" label="STOCK IN" />

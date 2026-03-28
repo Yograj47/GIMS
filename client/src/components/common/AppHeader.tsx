@@ -24,8 +24,6 @@ function AppHeader() {
     const { fetchSettings, settings } = useGlobalStore();
     const { user } = useAuthStore();
 
-
-    // 2. Fetch both Alerts and Settings on Mount
     useEffect(() => {
         fetchActiveAlerts();
         if (!settings) {
@@ -54,12 +52,12 @@ function AppHeader() {
     };
 
     return (
-        <header className="w-full h-16 bg-white/70 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
+        <header className="w-full h-16 flex items-center justify-between px-8">
             {/* Left: Branch Status Chip */}
-            <div className="flex items-center gap-3 bg-slate-100/50 border border-slate-200 py-1.5 px-4 rounded-full">
+            <div className="flex items-center gap-3 bg-white border border-slate-400 py-1.5 px-4 rounded-full">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">
-                    {settings?.location || "Main Hub"}
+                <span className="text-[12px] font-black text-slate-500 uppercase tracking-[0.15em]">
+                    {settings?.storeName || "Main Hub"}
                 </span>
             </div>
 
@@ -79,14 +77,12 @@ function AppHeader() {
                             <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 border-2 border-white" />
                         )}
                     </button>
-                    {/* ... (Keep notification dropdown code) ... */}
-
 
                     {/* Dropdown Menu */}
                     {showNotifications && (
                         <div className="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
                             {/* Header */}
-                            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div className="p-4 border-b border-slate-300 flex justify-between items-center bg-slate-50/50">
                                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 font-mono">Alert Center</h3>
                                 {isLoading && <Loader2 size={12} className="animate-spin text-blue-500" />}
                             </div>
@@ -97,7 +93,7 @@ function AppHeader() {
                                     activeAlerts.map((alert) => (
                                         <div
                                             key={alert._id}
-                                            className="p-4 border-b border-slate-50 hover:bg-slate-50/80 transition-colors group relative cursor-default"
+                                            className="p-4 border-b border-slate-300 hover:bg-slate-50/80 transition-colors group relative cursor-default"
                                         >
                                             <div className="flex gap-3">
                                                 <div className={cn(
@@ -148,7 +144,7 @@ function AppHeader() {
                     )}
                 </div>
 
-                <div className="h-8 w-px bg-slate-200 mx-1" />
+                <div className="h-8 w-px bg-slate-300 mx-1" />
 
                 {/* Profile Link */}
                 <Link to="/me" className="flex items-center gap-3 pl-2 group">

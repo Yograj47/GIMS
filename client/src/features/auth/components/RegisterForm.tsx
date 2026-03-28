@@ -99,9 +99,9 @@ function RegisterForm() {
         className="w-full h-12 mt-4 text-sm font-bold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 rounded-xl"
       >
         {isLoading ? (
-          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Provisioning Account...</>
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...</>
         ) : (
-          "Initialize Account"
+          "Create Account"
         )}
       </Button>
     </form>

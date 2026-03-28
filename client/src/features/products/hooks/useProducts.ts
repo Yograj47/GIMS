@@ -12,10 +12,10 @@ export const useProducts = () => {
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
     // 1. Fetch All Products
-    const fetchProducts = useCallback(async (page?: number, limit?: number, search?: string, stockLevel?: string, all?: boolean) => {
+    const fetchProducts = useCallback(async (page?: number, limit?: number, search?: string, category?: string, stockLevel?: string, all?: boolean) => {
         try {
             setLoading(true);
-            const response = await productService.getAll(page, limit, search, stockLevel, all);
+            const response = await productService.getAll(page, limit, search, category, stockLevel, all);
             if (response.status === "Success") {
                 setProducts(response.data as ProductData[]);
                 setMeta(all ? null : (response.meta || null));

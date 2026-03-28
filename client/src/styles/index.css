@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
+@import "@fontsource/poppins";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/400-italic.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -25,6 +27,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
@@ -120,7 +123,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply font-sans bg-background text-foreground;
+
   }
 
 }
@@ -131,14 +135,16 @@
     height: 44px;
     border-radius: 50%;
     /* Creates a beautiful blue trail effect */
-    background: conic-gradient(#0000 10%, #2563eb); 
+    background: conic-gradient(#0000 10%, #2563eb);
     -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 5px), #000 0);
     mask: radial-gradient(farthest-side, #0000 calc(100% - 5px), #000 0);
     animation: spin 0.8s infinite linear;
   }
 
   @keyframes spin {
-    to { transform: rotate(1turn); }
+    to {
+      transform: rotate(1turn);
+    }
   }
 }
 
@@ -154,7 +160,7 @@
   body {
     background-color: white !important;
     margin: 0;
-    -webkit-print-color-adjust: exact; 
+    -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
