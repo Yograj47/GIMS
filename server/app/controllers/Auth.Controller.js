@@ -121,7 +121,6 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
         `${process.env.CLIENT_URL}/verify`
     );
 
-    // FIX: Wrapped in try/catch — OTP is already saved, email failure shouldn't crash request
     try {
         await transporter.sendMail({
             from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
@@ -148,7 +147,6 @@ export const verifyEmail = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    // FIX: String conversion for safe OTP comparison
     if (!user.verifyOpt || user.verifyOpt !== String(otp) || Date.now() > user.verifyOptExpiryAt) {
         res.status(400);
         throw new Error("Invalid or expired OTP");
@@ -172,7 +170,6 @@ export const logoutUser = asyncHandler(async (req, res) => {
         await createLog(req.user.id, "LOGOUT", "AUTH", "User successfully ended their session");
     }
 
-    // FIX: Use same sameSite/secure settings as login so browser clears the correct cookie
     res.cookie("token", "", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -216,7 +213,6 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
         `${process.env.CLIENT_URL}/reset-password`
     );
 
-    // FIX: Wrapped in try/catch — OTP is already saved, email failure shouldn't crash request
     try {
         await transporter.sendMail({
             from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
@@ -244,7 +240,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    // FIX: String conversion for safe OTP comparison
     if (!user.resetOpt || user.resetOpt !== String(otp) || Date.now() > user.resetOptExpiryAt) {
         res.status(400);
         throw new Error("Invalid or expired OTP");
@@ -267,7 +262,6 @@ export const updateRole = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    // FIX: Validate role before hitting DB
     if (!VALID_ROLES.includes(role)) {
         res.status(400);
         throw new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(", ")}`);

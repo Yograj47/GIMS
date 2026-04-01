@@ -1,12 +1,8 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/User.Model.js";
 
-// @desc Get Me
 /** 
-* @route GET /api/v1/users/profile
-* @access Private
-* @param {string} userId - User ID from request body
-* @returns {object} 200 - User profile data
+ * @desc Get Me
 */
 export const getMe = asyncHandler(async (req, res) => {
     const userId = req.user.id;
@@ -33,13 +29,70 @@ export const getMe = asyncHandler(async (req, res) => {
     });
 })
 
+/**
+ * @desc Get all users (Admin only)
+ */
+
 export const getAllUsers = asyncHandler(async (req, res) => {
     const users = await User.find()
         .select("-password -verifyOptExpiryAt -resetOptExpiryAt -verifyOpt -resetOpt");
-        
+
     res.status(200).json({
         status: "Success",
         data: users
+    });
+});
+
+/**
+ * @desc Update user details (name, email) - accessible to all authenticated users
+ */
+export const updateUserDetails = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { name, email } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { name, email },
+        { new: true, runValidators: true }
+    ).select("-password -verifyOptExpiryAt -resetOptExpiryAt -verifyOpt -resetOpt");
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    res.status(200).json({
+        status: "Success",
+        data: user
+    });
+});
+
+/**
+ * @desc Update user password - accessible to all authenticated users
+ */
+export const UpdatePassword = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(userId);
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+
+    if (!isMatch) {
+        res.status(400);
+        throw new Error("Current password is incorrect");
+    }
+
+    user.password = newPassword;
+    await user.save();  
+
+    res.status(200).json({
+        status: "Success",
+        message: "Password updated successfully"
     });
 });
 

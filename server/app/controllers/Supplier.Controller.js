@@ -3,6 +3,7 @@ import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
 import { supplierSchema } from "../validation/Supplier.validation.js";
 import { createLog } from "../config/Logger.js";
+import { regex } from "zod";
 
 /**
  * @desc    Create a new supplier
@@ -43,6 +44,12 @@ export const getSuppliers = asyncHandler(async (req, res) => {
             {
                 name: { $regex: search, $options: 'i' }
             },
+            {
+                phone: { $regex: search, $options: 'i' }
+            },
+            {
+                address: { $regex: search, $options: 'i' }
+            }
         ]
     }
 
