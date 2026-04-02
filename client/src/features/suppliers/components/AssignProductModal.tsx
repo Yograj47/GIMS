@@ -98,7 +98,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                     <Button
                         disabled={selectedIds.length === 0 || isSubmitting}
                         onClick={async () => { setIsSubmitting(true); await onAssign(selectedIds); setIsSubmitting(false); onClose(); }}
-                        className="flex-2 bg-slate-900 hover:bg-black text-white text-[10px] font-black uppercase tracking-widest h-10 shadow-none rounded-lg"
+                        className="flex-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest h-10 shadow-none rounded-lg"
                     >
                         {isSubmitting ? "Processing..." : `Link ${selectedIds.length} Items`}
                     </Button>

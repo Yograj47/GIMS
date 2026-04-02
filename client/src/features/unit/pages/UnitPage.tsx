@@ -5,6 +5,9 @@ import UnitFormModal from "../components/UnitFormModal";
 import type { UnitFormData, UnitData } from "@/types/Unit";
 import { DataTable } from "@/components/common/DataTable";
 import { getUnitColumns } from "../components/UnitColumns";
+import { useDebounce } from "@/lib/debounce";
+import { DeleteConfirmDialog } from "@/lib/deleteAlert";
+import { AdminGate } from "@/features/auth/components/AdminGate";
 
 export default function UnitPage() {
     const { units, fetchUnits, removeUnit, meta, addUnit, updateUnit, isLoading } = useUnits();
@@ -12,13 +15,15 @@ export default function UnitPage() {
     const [selectedUnit, setSelectedUnit] = useState<UnitData | null>(null);
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
     const [searchQuery, setSearchQuery] = useState("");
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+    const debouncedSearch = useDebounce(searchQuery, 400);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchUnits(pagination.pageIndex + 1, pagination.pageSize, searchQuery);
+            fetchUnits(pagination.pageIndex + 1, pagination.pageSize, debouncedSearch);
         }, 400);
         return () => clearTimeout(timer);
-    }, [fetchUnits, pagination.pageIndex, pagination.pageSize, searchQuery]);
+    }, [fetchUnits, pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
     const handleAddClick = () => {
         setSelectedUnit(null);
@@ -39,6 +44,19 @@ export default function UnitPage() {
         setIsModalOpen(false);
     };
 
+    const handleDeleteClick = (unit: UnitData) => {
+        setSelectedUnit(unit);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (selectedUnit) {
+            await removeUnit(selectedUnit._id);
+            setIsDeleteDialogOpen(false);
+            setSelectedUnit(null);
+        }
+    }
+
     return (
         <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500">
 
@@ -49,49 +67,60 @@ export default function UnitPage() {
                         <Scale size={18} />
                     </div>
                     <div>
-                        <h1 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">
+                        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                             Measurement Registry (Unit)
                         </h1>
-                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] mt-1.5">
+                        <p className="text-slate-500 text-xs mt-1">
                             Unit Specification & Scale Configuration
                         </p>
                     </div>
                 </div>
 
-                <button
-                    onClick={handleAddClick}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.15em] px-6 h-10 rounded-sm transition-all active:scale-95 flex items-center gap-2"
-                >
-                    <Plus size={14} strokeWidth={4} />
-                    Define Unit 
-                </button>
+                <AdminGate>
+                    <button
+                        onClick={handleAddClick}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.15em] px-6 h-10 rounded-sm transition-all active:scale-95 flex items-center gap-2"
+                    >
+                        <Plus size={14} strokeWidth={4} />
+                        Define Unit
+                    </button>
+                </AdminGate>
             </div>
 
             {/* 2. SEARCH - Sharp Industrial */}
             <div className="mb-4 group">
-                <div className="bg-white border border-slate-200 group-within:border-blue-600 rounded-sm p-2 flex items-center gap-3 transition-all">
+                <div className="bg-white border border-slate-300 group-within:border-blue-600 rounded-sm p-2 flex items-center gap-3 transition-all">
                     <div className="pl-2 text-slate-400 group-within:text-blue-600 transition-colors">
                         <Search size={16} strokeWidth={3} />
                     </div>
                     <input
                         type="text"
-                        placeholder="SEARCH BY NAME OR CODE..."
+                        placeholder="Search units..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent border-none outline-none font-bold text-[11px] uppercase tracking-widest placeholder:text-slate-300 text-slate-900"
+                        className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-slate-600 text-slate-900 font-medium"
                     />
                 </div>
             </div>
 
-            {/* 3. DATATABLE - Flattened */}
-            <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
+            {/* 3. DATATABLE */}
+            <div className="bg-white border border-slate-300 rounded-sm overflow-hidden">
                 <DataTable
-                    columns={getUnitColumns(handleEditClick, removeUnit)}
+                    columns={getUnitColumns(handleEditClick, handleDeleteClick)}
                     data={units}
                     pageCount={meta?.totalPages || 0}
                     rowCount={meta?.totalItems || 0}
                     pagination={pagination}
                     setPagination={setPagination}
+                    isLoading={isLoading}
+                />
+
+                <DeleteConfirmDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                    onConfirm={confirmDelete}
+                    title="Confirm Unit Deletion"
+                    itemName={selectedUnit?.name || "this unit"}
                     isLoading={isLoading}
                 />
             </div>
@@ -103,6 +132,6 @@ export default function UnitPage() {
                 initialData={selectedUnit}
                 isLoading={isLoading}
             />
-        </div>
+        </div >
     );
 }

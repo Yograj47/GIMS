@@ -39,7 +39,6 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
-
 export interface ResetPasswordPayload {
   email: string;
   otp: string;

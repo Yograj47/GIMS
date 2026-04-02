@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { AdminGate } from "@/features/auth/components/AdminGate";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus, ChevronRight, ChevronDown, Package, Box } from "lucide-react";
 
@@ -69,11 +70,14 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any
     {
         id: "actions",
         header: () => (
+            <AdminGate>
             <div className="text-right text-[11px] font-bold text-slate-500 uppercase tracking-tight pr-4">
                 Operations
             </div>
+            </AdminGate>
         ),
         cell: ({ row }) => (
+            <AdminGate>
             <div className="flex justify-end pr-2">
                 <Button
                     onClick={(e) => {
@@ -87,6 +91,7 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any
                     Map Unit
                 </Button>
             </div>
+            </AdminGate>
         ),
     },
 ];

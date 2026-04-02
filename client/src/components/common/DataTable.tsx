@@ -59,7 +59,7 @@ export function DataTable<TData>({
 
 
     return (
-        <div className="flex flex-col h-full bg-white border border-slate-200">
+        <div className="flex flex-col h-full bg-white border border-slate-300">
             <div className="flex-1 overflow-auto custom-scrollbar">
                 <Table className="w-full border-separate border-spacing-0">
                     <TableHeader className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-sm">
@@ -121,7 +121,7 @@ export function DataTable<TData>({
                 </Table>
             </div>
 
-            <div className="border-t border-slate-200 bg-white px-4 py-3">
+            <div className="border-t border-slate-300 bg-white px-4 py-3">
                 <DataTablePagination table={table} totalItems={rowCount} />
             </div>
         </div>

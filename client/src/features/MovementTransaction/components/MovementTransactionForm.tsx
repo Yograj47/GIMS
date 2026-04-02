@@ -52,18 +52,21 @@ export default function MovementForm() {
     const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-600 hover:bg-rose-700";
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto px-6 py-8 space-y-8 animate-in fade-in duration-500">
-            
+        <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+
             {/* --- TOP BAR / HEADER --- */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+            <div className="flex items-center justify-between border-b border-slate-300 pb-6">
                 <div className="flex items-center gap-4">
-                    <button 
-                        type="button"
-                        onClick={() => navigate(-1)} 
-                        className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors"
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(-1)}
+                        className="text-slate-500 hover:text-blue-600 group"
                     >
-                        <ArrowLeft size={16} strokeWidth={3} className="text-slate-400" />
-                    </button>
+                        <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                        </div>
+                    </Button>
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className={cn("text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest text-white", themeBg)}>
@@ -71,7 +74,7 @@ export default function MovementForm() {
                             </span>
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Module</span>
                         </div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">
+                        <h1 className="text-3xl text-slate-900 tracking-tighter uppercase italic">
                             {isStockIn ? "Stock Entry" : "Stock Release"}
                         </h1>
                     </div>
@@ -84,23 +87,23 @@ export default function MovementForm() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
+
                 {/* LEFT COLUMN: PRIMARY INPUTS */}
                 <div className="lg:col-span-8 space-y-6">
-                    
+
                     {/* SECTION: CONFIGURATION */}
-                    <section className="bg-white border border-slate-200 rounded-xl p-5 overflow-hidden relative">
+                    <section className="bg-white border border-slate-300 rounded-xl p-5 overflow-hidden relative">
                         <div className="absolute top-0 right-0 p-2 opacity-[0.03]">
                             {isStockIn ? <PackagePlus size={80} /> : <PackageMinus size={80} />}
                         </div>
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-5 flex items-center gap-2">
-                           <Info size={14} /> Movement Parameters
+                            <Info size={14} /> Movement Parameters
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Transaction Category *</label>
-                                <select 
-                                    {...register("transactionType")} 
+                                <select
+                                    {...register("transactionType")}
                                     className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all"
                                 >
                                     {isStockIn ? (
@@ -122,8 +125,8 @@ export default function MovementForm() {
                     </section>
 
                     {/* SECTION: ITEM LEDGER */}
-                    <section className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                    <section className="bg-white border border-slate-300 rounded-xl overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-300 flex items-center justify-between bg-slate-50/30">
                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                                 <ShoppingCart size={14} /> Item Selection List
                             </h3>
@@ -140,7 +143,7 @@ export default function MovementForm() {
                                 fields.map((field, index) => (
                                     <div key={field.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors group">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center font-mono font-black text-slate-400">
+                                            <div className="h-10 w-10 bg-slate-100 border border-slate-300 rounded-lg flex items-center justify-center font-mono font-black text-slate-400">
                                                 {String(index + 1).padStart(2, '0')}
                                             </div>
                                             <div>
@@ -152,9 +155,9 @@ export default function MovementForm() {
                                         </div>
                                         <div className="flex items-center gap-6">
                                             <p className="font-mono font-black text-xs text-slate-700">₹{field.total}</p>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => remove(index)} 
+                                            <button
+                                                type="button"
+                                                onClick={() => remove(index)}
                                                 className="text-slate-300 hover:text-rose-500 transition-colors"
                                             >
                                                 <Trash2 size={14} />
@@ -166,7 +169,7 @@ export default function MovementForm() {
                         </div>
 
                         {/* SUB-TOTAL BAR */}
-                        <div className="p-5 border-t border-slate-100 bg-slate-50/30 flex justify-end">
+                        <div className="p-5 border-t border-slate-200 bg-slate-50/30 flex justify-end">
                             <div className="flex items-center gap-4">
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aggregate Total</span>
                                 <span className={cn("text-xl font-mono font-black", themeColor)}>₹{grandTotal}</span>
@@ -175,23 +178,23 @@ export default function MovementForm() {
                     </section>
 
                     {/* SECTION: NOTES */}
-                    <section className="bg-white border border-slate-200 rounded-xl p-5">
+                    <section className="bg-white border border-slate-300 rounded-xl p-5">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                           <ReceiptText size={14} /> Internal Remarks
+                            <ReceiptText size={14} /> Internal Remarks
                         </h3>
-                        <textarea 
-                            {...register("notes")} 
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-bold focus:bg-white outline-none transition-all h-20 resize-none" 
-                            placeholder="Specify details for this movement..." 
+                        <textarea
+                            {...register("notes")}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-bold focus:bg-white outline-none transition-all h-20 resize-none"
+                            placeholder="Specify details for this movement..."
                         />
                     </section>
                 </div>
 
                 {/* RIGHT COLUMN: SETTLEMENT SIDEBAR */}
                 <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
-                    
+
                     {showSettlement ? (
-                        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-sm">
                             <div className={cn("px-5 py-3 text-white flex items-center justify-between", themeBg)}>
                                 <h2 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
                                     <CreditCard size={14} /> Counterparty Info
@@ -200,9 +203,9 @@ export default function MovementForm() {
                             </div>
                             <div className="p-5 space-y-5">
                                 <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setValue("isPaid", true)} 
+                                    <button
+                                        type="button"
+                                        onClick={() => setValue("isPaid", true)}
                                         className={cn(
                                             "flex-1 py-1.5 rounded-md text-[10px] font-black tracking-widest transition-all",
                                             watch("isPaid") ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
@@ -210,9 +213,9 @@ export default function MovementForm() {
                                     >
                                         CASH/PAID
                                     </button>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setValue("isPaid", false)} 
+                                    <button
+                                        type="button"
+                                        onClick={() => setValue("isPaid", false)}
                                         className={cn(
                                             "flex-1 py-1.5 rounded-md text-[10px] font-black tracking-widest transition-all",
                                             !watch("isPaid") ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
@@ -221,21 +224,21 @@ export default function MovementForm() {
                                         CREDIT
                                     </button>
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     <div className="space-y-1.5">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entity Name</label>
-                                        <Input {...register("partyDetails.name")} className="h-9 text-xs font-bold rounded-lg border-slate-200 bg-slate-50/50" placeholder="e.g. Acme Corp" />
+                                        <Input {...register("partyDetails.name")} className="h-9 text-xs rounded-lg border-slate-300 bg-slate-50/50" placeholder="e.g. Acme Corp" />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Hash</label>
-                                        <Input {...register("partyDetails.phone")} className="h-9 text-xs font-mono font-bold rounded-lg border-slate-200 bg-slate-50/50" placeholder="+91 00000 00000" />
+                                        <Input {...register("partyDetails.phone")} className="h-9 text-xs rounded-lg border-slate-300 bg-slate-50/50" placeholder="+977 98**" />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-8 text-center">
+                        <div className="bg-slate-50 border border-slate-300 border-dashed rounded-xl p-8 text-center">
                             <div className="w-10 h-10 bg-white border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <Info size={16} className="text-slate-300" />
                             </div>
@@ -244,9 +247,9 @@ export default function MovementForm() {
                         </div>
                     )}
 
-                    <Button 
-                        type="submit" 
-                        disabled={isLoading || fields.length === 0} 
+                    <Button
+                        type="submit"
+                        disabled={isLoading || fields.length === 0}
                         className={cn(
                             "w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-none",
                             themeBg, "hover:opacity-90 text-white"

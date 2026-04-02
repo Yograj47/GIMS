@@ -66,11 +66,10 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/help" element={<HelpPage/>} />
+              <Route path="/help" element={<HelpPage />} />
             </Route>
             <Route path="/verify" element={<VerifyAccount />} />
             <Route path="/forget-password" element={<ForgotPassword />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
           </Route>
 
           {/* --- Protected Inventory/Admin Routes --- */}
@@ -88,8 +87,10 @@ function App() {
               {/* 2. Admin/Owner/Staff: Products & Suppliers (Internal logic hides buttons) */}
               <Route path="/products">
                 <Route index element={<Products />} />
-                <Route path="add" element={<ManageProduct />} />
-                <Route path="edit/:productId" element={<ManageProduct />} />
+                <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                  <Route path="add" element={<ManageProduct />} />
+                  <Route path="edit/:productId" element={<ManageProduct />} />
+                </Route>
               </Route>
 
               <Route path="/suppliers">
@@ -107,39 +108,43 @@ function App() {
                 </Route>
               </Route>
 
-              {/* 4. Admin/Owner Only: Reports */}
+              {/* 4. Admin/Owner Only: Activity Logs and stock movement*/}
               <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
                 <Route path="/reports">
-                  <Route index element={<ReportsHub />} />
                   <Route path="activity" element={<ActivityLogs />} />
+                  <Route path="movement" element={<StockMovementReport />} />
+                </Route>
+              </Route>
+
+              <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "staff"]} />}>
+                <Route path="/reports">
+                  <Route index element={<ReportsHub />} />
                   <Route path="transactions" element={<Transaction />} />
                   <Route path="transaction/:id" element={<TransactionViewPage />} />
                   <Route path="stock" element={<StockReport />} />
                   <Route path="stock/product-history/:productId" element={<ProductMovementHistory />} />
-                  <Route path="movement" element={<StockMovementReport />} />
                 </Route>
-
-
               </Route>
-            </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
-              <Route element={<SettingsLayout />}>
-                <Route path="/settings">
-                  <Route index element={<GeneralSettings />} />
-                  <Route path="categories" element={<CategoryPage />} />
-                  <Route path="units" element={<UnitPage />} />
-                  <Route path="uoms" element={<ProductUnitPage />} />
+              <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route element={<SettingsLayout />}>
+                  <Route path="/settings">
+                    <Route index element={<GeneralSettings />} />
+                    <Route path="categories" element={<CategoryPage />} />
+                    <Route path="units" element={<UnitPage />} />
+                    <Route path="uoms" element={<ProductUnitPage />} />
+                  </Route>
                 </Route>
               </Route>
             </Route>
           </Route>
 
           {/* --- 404 Route --- */}
+          <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        <Toaster position="top-right" theme="dark" closeButton richColors />
+        <Toaster position="top-right" theme="light" closeButton richColors />
       </div>
     </BrowserRouter>
   );

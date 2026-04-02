@@ -13,14 +13,11 @@ const BASE_URL = "/auths";
 
 export const authService = {
     register: async (payload: RegisterFormData) => {
-        // Register usually returns a message or the created user
         const { data } = await api.post<AuthResponse<UserData>>(`${BASE_URL}/`, payload);
         return data;
     },
 
     login: async (payload: LoginFormData) => {
-        // Login doesn't return user data in your backend (it sets a cookie),
-        // so we use AuthResponse with default or just a message type
         const { data } = await api.post<AuthResponse>(`${BASE_URL}/login`, payload);
         return data;
     },
@@ -29,7 +26,7 @@ export const authService = {
         const { data } = await api.get<AuthResponse<UserData>>("/users/profile");
         return data;
     },
-    
+
     getUsers: async () => {
         const { data } = await api.get<AuthResponse<UserData[]>>("/users/all");
         return data;
@@ -62,6 +59,16 @@ export const authService = {
 
     updateRole: async (userId: string, newRole: string) => {
         const { data } = await api.put<AuthResponse<UserData>>(`${BASE_URL}/role/${userId}`, { role: newRole });
+        return data;
+    },
+
+    updateProfile: async (userId: string, name: string, email: string) => {
+        const { data } = await api.patch<AuthResponse<UserData>>(`${BASE_URL}/update-profile/${userId}`, { name, email });
+        return data;
+    },
+
+    updatePassword: async (userId: string, currentPassword: string, newPassword: string) => {
+        const { data } = await api.patch<AuthResponse>(`${BASE_URL}/update-password/${userId}`, { currentPassword, newPassword });
         return data;
     }
 };

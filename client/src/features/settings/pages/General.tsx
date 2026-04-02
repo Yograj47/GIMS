@@ -46,10 +46,10 @@ export default function GeneralSettings() {
             <Globe size={18} />
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
               General Registry
             </h1>
-            <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] mt-1.5">
+            <p className="text-slate-500 text-xs mt-1">
               Global System Parameters & Localization
             </p>
           </div>
@@ -62,27 +62,27 @@ export default function GeneralSettings() {
         <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
             <Store size={14} className="text-slate-900" strokeWidth={3} />
-            <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-widest">Core Identity</h3>
+            <h3 className="font-bold text-slate-900 text-[11px] uppercase tracking-widest">Core Identity</h3>
           </div>
           
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-0.5">Store Identifier</Label>
+              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] ml-0.5">Store Identifier</Label>
               <Input 
                 {...register("storeName")} 
                 placeholder="PRO-TECH SYSTEMS" 
                 className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs uppercase focus-visible:ring-blue-600 transition-all placeholder:text-slate-300" 
               />
-              {errors.storeName && <p className="text-[9px] text-red-600 font-black uppercase tracking-tighter mt-1">{errors.storeName.message}</p>}
+              {errors.storeName && <p className="text-[9px] text-red-600 font-bold uppercase tracking-tighter mt-1">{errors.storeName.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] ml-0.5">Physical Hub</Label>
+              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] ml-0.5">Physical Hub</Label>
               <Input 
                 {...register("location")} 
                 placeholder="KATHMANDU HQ" 
                 className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs uppercase focus-visible:ring-blue-600 transition-all placeholder:text-slate-300" 
               />
-              {errors.location && <p className="text-[9px] text-red-600 font-black uppercase tracking-tighter mt-1">{errors.location.message}</p>}
+              {errors.location && <p className="text-[9px] text-red-600 font-bold uppercase tracking-tighter mt-1">{errors.location.message}</p>}
             </div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function GeneralSettings() {
         <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
             <Bell size={14} className="text-blue-600" strokeWidth={3} />
-            <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-widest">Alert Protocols</h3>
+            <h3 className="font-bold text-slate-900 text-[11px] uppercase tracking-widest">Alert Protocols</h3>
           </div>
 
           <div className="p-6 space-y-6">

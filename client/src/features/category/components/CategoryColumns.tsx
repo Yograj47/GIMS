@@ -1,18 +1,19 @@
-import { Edit3, Trash2, Calendar} from "lucide-react";
+import { Edit3, Trash2, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import type { CategoryData } from "@/types/Category";
 import type { ColumnDef } from "@tanstack/react-table";
+import { AdminGate } from "@/features/auth/components/AdminGate";
 
 export const getCategoryColumns = (
   onEdit: (category: CategoryData) => void,
-  onDelete: (id: string) => void
+  onDelete: (category: CategoryData) => void
 ): ColumnDef<CategoryData>[] => [
     {
       accessorKey: "name",
       header: () => (
         <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-          Classification
+          Category Name
         </span>
       ),
       cell: ({ row }) => (
@@ -67,29 +68,33 @@ export const getCategoryColumns = (
     {
       id: "actions",
       header: () => (
-        <div className="text-right pr-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-          Control
-        </div>
+        <AdminGate>
+          <div className="text-right pr-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+            Control
+          </div>
+        </AdminGate>
       ),
       cell: ({ row }) => (
-        <div className="flex justify-end gap-1 pr-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(row.original)}
-            className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
-          >
-            <Edit3 size={14} strokeWidth={2.5} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(row.original._id)}
-            className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all"
-          >
-            <Trash2 size={14} strokeWidth={2.5} />
-          </Button>
-        </div>
+        <AdminGate>
+          <div className="flex justify-end gap-1 pr-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(row.original)}
+              className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
+            >
+              <Edit3 size={14} strokeWidth={2.5} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(row.original)}
+              className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-rose-600..."
+            >
+              <Trash2 size={14} strokeWidth={2.5} />
+            </Button>
+          </div>
+        </AdminGate>
       ),
     },
   ];

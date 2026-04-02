@@ -25,7 +25,7 @@ export default function AlertCard({ productName, remainingQty, onAction }: Alert
             </div>
             <Button 
                 onClick={onAction}
-                className="w-full mt-8 bg-sky-500 hover:bg-sky-600 text-white font-black text-[12px] uppercase tracking-[0.2em] h-12 rounded-lg shadow-lg shadow-blue-200"
+                className="w-full mt-8 text-green-500 hover:bg-green-600 hover:text-white bg-white font-black text-[12px] uppercase tracking-[0.2em] h-12 border border-green-500 rounded-lg"
             >
                 Restock Asset
             </Button>

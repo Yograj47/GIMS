@@ -53,7 +53,7 @@ export default function TransactionViewPage() {
         <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500 text-slate-900">
             {/* 1. COMMAND STRIP HEADER */}
             <div className="no-print space-y-6">
-                <div className="flex justify-between items-center bg-white h-14 px-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="flex justify-between items-center rounded-lg bg-white h-14 px-4 border border-slate-300 ">
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"
@@ -70,7 +70,7 @@ export default function TransactionViewPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={() => window.print()} className="h-9 rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                        <Button variant="outline" onClick={() => window.print()} className="h-9 rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider border-slate-300 text-slate-600 hover:bg-slate-50 transition-all">
                             <Printer size={14} className="text-blue-600" /> Print Bill
                         </Button>
 
@@ -80,7 +80,7 @@ export default function TransactionViewPage() {
                             </Button>
                         ) : (
                             <div className="flex gap-2 animate-in zoom-in-95 duration-200">
-                                <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-9 text-rose-500 font-bold text-[11px] uppercase tracking-wider hover:bg-rose-50 rounded-xl">
+                                <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-9 text-rose-500 font-bold text-[11px] uppercase tracking-wider hover:bg-rose-50  hover:text-rose-600 rounded-xl">
                                     Cancel
                                 </Button>
                                 <Button onClick={handleUpdate} className="h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider shadow-md transition-all">
@@ -92,7 +92,7 @@ export default function TransactionViewPage() {
                 </div>
 
                 {/* 2. THE AUDIT CARD */}
-                <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden">
+                <div className="bg-white border border-slate-300 rounded-lg shadow-sm overflow-hidden">
                     {/* Brand Header */}
                     <div className="p-8 bg-slate-50/40 border-b border-slate-100 flex justify-between items-end">
                         <div className="space-y-6">
@@ -132,7 +132,7 @@ export default function TransactionViewPage() {
                         </div>
 
                         <div className="text-right">
-                            <div className="bg-white p-4 px-6 rounded-2xl border border-slate-100 shadow-sm inline-block">
+                            <div className="bg-white p-4 px-6 rounded-2xl border border-slate-300 inline-block">
                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Valuation</p>
                                 <p className="text-3xl font-black text-slate-900 tabular-nums">
                                     <span className="text-sm mr-1 text-slate-300 font-bold uppercase">Rs</span>
@@ -145,20 +145,20 @@ export default function TransactionViewPage() {
                     {/* 3. METADATA SECTION */}
                     <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-3">
-                            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h3 className="text-[11px] font-bold text-slate-900 uppercase flex items-center gap-2">
                                 Settlement Status
                             </h3>
                             {isEditing ? (
-                                <div className="flex gap-1 p-1.5 bg-slate-100 rounded-2xl w-fit border border-slate-200/50">
+                                <div className="flex gap-1 p-1.5 bg-slate-100 rounded-lg w-fit border border-slate-300/50">
                                     <Button
                                         onClick={() => setIsPaid(true)}
-                                        className={cn("h-8 rounded-xl font-black text-[10px] uppercase tracking-wider px-6 transition-all", isPaid ? "bg-white text-emerald-600 shadow-sm" : "bg-transparent text-slate-400 hover:text-slate-600")}
+                                        className={cn("h-8 rounded-xl font-black text-[11px] uppercase tracking-wider px-6 transition-all", isPaid ? "bg-white text-emerald-600 shadow-sm" : "bg-transparent text-slate-400 hover:text-slate-600")}
                                     >
                                         Paid
                                     </Button>
                                     <Button
                                         onClick={() => setIsPaid(false)}
-                                        className={cn("h-8 rounded-xl font-black text-[10px] uppercase tracking-wider px-6 transition-all", !isPaid ? "bg-white text-rose-600 shadow-sm" : "bg-transparent text-slate-400 hover:text-slate-600")}
+                                        className={cn("h-8 rounded-xl font-black text-[11px] uppercase tracking-wider px-6 transition-all", !isPaid ? "bg-white text-rose-600 shadow-sm" : "bg-transparent text-slate-400 hover:text-slate-600")}
                                     >
                                         Unpaid
                                     </Button>
@@ -173,7 +173,7 @@ export default function TransactionViewPage() {
                         </div>
 
                         <div className="space-y-3">
-                            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h3 className="text-[11px] font-bold text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
                                 Remarks / Notes
                             </h3>
                             {isEditing ? (
@@ -193,10 +193,10 @@ export default function TransactionViewPage() {
 
                     {/* 4. ITEMIZATION TABLE */}
                     <div className="px-8 pb-10">
-                        <div className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+                        <div className="border border-slate-300 overflow-hidden shadow-sm">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-slate-900 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">
+                                    <tr className="bg-slate-600 text-[12px] font-black text-white uppercase tracking-[0.25em]">
                                         <th className="px-6 py-4 text-left">Description</th>
                                         <th className="px-6 py-4 text-center">Qty / Unit</th>
                                         <th className="px-6 py-4 text-center">Price</th>

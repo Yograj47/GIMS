@@ -46,7 +46,7 @@ const AlertPage: React.FC = () => {
                     </div>
 
                     {/* Active Issues Badge */}
-                    <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-sm shadow-sm">
+                    <div className="flex items-center gap-3 bg-white border border-slate-300 px-4 py-2 rounded-sm shadow-sm">
                         <Activity size={14} className="text-rose-600 animate-pulse" />
                         <span className="text-[11px] font-black uppercase tracking-wider text-slate-600">
                             {activeCount} Issues Pending
@@ -56,7 +56,7 @@ const AlertPage: React.FC = () => {
 
 
                 {/* 2. The Data Table Wrapper */}
-                <div className="bg-white border border-slate-200 shadow-sm">
+                <div className="bg-white border border-slate-300">
                     <DataTable
                         columns={getAlertColumns(markAsResolved)}
                         data={alerts}

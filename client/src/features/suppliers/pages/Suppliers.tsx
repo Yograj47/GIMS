@@ -27,7 +27,7 @@ const Suppliers: React.FC = () => {
             <div className="max-w-350 mx-auto space-y-6">
 
                 {/* 1. Minimal Header */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-300 pb-6">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
                             <Truck size={20} />
@@ -65,7 +65,7 @@ const Suppliers: React.FC = () => {
                                 setSearchQuery(e.target.value);
                                 setPagination(prev => ({ ...prev, pageIndex: 0 }));
                             }}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 shadow-none"
+                            className="w-full h-10 pl-10 bg-white border-slate-300 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 shadow-none"
                         />
                     </div>
 
@@ -80,7 +80,7 @@ const Suppliers: React.FC = () => {
                 </div>
 
                 {/* 3. The Data Table Wrapper */}
-                <div className="bg-white border border-slate-200 shadow-sm">
+                <div className="bg-white border border-slate-300 shadow-sm">
                     <DataTable
                         columns={columns}
                         data={Suppliers || []}

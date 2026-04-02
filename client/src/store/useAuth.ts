@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { authService } from "@/features/auth/api/AuthService";
-import type { 
-    LoginFormData, 
-    RegisterFormData, 
-    UserData, 
-    VerifyEmailFormData, 
+import type {
+    LoginFormData,
+    RegisterFormData,
+    UserData,
+    VerifyEmailFormData,
 } from "@/types/Auth";
+import { notify } from "@/lib/toast";
 
 type AuthState = {
     user: UserData | null;
@@ -24,6 +25,8 @@ type AuthState = {
     sendVerifyOtp: () => Promise<void>;
     verifyEmail: (data: VerifyEmailFormData) => Promise<void>;
     updateRole: (userId: string, newRole: string) => Promise<void>;
+    updateProfile: (userId: string, name: string, email: string) => Promise<void>;
+    updatePassword: (userId: string, currentPassword: string, newPassword: string) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -60,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
                     }
                 } catch (error) {
                     console.error("Error fetching users:", error);
-                    set({ users: [] }); 
+                    set({ users: [] });
                 } finally {
                     set({ isLoading: false });
                 }
@@ -74,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
                         const profile = await authService.getProfile();
                         set({ user: profile.data || null, isAuthenticated: true });
                         window.location.href = "/dashboard";
+                        notify.success("Welcome back!", "You have successfully logged in.");
                     }
                 } finally {
                     set({ isLoading: false });
@@ -86,6 +90,7 @@ export const useAuthStore = create<AuthState>()(
                     const response = await authService.register(data);
                     if (response.status === "Success") {
                         window.location.href = "/verify";
+                        notify.success("Account created!", "Please verify your email to continue."); 
                     }
                 } finally {
                     set({ isLoading: false });
@@ -132,13 +137,11 @@ export const useAuthStore = create<AuthState>()(
                     const response = await authService.updateRole(userId, newRole);
                     const updatedUser = response.data as UserData;
 
-                    // Update local session if it's the current user
                     const currentUser = get().user;
                     if (currentUser && currentUser._id === userId) {
                         set({ user: updatedUser });
                     }
 
-                    // Update user list for Admin UI
                     const currentUsersList = get().users;
                     if (currentUsersList) {
                         set({
@@ -147,6 +150,31 @@ export const useAuthStore = create<AuthState>()(
                             ),
                         });
                     }
+                    notify.success(response.message || "User role updated successfully");
+                } finally {
+                    set({ isLoading: false });
+                    window.location.href = "/dashboard";
+                }
+            },
+
+            updateProfile: async (userId: string, name: string, email: string) => {
+                set({ isLoading: true });
+                try {
+                    const response = await authService.updateProfile(userId, name, email);
+                    const updatedUser = response.data as UserData;
+                    set({ user: updatedUser });
+                    notify.success(response.message || "Profile updated successfully");
+                } finally {
+                    set({ isLoading: false });
+
+                }
+            },
+
+            updatePassword: async (userId: string, currentPassword: string, newPassword: string) => {
+                set({ isLoading: true });
+                try {
+                    const response = await authService.updatePassword(userId, currentPassword, newPassword);
+                    notify.success(response.message || "Password updated successfully");
                 } finally {
                     set({ isLoading: false });
                 }

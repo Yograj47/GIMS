@@ -10,7 +10,6 @@ export default function SettingsLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
-  // Responsive logic matched to AppLayout
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
@@ -33,9 +32,9 @@ export default function SettingsLayout() {
   ];
 
   return (
-    <div className="flex h-screen w-full bg-[#f1f5f9] overflow-hidden font-sans antialiased text-slate-900">
+    <div className="flex h-screen w-full bg-[#f1f1f1] overflow-hidden font-sans antialiased text-slate-900">
 
-      {/* 1. SETTINGS SIDEBAR (Matched to App Sidebar Logic) */}
+      {/* 1. SETTINGS SIDEBAR  */}
       <aside
         className={cn(
           "no-print fixed inset-y-0 left-0 z-60 bg-white border-r border-slate-200 transition-all duration-500 ease-in-out flex flex-col",
@@ -44,10 +43,10 @@ export default function SettingsLayout() {
         )}
       >
         {/* Back to App Header */}
-        <div className="p-6 border-b border-slate-50">
+        <div className="p-6 border-b border-slate-200">
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 text-slate-400 hover:text-blue-600 transition-colors group"
+            className="flex items-center gap-3 text-slate-600 hover:text-blue-600 transition-colors group"
           >
             <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
               <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
@@ -71,7 +70,7 @@ export default function SettingsLayout() {
                 to={item.path}
                 end={item.exact}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-3 rounded-sm text-[11px] font-bold transition-all group",
+                  "flex items-center gap-3 px-3 py-3 rounded-sm text-[12px] font-bold transition-all group",
                   isActive
                     ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
@@ -129,7 +128,6 @@ export default function SettingsLayout() {
             </div>
           </div>
 
-          {/* Optional Toggle for Sidebar - same as AppHeader */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-slate-100 rounded-sm transition-colors text-slate-400"

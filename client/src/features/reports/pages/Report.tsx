@@ -1,6 +1,7 @@
 import { BarChart3, ArrowRightLeft, FileText, ClipboardList, ChevronRight, ChartBar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/useAuth";
 
 const REPORT_CONFIG = [
   {
@@ -9,7 +10,8 @@ const REPORT_CONFIG = [
     icon: BarChart3,
     path: "/reports/stock",
     color: "text-blue-600",
-    bg: "bg-blue-50"
+    bg: "bg-blue-50",
+    roles: ['admin', 'owner', 'staff']
   },
   {
     title: "Transaction Report",
@@ -17,7 +19,8 @@ const REPORT_CONFIG = [
     icon: FileText,
     path: "/reports/transactions",
     color: "text-emerald-600",
-    bg: "bg-emerald-50"
+    bg: "bg-emerald-50",
+    roles: ['admin', 'owner', 'staff']
   },
   {
     title: "Movement Report",
@@ -25,7 +28,8 @@ const REPORT_CONFIG = [
     icon: ArrowRightLeft,
     path: "/reports/movement",
     color: "text-amber-600",
-    bg: "bg-amber-50"
+    bg: "bg-amber-50",
+    roles: ['admin', 'owner']
   },
   {
     title: "Activity Logs",
@@ -33,12 +37,16 @@ const REPORT_CONFIG = [
     icon: ClipboardList,
     path: "/reports/activity",
     color: "text-slate-600",
-    bg: "bg-slate-50"
+    bg: "bg-slate-50",
+    roles: ['admin', 'owner']
   },
 ];
 
 export default function ReportsHub() {
   const navigate = useNavigate();
+  const {user} = useAuthStore();
+
+  const filteredReports = REPORT_CONFIG.filter(report => report.roles.includes(user?.role.toLowerCase() || ""));
 
   return (
     <div className="h-full animate-in fade-in duration-700 px-6 py-6">
@@ -68,7 +76,7 @@ export default function ReportsHub() {
 
         {/* --- 2. SMOOTH REPORT GRID --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {REPORT_CONFIG.map((report) => (
+          {filteredReports.map((report) => (
             <div
               key={report.path}
               onClick={() => navigate(report.path)}
@@ -114,11 +122,11 @@ export default function ReportsHub() {
 
         {/* --- 3. FOOTER --- */}
         <div className="pt-8 border-t border-slate-200 flex justify-between items-center opacity-60">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
+          <p className="text-[9px] font-black text-slate-800 uppercase tracking-[0.3em]">
             Core.Analytical_Services
           </p>
-          <p className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-tighter">
-            Build_ID: 1.0.0_S
+          <p className="text-[9px] font-mono font-bold text-slate-800 uppercase tracking-tighter">
+            Build_ID: 1.0.0
           </p>
         </div>
       </div>

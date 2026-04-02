@@ -9,6 +9,7 @@ import { getProductColumns } from '../components/ProductColumns';
 import { useDebounce } from '@/lib/debounce';
 import { useCategories } from '@/features/category/hooks/useCategories';
 import Select from "react-select";
+import { AdminGate } from '@/features/auth/components/AdminGate';
 
 
 const Products: React.FC = () => {
@@ -94,12 +95,14 @@ const Products: React.FC = () => {
                         </div>
                     </div>
 
-                    <Button
-                        onClick={() => navigate("/products/add")}
-                        className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
-                    >
-                        <Plus className="mr-2 h-4 w-4" strokeWidth={3} /> Add Product
-                    </Button>
+                    <AdminGate allowedRoles={["owner"]}>
+                        <Button
+                            onClick={() => navigate("/products/add")}
+                            className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                        >
+                            <Plus className="mr-2 h-4 w-4" strokeWidth={3} /> Add Product
+                        </Button>
+                    </AdminGate>
                 </div>
 
                 {/* 2. Precision Toolbar */}

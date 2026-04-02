@@ -32,10 +32,12 @@ export default function ManageSupplier() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="rounded-full border-2 border-slate-200 hover:bg-white hover:border-slate-600 transition-all"
                         onClick={() => navigate("/suppliers")}
+                        className="text-slate-500 hover:text-blue-600 group"
                     >
-                        <ArrowLeft size={16} strokeWidth={3} />
+                        <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                        </div>
                     </Button>
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
@@ -50,7 +52,7 @@ export default function ManageSupplier() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 {/* Main Form Section */}
-                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="lg:col-span-2 bg-white border border-slate-300 rounded-sm shadow-sm overflow-hidden">
                     <div className="p-6">
                         <SupplierForm
                             initialData={isEditMode && singleSupplier ? singleSupplier : undefined}
@@ -59,7 +61,7 @@ export default function ManageSupplier() {
                     </div>
 
                     {/* Action Footer: Standardized */}
-                    <div className="flex items-center justify-end gap-2 bg-slate-50/50 border-t border-slate-100 px-6 py-4">
+                    <div className="flex items-center justify-end gap-2 bg-slate-50/50 border-t border-slate-300 px-6 py-4">
                         <Button
                             variant="outline"
                             type="button"
@@ -92,7 +94,7 @@ export default function ManageSupplier() {
                         </p>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-sm p-5">
+                    <div className="bg-white border border-slate-300 rounded-sm p-5">
                         <div className="flex items-center gap-2 mb-4 text-slate-900">
                             <ShieldAlert size={16} strokeWidth={3} />
                             <h3 className="font-bold text-[11px] uppercase tracking-widest">Compliance</h3>

@@ -27,7 +27,7 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
         if (initialData) reset(initialData);
     }, [initialData, reset]);
 
-    const inputStyle = "w-full rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
+    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
     const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
     const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-blue-600 mb-4 flex items-center gap-2";
 
@@ -60,7 +60,7 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
             </div>
 
             {/* Section 2: Geographic Parameters (Styled like Product Valuation Box) */}
-            <div className="bg-slate-50 border border-slate-200 p-5 rounded-sm">
+            <div className="bg-slate-50 border border-slate-300 p-5 rounded-sm">
                 <div className={sectionTitle}>
                     <MapPin size={14} strokeWidth={3} /> Geographic Parameters
                 </div>
@@ -84,7 +84,7 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
             </div>
 
             {/* Status Check */}
-            <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-sm">
+            <div className="flex items-center justify-between p-4 bg-white border border-slate-300 rounded-sm">
                 <div className="flex items-center gap-3">
                     <Power size={18} className="text-slate-400" />
                     <div>

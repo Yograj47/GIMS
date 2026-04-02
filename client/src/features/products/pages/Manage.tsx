@@ -15,7 +15,6 @@ export default function ManageProduct() {
     const isEditMode = Boolean(productId);
     const navigate = useNavigate();
 
-    // 1. Dialog State
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const {

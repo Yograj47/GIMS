@@ -1,35 +1,38 @@
 import { toast } from "sonner";
 
+const glassClass = "rounded-2xl border border-white/40 bg-white/60 backdrop-blur-md shadow-lg shadow-black/5 font-sans";
+const descClass = "text-slate-500 font-medium";
+
 export const notify = {
   success: (message: string, description?: string) => {
     toast.success(message, {
       description,
-      className: "rounded-2xl border-emerald-500/20 bg-slate-900/90 backdrop-blur-xl text-emerald-400 shadow-2xl shadow-emerald-900/20 font-sans",
-      descriptionClassName: "text-slate-400 font-medium",
+      className: `${glassClass} text-emerald-600`,
+      descriptionClassName: descClass,
     });
   },
   
   error: (message: string, description?: string) => {
     toast.error(message, {
       description,
-      className: "rounded-2xl border-red-500/20 bg-slate-900/90 backdrop-blur-xl text-red-400 shadow-2xl shadow-red-900/20 font-sans",
-      descriptionClassName: "text-slate-400 font-medium",
+      className: `${glassClass} text-red-600`,
+      descriptionClassName: descClass,
     });
   },
 
   info: (message: string, description?: string) => {
-    toast(message, {
+    toast.info(message, {
       description,
-      className: "rounded-2xl border-blue-500/20 bg-slate-900/90 backdrop-blur-xl text-blue-400 shadow-2xl shadow-blue-900/20 font-sans",
-      descriptionClassName: "text-slate-400 font-medium",
+      className: `${glassClass} text-sky-600`,
+      descriptionClassName: descClass,
     });
   },
 
   warning: (message: string, description?: string) => {
     toast.warning(message, {
       description,
-      className: "rounded-2xl border-amber-500/20 bg-slate-900/90 backdrop-blur-xl text-amber-400 shadow-2xl shadow-amber-900/20 font-sans",
-      descriptionClassName: "text-slate-400 font-medium",
+      className: `${glassClass} text-amber-600`,
+      descriptionClassName: descClass,
     });
   }
 };

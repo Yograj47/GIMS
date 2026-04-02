@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@fontsource/poppins";
-@import "@fontsource/poppins/400.css";
-@import "@fontsource/poppins/400-italic.css";
+@import url('https://rsms.me/inter/inter.css');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -27,7 +25,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);

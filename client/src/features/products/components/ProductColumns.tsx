@@ -5,6 +5,7 @@ import type { NavigateFunction } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useGlobalStore } from "@/store/globalStore";
 import { cn } from "@/lib/utils";
+import { AdminGate } from "@/features/auth/components/AdminGate";
 
 export const getProductColumns = (navigate: NavigateFunction): ColumnDef<ProductData>[] => {
     const settings = useGlobalStore.getState().settings;
@@ -90,6 +91,7 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
             id: "actions",
             header: "",
             cell: ({ row }) => (
+                <AdminGate allowedRoles={["owner"]}>
                 <div className="flex justify-end">
                     <Button
                         variant="ghost"
@@ -103,6 +105,7 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                         <Edit3 size={14} />
                     </Button>
                 </div>
+                </AdminGate>
             ),
         },
     ];

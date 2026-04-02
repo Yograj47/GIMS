@@ -46,7 +46,7 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
         { name: "Suppliers", icon: <Truck size={20} />, path: "/suppliers", roles: ['admin', 'owner'] },
         { name: "Movement", icon: <ArrowLeftRight size={20} />, path: "/stock-movements", roles: ['admin', 'staff'] },
         { name: "Alerts", icon: <Bell size={20} />, path: "/alerts", roles: ['admin', 'staff'] },
-        { name: "Reports", icon: <BarChart3 size={20} />, path: "/reports", roles: ['admin', 'owner'] },
+        { name: "Reports", icon: <BarChart3 size={20} />, path: "/reports", roles: ['admin', 'owner', 'staff'] },
         { name: "Users", icon: <Users size={20} />, path: "/users", roles: ['admin'] },
         { name: "Settings", icon: <Settings size={20} />, path: "/settings", roles: ['admin', 'owner'] },
     ];

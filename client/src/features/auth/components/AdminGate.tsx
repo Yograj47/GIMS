@@ -4,12 +4,28 @@ import type { ReactNode } from "react";
 interface AdminGateProps {
     children: ReactNode;
     fallback?: ReactNode;
+    allowedRoles?: string[]; 
 }
 
-export const AdminGate = ({ children, fallback = null }: AdminGateProps) => {
+export const AdminGate = ({ children, fallback = null, allowedRoles = [] }: AdminGateProps) => {
     const { user } = useAuthStore();
-    const isAdmin = user?.role.toLowerCase() === "admin";
 
-    if (!isAdmin) return <>{fallback}</>;
+    if (!user) return <>{fallback}</>;
+
+    const userRole = user?.role.toLowerCase();
+    const isAdmin = userRole === "admin";
+
+    const hasExtraAccess = allowedRoles
+        .map(role => role.toLowerCase())
+        .includes(userRole || "");
+
+    if (!isAdmin && !hasExtraAccess) {
+        return <>{fallback}</>;
+    }
+    
+    if (isAdmin || hasExtraAccess) {
+        return <>{children}</>;
+    }
+
     return <>{children}</>;
 };
