@@ -60,7 +60,7 @@ export default function ReportsHub() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
-                Analytics Hub
+                Reports Hub
               </h1>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                 Data Intelligence • <span className="text-blue-600 italic font-black">Ready</span>
@@ -102,7 +102,7 @@ export default function ReportsHub() {
                 {/* CONTENT AREA */}
                 <div className="flex flex-1 flex-col justify-center px-6 transition-transform duration-300 group-hover:translate-x-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-[12px] font-black uppercase tracking-tight text-slate-900 transition-colors group-hover:text-blue-600">
+                    <h3 className="text-[14px] font-black uppercase tracking-tight text-slate-900 transition-colors group-hover:text-blue-600">
                       {report.title}
                     </h3>
                     <ChevronRight
@@ -111,7 +111,7 @@ export default function ReportsHub() {
                       strokeWidth={3}
                     />
                   </div>
-                  <p className="max-w-60 text-[9px] font-bold uppercase leading-tight text-slate-400 tracking-tight">
+                  <p className="max-w-60 text-[12px] font-medium leading-tight text-slate-500 tracking-tight">
                     {report.description}
                   </p>
                 </div>

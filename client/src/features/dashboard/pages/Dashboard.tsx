@@ -60,7 +60,7 @@ return (
                     <LayoutDashboard size={20} strokeWidth={2.5} />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase">
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
                         System Overview
                     </h1>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">

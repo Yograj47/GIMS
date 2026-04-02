@@ -63,12 +63,12 @@ export const authService = {
     },
 
     updateProfile: async (userId: string, name: string, email: string) => {
-        const { data } = await api.patch<AuthResponse<UserData>>(`${BASE_URL}/update-profile/${userId}`, { name, email });
+        const { data } = await api.patch<AuthResponse<UserData>>(`users/update-details/${userId}`, { name, email });
         return data;
     },
 
     updatePassword: async (userId: string, currentPassword: string, newPassword: string) => {
-        const { data } = await api.patch<AuthResponse>(`${BASE_URL}/update-password/${userId}`, { currentPassword, newPassword });
+        const { data } = await api.patch<AuthResponse>(`users/update-password/${userId}`, { currentPassword, newPassword });
         return data;
     }
 };

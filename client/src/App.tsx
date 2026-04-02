@@ -16,9 +16,9 @@ import SettingsLayout from "./layout/SettingLayout";
 // Pages
 import Login from "./features/auth/pages/Login";
 import Register from "./features/auth/pages/Register";
-import Home from "./features/StaticPage/Home";
+import Home from "./features/OtherPages/Home";
 import VerifyAccount from "./features/auth/pages/VerifyAccount";
-import NotFound from "./features/StaticPage/NotFound";
+import NotFound from "./features/OtherPages/NotFound";
 import Products from "./features/products/pages/Products";
 import ManageProduct from "./features/products/pages/Manage";
 import Suppliers from "./features/suppliers/pages/Suppliers";
@@ -43,9 +43,9 @@ import StockMovementForm from "./features/MovementTransaction/components/Movemen
 import ProductMovementHistory from "./features/reports/pages/ProductMovementHistory";
 import TransactionViewPage from "./features/reports/pages/TransactionViewPage";
 import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
-import ProfilePage from "./features/StaticPage/Profile";
-import Unauthorized from "./features/StaticPage/Unauthorized";
-import HelpPage from "./features/StaticPage/Helper";
+import ProfilePage from "./features/OtherPages/Profile";
+import Unauthorized from "./features/OtherPages/Unauthorized";
+import HelpPage from "./features/OtherPages/Helper";
 
 axios.defaults.withCredentials = true;
 
@@ -126,14 +126,15 @@ function App() {
                 </Route>
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
-                <Route element={<SettingsLayout />}>
-                  <Route path="/settings">
-                    <Route index element={<GeneralSettings />} />
-                    <Route path="categories" element={<CategoryPage />} />
-                    <Route path="units" element={<UnitPage />} />
-                    <Route path="uoms" element={<ProductUnitPage />} />
-                  </Route>
+            </Route>
+
+            <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+              <Route element={<SettingsLayout />}>
+                <Route path="/settings">
+                  <Route index element={<GeneralSettings />} />
+                  <Route path="categories" element={<CategoryPage />} />
+                  <Route path="units" element={<UnitPage />} />
+                  <Route path="uoms" element={<ProductUnitPage />} />
                 </Route>
               </Route>
             </Route>

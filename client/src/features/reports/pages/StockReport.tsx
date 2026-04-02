@@ -1,4 +1,4 @@
-import { Search, Download, Filter, PackageSearch } from "lucide-react";
+import { Search, Download, Filter, PackageSearch, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "@/features/products/hooks/useProducts";
@@ -9,6 +9,7 @@ import { getStockColumns } from "../components/StockColumns";
 import { exportToCSV } from "@/lib/csvExport";
 import { notify } from "@/lib/toast";
 import { Loading } from "@/lib/loader";
+import { useDebounce } from "@/lib/debounce";
 
 export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
@@ -16,6 +17,7 @@ export default function StockReport() {
     const [stockLevel, setStockLevel] = useState<string>("All Levels");
     const navigate = useNavigate();
     const [IsExporting, setIsExporting] = useState<boolean>(false);
+    const debouncedSearch = useDebounce(searchQuery, 500);  
 
 
     const [pagination, setPagination] = useState({
@@ -29,11 +31,11 @@ export default function StockReport() {
             fetchProducts(
                 pagination.pageIndex + 1,
                 pagination.pageSize,
-                searchQuery,
+                debouncedSearch,
                 levelFilter
             );
         }
-    }, [fetchProducts, pagination, searchQuery, stockLevel]);
+    }, [fetchProducts, pagination, debouncedSearch, stockLevel]);
 
     const handleExport = () => {
 
@@ -43,6 +45,7 @@ export default function StockReport() {
             1,
             1000,
             searchQuery,
+            undefined,
             levelFilter,
             true
         );
@@ -85,6 +88,16 @@ export default function StockReport() {
                 {/* 1. PRECISION HEADER */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
                     <div className="flex items-center gap-4">
+                         <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(-1)}
+                            className="text-slate-500 hover:text-blue-600 group"
+                        >
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                            </div>
+                        </Button>
                         <div className="p-2 bg-blue-600 rounded-sm text-white">
                             <PackageSearch size={20} />
                         </div>

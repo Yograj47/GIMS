@@ -1,23 +1,87 @@
 import { useEffect, useState } from "react";
 import {
-    Key, Camera, LogOut,X, Eye, EyeOff, Lock, CheckCircle2
+    Key, Camera, LogOut, CheckCircle2
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuth";
 import { Loading } from "@/lib/loader";
+import { InputGroup } from "@/components/common/InputGroup";
+import { PasswordUpdateModal } from "../auth/components/PasswordUpdateModal";
 
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const { fetchUser, isLoading, user, logout } = useAuthStore();
+    const { fetchUser, isLoading, user, logout, updateProfile } = useAuthStore();
+    const [updatedData, setUpdatedData] = useState({ userId: user?._id || "", name: user?.name || "", email: user?.email || "" });
 
     useEffect(() => { fetchUser(); }, [fetchUser]);
+
+    useEffect(() => {
+        if (user) {
+            setUpdatedData({
+                userId: user._id,
+                name: user.name,
+                email: user.email
+            });
+        }
+    }, [user]);
+
+    const handleProfileUpdate = async () => {
+        try {
+            await updateProfile(updatedData.userId, updatedData.name, updatedData.email);
+            console.log(updatedData);
+
+        } catch (error) {
+            console.error("Error updating profile:", error);
+        } finally {
+            setIsEditing(false);
+        }
+    };
+
+    const SYSTEM_ACCESS_MAPPING = [
+        {
+            role: "admin",
+            permissions: [
+                "Full Inventory Control",
+                "Financial Audit & Write",
+                "User Management",
+                "System Configuration",
+                "Security Monitoring",
+                "Root Access Control"
+            ]
+        },
+        {
+            role: "owner",
+            permissions: [
+                "Inventory Control", // Maps from product:read/write/delete
+                "Vendor Registry",    // Maps from supplier:read/write/delete
+                "Financial Audit",    // Maps from transaction:read
+                "Data Reporting",     // Maps from report:read
+                "Security Monitoring", // Maps from alert:read/write
+                "System Configuration" // Maps from generalSetting:read/write
+            ]
+        },
+        {
+            role: "staff",
+            permissions: [
+                "Ledger Management",  // Maps from transaction:read/write/audit
+                "Inventory View-Only", // Maps from product:read/category:read
+                "Vendor Registry",     // Maps from supplier:read
+                "Security Monitoring", // Maps from alert:read/write
+                "System Settings View" // Maps from generalSetting:read
+            ]
+        }
+    ];
+
+    const currentAccess = SYSTEM_ACCESS_MAPPING.find(
+        (item) => item.role === user?.role?.toLowerCase()
+    );
 
     if (isLoading) return <Loading fullPage />;
 
     return (
-        <div className="h-full bg-[#f1f5f9] animate-in fade-in duration-700">
+        <div className="h-full bg-[#f1f5f9] p-2 animate-in fade-in duration-700">
             <div className="max-w-5xl mx-auto">
-                
+
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 pb-12 border-b border-slate-200">
                     <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                         <div className="relative">
@@ -39,8 +103,8 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <button 
-                        onClick={logout} 
+                    <button
+                        onClick={logout}
                         className="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 rounded-2xl transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-sm"
                     >
                         <LogOut size={16} /> Sign Out
@@ -48,7 +112,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                    
+
                     {/* --- MAIN CONTENT: Defined White Cards --- */}
                     <div className="lg:col-span-2 space-y-8">
                         <section className="bg-white rounded-[2rem] border border-slate-200 p-10 shadow-sm">
@@ -63,12 +127,12 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <InputGroup label="Full Name" disabled={!isEditing} value={user?.name} />
-                                <InputGroup label="Email Address" disabled={!isEditing} value={user?.email} />
+                                <InputGroup label="Full Name" disabled={!isEditing} value={updatedData.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpdatedData({ ...updatedData, name: e.target.value })} />
+                                <InputGroup label="Email Address" disabled={!isEditing} value={updatedData.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpdatedData({ ...updatedData, email: e.target.value })} />
                             </div>
 
                             {isEditing && (
-                                <button className="mt-10 px-8 py-4 bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
+                                <button onClick={handleProfileUpdate} className="mt-10 px-8 py-4 bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
                                     Save Changes
                                 </button>
                             )}
@@ -101,7 +165,7 @@ export default function ProfilePage() {
                             <CheckCircle2 className="absolute -right-4 -bottom-4 w-24 h-24 text-white/5" />
                             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">System Access</h4>
                             <div className="space-y-5">
-                                {['Inventory Control', 'Financial Audit', 'Users Management'].map((perm) => (
+                                {currentAccess?.permissions.map((perm) => (
                                     <div key={perm} className="flex items-center gap-4 group">
                                         <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
                                             <CheckCircle2 size={14} className="text-blue-400" />
@@ -124,90 +188,10 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <PasswordUpdateModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} />
+            <PasswordUpdateModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} user={user} />
         </div>
     );
 }
 
-function InputGroup({ label, disabled, value }: any) {
-    return (
-        <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">{label}</label>
-            <input
-                type="text"
-                disabled={disabled}
-                defaultValue={value}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-4 focus:ring-blue-100/50 focus:border-blue-500 outline-none transition-all disabled:opacity-60"
-            />
-        </div>
-    );
-}
 
-function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-    const [showPass, setShowPass] = useState(false);
 
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
-            <div 
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" 
-                onClick={onClose} 
-            />
-
-            <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative z-10 p-8 border border-slate-200 animate-in zoom-in-95 slide-in-from-bottom-8 duration-300">
-                <button 
-                    onClick={onClose} 
-                    className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
-                >
-                    <X size={20} />
-                </button>
-
-                <div className="mb-8">
-                    <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 mb-4 border border-amber-100">
-                        <Key size={24} />
-                    </div>
-                    <h2 className="text-xl font-black text-slate-800 tracking-tight">Security Update</h2>
-                    <p className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-widest">Update your login credentials</p>
-                </div>
-
-                <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
-                        <div className="relative group">
-                            <input
-                                type={showPass ? "text" : "password"}
-                                className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all"
-                                placeholder="••••••••"
-                            />
-                            <Lock className="absolute left-4 top-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Password</label>
-                        <div className="relative group">
-                            <input
-                                type={showPass ? "text" : "password"}
-                                className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all"
-                                placeholder="Min. 8 characters"
-                            />
-                            <Lock className="absolute left-4 top-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
-                            <button
-                                type="button"
-                                onClick={() => setShowPass(!showPass)}
-                                className="absolute right-4 top-4 text-slate-300 transition-colors group-focus-within:text-slate-500"
-                            >
-                                {showPass ? <EyeOff  size={18} /> : <Eye size={18} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <button className="w-full mt-4 py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95">
-                        Confirm Changes
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
-}

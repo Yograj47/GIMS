@@ -3,12 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/common/DataTable";
 import { getTransactionColumns } from "../components/TransactionColumns";
 import { Button } from "@/components/ui/button";
-import { Download, Search, History } from "lucide-react";
+import { Download, Search, History, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Loading } from "@/lib/loader";
 import { notify } from "@/lib/toast";
 import { exportToCSV } from "@/lib/csvExport";
+import { useDebounce } from "@/lib/debounce";
 
 export default function Transaction() {
     const { fetchTransactions, transactions, isLoading, meta } = useMovementTransactions();
@@ -18,23 +19,24 @@ export default function Transaction() {
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
     const [IsExporting, setIsExporting] = useState<boolean>(false);
     const navigate = useNavigate();
+    const debouncedSearch = useDebounce(searchQuery, 500);
 
     useEffect(() => {
         if (!IsExporting) {
             fetchTransactions(
                 pagination.pageIndex + 1,
                 pagination.pageSize,
-                searchQuery,
+                debouncedSearch,
                 transactionType,
                 dateRange.start,
                 dateRange.end
             );
         }
-    }, [pagination, searchQuery, transactionType, dateRange]);
+    }, [pagination, debouncedSearch, transactionType, dateRange]);
 
     const handleExport = async () => {
         setIsExporting(true);
-        await fetchTransactions(1, 1000, searchQuery, transactionType, dateRange.start, dateRange.end, true);
+        await fetchTransactions(1, 1000, debouncedSearch, transactionType, dateRange.start, dateRange.end, true);
         
         if (transactions) {
             const rows = transactions.flatMap((t: any) => t.items.map((item: any) => ({
@@ -61,6 +63,16 @@ export default function Transaction() {
                 {/* PRECISION HEADER (Stock Style) */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
                     <div className="flex items-center gap-4">
+                         <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(-1)}
+                            className="text-slate-500 hover:text-blue-600 group"
+                        >
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                            </div>
+                        </Button>
                         <div className="p-2 bg-indigo-600 rounded-sm text-white">
                             <History size={20} />
                         </div>

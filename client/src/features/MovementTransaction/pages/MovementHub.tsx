@@ -39,7 +39,7 @@ export default function StockManagement() {
             <span className="bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">v1.0.0</span>
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Control System</span>
           </div>
-          <h1 className="text-2xl text-slate-900 tracking-tighter uppercase">Stock Movements</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Stock Movements</h1>
         </div>
 
         <button

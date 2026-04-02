@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Download, Search, Filter, History } from "lucide-react"
+import { Download, Search, Filter, History, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import { Input } from "@/components/ui/input"
@@ -8,12 +8,16 @@ import { Loading } from "@/lib/loader"
 import { exportToCSV } from "@/lib/csvExport"
 import { useMovementTransactions } from "@/features/MovementTransaction/hooks/useMovementTransactions"
 import { getMovementColumns } from "../components/MovementColumns"
+import { useDebounce } from "@/lib/debounce"
+import { useNavigate } from "react-router-dom"
 
 export default function StockMovementReport() {
     const { fetchMovements, movements, isLoading, meta } = useMovementTransactions()
     const [searchQuery, setSearchQuery] = useState("")
     const [movementType, setMovementType] = useState<string>("All Movements")
     const [IsExporting, setIsExporting] = useState<boolean>(false);
+    const debouncedSearch = useDebounce(searchQuery, 500);
+    const navigate = useNavigate();
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -23,14 +27,14 @@ export default function StockMovementReport() {
     useEffect(() => {
         if (!IsExporting) {
             const typeFilter = movementType === "All Movements" ? "" : movementType;
-            fetchMovements(pagination.pageIndex + 1, pagination.pageSize, searchQuery, typeFilter);
+            fetchMovements(pagination.pageIndex + 1, pagination.pageSize, debouncedSearch, typeFilter);
         }
-    }, [pagination, searchQuery, movementType, IsExporting]);
+    }, [pagination, debouncedSearch, movementType, IsExporting]);
 
     const handleExport = () => {
         setIsExporting(true);
         const typeFilter = movementType === "All Movements" ? "" : movementType;
-        fetchMovements(1, 1000, searchQuery, typeFilter, true);
+        fetchMovements(1, 1000, debouncedSearch, typeFilter, true);
     };
 
     useEffect(() => {
@@ -64,7 +68,7 @@ export default function StockMovementReport() {
 
 
     console.log(meta);
-    
+
 
     return (
         <div className="h-full bg-slate-50/50 animate-in fade-in duration-500">
@@ -72,7 +76,18 @@ export default function StockMovementReport() {
 
                 {/* 1. PRECISION HEADER */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+
                     <div className="flex items-center gap-4">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(-1)}
+                            className="text-slate-500 hover:text-blue-600 group"
+                        >
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+                            </div>
+                        </Button>
                         <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm shadow-blue-100">
                             <History size={20} strokeWidth={2.5} />
                         </div>
@@ -104,15 +119,16 @@ export default function StockMovementReport() {
                     {/* Search Field */}
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-blue-600 transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
                         <Input
-                            placeholder="Filter by Product, Operator, or Reason..."
+                            placeholder="Filter by Product, Operator..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
+                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1
+                             focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
                         />
                     </div>
 
