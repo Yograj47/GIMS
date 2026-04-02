@@ -39,7 +39,7 @@ const limiter = rateLimit({
 })
 
 app.use(injectSettings);
-app.use(limiter);
+// app.use(limiter);
 
 // Test Route
 app.get("/", (req, res) => {

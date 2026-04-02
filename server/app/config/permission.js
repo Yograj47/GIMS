@@ -7,8 +7,8 @@ const ROLES = {
         'alert:read',
         "alert:write",
         'report:read',
+        'transaction:read',
         // Products: Full access (All)
-        "transaction:read",
         'product:read',
         'product:write',
         'product:delete',
@@ -36,6 +36,9 @@ const ROLES = {
         'transaction:write', 
         // Products & Suppliers: View Only
         'product:read',
+        'category:read',
+        'unit:read',
+        'productUnit:read',
         'supplier:read',
         'generalSetting:read',
     ],
