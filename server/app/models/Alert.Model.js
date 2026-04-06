@@ -32,6 +32,9 @@ const alertSchema = new mongoose.Schema({
   resolvedAt: Date
 }, { timestamps: true });
 
-alertSchema.index({ productId: 1, resolved: 1 })
+alertSchema.index(
+  { productId: 1, type: 1, resolved: 1 },
+  { unique: true, partialFilterExpression: { resolved: false } }
+);
 
 export default mongoose.model("Alerts", alertSchema)

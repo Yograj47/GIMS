@@ -34,6 +34,7 @@ const ROLES = {
         // Stock Movement: Full access
         'transaction:read',
         'transaction:write', 
+        'transaction:audit',
         // Products & Suppliers: View Only
         'product:read',
         'category:read',

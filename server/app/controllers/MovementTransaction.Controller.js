@@ -16,7 +16,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
     const validateResult = transactionSchema.parse(req.body);
     const session = await mongoose.startSession();
 
-    const productsToAlert = [];
+    const productsToAlert = new Set();
 
     try {
         session.startTransaction();
@@ -36,16 +36,35 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
         const transactionId = transaction[0]._id;
 
         for (const item of validateResult.items) {
-            const product = await Product.findById(item.productId).session(session);
-            if (!product) throw new Error(`Product ${item.productId} not found`);
-
             const isStockIN = ['Purchase', 'Return'].includes(validateResult.transactionType);
 
-            const oldQty = Number(product.quantity) || 0;
             const stockImpact = Number(item.qty) * Number(item.multiplier);
-            const newQty = isStockIN ? oldQty + stockImpact : oldQty - stockImpact;
 
-            if (isNaN(newQty)) throw new Error(`Math Error for product ${product.name}`);
+            const update = isStockIN
+                ? { $inc: { quantity: stockImpact } }
+                : { $inc: { quantity: -stockImpact } };
+
+            const product = await Product.findOneAndUpdate(
+                {
+                    _id: item.productId,
+                    ...(isStockIN ? {} : { quantity: { $gte: stockImpact } })
+                },
+                update,
+                { new: true, session }
+            );
+
+            if (!product) {
+                throw new Error(`Insufficient stock or product not found`);
+            }
+
+            const newQty = product.quantity;
+            const oldQty = isStockIN
+                ? newQty - stockImpact
+                : newQty + stockImpact;
+
+            if (isNaN(newQty)) {
+                throw new Error(`Math Error for product ${product.name}`);
+            }
 
             await Movement.create([{
                 productId: item.productId,
@@ -60,15 +79,11 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
                 reason: `${validateResult.transactionType}: ${item.qty} ${item.unitName || 'units'}`
             }], { session });
 
-            product.quantity = newQty;
-            await product.save({ session });
-
-            productsToAlert.push(product);
+            productsToAlert.add(product._id.toString());
         }
 
         await session.commitTransaction();
 
-        // Log the financial event for BI Dashboard
         await createLog(
             req.user.id,
             "TRANSACTION",
@@ -76,8 +91,11 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
             `Processed ${validateResult.transactionType} of ${validateResult.items.length} items. Total: ${validateResult.grandTotal}`
         );
 
-        Promise.all(productsToAlert.map(p => processProductAlert(p, req.user.id, req.settings)))
-            .catch(err => console.error("Alert Processing Error", err));
+        Promise.all(
+            [...productsToAlert].map(id =>
+                processProductAlert(id, req.user.id, req.settings)
+            )
+        ).catch(err => console.error("Alert Processing Error", err));
 
         res.status(201).json({ status: "Success", data: transaction[0] });
 
@@ -86,8 +104,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
 
         res.status(400);
         throw new Error(error.message);
-    }
-    finally {
+    } finally {
         session.endSession();
     }
 });
