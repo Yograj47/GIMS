@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { Download, Upload, History, ChevronRight, Activity } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { useAnalytics } from '@/features/dashboard/hooks/useAnalystics';
+import { useEffect } from 'react';
+import { Loading } from '@/lib/loader';
 
 export default function StockManagement() {
   const navigate = useNavigate();
@@ -28,6 +31,13 @@ export default function StockManagement() {
     }
   ];
 
+  const { fetchSummary, summary, isLoading } = useAnalytics();
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary])
+
+  if (isLoading) return <Loading fullPage />
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 animate-in fade-in duration-500">
@@ -93,8 +103,8 @@ export default function StockManagement() {
 
       {/* --- SYSTEM MONITORING BAR --- */}
       <div className="border border-slate-300 rounded-xl bg-slate-50/50 p-2 flex flex-col md:flex-row gap-2">
-        <MonitorCard label="Total Movements (24h)" value="142" />
-        <MonitorCard label="Critical Low Stock" value="08" isWarning />
+        <MonitorCard label="Total Movements (24h)" value={String(summary?.todayFlow.value)} />
+        <MonitorCard label="Critical Low Stock" value={String(summary?.lowItems)} isWarning />
         <MonitorCard label="Database Sync" value="Operational" isStatus />
       </div>
     </div>

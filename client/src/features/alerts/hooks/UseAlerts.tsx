@@ -11,7 +11,7 @@ export const useAlerts = () => {
         alerts,
         setActiveAlerts,
         setAlerts,
-        resolveAlertLocally,
+        acknowledgeAlertLocally,
         setLoading,
         isLoading
     } = useGlobalStore();
@@ -46,14 +46,13 @@ export const useAlerts = () => {
         } finally { }
     }, [setActiveAlerts]);
 
-    const markAsResolved = async (id: string) => {
+    const acknowledgeAlert = async (id: string) => {
         try {
             setLoading(true);
-            const response = await AlertService.resolveAlert(id);
+            const response = await AlertService.acknowledgeAlert(id);
             if (response.status === "Success") {
-                fetchAllAlerts();
-                resolveAlertLocally(id);
-                notify.success("Alert marked as resolved");
+                acknowledgeAlertLocally(id);
+                notify.success("Alert acknowledged");
                 return true;
             }
         } finally {
@@ -62,14 +61,16 @@ export const useAlerts = () => {
         return false;
     };
 
+
     return {
         alerts,
         activeAlerts,
-        activeCount: activeAlerts.length,
+        activeCount: activeAlerts.filter(a => !a.acknowledged).length,
         fetchActiveAlerts,
-        markAsResolved,
+        acknowledgeAlert,
         fetchAllAlerts,
         isLoading,
         meta
     };
+
 };

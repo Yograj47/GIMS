@@ -25,19 +25,19 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
-    const availableProducts = useMemo(() => {
-        return Products.filter(p => !excludeIds.includes(p._id) && p.name.toLowerCase().includes(search.toLowerCase()));
+    const filteredProducts = useMemo(() => {
+        return Products.filter(p => p.supplier === null && !excludeIds.includes(p._id) && p.name.toLowerCase().includes(search.toLowerCase()));
     }, [Products, search, excludeIds]);
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-md rounded-xl border border-slate-200 shadow-2xl flex flex-col max-h-[70vh] overflow-hidden">
+            <div className="bg-white w-full max-w-md rounded-xl border border-slate-300 shadow-2xl flex flex-col max-h-[70vh] overflow-hidden">
                 
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em]">Link Inventory</h3>
+                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Link Inventory</h3>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={16} /></button>
                 </div>
 
@@ -48,7 +48,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                         <input
                             type="text"
                             placeholder="Filter items..."
-                            className="w-full bg-white border border-slate-200 rounded-lg py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-white border border-slate-300 rounded-lg py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-indigo-500 transition-colors"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -57,8 +57,8 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
 
                 {/* List */}
                 <div className="flex-1 overflow-y-auto p-2">
-                    {availableProducts.length > 0 ? (
-                        availableProducts.map((product) => (
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
                             <div
                                 key={product._id}
                                 onClick={() => toggleProduct(product._id)}
@@ -66,7 +66,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                                     "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border mb-1",
                                     selectedIds.includes(product._id)
                                         ? "bg-indigo-50 border-indigo-200 shadow-sm"
-                                        : "bg-white border-transparent hover:bg-slate-50"
+                                        : "bg-white border-transparent hover:bg-slate-100"
                                 )}
                             >
                                 <div className="flex items-center gap-3">
@@ -94,7 +94,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
 
                 {/* Footer */}
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex gap-2">
-                    <Button variant="ghost" onClick={onClose} className="flex-1 text-[10px] font-black uppercase tracking-widest h-10">Cancel</Button>
+                    <Button variant="ghost" onClick={onClose} className="flex-1 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-slate-100 border">Cancel</Button>
                     <Button
                         disabled={selectedIds.length === 0 || isSubmitting}
                         onClick={async () => { setIsSubmitting(true); await onAssign(selectedIds); setIsSubmitting(false); onClose(); }}

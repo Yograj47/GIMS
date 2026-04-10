@@ -66,7 +66,7 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
                 <Button 
                     type="button" 
                     variant="outline" 
-                    className="h-11 border-2 border-dashed border-blue-100 text-blue-600 hover:bg-blue-50 hover:border-blue-200 rounded-xl px-6 font-bold transition-all"
+                    className="h-11 border-2 border-dashed border-blue-200 text-blue-600 rounded-xl px-6 font-bold transition-all"
                 >
                     <Plus size={18} className="mr-2" /> Select Product
                 </Button>

@@ -20,7 +20,7 @@ function AppHeader() {
     const navigate = useNavigate();
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [showNotifications, setShowNotifications] = useState(false);
-    const { activeAlerts, fetchActiveAlerts, isLoading, markAsResolved } = useAlerts();
+    const { activeAlerts, fetchActiveAlerts, isLoading, acknowledgeAlert } = useAlerts();
     const { fetchSettings, settings } = useGlobalStore();
     const { user } = useAuthStore();
 
@@ -32,7 +32,6 @@ function AppHeader() {
         const interval = setInterval(() => fetchActiveAlerts(), 60000);
         return () => clearInterval(interval);
     }, [fetchActiveAlerts, fetchSettings, settings]);
-
 
 
     // Close dropdown when clicking outside
@@ -48,7 +47,7 @@ function AppHeader() {
 
     const handleResolve = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        await markAsResolved(id);
+        await acknowledgeAlert(id);
     };
 
     return (
@@ -73,7 +72,7 @@ function AppHeader() {
                         )}
                     >
                         <Bell size={20} />
-                        {activeAlerts.length > 0 && (
+                        {activeAlerts.filter(a => !a.acknowledged).length > 0 && (
                             <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 border-2 border-white" />
                         )}
                     </button>
@@ -93,7 +92,10 @@ function AppHeader() {
                                     activeAlerts.map((alert) => (
                                         <div
                                             key={alert._id}
-                                            className="p-4 border-b border-slate-300 hover:bg-slate-50/80 transition-colors group relative cursor-default"
+                                            className={cn(
+                                                "p-4 border-b border-slate-300 hover:bg-slate-50/80 transition-colors group relative cursor-default",
+                                                alert.acknowledged && "opacity-50 bg-amber-50/30" 
+                                            )}
                                         >
                                             <div className="flex gap-3">
                                                 <div className={cn(

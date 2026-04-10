@@ -49,7 +49,7 @@ export default function MovementForm() {
     };
 
     const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
-    const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-600 hover:bg-rose-700";
+    const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-700 hover:bg-rose-700";
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -74,7 +74,7 @@ export default function MovementForm() {
                             </span>
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Module</span>
                         </div>
-                        <h1 className="text-3xl text-slate-900 tracking-tighter uppercase italic">
+                        <h1 className="text-3xl text-slate-900 tracking-tighter">
                             {isStockIn ? "Stock Entry" : "Stock Release"}
                         </h1>
                     </div>
@@ -180,7 +180,7 @@ export default function MovementForm() {
                     {/* SECTION: NOTES */}
                     <section className="bg-white border border-slate-300 rounded-xl p-5">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                            <ReceiptText size={14} /> Internal Remarks
+                            <ReceiptText size={14} /> Internal Remarks (Optional)
                         </h3>
                         <textarea
                             {...register("notes")}

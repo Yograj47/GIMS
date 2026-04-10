@@ -12,7 +12,7 @@ interface GlobalState {
 
   setActiveAlerts: (data: AlertData[]) => void;
   setAlerts: (data: AlertData[]) => void;
-  resolveAlertLocally: (id: string) => void;
+  acknowledgeAlertLocally: (id: string) => void;
 
   settings: GeneralSettingsData | null;
   fetchSettings: () => Promise<void>;
@@ -42,10 +42,16 @@ export const useGlobalStore = create<GlobalState>((set) => ({
 
   setAlerts: (data) => set({ alerts: data }),
 
-  resolveAlertLocally: (id) => set((state) => ({
+  acknowledgeAlertLocally: (id) => set((state) => ({
     alerts: state.alerts.map((a) =>
-      a._id === id ? { ...a, resolved: true } : a
+      a._id === id
+        ? { ...a, acknowledged: true, acknowledgedAt: new Date().toISOString() }
+        : a
     ),
-    activeAlerts: state.activeAlerts.filter((a) => a._id !== id),
+    activeAlerts: state.activeAlerts.map((a) =>  
+      a._id === id
+        ? { ...a, acknowledged: true, acknowledgedAt: new Date().toISOString() }
+        : a
+    ),
   })),
 }));

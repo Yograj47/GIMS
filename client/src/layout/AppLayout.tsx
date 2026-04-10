@@ -24,9 +24,9 @@ function AppLayout() {
     const collapsed = screen === "desktop" ? !sidebarOpen : true;
 
     return (
-        
+
         <div className="flex h-screen w-full overflow-hidden font-sans antialiased text-slate-900">
-            
+
             {/* 1. SIDEBAR WRAPPER */}
             <div className="no-print relative z-60">
                 <Sidebar
@@ -40,22 +40,24 @@ function AppLayout() {
                 className={cn(
                     "flex flex-col flex-1 min-w-0 transition-all duration-500 ease-in-out",
                     collapsed ? "ml-20" : "ml-64",
-                    screen === "mobile" && "ml-0" 
+                    screen === "mobile" && "ml-0"
                 )}
             >
-    
-                <div className="no-print border-b border-slate-300 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-                    <AppHeader />
-                </div>
 
-                <main className="flex-1 overflow-y-auto overflow-x-hidden">
-                    <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <Outlet />
+                    {/* Header */}
+                    <div className="no-print border-b border-slate-300 backdrop-blur-md sticky top-0 z-50"> 
+                        <AppHeader />
                     </div>
-                </main>
+
+                    {/* Main */}
+                    <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-200">
+                        <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <Outlet />
+                        </div>
+                    </main>
+                </div>
             </div>
-        </div>
-    );
+            );
 }
 
-export default AppLayout;
+            export default AppLayout;

@@ -8,7 +8,7 @@ const AlertPage: React.FC = () => {
     const {
         alerts,
         fetchAllAlerts,
-        markAsResolved,
+        acknowledgeAlert,
         isLoading,
         meta,
         activeCount,
@@ -58,7 +58,7 @@ const AlertPage: React.FC = () => {
                 {/* 2. The Data Table Wrapper */}
                 <div className="bg-white border border-slate-300">
                     <DataTable
-                        columns={getAlertColumns(markAsResolved)}
+                        columns={getAlertColumns(acknowledgeAlert)}
                         data={alerts}
                         isLoading={isLoading}
                         pageCount={meta?.totalPages || 0}

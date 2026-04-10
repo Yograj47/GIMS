@@ -28,7 +28,7 @@ export interface ProductData {
     sellingPrice: number;
     category: { _id: string; name: string };
     unit: { _id: string; name: string; shortForm?: string };
-    supplier: { _id: string; name: string };
+    supplier: { _id: string; name: string } | null;
     isActive: boolean;
     createdAt: string;
 }

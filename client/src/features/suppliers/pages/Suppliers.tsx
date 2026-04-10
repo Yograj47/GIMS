@@ -23,7 +23,7 @@ const Suppliers: React.FC = () => {
     const columns = useMemo(() => getSupplierColumns(navigate), [navigate]);
 
     return (
-        <div className="h-full bg-slate-50/50 animate-in fade-in duration-500 pb-10">
+        <div className="h-full animate-in fade-in duration-500 pb-10">
             <div className="max-w-350 mx-auto space-y-6">
 
                 {/* 1. Minimal Header */}

@@ -10,20 +10,20 @@ export interface AlertData {
         name: string;
         quantity: number;
         threshold: number;
-        unitId?: {
-            name: string;
-        };
+        unitId?: { name: string };
     };
     type: AlertType;
     severity: AlertSeverity;
     message: string;
     snapshotValue: number;
+    acknowledged: boolean;          
+    acknowledgedAt?: string | Date; 
+    acknowledgedBy?: string;        
     resolved: boolean;
     resolvedAt?: string | Date;
     createdAt: string;
     updatedAt: string;
 }
-
 
 export interface AlertAPIResponse {
     status: string;

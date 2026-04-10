@@ -76,7 +76,7 @@ const Products: React.FC = () => {
     const columns = useMemo(() => getProductColumns(navigate), [navigate]);
 
     return (
-        <div className="h-full bg-slate-50/50 animate-in fade-in duration-500">
+        <div className="h-full animate-in fade-in duration-500">
             <div className="max-w-400 mx-auto space-y-6">
 
                 {/* 1. Minimal Header */}

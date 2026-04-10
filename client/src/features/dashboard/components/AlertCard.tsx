@@ -18,16 +18,16 @@ export default function AlertCard({ productName, remainingQty, onAction }: Alert
                 <div>
                     <h4 className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-1">Stock Alert</h4>
                     <p className="text-lg font-black text-slate-900 tracking-tight leading-tight uppercase">
-                        {productName} 
+                        {productName}
                     </p>
                     <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Critical: {remainingQty} units left</p>
                 </div>
             </div>
-            <Button 
+            <Button
                 onClick={onAction}
-                className="w-full mt-8 text-green-500 hover:bg-green-600 hover:text-white bg-white font-black text-[12px] uppercase tracking-[0.2em] h-12 border border-green-500 rounded-lg"
+                className="w-full mt-8 text-amber-600 hover:bg-amber-500 hover:text-white bg-white font-black text-[12px] uppercase tracking-[0.2em] h-12 border border-amber-400 rounded-lg"
             >
-                Restock Asset
+                Acknowledge Alert
             </Button>
         </Card>
     );

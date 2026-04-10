@@ -28,13 +28,13 @@ export const AlertService = {
     },
 
     /**
-     * Marks an alert as resolved
+     * Marks an alert as acknowledge not resolved
      * Usually triggered manually if the user acknowledges the alert
      */
-    resolveAlert: async (id: string): Promise<{ status: string; data: AlertData }> => {
-        const { data } = await api.patch<{ status: string; data: AlertData }>(
-            `/alerts/${id}/resolve`
-        );
-        return data;
-    }
+    acknowledgeAlert: async (id: string): Promise<{ status: string; data: AlertData }> => {
+    const { data } = await api.patch<{ status: string; data: AlertData }>(
+        `/alerts/${id}/acknowledge`
+    );
+    return data;
+}
 };

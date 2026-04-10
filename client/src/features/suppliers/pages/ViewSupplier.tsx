@@ -33,6 +33,7 @@ export default function SupplierView() {
             fetchSupplierById(id);
         }
     };
+    
 
     const confirmDelete = async () => {
         if (!id) return;
@@ -135,13 +136,13 @@ export default function SupplierView() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {productData?.length ? (
-                                        productData.map((product) => (
+                                    {products?.length ? (
+                                        products.filter((p) => p.supplier?._id === id).map((product) => (
                                             <tr key={product._id} className="hover:bg-slate-50/30 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
                                                         <span className="text-xs font-bold text-slate-900 uppercase tracking-tight">{product.name}</span>
-                                                        <span className="text-[10px] text-slate-400 font-medium">Stock: {product.stock} units</span>
+                                                        <span className="text-[10px] text-slate-400 font-medium">Stock: {product.quantity} units</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
