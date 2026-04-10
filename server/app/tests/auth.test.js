@@ -54,6 +54,6 @@ describe('Auth Controller - Login', () => {
             });
 
         expect(response.status).toBe(401);
-        expect(response.body.message).toBe('Invalid email or password');
+        expect(response.body.message).toBe('Invalid Credentials');
     });
 });

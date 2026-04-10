@@ -10,9 +10,6 @@ export const getActiveAlerts = asyncHandler(async (req, res) => {
         .populate("productId", "name quantity threshold unit")
         .sort({ createdAt: -1 });
 
-    console.log(alerts);
-    
-
     const formattedAlerts = alerts.map(alert => {
         const doc = alert.toObject();
         return {
@@ -42,7 +39,7 @@ export const getAllAlerts = asyncHandler(async (req, res) => {
     const shouldPaginate = req.query.paginate !== 'false';
 
     const [items, totalItems] = await Promise.all([
-        Alert.find()
+        Alert.find({ resolved: false })
             .populate({ path: "productId", select: "name quantity unitId threshold", populate: { path: "unitId", select: "name" } })
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
@@ -77,14 +74,15 @@ export const getAllAlerts = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc Manually resolve an alert
+ * @desc Acknowledge the alert
  */
-export const resolveAlert = asyncHandler(async (req, res) => {
+export const acknowledgeAlert = asyncHandler(async (req, res) => {
     const alert = await Alert.findByIdAndUpdate(
         req.params.id,
         {
-            resolved: true,
-            resolvedAt: new Date()
+            acknowledged: true,
+            acknowledgedAt: new Date(),
+            acknowledgedBy: req.user._id  
         },
         { new: true }
     );
@@ -96,7 +94,7 @@ export const resolveAlert = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         status: "Success",
-        message: "Alert marked as resolved",
+        message: "Alert acknowledged",
         data: alert
     });
 });

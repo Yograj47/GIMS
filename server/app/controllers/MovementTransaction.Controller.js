@@ -240,7 +240,6 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
 export const getMovements = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    console.log(limit);
 
     const search = req.query.search || '';
     const shouldPaginate = req.query.paginate !== 'false';

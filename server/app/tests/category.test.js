@@ -18,7 +18,7 @@ describe('Category Controller - Create', () => {
             name: 'Admin User',
             email: 'admin@gims.com',
             password: 'password123',
-            role: 'admin' // Required for Private/Admin access
+            role: 'admin' 
         });
 
         // Generate a token for the request
@@ -37,7 +37,7 @@ describe('Category Controller - Create', () => {
     test('Should create a category successfully as an Admin', async () => {
         const response = await request(app)
             .post('/api/v1/categories')
-            .set('Cookie', [`token=${adminToken}`]) // Sending JWT via cookie
+            .set('Cookie', [`token=${adminToken}`])
             .send({
                 name: 'Dairy',
                 description: 'Milk and cheese products'
@@ -71,6 +71,7 @@ describe('Category Controller - Create', () => {
                 description: 'No name'
             });
 
+        
         expect(response.status).toBe(400);
         // Depending on your Global Error Handler, check for Zod error details
         expect(response.body).toHaveProperty('message');

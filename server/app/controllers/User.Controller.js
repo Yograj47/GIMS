@@ -14,8 +14,6 @@ export const getMe = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    console.log(user);
-
 
     res.status(200).json({
         status: "Success",

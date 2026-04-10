@@ -4,8 +4,6 @@ const rbac = (action) => {
     return (req, res, next) => {
         const { role } = req.user;
 
-        console.log(`User Role: ${req.user.role}, Action Needed: ${action}`);
-
         // Admin has access to everything
         if (role === 'admin') {
             return next();

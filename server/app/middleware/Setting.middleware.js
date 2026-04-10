@@ -13,7 +13,6 @@ export const injectSettings = asyncHandler(async (req, res, next) => {
             enableEmailNotifications: true
         };
     }
-    console.log("Hello:", settings.enableEmailNotifications);
 
     req.settings = settings;
     next();

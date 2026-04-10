@@ -36,15 +36,8 @@ export const processProductAlert = async (productId, userId, settings) => {
         if (alertType) {
             // Resolve other alert types
             await Alert.updateMany(
-                {
-                    productId: _id,
-                    resolved: false,
-                    type: { $ne: alertType }
-                },
-                {
-                    resolved: true,
-                    resolvedAt: new Date()
-                }
+                { productId: _id, resolved: false, type: { $ne: alertType } },
+                { resolved: true, resolvedAt: new Date(), acknowledged: false } 
             );
 
             // Atomic upsert
@@ -68,7 +61,7 @@ export const processProductAlert = async (productId, userId, settings) => {
                 }
             );
 
-            // Email (optional)
+            // Email
             if (settings?.enableEmailNotifications && user.email) {
                 try {
                     const color =
@@ -105,14 +98,8 @@ export const processProductAlert = async (productId, userId, settings) => {
 
         } else {
             await Alert.updateMany(
-                {
-                    productId: _id,
-                    resolved: false
-                },
-                {
-                    resolved: true,
-                    resolvedAt: new Date()
-                }
+                { productId: _id, resolved: false },
+                { resolved: true, resolvedAt: new Date(), acknowledged: false }
             );
         }
 

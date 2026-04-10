@@ -5,6 +5,7 @@ import Unit from "../models/Unit.Model.js"
 import { productSchema } from "../validation/Product.validation.js"
 import ProductUnit from "../models/ProductUnit.Model.js";
 import { createLog } from "../config/Logger.js"
+import path from "node:path";
 
 
 /** 
@@ -71,9 +72,6 @@ export const createProduct = asyncHandler(async (req, res) => {
     });
 });
 
-
-import mongoose from 'mongoose';
-
 /**
  * @desc    Get all products with Advanced Filtering
  * @route   GET /api/v1/products
@@ -127,7 +125,21 @@ export const getProducts = asyncHandler(async (req, res) => {
                 as: "unitDoc"
             }
         },
-        { $unwind: "$unitDoc" }
+        { $unwind: "$unitDoc" },
+        {
+            $lookup: {
+                from: "suppliers",
+                localField: "supplierId",
+                foreignField: "_id",
+                as: "supplierDoc"
+            }
+        },
+        {
+            $unwind: {
+                path: "$supplierDoc",
+                preserveNullAndEmptyArrays: true
+            }
+        }
     ];
 
     if (search) {
@@ -154,7 +166,14 @@ export const getProducts = asyncHandler(async (req, res) => {
             isActive: 1,
             createdAt: 1,
             category: { _id: "$categoryDoc._id", name: "$categoryDoc.name" },
-            unit: { _id: "$unitDoc._id", name: "$unitDoc.name", shortForm: "$unitDoc.shortForm" }
+            unit: { _id: "$unitDoc._id", name: "$unitDoc.name", shortForm: "$unitDoc.shortForm" },
+            supplier: {
+                $cond: {
+                    if: { $ifNull: ["$supplierDoc._id", false] },
+                    then: { _id: "$supplierDoc._id", name: "$supplierDoc.name" },
+                    else: null
+                }
+            }
         }
     });
 

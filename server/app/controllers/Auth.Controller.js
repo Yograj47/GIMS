@@ -73,7 +73,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
     if (!user || !(await bcrypt.compare(password, user.password))) {
         res.status(401);
-        throw new Error("Invalid email or password");
+        throw new Error("Invalid Credentials");
     }
 
     const token = jwt.sign(

@@ -25,6 +25,15 @@ const alertSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  acknowledged: {
+    type: Boolean,
+    default: false
+  },
+  acknowledgedAt: Date,
+  acknowledgedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users"
+  },
   resolved: {
     type: Boolean,
     default: false
