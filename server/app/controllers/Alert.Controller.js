@@ -45,7 +45,7 @@ export const getAllAlerts = asyncHandler(async (req, res) => {
             .skip((page - 1) * limit)
             .limit(limit)
             .lean(),
-        Alert.countDocuments()
+        Alert.countDocuments({ resolved: false })
     ]);
 
     const formattedItems = items.map(alert => ({
@@ -82,7 +82,7 @@ export const acknowledgeAlert = asyncHandler(async (req, res) => {
         {
             acknowledged: true,
             acknowledgedAt: new Date(),
-            acknowledgedBy: req.user._id  
+            acknowledgedBy: req.user._id
         },
         { new: true }
     );
