@@ -7,56 +7,91 @@ import asyncHandler from "express-async-handler";
  * @access  Private/Admin
  */
 export const getActivityLogs = asyncHandler(async (req, res) => {
-    const { page, limit, search = '', type, startDate, endDate, paginate } = req.query;
+    // 1. Sanitize and Parse Inputs
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const { search = '', type, startDate, endDate, paginate } = req.query;
     const shouldPaginate = paginate !== 'false';
 
-    // 1. Build Query Object
-    const query = {};
+    const pipeline = [
+        {
+            $lookup: {
+                from: "users",
+                localField: "performedBy", 
+                foreignField: "_id",
+                as: "userDoc"
+            }
+        },
+        { $unwind: "$userDoc" }
+    ];
 
     // Search Logic
     if (search) {
-        query.$or = [
-            { message: { $regex: search, $options: 'i' } },
-            { action: { $regex: search, $options: 'i' } },
-        ];
+        pipeline.push({
+            $match: {
+                $or: [
+                    { message: { $regex: search, $options: 'i' } },
+                    { 'userDoc.name': { $regex: search, $options: 'i' } },
+                    { action: { $regex: search, $options: 'i' } },
+                ]
+            }
+        });
     }
 
-    // Type Logic (Supports single or multiple types)
+    // Type Logic 
     if (type) {
         const typeArray = type.split(',');
-        query.type = { $in: typeArray };
+        pipeline.push({
+            $match: { type: { $in: typeArray } }
+        });
     }
 
-    // Date Range Logic
+    // Date Range Logic 
     if (startDate || endDate) {
-        query.createdAt = {};
-        if (startDate) query.createdAt.$gte = new Date(new Date(startDate).setHours(0, 0, 0, 0));
-        if (endDate) query.createdAt.$lte = new Date(new Date(endDate).setHours(23, 59, 59, 999));
+        const dateQuery = {};
+        if (startDate) dateQuery.$gte = new Date(new Date(startDate).setHours(0, 0, 0, 0));
+        if (endDate) dateQuery.$lte = new Date(new Date(endDate).setHours(23, 59, 59, 999));
+        
+        pipeline.push({
+            $match: { createdAt: dateQuery }
+        });
     }
 
-    // 2. Execute Query
-    let itemsQuery = ActivityLog.find(query)
-        .populate("performedBy", "name role") 
-        .sort({ createdAt: -1 })
-        .lean(); 
+    pipeline.push({ $sort: { createdAt: -1 } });
 
+    // Project fields
+    pipeline.push({
+        $project: {
+            _id: 1,
+            performedBy: { name: "$userDoc.name", role: "$userDoc.role" },
+            action: 1,
+            type: 1,
+            message: 1,
+            createdAt: 1
+        }
+    });
+
+    let totalItems = 0;
     if (shouldPaginate) {
-        itemsQuery = itemsQuery.skip((parseInt(page) - 1) * parseInt(limit)).limit(parseInt(limit));
+        const countResult = await ActivityLog.aggregate([...pipeline, { $count: "total" }]);
+        totalItems = countResult[0]?.total || 0;
+
+        // Ensure these are Numbers
+        pipeline.push({ $skip: (page - 1) * limit });
+        pipeline.push({ $limit: limit });
     }
 
-    const [items, totalItems] = await Promise.all([
-        itemsQuery,
-        ActivityLog.countDocuments(query)
-    ]);
+    const results = await ActivityLog.aggregate(pipeline);
 
     res.status(200).json({
         status: "Success",
-        data: items,
+        data: results, 
         meta: {
             totalItems,
             ...(shouldPaginate && {
                 totalPages: Math.ceil(totalItems / limit),
-                currentPage: parseInt(page)
+                currentPage: page,
+                itemsPerPage: limit
             })
         }
     });
