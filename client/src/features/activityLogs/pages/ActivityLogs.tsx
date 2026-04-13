@@ -20,6 +20,10 @@ export default function ActivityLogsPage() {
     const debouncedSearch = useDebounce(searchQuery, 400);
 
     useEffect(() => {
+        setPagination(prev => ({ ...prev, pageIndex: 0 }));
+    }, [debouncedSearch, typeFilter, startDate, endDate]);
+
+    useEffect(() => {
         const timer = setTimeout(() => {
             fetchLogs(
                 pagination.pageIndex + 1,

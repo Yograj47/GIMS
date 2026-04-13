@@ -50,7 +50,7 @@ function AppLayout() {
                     </div>
 
                     {/* Main */}
-                    <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-200">
+                    <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[#f1f1f1]">
                         <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <Outlet />
                         </div>

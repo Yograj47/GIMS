@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ArrowLeft, Trash2, Loader2, CreditCard, Info, ReceiptText, ShoppingCart, PackagePlus, PackageMinus, Hash } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useFieldArray, type Resolver } from "react-hook-form";
@@ -8,17 +8,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ProductItemModal from "./ProductItemModal";
 
-import { transactionSchema, type TransactionFormData } from "@/types/Transaction";
+import { transactionSchema, type Item, type TransactionFormData } from "@/types/Transaction";
 import { useMovementTransactions } from "../hooks/useMovementTransactions";
 import { cn } from "@/lib/utils";
+import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 
 export default function MovementForm() {
     const [searchParams] = useSearchParams();
     const mode = searchParams.get('mode') || 'in';
     const isStockIn = mode === "in";
     const navigate = useNavigate();
+    const { Suppliers, fetchSuppliers } = useSuppliers();
 
-    const { createTransaction, isLoading } = useMovementTransactions();
+    const { fetchTransactions, transactions, createTransaction, isLoading } = useMovementTransactions();
+
 
     const { register, control, handleSubmit, watch, setValue } = useForm<TransactionFormData>({
         resolver: zodResolver(transactionSchema) as Resolver<TransactionFormData>,
@@ -47,6 +50,51 @@ export default function MovementForm() {
         const success = await createTransaction(data);
         if (success) navigate("/reports/transactions");
     };
+
+    useEffect(() => {
+        if (isStockIn) {
+            fetchSuppliers()
+        } else {
+            fetchTransactions();
+        }
+    }, [isStockIn, fetchTransactions, fetchSuppliers])
+
+    const pastCustomers = useMemo(() => {
+
+        const customers = transactions
+            .filter(t => t.transactionType === "Sale")
+            .map(t => t.partyDetails)
+
+        return Array.from(new Map(customers.map(c => [c.name, c])).values())
+    }, [transactions]);
+
+
+    const watchedName = watch("partyDetails.name");
+
+    useEffect(() => {
+        const list = isStockIn ? Suppliers : pastCustomers;
+        const match = list.find(entity => entity.name === watchedName);
+        if (match) {
+            setValue("partyDetails.phone", match.phone);
+        }
+    }, [watchedName, isStockIn, Suppliers, pastCustomers, setValue]);
+
+    const handleAddProduct = (newItem: Item) => {
+        const existingIndex = fields.findIndex(
+            (item) => (item as Item).productId === newItem.productId
+        );
+
+        if (existingIndex > -1) {
+            const currentQty = Number(watchedItems[existingIndex].qty);
+            const newQty = currentQty + Number(newItem.qty);
+            const newTotal = newQty * Number(newItem.rate);
+
+            setValue(`items.${existingIndex}.qty`, newQty);
+            setValue(`items.${existingIndex}.total`, newTotal);
+        } else {
+            append(newItem)
+        }
+    }
 
     const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
     const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-700 hover:bg-rose-700";
@@ -130,7 +178,7 @@ export default function MovementForm() {
                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                                 <ShoppingCart size={14} /> Item Selection List
                             </h3>
-                            <ProductItemModal isStockIn={isStockIn} onAdd={(newItem) => append(newItem)} />
+                            <ProductItemModal isStockIn={isStockIn} onAdd={(newItem) => handleAddProduct(newItem)} />
                         </div>
 
                         <div className="divide-y divide-slate-100 min-h-30">
@@ -149,12 +197,12 @@ export default function MovementForm() {
                                             <div>
                                                 <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{(field as any).productName}</p>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                    Rate: ₹{field.rate} <span className="mx-1">×</span> Qty: {field.qty} {field.unitName}
+                                                    Rate: ₹{watchedItems[index].rate} <span className="mx-1">×</span> Qty: {watchedItems[index].qty} {field.unitName}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-6">
-                                            <p className="font-mono font-black text-xs text-slate-700">₹{field.total}</p>
+                                            <p className="font-mono font-black text-xs text-slate-700">₹{watchedItems[index].total}</p>
                                             <button
                                                 type="button"
                                                 onClick={() => remove(index)}
@@ -197,42 +245,73 @@ export default function MovementForm() {
                         <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-sm">
                             <div className={cn("px-5 py-3 text-white flex items-center justify-between", themeBg)}>
                                 <h2 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-                                    <CreditCard size={14} /> Counterparty Info
+                                    <CreditCard size={14} /> Party Info
                                 </h2>
                                 <ActivityIndicator />
                             </div>
-                            <div className="p-5 space-y-5">
-                                <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
-                                    <button
-                                        type="button"
-                                        onClick={() => setValue("isPaid", true)}
-                                        className={cn(
-                                            "flex-1 py-1.5 rounded-md text-[10px] font-black tracking-widest transition-all",
-                                            watch("isPaid") ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
-                                        )}
-                                    >
-                                        CASH/PAID
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setValue("isPaid", false)}
-                                        className={cn(
-                                            "flex-1 py-1.5 rounded-md text-[10px] font-black tracking-widest transition-all",
-                                            !watch("isPaid") ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
-                                        )}
-                                    >
-                                        CREDIT
-                                    </button>
-                                </div>
 
-                                <div className="space-y-4">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entity Name</label>
-                                        <Input {...register("partyDetails.name")} className="h-9 text-xs rounded-lg border-slate-300 bg-slate-50/50" placeholder="e.g. Acme Corp" />
+
+                            <div className="p-5 space-y-5">
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment Status</label>
+                                    <div className="flex gap-1 p-1 bg-slate-100 rounded-lg border border-slate-200">
+                                        <button
+                                            type="button"
+                                            onClick={() => setValue("isPaid", true)}
+                                            className={cn(
+                                                "flex-1 py-2 rounded-md text-[10px] font-black tracking-widest transition-all",
+                                                watch("isPaid") ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                            )}
+                                        >
+                                            PAID / SETTLED
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setValue("isPaid", false)}
+                                            className={cn(
+                                                "flex-1 py-2 rounded-md text-[10px] font-black tracking-widest transition-all",
+                                                !watch("isPaid") ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                            )}
+                                        >
+                                            CREDIT / DEBT
+                                        </button>
                                     </div>
+                                </div>
+                                <div className="space-y-4 pt-2 border-t border-slate-100">
+                                    <div className="space-y-1.5 relative">
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex justify-between">
+                                            <span>{isStockIn ? "Supplier" : "Customer"}</span>
+                                            {watch("partyDetails.name") && <span className="text-emerald-500 animate-in zoom-in">Verified</span>}
+                                        </label>
+                                        <div className="relative group">
+                                            <Input
+                                                list="user-list"
+                                                {...register("partyDetails.name")}
+                                                className="h-10 text-xs rounded-lg border-slate-300 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 transition-all pl-9"
+                                                placeholder="Search or type name..."
+                                            />
+                                            <Info size={14} className="absolute left-3 top-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                                        </div>
+                                        <datalist id="user-list">
+                                            {(isStockIn ? Suppliers : pastCustomers).map((party, idx) => (
+                                                <option key={idx} value={party?.name}>
+                                                    {party?.phone}
+                                                </option>
+                                            ))}
+                                        </datalist>
+                                    </div>
+
+                                    {/* Contact Input */}
                                     <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Hash</label>
-                                        <Input {...register("partyDetails.phone")} className="h-9 text-xs rounded-lg border-slate-300 bg-slate-50/50" placeholder="+977 98**" />
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Number</label>
+                                        <div className="relative">
+                                            <Input
+                                                {...register("partyDetails.phone")}
+                                                className="h-10 text-xs rounded-lg border-slate-300 bg-slate-50/50 focus:bg-white transition-all pl-9"
+                                                placeholder="+977"
+                                            />
+                                            <span className="absolute left-3 top-2.5 text-slate-400 font-mono text-[10px] font-bold">#</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -251,7 +330,7 @@ export default function MovementForm() {
                         type="submit"
                         disabled={isLoading || fields.length === 0}
                         className={cn(
-                            "w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-none",
+                            "w-full h-12 rounded-xl text-[12px] font-black uppercase shadow-none",
                             themeBg, "hover:opacity-90 text-white"
                         )}
                     >
