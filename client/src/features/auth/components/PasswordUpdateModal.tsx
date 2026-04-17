@@ -1,14 +1,12 @@
 import { notify } from "@/lib/toast";
 import { useAuthStore } from "@/store/useAuth";
-import type { UserData } from "@/types/Auth";
 import { Eye, EyeOff, Key, Lock, X } from "lucide-react";
 import { useState } from "react";
 
-export function PasswordUpdateModal({ isOpen, onClose, user }: { isOpen: boolean; onClose: () => void; user: UserData | null }) {
+export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void; }) {
     const [showPass, setShowPass] = useState(false);
     const { updatePassword } = useAuthStore();
-    const [updatedPassword, setUpdatedPassword] = useState({ userId: user?._id || "", currentPassword: "", newPassword: "" });
-
+    const [updatedPassword, setUpdatedPassword] = useState({ currentPassword: "", newPassword: "" });
 
     const handlePasswordUpdate = async () => {
         try {
@@ -16,13 +14,12 @@ export function PasswordUpdateModal({ isOpen, onClose, user }: { isOpen: boolean
                 notify.warning("New password cannot be the same as the current password.");
                 return;
             }
-
-            await updatePassword(updatedPassword.userId, updatedPassword.currentPassword, updatedPassword.newPassword);
+            await updatePassword(updatedPassword.currentPassword, updatedPassword.newPassword);
         } catch (error) {
             console.error("Error updating password:", error);
         } finally {
             setShowPass(false);
-            setUpdatedPassword({ userId: user?._id || "", currentPassword: "", newPassword: "" });
+            setUpdatedPassword({ currentPassword: "", newPassword: "" });
             onClose();
         }
     };

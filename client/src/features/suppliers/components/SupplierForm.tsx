@@ -43,13 +43,13 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
                     <div className="md:col-span-2 space-y-2">
                         <label className={labelStyle}>Full Company Name <span className="text-red-500">*</span></label>
                         <input {...register("name")} placeholder="Legal entity name..." className={inputStyle} />
-                        {errors.name && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.name.message}</p>}
+                        {errors.name && <p className="text-[10px] text-red-500 font-bold mt-1 ">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label className={labelStyle}><Phone size={12}/> Direct Contact <span className="text-red-500">*</span></label>
                         <input {...register("phone")} placeholder="+977-1-XXXXXXX" className={inputStyle} />
-                        {errors.phone && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.phone.message}</p>}
+                        {errors.phone && <p className="text-[10px] text-red-500 font-bold mt-1 ">{errors.phone.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -67,7 +67,7 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
                 <div className="space-y-2">
                     <label className={labelStyle}>Full Physical Address <span className="text-red-500">*</span></label>
                     <input {...register("address")} placeholder="Warehouse location, Street, City..." className={inputStyle} />
-                    {errors.address && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.address.message}</p>}
+                    {errors.address && <p className="text-[10px] text-red-500 font-bold mt-1 ">{errors.address.message}</p>}
                 </div>
             </div>
 

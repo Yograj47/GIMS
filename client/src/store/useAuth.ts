@@ -25,8 +25,8 @@ type AuthState = {
     sendVerifyOtp: () => Promise<void>;
     verifyEmail: (data: VerifyEmailFormData) => Promise<void>;
     updateRole: (userId: string, newRole: string) => Promise<void>;
-    updateProfile: (userId: string, name: string, email: string) => Promise<void>;
-    updatePassword: (userId: string, currentPassword: string, newPassword: string) => Promise<void>;
+    updateProfile: (name: string, email: string) => Promise<void>;
+    updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -157,10 +157,10 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            updateProfile: async (userId: string, name: string, email: string) => {
+            updateProfile: async (name: string, email: string) => {
                 set({ isLoading: true });
                 try {
-                    const response = await authService.updateProfile(userId, name, email);
+                    const response = await authService.updateProfile(name, email);
                     const updatedUser = response.data as UserData;
                     set({ user: updatedUser });
                     notify.success(response.message || "Profile updated successfully");
@@ -170,10 +170,10 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            updatePassword: async (userId: string, currentPassword: string, newPassword: string) => {
+            updatePassword: async (currentPassword: string, newPassword: string) => {
                 set({ isLoading: true });
                 try {
-                    const response = await authService.updatePassword(userId, currentPassword, newPassword);
+                    const response = await authService.updatePassword(currentPassword, newPassword);
                     notify.success(response.message || "Password updated successfully");
                 } finally {
                     set({ isLoading: false });

@@ -18,7 +18,10 @@ export default function ManageSupplier() {
     }, [id, isEditMode, fetchSupplierById]);
 
     const handleSubmit = async (data: SupplierFormData) => {
-        let success = isEditMode && id ? await updateSupplier(id, data) : await addSupplier(data);
+        let success = isEditMode && id
+            ? await updateSupplier(id, data)
+            : await addSupplier(data);
+            
         if (success) navigate("/suppliers");
     };
 
@@ -26,7 +29,7 @@ export default function ManageSupplier() {
 
     return (
         <div className="h-full animate-in fade-in duration-500">
-            {/* Header: Matching Product Style */}
+            {/* Header*/}
             <div className="flex items-center justify-between border-b border-slate-200 pb-6">
                 <div className="flex items-center gap-4">
                     <Button
@@ -82,7 +85,7 @@ export default function ManageSupplier() {
                     </div>
                 </div>
 
-                {/* Sidebar Info: Matching Product Sidebar */}
+                {/* Sidebar Info */}
                 <div className="space-y-4">
                     <div className="bg-slate-900 rounded-sm p-5 text-white shadow-lg">
                         <div className="flex items-center gap-2 mb-3 text-blue-400">

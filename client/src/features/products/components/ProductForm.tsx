@@ -36,7 +36,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const customSelectStyles = {
         control: (base: any, state: any) => ({
             ...base,
-            borderRadius: '0.125rem', 
+            borderRadius: '0.125rem',
             padding: '2px',
             fontSize: '13px',
             border: state.isFocused ? '1px solid #2563eb' : '1px solid #e2e8f0',
@@ -101,6 +101,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                                 />
                             )}
                         />
+                        {errors.categoryId && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.categoryId.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -119,6 +120,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                                 />
                             )}
                         />
+                        {errors.unitId && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.unitId.message}</p>}
                     </div>
                 </div>
             </div>
@@ -134,6 +136,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
                             <input type="number" {...register("basePrice", { valueAsNumber: true })} className={`${inputStyle} pl-10`} />
+                            {errors.basePrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.basePrice.message}</p>}
                         </div>
                     </div>
 
@@ -142,6 +145,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 font-bold text-xs">Rs.</span>
                             <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-10 border-blue-100`} />
+                            {errors.sellingPrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.sellingPrice.message}</p>}
                         </div>
                     </div>
 
@@ -178,6 +182,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                     <div className="space-y-2">
                         <label className={labelStyle}>Critical Alert Level</label>
                         <input type="number" {...register("threshold", { valueAsNumber: true })} className={inputStyle} />
+                        {errors.threshold && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.threshold.message}</p>}
                     </div>
                 </div>
             </div>

@@ -82,7 +82,7 @@ export const useCategories = () => {
             const response = await CategoryService.delete(id);
             if (response.success || response.status === "Success") {
                 setCategories((prev) => prev.filter((c) => c._id !== id));
-                notify.success("Product removed");
+                notify.success("Category removed");
             }
         } finally {
             setLoading(false);

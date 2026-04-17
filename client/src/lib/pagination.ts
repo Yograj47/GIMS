@@ -1,41 +1,36 @@
-import type { PaginationMetadata } from "@/types/Unit";
+import type { PaginationMetadata } from "@/types/Pagination";
 
 export interface PaginatedResponse<T> {
     items: T[];
     meta: PaginationMetadata;
 }
 
-export const generatePaginationRange = (currentPage: number, totalPages: number) => {
-    let range: (number | string)[] = [];
-    if (totalPages <= 7) {
-        range = Array.from({ length: totalPages }, (_, i) => i + 1);
+export const generatePaginationRange = (current: number, total: number) => {
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => i + 1);
     }
 
-    const leftSiblingIndex = Math.max(currentPage - 1, 1);
-    const rightSiblingIndex = Math.min(currentPage + 1, totalPages);
+    const siblings = 1;
+    const leftSiblingIndex = Math.max(current - siblings, 1);
+    const rightSiblingIndex = Math.min(current + siblings, total);
 
-    const shouldShowLeftDots = leftSiblingIndex > 2;
-    const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
+    const showLeftDots = leftSiblingIndex > 2;
+    const showRightDots = rightSiblingIndex < total - 2;
 
-    // Case 1: No left dots, but right dots
-    if (!shouldShowLeftDots && shouldShowRightDots) {
-        let leftItemCount = 3 + 2;
+    if (!showLeftDots && showRightDots) {
+        let leftItemCount = 3 + 2 * siblings;
         let leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
-        range = [...leftRange, '...', totalPages];
+        return [...leftRange, "...", total];
     }
 
-    // Case 2: No right dots, but left dots
-    if (shouldShowLeftDots && !shouldShowRightDots) {
-        let rightItemCount = 3 + 2;
-        let rightRange = Array.from({ length: rightItemCount }, (_, i) => totalPages - rightItemCount + i + 1);
-        range = [1, '...', ...rightRange];
+    if (showLeftDots && !showRightDots) {
+        let rightItemCount = 3 + 2 * siblings;
+        let rightRange = Array.from({ length: rightItemCount }, (_, i) => total - rightItemCount + i + 1);
+        return [1, "...", ...rightRange];
     }
 
-    // Case 3: Both left and right dots
-    if (shouldShowLeftDots && shouldShowRightDots) {
+    if (showLeftDots && showRightDots) {
         let middleRange = Array.from({ length: rightSiblingIndex - leftSiblingIndex + 1 }, (_, i) => leftSiblingIndex + i);
-        range = [1, '...', ...middleRange, '...', totalPages];
+        return [1, "...", ...middleRange, "...", total];
     }
-
-    return range;
-}
+};

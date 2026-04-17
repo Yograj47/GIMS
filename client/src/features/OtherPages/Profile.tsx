@@ -27,9 +27,7 @@ export default function ProfilePage() {
 
     const handleProfileUpdate = async () => {
         try {
-            await updateProfile(updatedData.userId, updatedData.name, updatedData.email);
-            console.log(updatedData);
-
+            await updateProfile(updatedData.name, updatedData.email);
         } catch (error) {
             console.error("Error updating profile:", error);
         } finally {
@@ -79,7 +77,7 @@ export default function ProfilePage() {
     if (isLoading) return <Loading fullPage />;
 
     return (
-        <div className="h-full bg-[#f1f5f9] p-2 animate-in fade-in duration-700">
+        <div className="h-full p-2 animate-in fade-in duration-700">
             <div className="max-w-5xl mx-auto">
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 pb-12 border-b border-slate-200">
@@ -188,7 +186,7 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <PasswordUpdateModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} user={user} />
+            <PasswordUpdateModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} />
         </div>
     );
 }

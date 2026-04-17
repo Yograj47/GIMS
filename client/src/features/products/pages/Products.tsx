@@ -116,7 +116,7 @@ const Products: React.FC = () => {
                             strokeWidth={2.5}
                         />
                         <Input
-                            placeholder="Filter by name, category..."
+                            placeholder="Search by product name..."
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);

@@ -75,22 +75,27 @@ export function DataTablePagination<TData>({
                     </Button>
 
                     <div className="flex items-center gap-1">
-                        {paginationRange.map((page, i) => (
-                            <Button
-                                key={i}
-                                variant={currentPage === page ? "secondary" : "ghost"}
-                                className={cn(
-                                    "h-8 min-w-8 px-2 text-[11px] font-bold rounded-sm",
-                                    currentPage === page 
-                                        ? "bg-black text-white hover:bg-slate-800" 
-                                        : "text-slate-500"
-                                )}
-                                disabled={page === "..."}
-                                onClick={() => typeof page === "number" && table.setPageIndex(page - 1)}
-                            >
-                                {page}
-                            </Button>
-                        ))}
+                        {paginationRange?.map((page, i) => {
+                            if (typeof page === "number" && page < 1) return null;
+
+                            return (
+                                <Button
+                                    key={i}
+                                    variant={currentPage === page ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "h-8 min-w-8 px-2 text-[11px] font-bold rounded-sm",
+                                        currentPage === page
+                                            ? "bg-black text-white hover:bg-slate-800"
+                                            : "text-slate-500"
+                                    )}
+                                    disabled={page === "..."}
+                                    onClick={() => typeof page === "number" && table.setPageIndex(page - 1)}
+                                >
+                                    {page}
+                                </Button>
+                            )
+                        })
+                        }
                     </div>
 
                     <Button
