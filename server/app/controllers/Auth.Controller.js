@@ -267,7 +267,7 @@ export const updateRole = asyncHandler(async (req, res) => {
         throw new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(", ")}`);
     }
 
-    if (req.user.id === id) {
+    if (req.user.id.toString() === id.toString()) {
         res.status(400);
         throw new Error("You cannot change your own role");
     }

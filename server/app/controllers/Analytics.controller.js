@@ -8,19 +8,36 @@ import moment from "moment";
  * @route GET /api/v1/analytics/summary
  */
 export const getDashboardSummary = asyncHandler(async (req, res) => {
-    // 1. Stock Value: Sum of (product.quantity * product.sellingPrice)
+    // 1. Stock Value: 
     const stockValueData = await Product.aggregate([
+        {
+            $lookup: {
+                from: "units",
+                localField: "unitId",
+                foreignField: "_id",
+                as: "unitDoc"
+            }
+        },
+        { $unwind: "$unitDoc" },
         {
             $group: {
                 _id: null,
-                totalValue: { $sum: { $multiply: ["$quantity", "$sellingPrice"] } }
+                totalValue: {
+                    $sum: {
+                        $multiply: [
+                            "$quantity",
+                            // price per base unit (KG)
+                            { $divide: ["$sellingPrice", "$unitDoc.multiplierToBase"] }
+                        ]
+                    }
+                }
             }
         }
     ]);
 
-    // 2. Low Items: Count items where quantity <= minStockLevel
+    // 2. Low Items: Count items where quantity <= threshold
     const lowItemsCount = await Product.countDocuments({
-        $expr: { $lte: ["$quantity", "$minStockLevel"] }
+        $expr: { $lte: ["$quantity", "$threshold"] }
     });
 
     // 3. Today's Flow: Total OUT movements today vs Yesterday (for the trend)

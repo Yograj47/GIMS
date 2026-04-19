@@ -5,8 +5,7 @@ import Unit from "../models/Unit.Model.js"
 import { productSchema } from "../validation/Product.validation.js"
 import ProductUnit from "../models/ProductUnit.Model.js";
 import { createLog } from "../config/Logger.js"
-import path from "node:path";
-
+import mongoose from "mongoose";
 
 /** 
  * @desc    Create new product
@@ -139,7 +138,47 @@ export const getProducts = asyncHandler(async (req, res) => {
                 path: "$supplierDoc",
                 preserveNullAndEmptyArrays: true
             }
-        }
+        },
+        {
+            $lookup: {
+                from: "productunits",
+                let: { productId: "$_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ["$productId", "$$productId"] },
+                            isActive: true
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "units",
+                            localField: "unitId",
+                            foreignField: "_id",
+                            as: "unitDoc"
+                        }
+                    },
+                    { $unwind: "$unitDoc" },
+                    {
+                        $project: {
+                            _id: 1,
+                            multiplier: 1,
+                            isDefault: 1,
+                            isFractionable: 1,
+                            unitId: {
+                                _id: "$unitDoc._id",
+                                name: "$unitDoc.name",
+                                shortForm: "$unitDoc.shortForm",
+                                multiplierToBase: "$unitDoc.multiplierToBase",
+                                baseUnit: "$unitDoc.baseUnit"
+                            }
+                        }
+                    }
+                ],
+                as: "sellingUnits"
+            }
+        },
+
     ];
 
     if (search) {
@@ -155,27 +194,59 @@ export const getProducts = asyncHandler(async (req, res) => {
 
     pipeline.push({ $sort: { createdAt: -1 } });
 
-    pipeline.push({
-        $project: {
-            _id: 1,
-            name: 1,
-            quantity: 1,
-            threshold: 1,
-            basePrice: 1,
-            sellingPrice: 1,
-            isActive: 1,
-            createdAt: 1,
-            category: { _id: "$categoryDoc._id", name: "$categoryDoc.name" },
-            unit: { _id: "$unitDoc._id", name: "$unitDoc.name", shortForm: "$unitDoc.shortForm" },
-            supplier: {
-                $cond: {
-                    if: { $ifNull: ["$supplierDoc._id", false] },
-                    then: { _id: "$supplierDoc._id", name: "$supplierDoc.name" },
-                    else: null
+    pipeline.push(
+        {
+            $project: {
+                _id: 1,
+                name: 1,
+                quantity: 1,
+                threshold: 1,
+                basePrice: 1,
+                sellingPrice: 1,
+                isActive: 1,
+                createdAt: 1,
+                category: { _id: "$categoryDoc._id", name: "$categoryDoc.name" },
+                unit: {
+                    _id: "$unitDoc._id",
+                    name: "$unitDoc.name",
+                    shortForm: "$unitDoc.shortForm",
+                    multiplierToBase: "$unitDoc.multiplierToBase"
+                },
+                supplier: {
+                    $cond: {
+                        if: { $ifNull: ["$supplierDoc._id", false] },
+                        then: { _id: "$supplierDoc._id", name: "$supplierDoc.name" },
+                        else: null
+                    }
+                },
+                sellingUnits: 1,
+                baseUnit: {
+                    $let: {
+                        vars: {
+                            found: {
+                                $first: {
+                                    $filter: {
+                                        input: "$sellingUnits",
+                                        cond: { $eq: ["$$this.multiplier", 1] }
+                                    }
+                                }
+                            }
+                        },
+                        in: {
+                            $cond: {
+                                if: { $ifNull: ["$$found", false] },
+                                then: {
+                                    name: "$$found.unitId.name",
+                                    shortForm: "$$found.unitId.shortForm"
+                                },
+                                else: null
+                            }
+                        }
+                    }
                 }
             }
         }
-    });
+    );
 
     // 3. Execution & Pagination Logic
     let results;

@@ -8,7 +8,7 @@ router.use(userAuth);
 
 router.get('/profile', getMe);
 router.get('/all', rbac("user:read"), getAllUsers);
-router.patch('/update-password/:id', UpdatePassword);
-router.patch('/update-details/:id', updateUserDetails);
+router.patch('/update-password/', UpdatePassword);
+router.patch('/update-details/', updateUserDetails);
 
 export default router;

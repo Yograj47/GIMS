@@ -148,7 +148,7 @@ export const updateProductUnit = asyncHandler(async (req, res) => {
         req.user.id,
         "UPDATE",
         "INVENTORY_CONFIG",
-        `Updated unit conversion parameters for Product ID: ${currentUnit.productId}`
+        `Updated unit conversion parameters for Product ID: ${updated.productId}`
     );
 
     res.status(200).json({ status: "Success", data: updated });

@@ -3,7 +3,7 @@ import Product from "../models/Product.Model.js";
 import asyncHandler from "express-async-handler";
 import { supplierSchema } from "../validation/Supplier.validation.js";
 import { createLog } from "../config/Logger.js";
-import { regex } from "zod";
+import mongoose from "mongoose";
 
 /**
  * @desc    Create a new supplier
@@ -13,6 +13,13 @@ import { regex } from "zod";
  */
 export const createSupplier = asyncHandler(async (req, res) => {
     const validatedData = supplierSchema.parse(req.body);
+
+    const emailExist = await Supplier.findOne({ email: validatedData.email });
+
+    if (emailExist) {
+        res.status(400);
+        throw new Error("A supplier with this email already exists");
+    }
 
     const supplier = await Supplier.create(validatedData);
 
@@ -25,7 +32,7 @@ export const createSupplier = asyncHandler(async (req, res) => {
     );
 
     res.status(201).json({
-        status: "success",
+        status: "Success",
         data: supplier
     });
 })
@@ -93,6 +100,7 @@ export const getSupplierById = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Supplier not found");
     }
+
 
     const products = await Product.find({ supplierId: supplier._id });
 
@@ -235,11 +243,24 @@ export const unassignProduct = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const deleteSupplier = asyncHandler(async (req, res) => {
-    const supplier = await Supplier.findByIdAndDelete(req.params.id).select('-__v');
+    const { id } = req.params;
+    const supplier = await Supplier.findByIdAndDelete(id).select('-__v');
 
     if (!supplier) {
         res.status(404);
         throw new Error("Supplier not found");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error("Invalid supplier ID");
+    }
+
+    const count = await Product.countDocuments({ supplierId: id });
+
+    if(count > 0) {
+        res.status(400);
+        throw new Error(`Cannot delete supplier. There are ${count} products assigned to it.`);
     }
 
     // LOG: Supplier Deletion

@@ -3,6 +3,7 @@ import Product from '../models/Product.Model.js';
 import asyncHandler from 'express-async-handler';
 import { categorySchema } from '../validation/Category.validation.js';
 import { createLog } from "../config/Logger.js";
+import mongoose from 'mongoose';
 
 /**
  * @desc    Create a new category
@@ -142,17 +143,19 @@ export const updateCategory = asyncHandler(async (req, res) => {
 export const deleteCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // 1. Referential Integrity: Check if any products are using this category
-    const productsUsingCategory = await Product.countDocuments({ category: id });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error("Invalid Category ID format");
+    }
+    const count = await Product.countDocuments({ categoryId: id });
 
-    if (productsUsingCategory > 0) {
+    if (count > 0) {
         res.status(400);
         throw new Error(
-            `Cannot delete category. There are ${productsUsingCategory} products assigned to it.`
+            `Cannot delete category. There are ${count} products assigned to it.`
         );
     }
 
-    // 2. Proceed with deletion if no dependencies found
     const category = await Category.findByIdAndDelete(id);
 
     if (!category) {

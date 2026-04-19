@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/User.Model.js";
+import bcrypt from "bcryptjs";
 
 /** 
  * @desc Get Me
@@ -78,7 +79,7 @@ export const UpdatePassword = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    const isMatch = await user.matchPassword(currentPassword);
+    const isMatch = await bcrypt.compare(currentPassword, user.password) 
 
     if (!isMatch) {
         res.status(400);

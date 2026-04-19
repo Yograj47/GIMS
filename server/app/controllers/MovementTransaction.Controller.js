@@ -37,8 +37,14 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
 
         for (const item of validateResult.items) {
             const isStockIN = ['Purchase', 'Return'].includes(validateResult.transactionType);
+           
+            const stockImpact = item.baseQuantity
+                ? Number(item.baseQuantity)
+                : Number(item.qty) * Number(item.multiplier);
 
-            const stockImpact = Number(item.qty) * Number(item.multiplier);
+            if (!stockImpact || stockImpact <= 0) {
+                throw new Error(`Invalid quantity for product ${item.productId}`);
+            }
 
             const update = isStockIN
                 ? { $inc: { quantity: stockImpact } }
