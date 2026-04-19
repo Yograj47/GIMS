@@ -10,6 +10,7 @@ import { exportToCSV } from "@/lib/csvExport";
 import { notify } from "@/lib/toast";
 import { Loading } from "@/lib/loader";
 import { useDebounce } from "@/lib/debounce";
+import { AdminGate } from "@/features/auth/components/AdminGate";
 
 export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
@@ -17,7 +18,7 @@ export default function StockReport() {
     const [stockLevel, setStockLevel] = useState<string>("All Levels");
     const navigate = useNavigate();
     const [IsExporting, setIsExporting] = useState<boolean>(false);
-    const debouncedSearch = useDebounce(searchQuery, 500);  
+    const debouncedSearch = useDebounce(searchQuery, 500);
 
 
     const [pagination, setPagination] = useState({
@@ -84,11 +85,11 @@ export default function StockReport() {
     return (
         <div className="h-full animate-in fade-in duration-500">
             <div className="max-w-400 mx-auto space-y-6">
-                
+
                 {/* 1. PRECISION HEADER */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
                     <div className="flex items-center gap-4">
-                         <Button
+                        <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
@@ -111,17 +112,20 @@ export default function StockReport() {
                         </div>
                     </div>
 
-                    <Button 
-                        onClick={handleExport} 
-                        disabled={IsExporting}
-                        className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
-                    >
-                        {IsExporting ? (
-                            <><Loading size="sm" className="mr-2" /> Processing...</>
-                        ) : (
-                            <><Download size={14} className="mr-2" /> Export CSV</>
-                        )}
-                    </Button>
+
+                    <AdminGate allowedRoles={["owner"]}>
+                        <Button
+                            onClick={handleExport}
+                            disabled={IsExporting}
+                            className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                        >
+                            {IsExporting ? (
+                                <><Loading size="sm" className="mr-2" /> Processing...</>
+                            ) : (
+                                <><Download size={14} className="mr-2" /> Export CSV</>
+                            )}
+                        </Button>
+                    </AdminGate>
                 </div>
 
                 {/* 2. PRECISION TOOLBAR (Consistent with Products Page) */}

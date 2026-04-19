@@ -5,12 +5,13 @@ const itemSchema = z.object({
   productName: z.string().optional(),
   productId: z.string().min(1, "Product is required"),
   unitId: z.string().min(1, "Unit is required"),
-  unitName: z.string().optional(), 
-  multiplier: z.number().min(0.00001, "Invalid multiplier"), 
-  
-  qty: z.number().min(0.001, "Quantity must be at least 0.001"), 
+  unitName: z.string().optional(),
+  multiplier: z.number().min(0.00001, "Invalid multiplier"),
+  pricePerBase: z.number().min(0),   
+  qty: z.number().min(0.001, "Quantity must be at least 0.001"),
   rate: z.number().min(0, "Rate cannot be negative"),
-  total: z.number()
+  total: z.number(),
+  baseQuantity: z.number().min(0.001, "Base quantity must be at least 0.001")
 });
 
 export const transactionSchema = z.object({

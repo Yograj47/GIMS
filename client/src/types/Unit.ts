@@ -5,7 +5,6 @@ export const unitSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").trim(),
   shortForm: z.string().min(1, "Short form is required").max(10).trim(),
   unitType: z.enum(['weight', 'volume', 'count', 'pack']).describe("Please select a valid unit type"),
-  // This is the most important update:
   multiplierToBase: z.coerce
     .number()
     .min(1, "Multiplier must be at least 1")

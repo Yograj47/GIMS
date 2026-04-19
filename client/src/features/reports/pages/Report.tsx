@@ -38,7 +38,7 @@ const REPORT_CONFIG = [
     path: "/reports/activity",
     color: "text-slate-600",
     bg: "bg-slate-50",
-    roles: ['admin', 'owner']
+    roles: ['admin']
   },
 ];
 

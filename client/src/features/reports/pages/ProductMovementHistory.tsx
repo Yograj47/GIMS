@@ -30,7 +30,7 @@ export default function ProductMovementHistory() {
     const columns = useMemo(() => getProductHistoryColumns, []);
 
     return (
-        <div className="h-full bg-slate-50/50 animate-in fade-in duration-500">
+        <div className="h-full animate-in fade-in duration-500">
             <div className="max-w-400 mx-auto space-y-6">
 
                 {/* 1. COMPACT NAVIGATION HEADER */}
@@ -90,8 +90,8 @@ export default function ProductMovementHistory() {
 
                 {/* 4. SYSTEM FOOTER */}
                 <div className="flex justify-between items-center opacity-50 px-2">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em]">Secure_Audit_Trail</p>
-                    <p className="text-[9px] font-mono font-bold text-slate-400">P_LOG_REF: {new Date().getTime()}</p>
+                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em]">Secure_Audit_Trail</p>
+                    <p className="text-[9px] font-mono font-bold text-slate-600">P_LOG_REF: {new Date().getTime()}</p>
                 </div>
             </div>
         </div>

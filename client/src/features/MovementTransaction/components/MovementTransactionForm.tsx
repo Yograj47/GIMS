@@ -80,21 +80,21 @@ export default function MovementForm() {
     }, [watchedName, isStockIn, Suppliers, pastCustomers, setValue]);
 
     const handleAddProduct = (newItem: Item) => {
-        const existingIndex = fields.findIndex(
-            (item) => (item as Item).productId === newItem.productId
-        );
+    const existingIndex = fields.findIndex(
+        (item) => item.productId === newItem.productId && item.unitId === newItem.unitId
+    );
 
-        if (existingIndex > -1) {
-            const currentQty = Number(watchedItems[existingIndex].qty);
-            const newQty = currentQty + Number(newItem.qty);
-            const newTotal = newQty * Number(newItem.rate);
+    if (existingIndex > -1) {
+        const currentQty = Number(watchedItems[existingIndex].qty);
+        const newQty = currentQty + Number(newItem.qty);
+        const newTotal = newQty * Number(newItem.rate);
 
-            setValue(`items.${existingIndex}.qty`, newQty);
-            setValue(`items.${existingIndex}.total`, newTotal);
-        } else {
-            append(newItem)
-        }
+        setValue(`items.${existingIndex}.qty`, newQty);
+        setValue(`items.${existingIndex}.total`, newTotal);
+    } else {
+        append(newItem);
     }
+};
 
     const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
     const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-700 hover:bg-rose-700";

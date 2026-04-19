@@ -19,6 +19,19 @@ export const productSchema = z.object({
 
 export type ProductFormData = z.infer<typeof productSchema>;
 
+export interface SellingUnit {
+    _id: string;
+    multiplier: number;
+    isDefault: boolean;
+    isFractionable: boolean;
+    unitId: {
+        _id: string;
+        name: string;
+        shortForm: string;
+        multiplierToBase: number;
+    };
+}
+
 export interface ProductData {
     _id: string;
     name: string;
@@ -27,14 +40,20 @@ export interface ProductData {
     basePrice: number;
     sellingPrice: number;
     category: { _id: string; name: string };
-    unit: { _id: string; name: string; shortForm?: string };
+    unit: {
+        _id: string;
+        name: string;
+        shortForm: string;
+        multiplierToBase: number;
+    };
     supplier: { _id: string; name: string } | null;
     isActive: boolean;
     createdAt: string;
+    sellingUnits: SellingUnit[];   
+    baseUnit: { name: string; shortForm: string } | null;
 }
-
 export interface ProductAPIResponse {
-    status: string; 
-    data: ProductData | ProductData[]; 
+    status: string;
+    data: ProductData | ProductData[];
     meta?: PaginationMetadata;
 }

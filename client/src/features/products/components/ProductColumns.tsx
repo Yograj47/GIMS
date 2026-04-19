@@ -46,10 +46,10 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                             "text-[13px] font-bold px-2 py-0.5 rounded",
                             isLow ? "text-red-700 bg-red-50" : "text-blue-700 bg-blue-50"
                         )}>
-                            {row.original.quantity}
+                            {row.original.quantity} {row.original.baseUnit?.shortForm}
                         </span>
                         <span className="text-[10px] text-slate-400 font-medium uppercase">
-                            {row.original.unit.name}
+                            {(row.original.quantity / row.original.unit.multiplierToBase).toLocaleString()} {row.original.unit.shortForm} in stock
                         </span>
                         {isLow && <AlertCircle size={12} className="text-red-500 animate-pulse" />}
                     </div>
@@ -59,29 +59,38 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
         {
             id: "pricing",
             header: () => <div className="text-right">Unit Pricing</div>,
-            cell: ({ row }) => (
-                <div className="text-right tabular-nums">
-                    <div className="text-[13px] font-bold text-blue-600">
-                        {currency}{row.original.sellingPrice.toLocaleString()}
+            cell: ({ row }) => {
+                const { sellingPrice, basePrice, unit, baseUnit } = row.original;
+                const pricePerBase = sellingPrice / unit.multiplierToBase;
+                const costPerBase = basePrice / unit.multiplierToBase;
+                const unitLabel = baseUnit?.shortForm ?? unit.shortForm;
+                return (
+                    <div className="text-right tabular-nums">
+                        <div className="text-[13px] font-bold text-blue-600">
+                            {currency}{pricePerBase.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {unitLabel}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-medium uppercase">
+                            Cost: {currency}{costPerBase.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {unitLabel}
+                        </div>
                     </div>
-                    <div className="text-[10px] text-slate-400 font-medium uppercase">
-                        Cost: {currency}{row.original.basePrice}
-                    </div>
-                </div>
-            ),
+                );
+            },
         },
         {
             id: "valuation",
             header: () => <div className="text-right">Total Valuation</div>,
             cell: ({ row }) => {
-                const totalVal = row.original.quantity * row.original.sellingPrice;
+                const { quantity, sellingPrice, unit, baseUnit } = row.original;
+                const pricePerBase = sellingPrice / unit.multiplierToBase;
+                const totalVal = quantity * pricePerBase;
+                const unitLabel = baseUnit?.shortForm ?? unit.shortForm;
                 return (
                     <div className="text-right tabular-nums">
                         <span className="text-[13px] font-black text-emerald-600">
-                            {currency}{totalVal.toLocaleString()}
+                            {currency}{totalVal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </span>
                         <div className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
-                            Gross Value
+                            {quantity} {unitLabel} × {currency}{pricePerBase.toFixed(2)}
                         </div>
                     </div>
                 );
@@ -92,19 +101,19 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
             header: "",
             cell: ({ row }) => (
                 <AdminGate allowedRoles={["owner"]}>
-                <div className="flex justify-end">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/products/edit/${row.original._id}`);
-                        }}
-                    >
-                        <Edit3 size={14} />
-                    </Button>
-                </div>
+                    <div className="flex justify-end">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/products/edit/${row.original._id}`);
+                            }}
+                        >
+                            <Edit3 size={14} />
+                        </Button>
+                    </div>
                 </AdminGate>
             ),
         },

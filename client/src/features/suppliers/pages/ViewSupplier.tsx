@@ -31,9 +31,10 @@ export default function SupplierView() {
         if (success) {
             setIsAssigning(false);
             fetchSupplierById(id);
+            navigate(`/suppliers`);
         }
     };
-    
+
 
     const confirmDelete = async () => {
         if (!id) return;
@@ -150,7 +151,11 @@ export default function SupplierView() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <button
-                                                        onClick={() => removeProductFromSupplier(id!, product._id)}
+                                                        onClick={() => {
+                                                            removeProductFromSupplier(id!, product._id)
+                                                            navigate(`/suppliers`)
+                                                        }
+                                                        }
                                                         className="text-slate-300 hover:text-rose-500 transition-colors"
                                                     >
                                                         <Trash2 size={14} />

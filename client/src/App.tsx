@@ -109,11 +109,12 @@ function App() {
               </Route>
 
               {/* 4. Admin/Owner Only: Activity Logs and stock movement*/}
-              <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
-                <Route path="/reports">
-                  <Route path="activity" element={<ActivityLogs />} />
-                  <Route path="movement" element={<StockMovementReport />} />
-                </Route>
+              <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route path="activity" element={<ActivityLogs />} />
+              </Route>
+
+              <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route path="movement" element={<StockMovementReport />} />
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "staff"]} />}>

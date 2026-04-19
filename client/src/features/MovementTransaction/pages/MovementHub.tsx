@@ -86,7 +86,7 @@ export default function StockManagement() {
             </div>
 
             <div className="space-y-1 mb-4">
-              <h2 className="text-xl text-slate-900 tracking-tight uppercase italic">{action.title}</h2>
+              <h2 className="text-xl text-slate-900  font-bold tracking-tight uppercase italic">{action.title}</h2>
               <div className="h-0.5 w-8 bg-slate-900 group-hover:w-16 transition-all duration-300" />
             </div>
 
