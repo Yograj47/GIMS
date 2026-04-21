@@ -13,6 +13,16 @@ import mongoose from "mongoose";
  * @access  Private
  */
 export const createProduct = asyncHandler(async (req, res) => {
+    
+    const validatedData = productSchema.safeParse(req.body);
+
+    if (!validatedData.success) {
+        const error = new Error("Validation failed");
+        error.statusCode = 400;
+        error.errors = validatedData.error.errors;
+        throw error;
+    }
+
     const {
         name,
         categoryId,
@@ -22,19 +32,20 @@ export const createProduct = asyncHandler(async (req, res) => {
         supplierId,
         basePrice,
         sellingPrice
-    } = productSchema.parse(req.body);
-
+    } = validatedData.data;
 
     const categoryExist = await Category.findById(categoryId);
     if (!categoryExist) {
-        res.status(400);
-        throw new Error("Category not found");
+        const error = new Error("Category not found");
+        error.statusCode = 400;
+        throw error;
     }
 
     const unitExist = await Unit.findById(unitId);
     if (!unitExist) {
-        res.status(400);
-        throw new Error("Unit not found");
+        const error = new Error("Unit not found");
+        error.statusCode = 400;
+        throw error;
     }
 
     const product = await Product.create({

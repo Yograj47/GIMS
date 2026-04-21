@@ -26,7 +26,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -39,7 +39,7 @@ const limiter = rateLimit({
 })
 
 app.use(injectSettings);
-// app.use(limiter);
+app.use(limiter);
 
 // Test Route
 app.get("/", (req, res) => {

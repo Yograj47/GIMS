@@ -13,15 +13,13 @@ describe('Category Controller - Create', () => {
         mongoServer = await MongoMemoryServer.create();
         await mongoose.connect(mongoServer.getUri());
 
-        // Create an Admin user to get a real ID for the log
         const admin = await User.create({
             name: 'Admin User',
             email: 'admin@gims.com',
             password: 'password123',
-            role: 'admin' 
+            role: 'admin'
         });
 
-        // Generate a token for the request
         adminToken = jwt.sign(
             { id: admin._id, role: admin.role },
             process.env.JWT_SECRET || 'testsecret',
@@ -33,6 +31,10 @@ describe('Category Controller - Create', () => {
         await mongoose.disconnect();
         await mongoServer.stop();
     });
+
+    afterEach(async () => {
+        await Category.deleteMany({});
+    }); //
 
     test('Should create a category successfully as an Admin', async () => {
         const response = await request(app)
@@ -49,14 +51,12 @@ describe('Category Controller - Create', () => {
     });
 
     test('Should fail if category name already exists', async () => {
-        // First, we ensure 'Dairy' exists (from previous test or create here)
+        await Category.create({ name: 'Dairy', description: 'Pre-seeded' });
+
         const response = await request(app)
             .post('/api/v1/categories')
             .set('Cookie', [`token=${adminToken}`])
-            .send({
-                name: 'Dairy',
-                description: 'Duplicate test'
-            });
+            .send({ name: 'Dairy', description: 'Duplicate test' });
 
         expect(response.status).toBe(400);
         expect(response.body.message).toBe('Category name already exists');
@@ -67,13 +67,13 @@ describe('Category Controller - Create', () => {
             .post('/api/v1/categories')
             .set('Cookie', [`token=${adminToken}`])
             .send({
-                name: '', // Invalid per Zod
+                name: '',
                 description: 'No name'
             });
 
-        
+
         expect(response.status).toBe(400);
-        // Depending on your Global Error Handler, check for Zod error details
         expect(response.body).toHaveProperty('message');
     });
 });
+

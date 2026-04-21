@@ -86,7 +86,7 @@ export const processProductAlert = async (productId, userId, settings) => {
 
                     await transporter.sendMail({
                         from: `"GIMS Alert"<${process.env.SENDER_EMAIL}>`,
-                        to: user.email,
+                        to: req.settings.adminEmail,
                         subject: `[${severity.toUpperCase()}] ${name}`,
                         html: htmlEmail
                     });

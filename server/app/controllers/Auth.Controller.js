@@ -72,8 +72,9 @@ export const loginUser = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user || !(await bcrypt.compare(password, user.password))) {
-        res.status(401);
-        throw new Error("Invalid Credentials");
+        const error = new Error("Invalid Credentials");
+        error.statusCode = 401;
+        throw error;
     }
 
     const token = jwt.sign(
@@ -297,3 +298,30 @@ export const updateRole = asyncHandler(async (req, res) => {
         }
     });
 });
+
+/**
+ * @desc delete user 
+ */
+export const removeUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndDelete(id)
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    await createLog(
+        req.user.id,
+        "DELETE",
+        "AUTH",
+        `Deleted User: ${user.name}`
+    );
+
+    res.status(200).json({
+        status: "Success",
+        message: 'User removed successfully'
+    })
+
+})

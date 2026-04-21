@@ -7,7 +7,8 @@ import {
     sendVerifyOtp,
     resetPasswordOtp,
     resetPassword,
-    updateRole
+    updateRole,
+    removeUser
 } from "../controllers/Auth.Controller.js";
 import { userAuth } from "../middleware/Auth.middleware.js";
 import rbac from "../middleware/Role.middleware.js";
@@ -28,5 +29,7 @@ router.post('/reset-password-otp', resetPasswordOtp);
 router.post('/reset-password', resetPassword);
 
 router.put('/role/:id', userAuth, rbac("user:write"), updateRole);
+
+router.delete("/del/:id", userAuth, removeUser)
 
 export default router;

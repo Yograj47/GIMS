@@ -13,31 +13,40 @@ import { createLog } from "../config/Logger.js"
  * @access Private
  */
 export const createUnifiedTransaction = asyncHandler(async (req, res) => {
-    const validateResult = transactionSchema.parse(req.body);
-    const session = await mongoose.startSession();
+    const validateResult = transactionSchema.safeParse(req.body);
 
+    if (!validateResult.success) {
+        const error = new Error("Validation failed");
+        error.statusCode = 400;
+        error.errors = validateResult.error.errors;
+        throw error;
+    }
+
+    const { transactionType, items, grandTotal, isPaid, partyDetails, notes } = validateResult.data;
+
+    const session = await mongoose.startSession();
     const productsToAlert = new Set();
 
     try {
         session.startTransaction();
 
         const transaction = await Transaction.create([{
-            transactionType: validateResult.transactionType,
-            items: validateResult.items,
-            grandTotal: validateResult.grandTotal,
-            isPaid: validateResult.isPaid,
+            transactionType,
+            items,
+            grandTotal,
+            isPaid,
             partyDetails: {
-                name: validateResult.partyDetails?.name || "",
-                phone: validateResult.partyDetails?.phone || ""
+                name: partyDetails?.name || "",
+                phone: partyDetails?.phone || ""
             },
-            notes: validateResult.notes || ""
+            notes: notes || ""          
         }], { session });
 
         const transactionId = transaction[0]._id;
 
-        for (const item of validateResult.items) {
-            const isStockIN = ['Purchase', 'Return'].includes(validateResult.transactionType);
-           
+        for (const item of items) {    
+            const isStockIN = ['Purchase', 'Return'].includes(transactionType);
+
             const stockImpact = item.baseQuantity
                 ? Number(item.baseQuantity)
                 : Number(item.qty) * Number(item.multiplier);
@@ -64,17 +73,11 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
             }
 
             const newQty = product.quantity;
-            const oldQty = isStockIN
-                ? newQty - stockImpact
-                : newQty + stockImpact;
-
-            if (isNaN(newQty)) {
-                throw new Error(`Math Error for product ${product.name}`);
-            }
+            const oldQty = isStockIN ? newQty - stockImpact : newQty + stockImpact;
 
             await Movement.create([{
                 productId: item.productId,
-                transactionId: transactionId,
+                transactionId,
                 performedBy: req.user.id,
                 unitId: item.unitId,
                 multiplier: item.multiplier,
@@ -82,7 +85,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
                 movementType: isStockIN ? 'IN' : 'OUT',
                 oldQuantity: oldQty,
                 newQuantity: newQty,
-                reason: `${validateResult.transactionType}: ${item.qty} ${item.unitName || 'units'}`
+                reason: `${transactionType}: ${item.qty} ${item.unitName || 'units'}` 
             }], { session });
 
             productsToAlert.add(product._id.toString());
@@ -94,7 +97,7 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
             req.user.id,
             "TRANSACTION",
             "FINANCE",
-            `Processed ${validateResult.transactionType} of ${validateResult.items.length} items. Total: ${validateResult.grandTotal}`
+            `Processed ${transactionType} of ${items.length} items. Total: ${grandTotal}` 
         );
 
         Promise.all(
@@ -108,8 +111,9 @@ export const createUnifiedTransaction = asyncHandler(async (req, res) => {
     } catch (error) {
         if (session.inTransaction()) await session.abortTransaction();
 
-        res.status(400);
-        throw new Error(error.message);
+        const err = new Error(error.message);
+        err.statusCode = error.statusCode || 400;
+        throw err;
     } finally {
         session.endSession();
     }

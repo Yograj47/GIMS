@@ -12,16 +12,24 @@ import mongoose from "mongoose";
  * @param   {Object} req.body - Expects { name, contactInfo, address, isActive }
  */
 export const createSupplier = asyncHandler(async (req, res) => {
-    const validatedData = supplierSchema.parse(req.body);
+    const validatedData = supplierSchema.safeParse(req.body);
 
-    const emailExist = await Supplier.findOne({ email: validatedData.email });
-
-    if (emailExist) {
-        res.status(400);
-        throw new Error("A supplier with this email already exists");
+    if (!validatedData.success) {
+        const error = new Error("Validation failed");
+        error.statusCode = 400;
+        error.errors = validatedData.error.errors;
+        throw error;
     }
 
-    const supplier = await Supplier.create(validatedData);
+    const emailExist = await Supplier.findOne({ email: validatedData.data.email });
+
+    if (emailExist) {
+        const error = new Error("A supplier with this email already exists");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const supplier = await Supplier.create(validatedData.data);
 
     // LOG: Supplier Creation
     await createLog(

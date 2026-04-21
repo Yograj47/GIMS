@@ -13,16 +13,24 @@ import mongoose from 'mongoose';
  */
 export const createCategory = asyncHandler(async (req, res) => {
     // 1. Validate input via Zod
-    const validatedData = categorySchema.parse(req.body);
+    const validatedData = categorySchema.safeParse(req.body);
 
-    // 2. Prevent duplicate entries before hitting DB
-    const categoryExists = await Category.findOne({ name: validatedData.name });
-    if (categoryExists) {
-        res.status(400);
-        throw new Error('Category name already exists');
+    if (!validatedData.success) {
+        const error = new Error("Validation failed");
+        error.statusCode = 400;
+        error.errors = validatedData.error.errors;
+        throw error;
     }
 
-    const createdCategory = await Category.create(validatedData);
+    // 2. Prevent duplicate entries before hitting DB
+    const categoryExists = await Category.findOne({ name: validatedData.data.name });
+    if (categoryExists) {
+        const error = new Error("Category name already exists");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const createdCategory = await Category.create(validatedData.data);
 
     // LOG: Category Creation
     await createLog(

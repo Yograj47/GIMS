@@ -79,15 +79,16 @@ export const UpdatePassword = asyncHandler(async (req, res) => {
         throw new Error("User not found");
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password) 
+    const isMatch = await bcrypt.compare(currentPassword, user.password)
 
     if (!isMatch) {
         res.status(400);
         throw new Error("Current password is incorrect");
     }
 
-    user.password = newPassword;
-    await user.save();  
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashPassword;
+    await user.save();
 
     res.status(200).json({
         status: "Success",
