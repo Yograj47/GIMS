@@ -103,7 +103,7 @@ root/
 ### 1. Clone Repository
 ```bash
 git clone <your-repo-url>
-cd grocery-pro
+cd gims
 ```
 
 ### 2. Setup Frontend
