@@ -27,6 +27,7 @@ type AuthState = {
     updateRole: (userId: string, newRole: string) => Promise<void>;
     updateProfile: (name: string, email: string) => Promise<void>;
     updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+    removeUser: (userId: string) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -175,6 +176,21 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await authService.updatePassword(currentPassword, newPassword);
                     notify.success(response.message || "Password updated successfully");
+                } finally {
+                    set({ isLoading: false });
+                }
+            },
+
+            removeUser: async (userId: string) => {
+                set({ isLoading: true });
+                try {
+                    await authService.removeUser(userId);
+                    const currentUsersList = get().users;
+                    if (currentUsersList) {
+                        set({
+                            users: currentUsersList.filter((u) => u._id !== userId),
+                        });
+                    }
                 } finally {
                     set({ isLoading: false });
                 }

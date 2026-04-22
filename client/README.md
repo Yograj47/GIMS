@@ -1,73 +1,104 @@
-# React + TypeScript + Vite
+# 🛒 Grocery Pro – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📌 Overview
+Grocery Pro is a lightweight and user-friendly web application designed for small and medium-sized grocery store owners in Nepal. It simplifies inventory management by replacing manual processes with a digital system that is easy to use, even for users with limited technical knowledge.
 
-Currently, two official plugins are available:
+Unlike complex ERP or POS systems, Grocery Pro focuses on practical, real-world needs—helping store owners efficiently manage stock, monitor movements, and improve daily operations.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🎯 Target Users
+- Grocery Store Owners (Small to Medium)
+- Admin Users
+- Store Staff
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✨ Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📊 Dashboard
+- Total stock overview  
+- Daily stock movement summary  
+- Low stock alerts  
+- 7-day stock in/out visualization  
+- Activity highlights and alerts  
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📦 Inventory Management
+- Product management  
+- Category management  
+- Unit & multiplier configuration  
+- Supplier management  
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 📑 Reports Hub
+- Stock report  
+- Movement history  
+- Transaction report  
+- Activity logs (audit trail)  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 👤 User Features
+- User profile management  
+- Role-based access control  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔐 Role-Based Access
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Role   | Permissions |
+|--------|------------|
+| **Admin** | Full Inventory Control, Financial Audit & Write, User Management, System Configuration, Security Monitoring |
+| **Owner** | Inventory Control, Vendor Registry, Financial Audit, Data Reporting, Security Monitoring, System Configuration |
+| **Staff** | Ledger Management, Inventory View-Only, Vendor Registry, Security Monitoring, System Settings View |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** React (Vite)  
+- **Language:** JavaScript  
+- **Styling:** Tailwind CSS + shadcn/ui  
+- **State Management:** Zustand  
+- **Routing:** React Router  
+- **Forms:** React Hook Form  
+- **Data Export:** PapaParse (CSV export)  
+- **API Integration:** REST API  
+
+---
+
+## 🌐 Responsiveness
+- Optimized for **desktop** and **tablet devices**  
+- Mobile responsiveness is partially supported and will be improved in future updates  
+
+---
+
+## ⚙️ Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone <your-repo-url>
+cd client
+
+2. Install Dependencies
+npm install
+3. Run Development Server
+npm run dev
+🔗 API Integration
+
+This frontend connects to a custom backend via REST APIs.
+Make sure to configure the API base URL in your environment settings.
+
+📤 CSV Export
+Reports can be exported as CSV files using PapaParse
+Useful for external analysis and record-keeping
+🚧 Limitations
+Mobile optimization is not fully complete
+Depends on backend API availability
+No offline support
+🔮 Future Improvements
+Full mobile responsiveness
+Performance optimization
+Enhanced UI/UX
+Additional reporting features
+📄 License
+
+This project is developed for educational purposes and is not currently intended for commercial use.
+

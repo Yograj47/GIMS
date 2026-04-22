@@ -6,7 +6,7 @@ import type {
     RegisterFormData,
     ResetPasswordPayload,
     VerifyEmailFormData,
-    UserData // Import UserData for the generics
+    UserData 
 } from "@/types/Auth";
 
 const BASE_URL = "/auths";
@@ -69,6 +69,11 @@ export const authService = {
 
     updatePassword: async (currentPassword: string, newPassword: string) => {
         const { data } = await api.patch<AuthResponse>(`users/update-password/`, { currentPassword, newPassword });
+        return data;
+    },
+
+    removeUser: async (userId: string) => {
+        const { data } = await api.delete<AuthResponse>(`${BASE_URL}/del/${userId}`);
         return data;
     }
 };

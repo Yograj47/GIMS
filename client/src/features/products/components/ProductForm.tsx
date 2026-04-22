@@ -30,8 +30,8 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
         },
     });
 
-    const categoryOptions = categories?.map(c => ({ value: c._id, label: c.name })) || [];
-    const unitOptions = units?.map(u => ({ value: u._id, label: `${u.name} (${u.shortForm})` })) || [];
+    const categoryOptions = categories?.filter(c => c.isActive).map(c => ({ value: c._id, label: c.name })) || [];
+    const unitOptions = units?.filter(u => u.isActive).map(u => ({ value: u._id, label: `${u.name} (${u.shortForm})` })) || [];
 
     const customSelectStyles = {
         control: (base: any, state: any) => ({

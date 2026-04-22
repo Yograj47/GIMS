@@ -7,7 +7,7 @@ import UserListing from "../components/UserListing";
 import { DeleteConfirmDialog } from "@/lib/deleteAlert";
 
 export default function UserManagement() {
-    const { users, fetchUsers, isLoading, updateRole, user: currentUser } = useAuthStore();
+    const { users, fetchUsers, isLoading, updateRole, user: currentUser, removeUser } = useAuthStore();
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
 
@@ -32,7 +32,8 @@ export default function UserManagement() {
     const confirmDelete = async () => {
         if (!userToDelete) return;
         try {
-            toast.success(`User ${userToDelete.name} Purged`);
+            await removeUser(userToDelete.id);
+            toast.success(`User ${userToDelete.name} Deleted`);
             setIsDeleteDialogOpen(false);
         } catch (error) {
             toast.error("Action Failed");
