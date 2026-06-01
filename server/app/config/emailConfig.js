@@ -57,8 +57,8 @@ export const wrapEmail = (title, content, buttonText = '', buttonUrl = '', color
 
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
-    port: 465,
-    secure: true, // true for 465 (SSL), false for 587 (TLS)
+    port: 587,
+    secure: false, // true for 465 (SSL), false for 587 (TLS)
     auth: {
         user: process.env.SMTP_USER,    
         pass: process.env.SMTP_PASS    
@@ -71,6 +71,14 @@ const transporter = nodemailer.createTransport({
     },
     logger: process.env.NODE_ENV === 'development' ? true : false,
     debug: process.env.NODE_ENV === 'development' ? true : false
+});
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.log("SMTP ERROR:", error);
+    } else {
+        console.log("SMTP READY");
+    }
 });
 
 export default transporter;
