@@ -50,11 +50,9 @@ import HelpPage from "./features/OtherPages/Helper";
 axios.defaults.withCredentials = true;
 
 function App() {
-  const { fetchUser } = useAuthStore();
-
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+    useAuthStore.getState().fetchUser();
+  }, []);
 
   return (
     <BrowserRouter>

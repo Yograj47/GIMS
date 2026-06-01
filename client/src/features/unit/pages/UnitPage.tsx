@@ -60,7 +60,6 @@ export default function UnitPage() {
     return (
         <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-            {/* 1. HEADER - Unified Registry Style */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-slate-200 pb-6">
                 <div className="flex items-center gap-4">
                     <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm">
@@ -87,7 +86,6 @@ export default function UnitPage() {
                 </AdminGate>
             </div>
 
-            {/* 2. SEARCH - Sharp Industrial */}
             <div className="mb-4 group">
                 <div className="bg-white border border-slate-300 group-within:border-blue-600 rounded-sm p-2 flex items-center gap-3 transition-all">
                     <div className="pl-2 text-slate-400 group-within:text-blue-600 transition-colors">

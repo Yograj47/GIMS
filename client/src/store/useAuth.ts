@@ -30,6 +30,7 @@ type AuthState = {
     removeUser: (userId: string) => Promise<void>;
 };
 
+
 export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
@@ -91,7 +92,7 @@ export const useAuthStore = create<AuthState>()(
                     const response = await authService.register(data);
                     if (response.status === "Success") {
                         window.location.href = "/verify";
-                        notify.success("Account created!", "Please verify your email to continue."); 
+                        notify.success("Account created!", "Please verify your email to continue.");
                     }
                 } finally {
                     set({ isLoading: false });
@@ -104,8 +105,8 @@ export const useAuthStore = create<AuthState>()(
                     await authService.logout();
                 } finally {
                     set({ user: null, users: null, isAuthenticated: false, isLoading: false });
-                    localStorage.removeItem("user-storage");
-                    window.location.href = "/login";
+                    useAuthStore.persist.clearStorage();
+
                 }
             },
 
