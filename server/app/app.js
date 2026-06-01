@@ -3,7 +3,7 @@ import express from "express"
 import cookieParser from "cookie-parser";
 import errorHandler from "./middleware/errorHandler.js"
 import cors from "cors"
-import { rateLimit } from 'express-rate-limit'
+import bcrypt from "bcryptjs";
 
 // Import Routes
 import SettingRoutes from "./routes/Setting.Route.js"
@@ -19,6 +19,7 @@ import AlertRoutes from "./routes/Alert.Route.js"
 import ProductUnitRoutes from "./routes/ProductUnit.Route.js"
 import AnalyticsRoutes from "./routes/Analytics.routes.js";
 import { injectSettings } from "./middleware/Setting.middleware.js";
+import mongoose from "mongoose";
 
 const app = express();
 
@@ -32,14 +33,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: "Too many requests from this IP, please try again after 15 minutes",
-})
 
 app.use(injectSettings);
-app.use(limiter);
 
 // Test Route
 app.get("/", (req, res) => {
@@ -64,5 +59,51 @@ app.use(`${API}/analytics`, AnalyticsRoutes);
 
 // Error Middleware
 app.use(errorHandler);
+
+// Seed Data
+async function seedData() {
+    try {
+        await mongoose.connect(process.env.MONGO_URI)
+
+        const users = [
+            {
+                name: process.env.OWNER_NAME,
+                email: process.env.OWNER_EMAIL,
+                password: process.env.OWNER_PASSWORD,
+                role: "owner",
+                isVerified: true
+            },
+            {
+                name: process.env.ADMIN_NAME,
+                email: process.env.ADMIN_EMAIL,
+                password: process.env.ADMIN_PASSWORD,
+                role: "admin",
+                isVerified: true
+            }
+        ]
+
+        for (const userData of users) {
+            const existingUser = await mongoose.model('Users').findOne({ email: userData.email });
+            if (existingUser) {
+                console.log(`User ${userData.email} already exists.`);
+            }
+
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
+            const newUser = new (mongoose.model('Users'))({
+                name: userData.name,
+                email: userData.email,
+                password: hashedPassword,
+                role: userData.role,
+                isVerified: userData.isVerified
+            });
+            await newUser.save();
+            console.log(`User ${userData.email} created successfully.`);
+        }
+    } catch (error) {
+        console.log("Error seeding data:", error);
+    }
+}
+
+seedData();
 
 export default app;
