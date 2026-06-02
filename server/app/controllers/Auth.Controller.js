@@ -2,7 +2,7 @@ import User from "../models/User.Model.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import transporter, { wrapEmail } from "../config/emailConfig.js";
+import { sendEmail, wrapEmail } from "../config/emailConfig.js";
 import { registerSchema, loginSchema, resetPasswordSchema } from "../validation/User.validation.js";
 import { createLog } from "../config/Logger.js";
 
@@ -48,13 +48,11 @@ export const registerUser = asyncHandler(async (req, res) => {
         `${process.env.CLIENT_URL}/dashboard`
     );
 
-    transporter.sendMail({
-        from: `"GIMS System" <${process.env.SENDER_EMAIL}>`,
-        to: user.email,
-        subject: 'Welcome to GIMS! 🚀',
-        html,
-        text: `Welcome to GIMS, ${user.name}! Login at ${process.env.CLIENT_URL}/dashboard`
-    }).catch(err => console.error("Welcome email error:", err.message));
+    await sendEmail(
+        user.email,
+        'Welcome to GIMS! 🚀',
+        html
+    );
 
     await createLog(user._id, "CREATE", "AUTH", `New user account registered: ${user.name}`);
 
@@ -123,12 +121,11 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
     );
 
     try {
-        await transporter.sendMail({
-            from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
-            to: user.email,
-            subject: 'Account Verification OTP',
+        await sendEmail(
+            user.email,
+            'Account Verification OTP',
             html
-        });
+        );
     } catch (err) {
         console.error("Verify OTP email error:", err.message);
     }
@@ -215,13 +212,11 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
     );
 
     try {
-        await transporter.sendMail({
-            from: `"GIMS Security" <${process.env.SENDER_EMAIL}>`,
-            to: user.email,
-            subject: 'Password Reset OTP 🔐',
-            html,
-            text: `Your password reset code is: ${otp}`
-        });
+        await sendEmail(
+            user.email,
+            'Password Reset OTP 🔐',
+            html
+        );
     } catch (err) {
         console.error("Reset OTP email error:", err.message);
     }
