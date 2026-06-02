@@ -1,6 +1,6 @@
-import nodemailer from 'nodemailer';
+import { BrevoClient, logging } from '@getbrevo/brevo';
+import asyncHandler from "express-async-handler";
 import dotenv from "dotenv";
-
 dotenv.config();
 
 /**
@@ -44,7 +44,7 @@ export const wrapEmail = (title, content, buttonText = '', buttonUrl = '', color
                         </div>` : ''}
                 </div>
                 <div class="footer">
-                    Sent by GIMS Inventory Management<br>
+                    Sent by GroceryPro<br>
                     &copy; 2026. All rights reserved.
                 </div>
             </div>
@@ -54,31 +54,22 @@ export const wrapEmail = (title, content, buttonText = '', buttonUrl = '', color
     `;
 };
 
-
-const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false, // true for 465 (SSL), false for 587 (TLS)
-    auth: {
-        user: process.env.SMTP_USER,    
-        pass: process.env.SMTP_PASS    
-    },
-    pool: {
-        maxConnections: 5,
-        maxMessages: 100,
-        rateDelta: 2000,
-        rateLimit: 5
-    },
-    logger: process.env.NODE_ENV === 'development' ? true : false,
-    debug: process.env.NODE_ENV === 'development' ? true : false
-});
-
-transporter.verify((error, success) => {
-    if (error) {
-        console.log("SMTP ERROR:", error);
-    } else {
-        console.log("SMTP READY");
+const brevo = new BrevoClient({
+    apiKey: process.env.BREVO_API_KEY,
+    logging: {
+        level: logging.LogLevel.Debug,
+        logger: new logging.ConsoleLogger()
     }
-});
+})
 
-export default transporter;
+export const sendEmail = asyncHandler(async (to, subject, htmlContent) => {
+    const emailData = {
+        subject,
+        sender: { name: "GroceryPro", email: process.env.SENDER_EMAIL },
+        to: [{ email: to }],
+        htmlContent
+    };
+
+    const result = await brevo.transactionalEmails.sendTransacEmail(emailData);
+    return result;
+});

@@ -1,7 +1,7 @@
 import Alert from "../models/Alert.Model.js";
 import User from "../models/User.Model.js";
 import Product from "../models/Product.Model.js";
-import transporter, { wrapEmail } from "./emailConfig.js";
+import { sendEmail, wrapEmail } from "./emailConfig.js";
 
 export const processProductAlert = async (productId, userId, settings) => {
     try {
@@ -84,12 +84,11 @@ export const processProductAlert = async (productId, userId, settings) => {
                         color
                     );
 
-                    await transporter.sendMail({
-                        from: `"GIMS Alert"<${process.env.SENDER_EMAIL}>`,
-                        to: req.settings.adminEmail,
-                        subject: `[${severity.toUpperCase()}] ${name}`,
-                        html: htmlEmail
-                    });
+                    await sendEmail(
+                        req.settings.adminEmail,
+                        `[${severity.toUpperCase()}] ${name}`,
+                        htmlEmail
+                    );
 
                 } catch (err) {
                     console.error("Email failed:", err.message);
