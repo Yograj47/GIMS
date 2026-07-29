@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
 const API = "/api/v1"
 
 // Routes
-app.use(`${API}/auths`, AuthRoutes);
+app.use(`${API}/auth`, AuthRoutes);
 app.use(`${API}/users`, UserRoutes);
 app.use(`${API}/categories`, CategoryRoutes);
 app.use(`${API}/units`, UnitRoutes);
