@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import logger from "../shared/logger/logger";
-import { LOG_CONTEXT } from "../shared/constants/index";
+import logger from "../shared/logger/logger.js";
+import { LOG_CONTEXT } from "../shared/constants/index.js";
 
 const connectDB = async () => {
     const mongoUri = process.env.MONGO_URI;

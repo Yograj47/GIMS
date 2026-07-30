@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import User from "@/modules/users/user.model.js";
+import User from "../../modules/user/user.model.js";
 
 export const authenticate = asyncHandler(
     async (req, res, next) => {

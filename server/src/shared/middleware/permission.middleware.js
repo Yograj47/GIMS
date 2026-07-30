@@ -1,6 +1,6 @@
 import {
     ROLE_PERMISSIONS
-} from "../constants/index";
+} from "../constants/index.js";
 
 export const authorize =
     (...requiredPermissions) =>

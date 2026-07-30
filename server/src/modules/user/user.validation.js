@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ROLES } from "../shared/constants/roles.constant.js";
+import { ROLES } from "../../shared/constants/index.js";
 
 export const registerSchema = z.object({
     name: z.string()
