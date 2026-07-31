@@ -6,12 +6,13 @@ import {
     findUserByEmail,
     updateUserById,
 } from "./user.repository.js";
+import { AppError } from "../../shared/errors/index.js"
 
 export const getMe = async (userId) => {
     const user = await findUserById(userId);
 
     if (!user) {
-        throw new Error("User not found");
+        throw AppError.notFound("User not found");
     }
 
     return {
@@ -40,7 +41,7 @@ export const updateProfile = async (
     );
 
     if (!user) {
-        throw new Error("User not found");
+        throw AppError.notFound("User not found");
     }
 
     return user;
@@ -54,7 +55,7 @@ export const updatePassword = async ({
     const user = await findUserById(userId);
 
     if (!user) {
-        throw new Error("User not found");
+        throw AppError.notFound("User not found");
     }
 
     const isMatch = await bcrypt.compare(
@@ -63,7 +64,7 @@ export const updatePassword = async ({
     );
 
     if (!isMatch) {
-        throw new Error(
+        throw AppError.badRequest(
             "Current password is incorrect"
         );
     }

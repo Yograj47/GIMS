@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 
 import { API, ROUTES } from "./shared/constants/index.js";
 import authRoutes from "./modules/auth/auth.route.js";
+import userRoutes from "./modules/user/user.route.js"
+import { errorHandler } from "./shared/middleware/index.js";
 
 const app = express();
 
@@ -32,8 +34,8 @@ app.get("/", (req, res) => {
 | API Routes
 |--------------------------------------------------------------------------
 */
-
 app.use(`${API}${ROUTES.AUTH}`, authRoutes);
+app.use(`${API}${ROUTES.USERS}`, userRoutes);
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +43,6 @@ app.use(`${API}${ROUTES.AUTH}`, authRoutes);
 |--------------------------------------------------------------------------
 */
 
-// app.use(errorHandler);
+app.use(errorHandler);
 
 export default app;

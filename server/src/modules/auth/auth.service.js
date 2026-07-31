@@ -16,7 +16,9 @@ import {
 import {
     generateToken,
     sendEmail,
+    createEmailTemplate
 } from "../../shared/services/index.js";
+import { AppError } from "../../shared/errors/index.js";
 
 export const registerUser = async ({
     name,
@@ -26,9 +28,7 @@ export const registerUser = async ({
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-        const error = new Error("User already exists");
-        error.statusCode = 409;
-        throw error;
+        throw AppError.conflict("User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -54,9 +54,7 @@ export const loginUser = async ({
     const user = await findUserByEmail(email);
 
     if (!user) {
-        const error = new Error("Invalid credentials");
-        error.statusCode = 401;
-        throw error;
+        throw AppError.unauthorized("Invalid credentials");
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -65,9 +63,7 @@ export const loginUser = async ({
     );
 
     if (!isPasswordValid) {
-        const error = new Error("Invalid credentials");
-        error.statusCode = 401;
-        throw error;
+        throw AppError.unauthorized("Invalid credentials");
     }
 
     const token = generateToken(user);
@@ -82,15 +78,11 @@ export const sendVerifyOtp = async (userId) => {
     const user = await findUserById(userId);
 
     if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("User not found");
     }
 
     if (user.isVerified) {
-        const error = new Error("User is already verified");
-        error.statusCode = 400;
-        throw error;
+        throw AppError.badRequest("User is already verified");
     }
 
     const otp = generateOtp();
@@ -127,9 +119,7 @@ export const verifyEmail = async ({
     const user = await findUserById(userId);
 
     if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("User not found");
     }
 
     const isOtpInvalid =
@@ -138,9 +128,7 @@ export const verifyEmail = async ({
         Date.now() > user.verifyOtpExpiresAt;
 
     if (isOtpInvalid) {
-        const error = new Error("Invalid or expired OTP");
-        error.statusCode = 400;
-        throw error;
+        throw AppError.badRequest("Invalid or expired OTP");
     }
 
     const updatedUser = await updateUserById(userId, {
@@ -156,7 +144,7 @@ export const resetPasswordOtp = async (email) => {
     const user = await findUserByEmail(email);
 
     if (!user) {
-        throwError("User not found", 404);
+        throw AppError.notFound("User not found");
     }
 
     const otp = generateOtp();
@@ -201,9 +189,7 @@ export const resetPassword = async ({
     const user = await findUserByEmail(email);
 
     if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("User not found");
     }
 
     const isOtpInvalid =
@@ -212,9 +198,7 @@ export const resetPassword = async ({
         Date.now() > user.resetOtpExpiresAt;
 
     if (isOtpInvalid) {
-        const error = new Error("Invalid or expired OTP");
-        error.statusCode = 400;
-        throw error;
+        throw AppError.badRequest("Invalid or expired OTP");
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -237,19 +221,12 @@ export const updateRole = async ({
     const validRoles = Object.values(ROLES);
 
     if (!validRoles.includes(role)) {
-        const error = new Error(
-            `Invalid role. Must be one of: ${validRoles.join(", ")}`
-        );
-        error.statusCode = 400;
-        throw error;
+
+        throw AppError.badRequest(`Invalid role. Must be one of: ${validRoles.join(", ")}`);
     }
 
     if (currentUserId.toString() === targetUserId.toString()) {
-        const error = new Error(
-            "You cannot change your own role"
-        );
-        error.statusCode = 400;
-        throw error;
+        throw AppError.badRequest("You cannot change your own role");
     }
 
     const user = await updateUserById(
@@ -258,9 +235,8 @@ export const updateRole = async ({
     );
 
     if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("User not found");
+
     }
 
     return user;
@@ -271,11 +247,7 @@ export const removeUser = async ({
     targetUserId,
 }) => {
     if (currentUserId.toString() === targetUserId.toString()) {
-        const error = new Error(
-            "You cannot delete your own account"
-        );
-        error.statusCode = 400;
-        throw error;
+        throw AppError.badRequest("You cannot delete your own account");
     }
 
     const user = await deleteUserById(
@@ -283,9 +255,7 @@ export const removeUser = async ({
     );
 
     if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("User not found");
     }
 
     return user;
