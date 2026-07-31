@@ -6,7 +6,7 @@ import {
     createUser,
     updateUserById,
     deleteUserById,
-} from "../user/user.service.js";
+} from "../user/user.repository.js";
 
 import {
     ROLES,

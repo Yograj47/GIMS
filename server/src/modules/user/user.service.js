@@ -1,24 +1,79 @@
+import bcrypt from "bcryptjs";
 import User from "./user.model.js";
 
-export const findUserByEmail = async (email) => {
-    return User.findOne({ email });
+import {
+    findUserById,
+    findUserByEmail,
+    updateUserById,
+} from "./user.repository.js";
+
+export const getMe = async (userId) => {
+    const user = await findUserById(userId);
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
+        isVerified: user.isVerified,
+    };
 };
 
-export const findUserById = async (id) => {
-    return User.findById(id);
+export const getAllUsers = async () => {
+    return User.find().select(
+        "-password -verifyOtp -verifyOtpExpiresAt -resetOtp -resetOtpExpiresAt"
+    );
 };
 
-export const createUser = async (payload) => {
-    return User.create(payload);
+export const updateProfile = async (
+    userId,
+    payload
+) => {
+    const user = await updateUserById(
+        userId,
+        payload
+    );
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return user;
 };
 
-export const updateUserById = async (id, payload) => {
-    return User.findByIdAndUpdate(id, payload, {
-        new: true,
-        runValidators: true,
-    });
-};
+export const updatePassword = async ({
+    userId,
+    currentPassword,
+    newPassword,
+}) => {
+    const user = await findUserById(userId);
 
-export const deleteUserById = async (id) => {
-    return User.findByIdAndDelete(id);
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const isMatch = await bcrypt.compare(
+        currentPassword,
+        user.password
+    );
+
+    if (!isMatch) {
+        throw new Error(
+            "Current password is incorrect"
+        );
+    }
+
+    user.password = await bcrypt.hash(
+        newPassword,
+        10
+    );
+
+    await user.save();
+
+    return true;
 };
