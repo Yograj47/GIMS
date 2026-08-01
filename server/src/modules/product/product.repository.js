@@ -128,3 +128,20 @@ export const removeSupplierFromProduct = async (
         }
     );
 };
+
+export const updateProductQuantity =
+    async (
+        productId,
+        quantity,
+        session
+    ) => {
+        return Product.findByIdAndUpdate(
+            productId,
+            { quantity },
+            {
+                new: true,
+                runValidators: true,
+                session,
+            }
+        );
+    };

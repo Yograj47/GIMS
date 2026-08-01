@@ -12,6 +12,8 @@ import supplierRoutes from "./modules/supplier/supplier.route.js";
 import unitRoutes from "./modules/unit/unit.route.js";
 import productUnitRoutes from "./modules/productUnit/product-unit.route.js";
 import productRoutes from "./modules/product/product.route.js";
+import movementRoutes from "./modules/movement/movement.route.js";
+import transactionRoutes from "./modules/transaction/transaction.route.js";
 
 const app = express();
 
@@ -46,6 +48,9 @@ app.use(`${API}${ROUTES.INVENTORY.CATEGORIES}`, categoryRoutes);
 app.use(`${API}${ROUTES.INVENTORY.SUPPLIERS}`, supplierRoutes);
 app.use(`${API}${ROUTES.INVENTORY.UNITS}`, unitRoutes);
 app.use(`${API}${ROUTES.INVENTORY.PRODUCT_UNITS}`, productUnitRoutes);
+app.use(`${API}${ROUTES.INVENTORY.PRODUCTS}`, productRoutes);
+app.use(`${API}${ROUTES.MOVEMENTS}`, movementRoutes);
+app.use(`${API}${ROUTES.TRANSACTIONS}`, transactionRoutes);
 
 /*
 |--------------------------------------------------------------------------

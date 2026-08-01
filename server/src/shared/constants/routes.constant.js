@@ -15,6 +15,7 @@ export const ROUTES = {
     },
 
     TRANSACTIONS: "/transactions",
+    MOVEMENTS: "/movements",
 
     ACTIVITY_LOGS: "/activity-logs",
 
