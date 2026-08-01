@@ -5,13 +5,7 @@ import {
     updateUnitSchema,
 } from "./unit.validation.js";
 
-import {
-    createUnit,
-    getAllUnits,
-    getUnit,
-    updateUnit,
-    removeUnit,
-} from "./unit.service.js";
+import * as unitService from "./unit.service.js";
 
 export const createUnit = asyncHandler(
     async (req, res) => {
@@ -19,7 +13,7 @@ export const createUnit = asyncHandler(
             createUnitSchema.parse(req.body);
 
         const unit =
-            await createUnit(payload);
+            await unitService.create(payload);
 
         res.status(201).json({
             success: true,
@@ -31,7 +25,7 @@ export const createUnit = asyncHandler(
 export const getUnits = asyncHandler(
     async (req, res) => {
         const result =
-            await getAllUnits({
+            await unitService.find({
                 page:
                     Number(req.query.page) || 1,
                 limit:
@@ -54,7 +48,7 @@ export const getUnits = asyncHandler(
 
 export const getUnitById = asyncHandler(
     async (req, res) => {
-        const unit = await getUnit(
+        const unit = await unitService.findById(
             req.params.id
         );
 
@@ -73,7 +67,7 @@ export const updateUnitById =
             );
 
         const unit =
-            await updateUnit(
+            await unitService.update(
                 req.params.id,
                 payload
             );
@@ -86,7 +80,7 @@ export const updateUnitById =
 
 export const deleteUnitById =
     asyncHandler(async (req, res) => {
-        await removeUnit(req.params.id);
+        await unitService.remove(req.params.id);
 
         res.status(200).json({
             success: true,

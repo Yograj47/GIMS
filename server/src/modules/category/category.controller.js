@@ -5,13 +5,7 @@ import {
     updateCategorySchema,
 } from "./category.validation.js";
 
-import {
-    createCategory,
-    findCategories,
-    findCategoryById,
-    updateCategory,
-    deleteCategory,
-} from "./category..js";
+import * as categoryService from "./category.service.js";
 
 export const createCategory = asyncHandler(
     async (req, res) => {
@@ -19,7 +13,7 @@ export const createCategory = asyncHandler(
             createCategorySchema.parse(req.body);
 
         const category =
-            await createCategory(payload);
+            await categoryService.create(payload);
 
         res.status(201).json({
             success: true,
@@ -31,7 +25,7 @@ export const createCategory = asyncHandler(
 export const findCategories = asyncHandler(
     async (req, res) => {
         const result =
-            await getCategories({
+            await categoryService.find({
                 page: Number(req.query.page) || 1,
                 limit: Number(req.query.limit) || 100,
                 search: req.query.search || "",
@@ -71,7 +65,7 @@ export const findCategories = asyncHandler(
 export const findCategoryById = asyncHandler(
     async (req, res) => {
         const category =
-            await getCategoryById(
+            await categoryService.findById(
                 req.params.id
             );
 
@@ -88,7 +82,7 @@ export const updateCategory = asyncHandler(
             updateCategorySchema.parse(req.body);
 
         const category =
-            await updateCategory(
+            await categoryService.update(
                 req.params.id,
                 payload
             );
@@ -104,7 +98,7 @@ export const updateCategory = asyncHandler(
 
 export const deleteCategory = asyncHandler(
     async (req, res) => {
-        await deleteCategory(
+        await categoryService.remove(
             req.params.id
         );
 

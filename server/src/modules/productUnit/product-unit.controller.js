@@ -1,16 +1,11 @@
 import asyncHandler from "express-async-handler";
 
-import {
-    getProductUnits,
-    createProductUnitConfig,
-    updateProductUnitConfig,
-    removeProductUnit,
-} from "./product-unit.service.js";
+import * as productUnitService from "./product-unit.service.js";
 
 export const getAllProductUnits = asyncHandler(
     async (req, res) => {
         const productUnits =
-            await getProductUnits();
+            await productUnitService.find();
 
         res.status(200).json({
             success: true,
@@ -22,7 +17,7 @@ export const getAllProductUnits = asyncHandler(
 export const createProductUnit =
     asyncHandler(async (req, res) => {
         const productUnit =
-            await createProductUnitConfig(
+            await productUnitService.create(
                 req.body
             );
 
@@ -37,7 +32,7 @@ export const createProductUnit =
 export const updateProductUnit =
     asyncHandler(async (req, res) => {
         const productUnit =
-            await updateProductUnitConfig({
+            await productUnitService.update({
                 id: req.params.id,
                 payload: req.body,
             });
@@ -52,7 +47,7 @@ export const updateProductUnit =
 
 export const deleteProductUnit =
     asyncHandler(async (req, res) => {
-        await removeProductUnit(
+        await productUnitService.remove(
             req.params.id
         );
 

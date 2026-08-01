@@ -18,11 +18,11 @@ import {
     findUnitById,
 } from "../unit/unit.repository.js";
 
-export const getProductUnits = async () => {
+export const find = async () => {
     return findProductUnits();
 };
 
-export const createProductUnitConfig = async (
+export const create = async (
     payload
 ) => {
     const {
@@ -66,7 +66,7 @@ export const createProductUnitConfig = async (
     return createProductUnit(payload);
 };
 
-export const updateProductUnitConfig =
+export const update =
     async ({
         id,
         payload,
@@ -92,7 +92,7 @@ export const updateProductUnitConfig =
         );
     };
 
-export const removeProductUnit = async (
+export const remove = async (
     id
 ) => {
     const productUnit =

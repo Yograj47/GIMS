@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import User from "../models/User.Model.js";
+import User from "../modules/user/user.model.js";
 
 export const seedInitialUsers = async () => {
     try {

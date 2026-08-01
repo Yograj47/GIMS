@@ -12,7 +12,7 @@ import {
     countProductsByUnit,
 } from "../product/product.repository.js";
 
-export const createUnit = async (
+export const create = async (
     payload
 ) => {
     const existingName =
@@ -46,7 +46,7 @@ export const createUnit = async (
     return createUnit(payload);
 };
 
-export const getAllUnits = async ({
+export const find = async ({
     page = 1,
     limit = 100,
     search = "",
@@ -101,7 +101,7 @@ export const getAllUnits = async ({
     };
 };
 
-export const getUnit = async (id) => {
+export const findById = async (id) => {
     const unit = await findUnitById(id);
 
     if (!unit) {
@@ -115,7 +115,7 @@ export const getUnit = async (id) => {
     return unit;
 };
 
-export const updateUnit = async (
+export const update = async (
     id,
     payload
 ) => {
@@ -176,7 +176,7 @@ export const updateUnit = async (
     return unit;
 };
 
-export const removeUnit = async (
+export const remove = async (
     id
 ) => {
     const productCount =

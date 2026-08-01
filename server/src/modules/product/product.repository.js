@@ -67,3 +67,7 @@ export const removeSupplierFromProduct = async (
         }
     );
 };
+
+export const findProductById = async (id) => {
+    return Product.findById(id);
+};

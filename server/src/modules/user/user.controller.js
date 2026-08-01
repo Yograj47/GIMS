@@ -4,7 +4,7 @@ import * as userService from "./user.service.js";
 import { changePasswordSchema, updateProfileSchema } from "./user.validation.js"
 
 export const getMe = asyncHandler(async (req, res) => {
-    const user = await userService.getMe(req.user.id);
+    const user = await userService.findMe(req.user.id);
 
     res.status(200).json({
         success: true,
@@ -13,7 +13,7 @@ export const getMe = asyncHandler(async (req, res) => {
 });
 
 export const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await userService.getAllUsers();
+    const users = await userService.findAllUsers();
 
     res.status(200).json({
         success: true,

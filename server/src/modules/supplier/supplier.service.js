@@ -2,8 +2,7 @@ import {
     createSupplier,
     findSupplierById,
     findSupplierByEmail,
-    findSupplierByName,
-    getSuppliers,
+    findSuppliers,
     updateSupplierById,
     deleteSupplierById,
 } from "./supplier.repository.js";
@@ -15,7 +14,7 @@ import {
     getProductsBySupplier,
 } from "../product/product.repository.js";
 
-export const createSupplier = async (payload) => {
+export const create = async (payload) => {
     const existingEmail =
         payload.email &&
         await findSupplierByEmail(payload.email);
@@ -43,11 +42,11 @@ export const createSupplier = async (payload) => {
     return createSupplier(payload);
 };
 
-export const getAllSuppliers = async (query) => {
-    return getSuppliers(query);
+export const findAll = async (query) => {
+    return findSuppliers(query);
 };
 
-export const getSupplier = async (id) => {
+export const findById = async (id) => {
     const supplier = await findSupplierById(id);
 
     if (!supplier) {
@@ -65,7 +64,7 @@ export const getSupplier = async (id) => {
     };
 };
 
-export const updateSupplier = async (
+export const update = async (
     id,
     payload
 ) => {
@@ -144,7 +143,7 @@ export const unassignProduct = async (
     );
 };
 
-export const removeSupplier = async (id) => {
+export const remove = async (id) => {
     const count =
         await countProductsBySupplier(id);
 

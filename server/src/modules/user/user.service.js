@@ -8,7 +8,7 @@ import {
 } from "./user.repository.js";
 import { AppError } from "../../shared/errors/index.js"
 
-export const getMe = async (userId) => {
+export const findMe = async (userId) => {
     const user = await findUserById(userId);
 
     if (!user) {
@@ -25,7 +25,7 @@ export const getMe = async (userId) => {
     };
 };
 
-export const getAllUsers = async () => {
+export const findAllUsers = async () => {
     return User.find().select(
         "-password -verifyOtp -verifyOtpExpiresAt -resetOtp -resetOtpExpiresAt"
     );

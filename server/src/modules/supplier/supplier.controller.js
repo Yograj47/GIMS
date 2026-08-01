@@ -5,20 +5,12 @@ import {
     updateSupplierSchema,
 } from "./supplier.validation.js";
 
-import {
-    createSupplier,
-    getAllSuppliers,
-    getSupplier,
-    updateSupplier,
-    assignProducts,
-    unassignProduct,
-    removeSupplier,
-} from "./supplier.service.js";
+import * as supplierService from "./supplier.service.js";
 
 export const createSupplier = asyncHandler(async (req, res) => {
     const payload = createSupplierSchema.parse(req.body);
 
-    const supplier = await createSupplier(payload);
+    const supplier = await supplierService.create(payload);
 
     res.status(201).json({
         success: true,
@@ -27,7 +19,7 @@ export const createSupplier = asyncHandler(async (req, res) => {
 });
 
 export const getSuppliers = asyncHandler(async (req, res) => {
-    const result = await getAllSuppliers({
+    const result = await supplierService.findAll({
         page: Number(req.query.page) || 1,
         limit: Number(req.query.limit) || 10,
         search: req.query.search || "",
@@ -42,7 +34,7 @@ export const getSuppliers = asyncHandler(async (req, res) => {
 });
 
 export const getSupplierById = asyncHandler(async (req, res) => {
-    const result = await getSupplier(req.params.id);
+    const result = await supplierService.findById(req.params.id);
 
     res.status(200).json({
         success: true,
@@ -54,7 +46,7 @@ export const getSupplierById = asyncHandler(async (req, res) => {
 export const updateSupplier = asyncHandler(async (req, res) => {
     const payload = updateSupplierSchema.parse(req.body);
 
-    const supplier = await updateSupplier(
+    const supplier = await supplierService.update(
         req.params.id,
         payload
     );
@@ -68,7 +60,7 @@ export const updateSupplier = asyncHandler(async (req, res) => {
 export const assignProductsToSupplier = asyncHandler(async (req, res) => {
     const { productIds } = req.body;
 
-    const result = await assignProducts({
+    const result = await supplierService.assignProducts({
         supplierId: req.params.id,
         productIds,
     });
@@ -81,7 +73,7 @@ export const assignProductsToSupplier = asyncHandler(async (req, res) => {
 });
 
 export const unassignProduct = asyncHandler(async (req, res) => {
-    await unassignProduct(req.params.productId);
+    await supplierService.unassignProduct(req.params.productId);
 
     res.status(200).json({
         success: true,
@@ -90,7 +82,7 @@ export const unassignProduct = asyncHandler(async (req, res) => {
 });
 
 export const deleteSupplier = asyncHandler(async (req, res) => {
-    await removeSupplier(req.params.id);
+    await supplierService.remove(req.params.id);
 
     res.status(200).json({
         success: true,

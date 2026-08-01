@@ -10,7 +10,7 @@ import {
 import { countProductsByCategory }
     from "../product/product.repository.js";
 
-export const createCategory = async (
+export const create = async (
     payload
 ) => {
     const existingCategory =
@@ -27,7 +27,7 @@ export const createCategory = async (
     return createCategory(payload);
 };
 
-export const findCategories = async ({
+export const find = async ({
     page = 1,
     limit = 100,
     search = "",
@@ -60,7 +60,7 @@ export const findCategories = async ({
     };
 };
 
-export const findCategoryById = async (
+export const findById = async (
     categoryId
 ) => {
     const category =
@@ -77,7 +77,7 @@ export const findCategoryById = async (
     return category;
 };
 
-export const updateCategory = async (
+export const update = async (
     categoryId,
     payload
 ) => {
@@ -117,7 +117,7 @@ export const updateCategory = async (
     return category;
 };
 
-export const deleteCategory = async (
+export const remove = async (
     categoryId
 ) => {
     const productCount =
