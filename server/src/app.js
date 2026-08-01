@@ -11,6 +11,7 @@ import categoryRoutes from "./modules/category/category.route.js";
 import supplierRoutes from "./modules/supplier/supplier.route.js";
 import unitRoutes from "./modules/unit/unit.route.js";
 import productUnitRoutes from "./modules/productUnit/product-unit.route.js";
+import productRoutes from "./modules/product/product.route.js";
 
 const app = express();
 
