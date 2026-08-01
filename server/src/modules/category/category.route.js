@@ -3,7 +3,7 @@ import { Router } from "express";
 import {
     authenticate,
     authorize,
-} from "../../shared/middlewares/index.js";
+} from "../../shared/middleware/index.js";
 
 import {
     PERMISSIONS,

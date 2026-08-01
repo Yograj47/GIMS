@@ -9,6 +9,8 @@ import authRoutes from "./modules/auth/auth.route.js";
 import userRoutes from "./modules/user/user.route.js";
 import categoryRoutes from "./modules/category/category.route.js";
 import supplierRoutes from "./modules/supplier/supplier.route.js";
+import unitRoutes from "./modules/unit/unit.route.js";
+import productUnitRoutes from "./modules/productUnit/product-unit.route.js";
 
 const app = express();
 
@@ -41,6 +43,8 @@ app.use(`${API}${ROUTES.AUTH}`, authRoutes);
 app.use(`${API}${ROUTES.USERS}`, userRoutes);
 app.use(`${API}${ROUTES.INVENTORY.CATEGORIES}`, categoryRoutes);
 app.use(`${API}${ROUTES.INVENTORY.SUPPLIERS}`, supplierRoutes);
+app.use(`${API}${ROUTES.INVENTORY.UNITS}`, unitRoutes);
+app.use(`${API}${ROUTES.INVENTORY.PRODUCT_UNITS}`, productUnitRoutes);
 
 /*
 |--------------------------------------------------------------------------

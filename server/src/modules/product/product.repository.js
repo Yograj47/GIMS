@@ -16,6 +16,14 @@ export const countProductsBySupplier = async (
     });
 };
 
+export const countProductsByUnit = async (
+    unitId
+) => {
+    return Product.countDocuments({
+        unitId,
+    });
+};
+
 export const getProductsBySupplier = async (
     supplierId
 ) => {
