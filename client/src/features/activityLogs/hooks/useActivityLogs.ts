@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
-import { ActivityLogService } from '../../../apis/ActivityLogService';
+import { ActivityLogService } from '../../../service/ActivityLogService';
 import type { ActivityAPIResponse, ActivityLogData } from '@/types/ActivityLog';
 import api from '@/lib/api';
 import type { PaginationMetadata } from '@/types/Pagination';
@@ -26,7 +26,6 @@ export const useActivityLogs = () => {
                 setMeta(data.meta || null);
             }
         } catch (error) {
-            console.error("Filter Error:", error);
         } finally {
             setLoading(false);
         }

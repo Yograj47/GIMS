@@ -70,9 +70,6 @@ const Products: React.FC = () => {
         })
     };
 
-    console.log(selectCategory);
-
-
     const columns = useMemo(() => getProductColumns(navigate), [navigate]);
 
     return (

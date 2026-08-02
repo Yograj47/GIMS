@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useGlobalStore } from "@/store/globalStore";
-import { MovementTransactionService } from "../../../apis/MovementTransactionService";
+import { MovementTransactionService } from "../../../service/MovementTransactionService";
 import type { TransactionData, TransactionFormData } from "@/types/Transaction";
 import type { MovementData } from "@/types/Movement";
 import { notify } from "@/lib/toast";
@@ -33,7 +33,6 @@ export const useMovementTransactions = () => {
                 return true;
             }
         } catch (error) {
-            console.error("Fetch Transactions Error:", error);
             notify.error("Failed to load transactions");
         } finally {
             setLoading(false);
@@ -51,7 +50,6 @@ export const useMovementTransactions = () => {
                 return true;
             }
         } catch (error) {
-            console.error("Fetch Movements Error:", error);
             notify.error("Failed to load stock history");
         } finally {
             setLoading(false);
@@ -71,7 +69,6 @@ export const useMovementTransactions = () => {
 
             }
         } catch (error) {
-            console.error("Fetch Product Movements Error:", error);
             notify.error("Failed to load product history");
         } finally {
             setLoading(false);
@@ -91,7 +88,6 @@ export const useMovementTransactions = () => {
                 return true;
             }
         } catch (error) {
-            console.error("Create Transaction Error:", error);
             notify.error("Transaction failed");
         } finally {
             setLoading(false);
@@ -112,7 +108,6 @@ export const useMovementTransactions = () => {
                 return true;
             }
         } catch (error) {
-            console.error("Update Credit Status Error:", error);
             notify.error("Failed to update status");
         } finally {
             setLoading(false);

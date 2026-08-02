@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { CategoryService } from '../../../apis/CategoryService';
+import { CategoryService } from '../../../service/CategoryService';
 import type { CategoryData, CategoryFormData } from '@/types/Category';
 import type { PaginationMetadata } from '@/types/Pagination';
 

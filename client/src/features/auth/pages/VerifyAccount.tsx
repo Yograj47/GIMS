@@ -6,36 +6,35 @@ import {
   InputOTPSlot
 } from "@/components/ui/input-otp";
 import { ShieldCheck, MailWarning, Loader2, ArrowRight, RefreshCw } from "lucide-react";
-import { useAuthStore } from "@/store/useAuth";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function VerifyAccount() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState<string>("");
-  const { isLoading, sendVerifyOtp, verifyEmail } = useAuthStore();
-
-
-
+  const { isLoading, sendVerifyOtp, verifyEmail } = useAuth();
+  const navigate = useNavigate();
+  
   const handleSendOtp = async () => {
     try {
       await sendVerifyOtp();
     } catch (err) {
-      console.error("Send OTP error:", err);
     } finally {
-      setOtpSent(true); 
+      setOtpSent(true);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (otp.length === 6) {
-      try {
-        await verifyEmail({ otp });
-      } catch (err) {
-        console.error("Verify OTP error:", err);
-      }
+    if (otp.length !== 6) return;
+
+    const success =
+      await verifyEmail({ otp });
+
+    if (success) {
+      navigate("/dashboard");
     }
   };
 
-  console.log(isLoading);
   return (
     <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 shadow-2xl p-8 md:p-10 animate-in fade-in zoom-in duration-500">
 

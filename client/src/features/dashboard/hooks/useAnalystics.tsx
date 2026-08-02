@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import type { WeeklyMovementData } from '@/types/Analytics';
-import { AnalyticsService } from '../../../apis/AnalyticsService';
+import { AnalyticsService } from '../../../service/AnalyticsService';
 
 export const useAnalytics = () => {
     const [weeklyStats, setWeeklyStats] = useState<WeeklyMovementData[]>([]);
@@ -21,7 +21,6 @@ export const useAnalytics = () => {
                 return response.data;
             }
         } catch (error) {
-            console.error("Analytics Error:", error);
         } finally {
             setLoading(false);
         }
@@ -36,7 +35,6 @@ export const useAnalytics = () => {
                 return response.data;
             }
         } catch (error) {
-            console.error("Analytics Error:", error);
         } finally {
             setLoading(false);
         }

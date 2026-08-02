@@ -14,7 +14,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen
 } from "lucide-react";
-import { useAuthStore } from "@/store/useAuth";
+import { useAuthStore } from "@/store/authStore";
 
 interface SidebarProps {
     isOpen: boolean;

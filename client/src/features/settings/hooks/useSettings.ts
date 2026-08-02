@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { notify } from '@/lib/toast';
 import type { GeneralSettingsData, GeneralSettingsFormData } from '@/types/Setting';
-import { SettingsService } from '../../../apis/SettingService';
+import { SettingsService } from '../../../service/SettingService';
 
 export const useSettings = () => {
     const [generalData, setGeneralData] = useState<GeneralSettingsData | null>(null);
@@ -16,7 +16,6 @@ export const useSettings = () => {
                 setGeneralData(response.data);
             }
         } catch (error: any) {
-            console.error("Failed to fetch settings", error);
         } finally {
             setIsLoading(false);
         }

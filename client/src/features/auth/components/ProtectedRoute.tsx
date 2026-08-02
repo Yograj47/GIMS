@@ -1,33 +1,67 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuthStore } from "@/store/useAuth";
+
+import { useAuthStore } from "@/store/authStore";
+
 import { Loading } from "@/lib/loader";
+import type { UserRole } from "@/types/user";
+
 
 interface ProtectedRouteProps {
-  allowedRoles?: ("admin" | "owner" | "staff")[];
+  allowedRoles?: UserRole[];
   requireVerified?: boolean;
 }
 
 export const ProtectedRoute = ({
   allowedRoles,
-  requireVerified = true
+  requireVerified = true,
 }: ProtectedRouteProps) => {
-  const { user, isAuthenticated, isInitialLoading } = useAuthStore();
+  const {
+    user,
+    isAuthenticated,
+    isInitialLoading,
+  } = useAuthStore();
+
   const location = useLocation();
 
+
   if (isInitialLoading) {
-    return <Loading fullPage />
+    return <Loading fullPage />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isAuthenticated || !user) {
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location }}
+        replace
+      />
+    );
   }
 
-  if (requireVerified && user && !user.isVerified) {
-    return <Navigate to="/verify" replace />;
+  if (
+    requireVerified &&
+    !user.isVerified
+  ) {
+    return (
+      <Navigate
+        to="/verify"
+        replace
+      />
+    );
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" replace />;
+  if (
+    allowedRoles &&
+    !allowedRoles.includes(
+      user.role
+    )
+  ) {
+    return (
+      <Navigate
+        to="/unauthorized"
+        replace
+      />
+    );
   }
 
   return <Outlet />;

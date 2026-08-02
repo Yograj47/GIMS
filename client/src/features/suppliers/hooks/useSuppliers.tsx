@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { SupplierService } from '../../../apis/SupplierService';
+import { SupplierService } from '../../../service/SupplierService';
 import type { SupplierProduct, SupplierData, SupplierFormData, } from '@/types/Supplier';
 import type { PaginationMetadata } from '@/types/Pagination';
 

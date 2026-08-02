@@ -2,7 +2,7 @@ import { Trash2, Check, AlertTriangle} from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { UserData } from "@/types/Auth";
+import type { UserData } from "@/types/auth";
 
 interface UserListingProps {
   user: UserData;

@@ -1,11 +1,11 @@
 import { notify } from "@/lib/toast";
-import { useAuthStore } from "@/store/useAuth";
 import { Eye, EyeOff, Key, Lock, X } from "lucide-react";
 import { useState } from "react";
+import { useUsers } from "../hooks/useUsers";
 
 export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void; }) {
     const [showPass, setShowPass] = useState(false);
-    const { updatePassword } = useAuthStore();
+    const { updatePassword } = useUsers();
     const [updatedPassword, setUpdatedPassword] = useState({ currentPassword: "", newPassword: "" });
 
     const handlePasswordUpdate = async () => {
@@ -16,7 +16,6 @@ export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onCl
             }
             await updatePassword(updatedPassword.currentPassword, updatedPassword.newPassword);
         } catch (error) {
-            console.error("Error updating password:", error);
         } finally {
             setShowPass(false);
             setUpdatedPassword({ currentPassword: "", newPassword: "" });

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
 import type { UnitData, UnitFormData } from '@/types/Unit';
-import { unitService } from '../../../apis/UnitService';
+import { unitService } from '../../../service/UnitService';
 import type { PaginationMetadata } from '@/types/Pagination';
 
 export const useUnits = () => {
@@ -12,7 +12,7 @@ export const useUnits = () => {
     const { setLoading, isLoading } = useGlobalStore();
 
     // 1. Fetch All units
-    const fetchUnits = useCallback(async (page?: number, limit? :number, search? :string, all? : boolean) => {
+    const fetchUnits = useCallback(async (page?: number, limit?: number, search?: string, all?: boolean) => {
         try {
             setLoading(true);
             const response = await unitService.getAll(page, limit, search, all);

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { AlertService } from '../../../apis/AlertService';
+import { AlertService } from '../../../service/AlertService';
 import type { AlertData } from '@/types/Alert';
 import type { PaginationMetadata } from '@/types/Pagination';
 

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useGlobalStore } from "@/store/globalStore";
-import { useAuthStore } from "@/store/useAuth";
+import { useAuthStore } from "@/store/authStore";
 dayjs.extend(relativeTime);
 
 function AppHeader() {

@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Loader2, SearchX, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuth";
 import UserListing from "../components/UserListing";
 import { DeleteConfirmDialog } from "@/lib/deleteAlert";
+import { useUsers } from "../hooks/useUsers";
+import { useAuth } from "../hooks/useAuth";
 
 export default function UserManagement() {
-    const { users, fetchUsers, isLoading, updateRole, user: currentUser, removeUser } = useAuthStore();
+    const { users, fetchUsers, isLoading, updateRole, removeUser } = useUsers();
+    const { user: currentUser } = useAuth();
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
 

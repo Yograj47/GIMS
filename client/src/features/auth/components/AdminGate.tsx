@@ -1,31 +1,29 @@
-import { useAuthStore } from "@/store/useAuth";
 import type { ReactNode } from "react";
+import { useAuthStore } from "@/store/authStore";
+import type { UserRole } from "@/types/user";
 
 interface AdminGateProps {
     children: ReactNode;
     fallback?: ReactNode;
-    allowedRoles?: string[]; 
+    allowedRoles?: UserRole[];
 }
 
-export const AdminGate = ({ children, fallback = null, allowedRoles = [] }: AdminGateProps) => {
+export const AdminGate = ({
+    children,
+    fallback = null,
+    allowedRoles = [],
+}: AdminGateProps) => {
     const { user } = useAuthStore();
 
-    if (!user) return <>{fallback}</>;
-
-    const userRole = user?.role.toLowerCase();
-    const isAdmin = userRole === "admin";
-
-    const hasExtraAccess = allowedRoles
-        .map(role => role.toLowerCase())
-        .includes(userRole || "");
-
-    if (!isAdmin && !hasExtraAccess) {
+    if (!user) {
         return <>{fallback}</>;
     }
-    
-    if (isAdmin || hasExtraAccess) {
-        return <>{children}</>;
-    }
 
-    return <>{children}</>;
+    const hasAccess =
+        user.role === "admin" ||
+        allowedRoles.includes(user.role);
+
+    return hasAccess
+        ? <>{children}</>
+        : <>{fallback}</>;
 };

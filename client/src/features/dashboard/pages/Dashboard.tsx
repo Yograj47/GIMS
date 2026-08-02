@@ -12,7 +12,7 @@ import { useActivityLogs } from "@/features/activityLogs/hooks/useActivityLogs";
 import { chartData, chartOptions } from "@/lib/dashboardCharts";
 import { useAlerts } from "@/features/alerts/hooks/UseAlerts";
 import { useAnalytics } from "../hooks/useAnalystics";
-import { useAuthStore } from "@/store/useAuth";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Dashboard() {
     const navigate = useNavigate();

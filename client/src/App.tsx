@@ -6,7 +6,7 @@ import axios from "axios";
 import { Toaster } from "sonner";
 
 // Auth Guard & Store
-import { useAuthStore } from "./store/useAuth";
+import { useAuthStore } from "./store/authStore";
 
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
@@ -51,9 +51,11 @@ axios.defaults.withCredentials = true;
 
 function App() {
   useEffect(() => {
-    useAuthStore.getState().fetchUser();
+    void useAuthStore
+      .getState()
+      .fetchUser();
   }, []);
-
+  
   return (
     <BrowserRouter>
       <div className="antialiased selection:bg-blue-100 selection:text-blue-700">
