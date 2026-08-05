@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
-
+import { socketAuth } from "./socketAuth";
+import { SOCKET_EVENTS } from "./socketEvents";
 let io = null;
 
 export const initializeSocket = (
@@ -12,21 +13,20 @@ export const initializeSocket = (
         },
     });
 
-    io.on("connection", (socket) => {
-        console.log(
-            `Socket Connected: ${socket.id}`
-        );
+    io.use(socketAuth);
 
-        socket.on(
-            "disconnect",
+    io.on(
+        SOCKET_EVENTS.CONNECTION,
+        (socket) => {
+            console.log(`Socket Connected: ${socket.id}`);
 
-            () => {
-                console.log(
-                    `Socket Disconnected: ${socket.id}`
-                );
-            }
-        );
-    });
+            socket.on(
+                SOCKET_EVENTS.DISCONNECT,
+                () => {
+                    console.log(`Socket Disconnected: ${socket.id}`);
+                }
+            );
+        })
 
     return io;
 };

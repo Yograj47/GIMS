@@ -1,4 +1,14 @@
 export const SOCKET_EVENTS = {
     CONNECTION: "connection",
     DISCONNECT: "disconnect",
+
+    USER_ONLINE: "user:online",
+    USER_OFFLINE: "user:offline",
+
+    NOTIFICATION: "notification:new",
+
+    INVENTORY_UPDATED: "inventory:updated",
+    STOCK_MOVEMENT_CREATED: "stock-movement:created",
+
+    ALERT_CREATED: "alert:created",
 };
