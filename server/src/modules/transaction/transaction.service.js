@@ -139,6 +139,7 @@ export const create = async (
             );
         }
 
+
         await session.commitTransaction();
 
         return transaction;

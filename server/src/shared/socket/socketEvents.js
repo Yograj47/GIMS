@@ -11,4 +11,7 @@ export const SOCKET_EVENTS = {
     STOCK_MOVEMENT_CREATED: "stock-movement:created",
 
     ALERT_CREATED: "alert:created",
+    ALERT_UPDATED: "alert:updated",
+    ALERT_RESOLVED: "alert:resolved",
+    ALERT_ACKNOWLEDGED: "alert:acknowledged",
 };
