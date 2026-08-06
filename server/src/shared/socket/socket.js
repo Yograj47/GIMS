@@ -1,6 +1,13 @@
 import { Server } from "socket.io";
-import { socketAuth } from "./socketAuth";
-import { SOCKET_EVENTS } from "./socketEvents";
+import { socketAuth } from "./socketAuth.js";
+import { SOCKET_EVENTS } from "./socketEvents.js";
+import { joinUserRooms } from "./socketRooms.js";
+import {
+    addConnection,
+    removeConnection,
+    getOnlineCount,
+    getOnlineUsers,
+} from "./socketPresence.js";
 let io = null;
 
 export const initializeSocket = (
@@ -18,15 +25,39 @@ export const initializeSocket = (
     io.on(
         SOCKET_EVENTS.CONNECTION,
         (socket) => {
-            console.log(`Socket Connected: ${socket.id}`);
+
+            joinUserRooms(socket);
+
+            addConnection(
+                socket.user.id,
+                socket.id
+            );
+
+            console.log(
+                `Socket Connected: ${socket.user.name}`
+            );
+
+            console.log("Online Users:", getOnlineCount());
 
             socket.on(
                 SOCKET_EVENTS.DISCONNECT,
                 () => {
-                    console.log(`Socket Disconnected: ${socket.id}`);
+                    removeConnection(
+                        socket.user.id,
+                        socket.id
+                    )
+                    console.log(
+                        `Socket Disconnected: ${socket.id}`
+                    );
+
+                    console.log(
+                        "Online Users:",
+                        getOnlineUsers()
+                    )
                 }
             );
-        })
+        }
+    );
 
     return io;
 };
