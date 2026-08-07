@@ -11,6 +11,7 @@ import type {
     ResetPasswordPayload,
     ForgotPasswordFormData,
 } from "@/types/auth";
+import { socket } from "@/socket/socket";
 
 export const useAuth = () => {
     const {
@@ -70,6 +71,8 @@ export const useAuth = () => {
             setLoading(true);
 
             await authService.logout();
+
+            socket.disconnect();
 
             reset();
 

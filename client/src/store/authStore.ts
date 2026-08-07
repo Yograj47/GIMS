@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { UserData } from "@/types/user";
 import { userService } from "@/features/auth/api/user.service";
+import { socket } from "@/socket/socket";
 
 interface AuthState {
     user: UserData | null;
@@ -65,7 +66,16 @@ export const useAuthStore =
                             isAuthenticated:
                                 !!response.data,
                         });
+
+                        if (
+                            response.data &&
+                            !socket.connected
+                        ) {
+                            socket.connect();
+                        }
                     } catch {
+                        socket.disconnect();
+
                         set({
                             user: null,
                             isAuthenticated: false,
