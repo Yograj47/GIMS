@@ -1,3 +1,5 @@
+import { AppError } from "../../shared/errors/index.js";
+
 import {
     findProductById,
     createProduct,
@@ -37,11 +39,9 @@ export const create = async (
         await findProductByName(name);
 
     if (existingProduct) {
-        const error = new Error(
+        throw AppError.conflict(
             "Product already exists"
         );
-        error.statusCode = 409;
-        throw error;
     }
 
     const category =
@@ -50,22 +50,18 @@ export const create = async (
         );
 
     if (!category) {
-        const error = new Error(
+        throw AppError.notFound(
             "Category not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     const unit =
         await findUnitById(unitId);
 
     if (!unit) {
-        const error = new Error(
+        throw AppError.notFound(
             "Unit not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     if (supplierId) {
@@ -75,11 +71,9 @@ export const create = async (
             );
 
         if (!supplier) {
-            const error = new Error(
+            throw AppError.notFound(
                 "Supplier not found"
             );
-            error.statusCode = 404;
-            throw error;
         }
     }
 
@@ -145,11 +139,9 @@ export const findById = async (
         );
 
     if (!product) {
-        const error = new Error(
+        throw AppError.notFound(
             "Product not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return product;
@@ -166,11 +158,9 @@ export const update = async (
             );
 
         if (!category) {
-            const error = new Error(
+            throw AppError.notFound(
                 "Category not found"
             );
-            error.statusCode = 404;
-            throw error;
         }
     }
 
@@ -181,11 +171,9 @@ export const update = async (
             );
 
         if (!unit) {
-            const error = new Error(
+            throw AppError.notFound(
                 "Unit not found"
             );
-            error.statusCode = 404;
-            throw error;
         }
     }
 
@@ -196,11 +184,9 @@ export const update = async (
             );
 
         if (!supplier) {
-            const error = new Error(
+            throw AppError.notFound(
                 "Supplier not found"
             );
-            error.statusCode = 404;
-            throw error;
         }
     }
 
@@ -211,11 +197,9 @@ export const update = async (
         );
 
     if (!product) {
-        const error = new Error(
+        throw AppError.notFound(
             "Product not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return product;
@@ -230,11 +214,9 @@ export const remove = async (
         );
 
     if (!product) {
-        const error = new Error(
+        throw AppError.notFound(
             "Product not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return product;

@@ -15,8 +15,9 @@ export const createCategory = asyncHandler(
         const category =
             await categoryService.create(payload);
 
-        res.status(201).json({
-            success: true,
+        return successResponse(res, {
+            statusCode: 201,
+            message: "Category created successfully",
             data: category,
         });
     }
@@ -41,17 +42,14 @@ export const findCategories = asyncHandler(
             paginate,
         } = result;
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
             data: items,
             meta: paginate
                 ? {
                     totalItems,
                     itemsPerPage: items.length,
                     currentPage: page,
-                    totalPages: Math.ceil(
-                        totalItems / limit
-                    ),
+                    totalPages: Math.ceil(totalItems / limit),
                 }
                 : {
                     totalItems,
@@ -69,8 +67,7 @@ export const findCategoryById = asyncHandler(
                 req.params.id
             );
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
             data: category,
         });
     }
@@ -87,10 +84,8 @@ export const updateCategory = asyncHandler(
                 payload
             );
 
-        res.status(200).json({
-            success: true,
-            message:
-                "Category updated successfully",
+        return successResponse(res, {
+            message: "Category updated successfully",
             data: category,
         });
     }
@@ -102,10 +97,8 @@ export const deleteCategory = asyncHandler(
             req.params.id
         );
 
-        res.status(200).json({
-            success: true,
-            message:
-                "Category removed successfully",
+        return successResponse(res, {
+            message: "Category removed successfully",
         });
     }
 );

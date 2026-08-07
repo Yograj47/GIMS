@@ -11,6 +11,7 @@ import {
 import {
     countProductsByUnit,
 } from "../product/product.repository.js";
+import { AppError } from "../../shared/errors/AppError.js";
 
 export const create = async (
     payload
@@ -19,11 +20,7 @@ export const create = async (
         await findUnitByName(payload.name);
 
     if (existingName) {
-        const error = new Error(
-            "Unit name already exists"
-        );
-        error.statusCode = 409;
-        throw error;
+        throw AppError.conflict("Unit name already exists");
     }
 
     const existingShortForm =
@@ -32,11 +29,7 @@ export const create = async (
         );
 
     if (existingShortForm) {
-        const error = new Error(
-            "Unit short form already exists"
-        );
-        error.statusCode = 409;
-        throw error;
+        throw AppError.conflict("Unit short form already exists");
     }
 
     if (payload.baseUnit) {
@@ -105,11 +98,7 @@ export const findById = async (id) => {
     const unit = await findUnitById(id);
 
     if (!unit) {
-        const error = new Error(
-            "Unit not found"
-        );
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("Unit not found");
     }
 
     return unit;
@@ -129,11 +118,7 @@ export const update = async (
             existingName &&
             existingName._id.toString() !== id
         ) {
-            const error = new Error(
-                "Unit name already exists"
-            );
-            error.statusCode = 409;
-            throw error;
+            throw AppError.conflict("Unit name already exists");
         }
     }
 
@@ -147,11 +132,7 @@ export const update = async (
             existingShortForm &&
             existingShortForm._id.toString() !== id
         ) {
-            const error = new Error(
-                "Unit short form already exists"
-            );
-            error.statusCode = 409;
-            throw error;
+            throw AppError.conflict("Unit short form already exists");
         }
     }
 
@@ -166,11 +147,7 @@ export const update = async (
         );
 
     if (!unit) {
-        const error = new Error(
-            "Unit not found"
-        );
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("Unit not found");
     }
 
     return unit;
@@ -183,21 +160,15 @@ export const remove = async (
         await countProductsByUnit(id);
 
     if (productCount > 0) {
-        const error = new Error(
+        throw AppError.badRequest(
             `Cannot deactivate. This unit is currently used by ${productCount} products.`
         );
-        error.statusCode = 400;
-        throw error;
     }
 
     const unit = await findUnitById(id);
 
     if (!unit) {
-        const error = new Error(
-            "Unit not found"
-        );
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound("Unit not found");
     }
 
     return updateUnitById(id, {

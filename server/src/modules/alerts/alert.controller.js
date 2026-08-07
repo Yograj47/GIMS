@@ -1,14 +1,14 @@
 import asyncHandler from "express-async-handler";
 
 import * as alertService from "./alert.service.js";
+import { successResponse } from "../../shared/utils/response.js";
 
 export const findActiveAlerts =
     asyncHandler(async (req, res) => {
         const alerts =
             await alertService.findActive();
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
             data: alerts,
         });
     });
@@ -32,8 +32,7 @@ export const findAlerts =
                 shouldPaginate
             );
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
             data: result.items,
             meta: result.meta,
         });
@@ -41,24 +40,13 @@ export const findAlerts =
 
 export const acknowledgeAlert =
     asyncHandler(async (req, res) => {
-        const alert =
-            await alertService.acknowledge(
-                req.params.id,
-                req.user.id
-            );
+        const alert = await alertService.acknowledge(
+            req.params.id,
+            req.user.id
+        );
 
-        if (!alert) {
-            return res.status(404).json({
-                success: false,
-                message:
-                    "Alert not found",
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message:
-                "Alert acknowledged",
+        return successResponse(res, {
+            message: "Alert acknowledged",
             data: alert,
         });
     });

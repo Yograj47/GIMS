@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+import { AppError } from "../../shared/errors/index.js";
+import logger from "../../shared/logger/logger.js";
+
 import {
     createTransaction,
     findTransactionById,
@@ -11,9 +14,17 @@ import {
 } from "../movement/movement.repository.js";
 
 import {
-    updateProductQuantity
+    findProductById,
+    updateProductQuantity,
 } from "../product/product.repository.js";
-import { checkProductStock } from "../alerts/alert.service.js";
+
+import {
+    findGeneralSettings,
+} from "../setting/setting.repository.js";
+
+import {
+    checkProductStock,
+} from "../alerts/alert.service.js";
 
 export const create = async (
     payload,
@@ -25,13 +36,12 @@ export const create = async (
     session.startTransaction();
 
     try {
-        const isStockIn =
-            [
-                "Purchase",
-                "Return",
-            ].includes(
-                payload.transactionType
-            );
+        const isStockIn = [
+            "Purchase",
+            "Return",
+        ].includes(
+            payload.transactionType
+        );
 
         const movements = [];
 
@@ -42,14 +52,9 @@ export const create = async (
                 );
 
             if (!product) {
-                const error =
-                    new Error(
-                        `Product not found: ${item.productId}`
-                    );
-
-                error.statusCode = 404;
-
-                throw error;
+                throw AppError.notFound(
+                    `Product not found: ${item.productId}`
+                );
             }
 
             const stockImpact =
@@ -71,14 +76,9 @@ export const create = async (
                     oldQuantity <
                     stockImpact
                 ) {
-                    const error =
-                        new Error(
-                            `Insufficient stock for ${product.name}`
-                        );
-
-                    error.statusCode = 400;
-
-                    throw error;
+                    throw AppError.badRequest(
+                        `Insufficient stock for ${product.name}`
+                    );
                 }
 
                 newQuantity =
@@ -132,7 +132,6 @@ export const create = async (
             await createMovement(
                 {
                     ...movement,
-
                     transactionId:
                         transaction._id,
                 },
@@ -142,32 +141,38 @@ export const create = async (
 
         await session.commitTransaction();
 
-        await session.commitTransaction();
+        const settings =
+            await findGeneralSettings();
 
         const affectedProducts = [
             ...new Set(
-                movements.map(m => m.productId.toString())
+                movements.map((m) =>
+                    m.productId.toString()
+                )
             ),
         ];
 
         try {
             await Promise.all(
-                affectedProducts.map(productId =>
-                    checkProductStock(
-                        productId,
-                        userId,
-                        settings
-                    )
+                affectedProducts.map(
+                    (productId) =>
+                        checkProductStock(
+                            productId,
+                            userId,
+                            settings
+                        )
                 )
             );
         } catch (error) {
-            logger.error("Alert processing failed", error);
+            logger.error(
+                "Alert processing failed",
+                error
+            );
         }
 
         return transaction;
     } catch (error) {
         await session.abortTransaction();
-
         throw error;
     } finally {
         session.endSession();
@@ -182,14 +187,15 @@ export const find = async ({
     const {
         items,
         totalItems,
-    } = await findTransactions(
-        {},
-        {
-            page,
-            limit,
-            paginate,
-        }
-    );
+    } =
+        await findTransactions(
+            {},
+            {
+                page,
+                limit,
+                paginate,
+            }
+        );
 
     return {
         items,
@@ -209,14 +215,9 @@ export const findById = async (
         );
 
     if (!transaction) {
-        const error =
-            new Error(
-                "Transaction not found"
-            );
-
-        error.statusCode = 404;
-
-        throw error;
+        throw AppError.notFound(
+            "Transaction not found"
+        );
     }
 
     return transaction;

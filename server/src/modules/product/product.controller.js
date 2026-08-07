@@ -6,6 +6,7 @@ import {
     createProductSchema,
     updateProductSchema,
 } from "./product.validation.js";
+import { successResponse } from "../../shared/utils/response.js";
 
 export const createProduct = asyncHandler(
     async (req, res) => {
@@ -19,10 +20,11 @@ export const createProduct = asyncHandler(
                 payload
             );
 
-        res.status(201).json({
-            success: true,
+        return successResponse(res, {
             data: product,
-        });
+            statusCode: 201,
+            message: "Product created successfully"
+        })
     }
 );
 
@@ -44,8 +46,8 @@ export const findProducts = asyncHandler(
                     "false",
             });
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
+            statusCode: 200,
             data: result.items,
             meta: result.paginate
                 ? {
@@ -79,10 +81,10 @@ export const findProductById =
                     req.params.id
                 );
 
-            res.status(200).json({
-                success: true,
+            return successResponse(res, {
+                statusCode: 200,
                 data: product,
-            });
+            })
         }
     );
 
@@ -101,10 +103,13 @@ export const updateProduct = asyncHandler(
 
         res.status(200).json({
             success: true,
-            message:
-                "Product updated successfully",
-            data: product,
+
         });
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Product updated successfully",
+            data: product,
+        })
     }
 );
 
@@ -114,10 +119,9 @@ export const removeProduct = asyncHandler(
             req.params.id
         );
 
-        res.status(200).json({
-            success: true,
-            message:
-                "Product deleted successfully",
-        });
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Product deleted successfully",
+        })
     }
 );

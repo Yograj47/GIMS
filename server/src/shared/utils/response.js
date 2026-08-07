@@ -3,6 +3,7 @@ export const successResponse = (
     {
         message = "Success",
         data = null,
+        meta = null,
         statusCode = 200,
     } = {}
 ) => {
@@ -10,6 +11,7 @@ export const successResponse = (
         success: true,
         message,
         data,
+        ...(meta && { meta }),
     });
 };
 

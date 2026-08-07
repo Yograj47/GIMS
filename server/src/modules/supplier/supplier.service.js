@@ -1,7 +1,10 @@
+import { AppError } from "../../shared/errors/index.js";
+
 import {
     createSupplier,
     findSupplierById,
     findSupplierByEmail,
+    findSupplierByName,
     findSuppliers,
     updateSupplierById,
     deleteSupplierById,
@@ -15,28 +18,24 @@ import {
 } from "../product/product.repository.js";
 
 export const create = async (payload) => {
-    const existingEmail =
-        payload.email &&
-        await findSupplierByEmail(payload.email);
+    if (payload.email) {
+        const existingEmail =
+            await findSupplierByEmail(payload.email);
 
-    if (existingEmail) {
-        const error = new Error(
-            "Supplier with this email already exists"
-        );
-        error.statusCode = 409;
-        throw error;
+        if (existingEmail) {
+            throw AppError.conflict(
+                "Supplier with this email already exists"
+            );
+        }
     }
 
-    const existingName = await findSupplierByName(
-        payload.name
-    );
+    const existingName =
+        await findSupplierByName(payload.name);
 
     if (existingName) {
-        const error = new Error(
+        throw AppError.conflict(
             "Supplier already exists"
         );
-        error.statusCode = 409;
-        throw error;
     }
 
     return createSupplier(payload);
@@ -47,12 +46,13 @@ export const findAll = async (query) => {
 };
 
 export const findById = async (id) => {
-    const supplier = await findSupplierById(id);
+    const supplier =
+        await findSupplierById(id);
 
     if (!supplier) {
-        const error = new Error("Supplier not found");
-        error.statusCode = 404;
-        throw error;
+        throw AppError.notFound(
+            "Supplier not found"
+        );
     }
 
     const products =
@@ -76,11 +76,9 @@ export const update = async (
             existingEmail &&
             existingEmail._id.toString() !== id
         ) {
-            const error = new Error(
+            throw AppError.conflict(
                 "Supplier with this email already exists"
             );
-            error.statusCode = 409;
-            throw error;
         }
     }
 
@@ -92,23 +90,22 @@ export const update = async (
             existingName &&
             existingName._id.toString() !== id
         ) {
-            const error = new Error(
+            throw AppError.conflict(
                 "Supplier already exists"
             );
-            error.statusCode = 409;
-            throw error;
         }
     }
 
     const supplier =
-        await updateSupplierById(id, payload);
+        await updateSupplierById(
+            id,
+            payload
+        );
 
     if (!supplier) {
-        const error = new Error(
+        throw AppError.notFound(
             "Supplier not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return supplier;
@@ -119,14 +116,14 @@ export const assignProducts = async ({
     productIds,
 }) => {
     const supplier =
-        await findSupplierById(supplierId);
+        await findSupplierById(
+            supplierId
+        );
 
     if (!supplier) {
-        const error = new Error(
+        throw AppError.notFound(
             "Supplier not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return assignSupplierToProducts(
@@ -148,22 +145,18 @@ export const remove = async (id) => {
         await countProductsBySupplier(id);
 
     if (count > 0) {
-        const error = new Error(
+        throw AppError.badRequest(
             `Cannot delete supplier. ${count} products are assigned to it.`
         );
-        error.statusCode = 400;
-        throw error;
     }
 
     const supplier =
         await deleteSupplierById(id);
 
     if (!supplier) {
-        const error = new Error(
+        throw AppError.notFound(
             "Supplier not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return supplier;

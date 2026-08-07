@@ -129,12 +129,14 @@ export const acknowledge =
             userId
         );
 
-        if (alert) {
-            emitEvent(
-                SOCKET_EVENTS.ALERT_ACKNOWLEDGED,
-                alert
-            );
+        if (!alert) {
+            throw AppError.notFound("Alert not found");
         }
+
+        emitEvent(
+            SOCKET_EVENTS.ALERT_ACKNOWLEDGED,
+            alert
+        );
 
         return alert;
     };

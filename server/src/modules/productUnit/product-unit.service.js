@@ -1,4 +1,4 @@
-// product-unit.service.js
+import { AppError } from "../../shared/errors/index.js";
 
 import {
     findProductUnit,
@@ -35,14 +35,18 @@ export const create = async (
         await findProductById(productId);
 
     if (!product) {
-        throw new Error("Product not found");
+        throw AppError.notFound(
+            "Product not found"
+        );
     }
 
     const unit =
         await findUnitById(unitId);
 
     if (!unit) {
-        throw new Error("Unit not found");
+        throw AppError.notFound(
+            "Unit not found"
+        );
     }
 
     const existing =
@@ -52,7 +56,7 @@ export const create = async (
         });
 
     if (existing) {
-        throw new Error(
+        throw AppError.conflict(
             "Product unit already exists"
         );
     }
@@ -66,31 +70,30 @@ export const create = async (
     return createProductUnit(payload);
 };
 
-export const update =
-    async ({
-        id,
-        payload,
-    }) => {
-        const existing =
-            await findProductUnitById(id);
+export const update = async ({
+    id,
+    payload,
+}) => {
+    const existing =
+        await findProductUnitById(id);
 
-        if (!existing) {
-            throw new Error(
-                "Product unit not found"
-            );
-        }
-
-        if (payload.isDefault) {
-            await unsetDefaultProductUnits(
-                existing.productId
-            );
-        }
-
-        return updateProductUnitById(
-            id,
-            payload
+    if (!existing) {
+        throw AppError.notFound(
+            "Product unit not found"
         );
-    };
+    }
+
+    if (payload.isDefault) {
+        await unsetDefaultProductUnits(
+            existing.productId
+        );
+    }
+
+    return updateProductUnitById(
+        id,
+        payload
+    );
+};
 
 export const remove = async (
     id
@@ -99,13 +102,13 @@ export const remove = async (
         await findProductUnitById(id);
 
     if (!productUnit) {
-        throw new Error(
+        throw AppError.notFound(
             "Product unit not found"
         );
     }
 
     if (productUnit.isDefault) {
-        throw new Error(
+        throw AppError.badRequest(
             "Cannot delete default unit"
         );
     }

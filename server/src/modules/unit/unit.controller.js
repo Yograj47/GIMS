@@ -4,8 +4,8 @@ import {
     createUnitSchema,
     updateUnitSchema,
 } from "./unit.validation.js";
-
 import * as unitService from "./unit.service.js";
+import { successResponse } from "../../shared/utils/response.js";
 
 export const createUnit = asyncHandler(
     async (req, res) => {
@@ -15,8 +15,9 @@ export const createUnit = asyncHandler(
         const unit =
             await unitService.create(payload);
 
-        res.status(201).json({
-            success: true,
+        return successResponse(res, {
+            statusCode: 201,
+            message: "Unit created successfully",
             data: unit,
         });
     }
@@ -38,8 +39,8 @@ export const getUnits = asyncHandler(
                     "false",
             });
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
+            statusCode: 200,
             data: result.units,
             meta: result.meta,
         });
@@ -52,8 +53,8 @@ export const getUnitById = asyncHandler(
             req.params.id
         );
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
+            statusCode: 200,
             data: unit,
         });
     }
@@ -72,8 +73,9 @@ export const updateUnitById =
                 payload
             );
 
-        res.status(200).json({
-            success: true,
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Unit updated successfully",
             data: unit,
         });
     });
@@ -82,9 +84,8 @@ export const deleteUnitById =
     asyncHandler(async (req, res) => {
         await unitService.remove(req.params.id);
 
-        res.status(200).json({
-            success: true,
-            message:
-                "Unit deleted successfully",
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Unit deleted successfully",
         });
     });

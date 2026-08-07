@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-
+import { successResponse } from "../../shared/utils/response.js";
 import * as movementService from "./movement.service.js";
 
 export const findMovements =
@@ -41,8 +41,8 @@ export const findMovements =
                 paginate,
             } = result;
 
-            res.status(200).json({
-                success: true,
+            return successResponse(res, {
+                statusCode: 200,
                 data: items,
                 meta: paginate
                     ? {
@@ -65,8 +65,7 @@ export const findMovements =
                             true,
                     },
             });
-        }
-    );
+        });
 
 export const findMovementById =
     asyncHandler(
@@ -76,9 +75,8 @@ export const findMovementById =
                     req.params.id
                 );
 
-            res.status(200).json({
-                success: true,
-                data: movement,
-            });
+            return successResponse(res, {
+                data: movement
+            })
         }
     );

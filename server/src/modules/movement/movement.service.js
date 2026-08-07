@@ -3,6 +3,10 @@ import {
     findMovements,
 } from "./movement.repository.js";
 
+import {
+    AppError,
+} from "../../shared/errors/index.js";
+
 export const find = async ({
     page = 1,
     limit = 100,
@@ -23,14 +27,11 @@ export const find = async ({
     const {
         items,
         totalItems,
-    } = await findMovements(
-        query,
-        {
-            page,
-            limit,
-            paginate,
-        }
-    );
+    } = await findMovements(query, {
+        page,
+        limit,
+        paginate,
+    });
 
     return {
         items,
@@ -50,14 +51,9 @@ export const findById = async (
         );
 
     if (!movement) {
-        const error =
-            new Error(
-                "Movement not found"
-            );
-
-        error.statusCode = 404;
-
-        throw error;
+        throw AppError.notFound(
+            "Movement not found"
+        );
     }
 
     return movement;

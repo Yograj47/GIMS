@@ -17,11 +17,9 @@ export const create = async (
         await findCategoryByName(payload.name);
 
     if (existingCategory) {
-        const error = new Error(
+        throw AppError.conflict(
             "Category name already exists"
         );
-        error.statusCode = 409;
-        throw error;
     }
 
     return createCategory(payload);
@@ -67,11 +65,9 @@ export const findById = async (
         await findCategoryById(categoryId);
 
     if (!category) {
-        const error = new Error(
+        throw AppError.notFound(
             "Category not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return category;
@@ -89,14 +85,11 @@ export const update = async (
 
         if (
             existingCategory &&
-            existingCategory._id.toString() !==
-            categoryId.toString()
+            existingCategory._id.toString() !== categoryId.toString()
         ) {
-            const error = new Error(
+            throw AppError.conflict(
                 "Category name already exists"
             );
-            error.statusCode = 409;
-            throw error;
         }
     }
 
@@ -107,13 +100,10 @@ export const update = async (
         );
 
     if (!category) {
-        const error = new Error(
+        throw AppError.notFound(
             "Category not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
-
     return category;
 };
 
@@ -126,22 +116,18 @@ export const remove = async (
         );
 
     if (productCount > 0) {
-        const error = new Error(
+        throw AppError.badRequest(
             `Cannot delete category. There are ${productCount} products assigned to it.`
         );
-        error.statusCode = 400;
-        throw error;
     }
 
     const category =
         await deleteCategoryById(categoryId);
 
     if (!category) {
-        const error = new Error(
+        throw AppError.notFound(
             "Category not found"
         );
-        error.statusCode = 404;
-        throw error;
     }
 
     return category;
