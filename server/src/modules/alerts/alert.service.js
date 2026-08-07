@@ -3,7 +3,7 @@ import {
 } from "../product/product.repository.js";
 import {
     sendEmail,
-    wrapEmail,
+    createEmailTemplate,
 } from "../../config/emailConfig.js";
 import { emitEvent } from "../../shared/socket/emitter.js";
 import { SOCKET_EVENTS } from "../../shared/socket/socketEvents.js";
@@ -272,7 +272,7 @@ export const checkProductStock =
                         : "#ea580c";
 
                 const html =
-                    wrapEmail(
+                    createEmailTemplate(
                         `${severity.toUpperCase()}: ${product.name}`,
 
                         `

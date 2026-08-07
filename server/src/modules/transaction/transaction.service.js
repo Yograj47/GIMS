@@ -13,6 +13,7 @@ import {
 import {
     updateProductQuantity
 } from "../product/product.repository.js";
+import { checkProductStock } from "../alerts/alert.service.js";
 
 export const create = async (
     payload,
@@ -139,8 +140,29 @@ export const create = async (
             );
         }
 
+        await session.commitTransaction();
 
         await session.commitTransaction();
+
+        const affectedProducts = [
+            ...new Set(
+                movements.map(m => m.productId.toString())
+            ),
+        ];
+
+        try {
+            await Promise.all(
+                affectedProducts.map(productId =>
+                    checkProductStock(
+                        productId,
+                        userId,
+                        settings
+                    )
+                )
+            );
+        } catch (error) {
+            logger.error("Alert processing failed", error);
+        }
 
         return transaction;
     } catch (error) {

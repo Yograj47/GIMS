@@ -1,5 +1,5 @@
 import { BrevoClient, logging } from "@getbrevo/brevo";
-import logger from "../logger/logger.js";
+import logger from "../shared/logger/logger.js";
 
 export const createEmailTemplate = (
     title,

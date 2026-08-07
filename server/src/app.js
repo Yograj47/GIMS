@@ -14,6 +14,7 @@ import productUnitRoutes from "./modules/productUnit/product-unit.route.js";
 import productRoutes from "./modules/product/product.route.js";
 import movementRoutes from "./modules/movement/movement.route.js";
 import transactionRoutes from "./modules/transaction/transaction.route.js";
+import alertRoutes from "./modules/alerts/alert.route.js"
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use(`${API}${ROUTES.INVENTORY.PRODUCT_UNITS}`, productUnitRoutes);
 app.use(`${API}${ROUTES.INVENTORY.PRODUCTS}`, productRoutes);
 app.use(`${API}${ROUTES.MOVEMENTS}`, movementRoutes);
 app.use(`${API}${ROUTES.TRANSACTIONS}`, transactionRoutes);
+app.use(`${API}${ROUTES.ALERTS}`, alertRoutes);
 
 /*
 |--------------------------------------------------------------------------
