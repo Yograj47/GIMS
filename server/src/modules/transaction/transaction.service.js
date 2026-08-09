@@ -19,12 +19,12 @@ import {
 } from "../product/product.repository.js";
 
 import {
-    findGeneralSettings,
+    findSettings
 } from "../setting/setting.repository.js";
 
 import {
     checkProductStock,
-} from "../alerts/alert.service.js";
+} from "../alert/alert.service.js";
 
 export const create = async (
     payload,
@@ -142,7 +142,7 @@ export const create = async (
         await session.commitTransaction();
 
         const settings =
-            await findGeneralSettings();
+            await findSettings();
 
         const affectedProducts = [
             ...new Set(

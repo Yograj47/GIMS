@@ -4,7 +4,6 @@ import {
     createSupplier,
     findSupplierById,
     findSupplierByEmail,
-    findSupplierByName,
     findSuppliers,
     updateSupplierById,
     deleteSupplierById,

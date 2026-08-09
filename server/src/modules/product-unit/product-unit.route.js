@@ -1,10 +1,10 @@
 import { Router } from "express";
 
 import {
-    getAllProductUnits,
+    findProductUnits,
     createProductUnit,
     updateProductUnit,
-    deleteProductUnit,
+    removeProductUnit,
 } from "./product-unit.controller.js";
 
 import {
@@ -25,7 +25,7 @@ router.route("/")
         authorize(
             PERMISSIONS.PRODUCT_UNIT_READ
         ),
-        getAllProductUnits
+        findProductUnits
     )
     .post(
         authorize(
@@ -45,7 +45,7 @@ router.route("/:id")
         authorize(
             PERMISSIONS.PRODUCT_UNIT_WRITE
         ),
-        deleteProductUnit
+        removeProductUnit
     );
 
 export default router;
