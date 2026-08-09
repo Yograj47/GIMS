@@ -17,6 +17,7 @@ import transactionRoutes from "./modules/transaction/transaction.route.js";
 import alertRoutes from "./modules/alert/alert.route.js";
 import settingRoute from "./modules/setting/setting.route.js";
 import activityLogRoute from "./modules/activity-log/activity-log.route.js";
+import analyticsRoute from "./modules/analytics/analytics.route.js";
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use(`${API}${ROUTES.TRANSACTIONS}`, transactionRoutes);
 app.use(`${API}${ROUTES.ALERTS}`, alertRoutes);
 app.use(`${API}${ROUTES.SETTINGS}`, settingRoute);
 app.use(`${API}${ROUTES.ACTIVITY_LOGS}`, activityLogRoute);
+app.use(`${API}${ROUTES.ANALYTICS}`, analyticsRoute);
 
 /*
 |--------------------------------------------------------------------------
