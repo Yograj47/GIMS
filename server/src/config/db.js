@@ -1,23 +1,42 @@
+import {
+    logInfo,
+    logError,
+} from "../shared/logger/index.js";
+
+import {
+    LOG_CONTEXT,
+} from "../shared/constants/index.js";
 import mongoose from "mongoose";
-import logger from "../shared/logger/logger.js";
-import { LOG_CONTEXT } from "../shared/constants/index.js";
 
 const connectDB = async () => {
-    const mongoUri = process.env.MONGO_URI;
+    const mongoUri =
+        process.env.MONGO_URI;
 
     if (!mongoUri) {
-        throw new Error("MONGO_URI is not defined");
+        throw new Error(
+            "MONGO_URI is not defined"
+        );
     }
 
     try {
-        const conn = await mongoose.connect(mongoUri);
+        const conn =
+            await mongoose.connect(
+                mongoUri
+            );
 
-        logger.info(
-            `[${LOG_CONTEXT.DATABASE}]MongoDB Connected: ${conn.connection.host}`
+        logInfo(
+            LOG_CONTEXT.DATABASE,
+            "MongoDB connected",
+            {
+                host:
+                    conn.connection.host,
+            }
         );
     } catch (error) {
-        logger.error(
-            `[${LOG_CONTEXT.DATABASE}]MongoDB connection failed: ${error.message}`
+        logError(
+            LOG_CONTEXT.DATABASE,
+            "MongoDB connection failed",
+            error
         );
 
         process.exit(1);

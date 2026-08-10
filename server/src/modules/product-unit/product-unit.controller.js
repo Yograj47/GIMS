@@ -1,11 +1,16 @@
 import asyncHandler from "express-async-handler";
-
 import * as ProductUnitService from "./product-unit.service.js";
 import {
     createProductUnitSchema,
     updateProductUnitSchema,
 } from "./product-unit.validation.js";
 import { successResponse } from "../../shared/utils/response.js";
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
 
 export const createProductUnit = asyncHandler(
     async (req, res) => {
@@ -18,6 +23,11 @@ export const createProductUnit = asyncHandler(
             await ProductUnitService.create(
                 payload
             );
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Product unit created for product ${productUnit.productId}`
+        );
 
         return successResponse(res, {
             data: productUnit,
@@ -72,20 +82,19 @@ export const findProductUnits = asyncHandler(
     }
 );
 
-export const findProductUnitById =
-    asyncHandler(
-        async (req, res) => {
-            const productUnit =
-                await ProductUnitService.findById(
-                    req.params.id
-                );
+export const findProductUnitById = asyncHandler(
+    async (req, res) => {
+        const productUnit =
+            await ProductUnitService.findById(
+                req.params.id
+            );
 
-            return successResponse(res, {
-                statusCode: 200,
-                data: productUnit,
-            });
-        }
-    );
+        return successResponse(res, {
+            statusCode: 200,
+            data: productUnit,
+        });
+    }
+);
 
 export const updateProductUnit = asyncHandler(
     async (req, res) => {
@@ -100,6 +109,11 @@ export const updateProductUnit = asyncHandler(
                 payload
             );
 
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Product unit updated: ${productUnit._id}`
+        );
+
         return successResponse(res, {
             statusCode: 200,
             message: "Product unit updated successfully",
@@ -112,6 +126,11 @@ export const removeProductUnit = asyncHandler(
     async (req, res) => {
         await ProductUnitService.remove(
             req.params.id
+        );
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Product unit deleted: ${req.params.id}`
         );
 
         return successResponse(res, {

@@ -4,7 +4,7 @@ import * as analyticsService from "./analytics.service.js";
 
 import {
     successResponse,
-} from "../../shared/utils/index.js";
+} from "../../shared/utils/response.js";
 
 export const getDashboardSummary =
     asyncHandler(async (req, res) => {

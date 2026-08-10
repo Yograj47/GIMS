@@ -1,11 +1,15 @@
 import asyncHandler from "express-async-handler";
-
 import {
     createCategorySchema,
     updateCategorySchema,
 } from "./category.validation.js";
-
 import * as categoryService from "./category.service.js";
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
 
 export const createCategory = asyncHandler(
     async (req, res) => {
@@ -14,6 +18,11 @@ export const createCategory = asyncHandler(
 
         const category =
             await categoryService.create(payload);
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Category created: ${category.name}`
+        );
 
         return successResponse(res, {
             statusCode: 201,
@@ -84,6 +93,11 @@ export const updateCategory = asyncHandler(
                 payload
             );
 
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Category updated: ${category.name}`
+        );
+
         return successResponse(res, {
             message: "Category updated successfully",
             data: category,
@@ -95,6 +109,11 @@ export const deleteCategory = asyncHandler(
     async (req, res) => {
         await categoryService.remove(
             req.params.id
+        );
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Category deleted: ${req.params.id}`
         );
 
         return successResponse(res, {

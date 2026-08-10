@@ -3,6 +3,12 @@ import asyncHandler from "express-async-handler";
 import { createTransactionSchema } from "./transaction.validation.js";
 import * as transactionService from "./transaction.service.js";
 import { successResponse } from "../../shared/utils/response.js";
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
 
 export const createTransaction = asyncHandler(
     async (req, res) => {
@@ -16,6 +22,11 @@ export const createTransaction = asyncHandler(
                 payload,
                 req.user.id
             );
+
+        logInfo(
+            LOG_CONTEXT.TRANSACTION,
+            `Transaction created: ${transaction._id}`
+        );
 
         return successResponse(res, {
             statusCode: 201,

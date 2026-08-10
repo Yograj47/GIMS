@@ -1,10 +1,6 @@
 import asyncHandler from "express-async-handler";
-
 import * as activityLogService from "./activity-log.service.js";
-
-import {
-    successResponse,
-} from "../../shared/utils/index.js";
+import { successResponse } from "../../shared/utils/response.js"
 
 export const findActivityLogs =
     asyncHandler(async (req, res) => {

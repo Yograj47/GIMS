@@ -1,8 +1,13 @@
 import asyncHandler from "express-async-handler";
-
 import * as userService from "./user.service.js";
 import { changePasswordSchema, updateProfileSchema } from "./user.validation.js"
 import { successResponse } from "../../shared/utils/response.js";
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
 
 export const getMe = asyncHandler(async (req, res) => {
     const user = await userService.findMe(req.user.id);
@@ -27,15 +32,22 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
     const payload = updateProfileSchema.parse(req.body);
 
-    const user = await userService.updateProfile(
-        req.user.id,
-        payload
+    const user =
+        await userService.updateProfile(
+            req.user.id,
+            payload
+        );
+
+    logInfo(
+        LOG_CONTEXT.AUTH,
+        `Profile updated: ${user.email}`
     );
 
     return successResponse(res, {
         statusCode: 200,
         data: user,
-        message: "Profile updated successfully"
+        message:
+            "Profile updated successfully",
     });
 });
 
@@ -47,8 +59,14 @@ export const updatePassword = asyncHandler(async (req, res) => {
         ...payload,
     });
 
+    logInfo(
+        LOG_CONTEXT.AUTH,
+        `Password updated: ${req.user.email || req.user.id}`
+    );
+
     return successResponse(res, {
         statusCode: 200,
-        message: "Password updated successfully",
+        message:
+            "Password updated successfully",
     });
 });

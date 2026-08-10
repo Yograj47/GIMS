@@ -6,6 +6,12 @@ import {
 } from "./unit.validation.js";
 import * as unitService from "./unit.service.js";
 import { successResponse } from "../../shared/utils/response.js";
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
 
 export const createUnit = asyncHandler(
     async (req, res) => {
@@ -14,6 +20,11 @@ export const createUnit = asyncHandler(
 
         const unit =
             await unitService.create(payload);
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Unit created: ${unit.name}`
+        );
 
         return successResponse(res, {
             statusCode: 201,
@@ -60,32 +71,40 @@ export const getUnitById = asyncHandler(
     }
 );
 
-export const updateUnitById =
-    asyncHandler(async (req, res) => {
-        const payload =
-            updateUnitSchema.parse(
-                req.body
-            );
+export const updateUnitById = asyncHandler(async (req, res) => {
+    const payload =
+        updateUnitSchema.parse(
+            req.body
+        );
 
-        const unit =
-            await unitService.update(
-                req.params.id,
-                payload
-            );
+    const unit =
+        await unitService.update(
+            req.params.id,
+            payload
+        );
 
-        return successResponse(res, {
-            statusCode: 200,
-            message: "Unit updated successfully",
-            data: unit,
-        });
+    logInfo(
+        LOG_CONTEXT.INVENTORY,
+        `Unit updated: ${unit.name}`
+    );
+
+    return successResponse(res, {
+        statusCode: 200,
+        message: "Unit updated successfully",
+        data: unit,
     });
+});
 
-export const deleteUnitById =
-    asyncHandler(async (req, res) => {
-        await unitService.remove(req.params.id);
+export const deleteUnitById = asyncHandler(async (req, res) => {
+    await unitService.remove(req.params.id);
 
-        return successResponse(res, {
-            statusCode: 200,
-            message: "Unit deleted successfully",
-        });
+    logInfo(
+        LOG_CONTEXT.INVENTORY,
+        `Unit deactivated: ${req.params.id}`
+    );
+
+    return successResponse(res, {
+        statusCode: 200,
+        message: "Unit deleted successfully",
     });
+});

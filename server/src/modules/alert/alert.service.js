@@ -4,7 +4,7 @@ import {
 import {
     sendEmail,
     createEmailTemplate,
-} from "../../config/emailConfig.js";
+} from "../../shared/services/email/email.service.js";
 import { emitEvent } from "../../shared/socket/emitter.js";
 import { SOCKET_EVENTS } from "../../shared/socket/socketEvents.js";
 

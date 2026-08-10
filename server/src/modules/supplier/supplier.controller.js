@@ -6,6 +6,13 @@ import {
 } from "./supplier.validation.js";
 import * as supplierService from "./supplier.service.js";
 import { successResponse } from "../../shared/utils/response.js";
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
+
 
 export const createSupplier = asyncHandler(
     async (req, res) => {
@@ -18,6 +25,11 @@ export const createSupplier = asyncHandler(
             await supplierService.create(
                 payload
             );
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Supplier created: ${supplier.name}`
+        );
 
         return successResponse(res, {
             statusCode: 201,
@@ -83,6 +95,11 @@ export const updateSupplier = asyncHandler(
                 payload
             );
 
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Supplier updated: ${supplier.name}`
+        );
+
         return successResponse(res, {
             statusCode: 200,
             message: "Supplier updated successfully",
@@ -91,33 +108,42 @@ export const updateSupplier = asyncHandler(
     }
 );
 
-export const assignProductsToSupplier =
-    asyncHandler(async (req, res) => {
-        const { productIds } = req.body;
+export const assignProductsToSupplier = asyncHandler(async (req, res) => {
+    const { productIds } = req.body;
 
-        const result =
-            await supplierService.assignProducts(
-                {
-                    supplierId:
-                        req.params.id,
-                    productIds,
-                }
-            );
+    const result =
+        await supplierService.assignProducts(
+            {
+                supplierId:
+                    req.params.id,
+                productIds,
+            }
+        );
 
-        return successResponse(res, {
-            statusCode: 200,
-            message: `${result.modifiedCount} products assigned successfully`,
-            data: {
-                modifiedCount:
-                    result.modifiedCount,
-            },
-        });
+    logInfo(
+        LOG_CONTEXT.INVENTORY,
+        `${result.modifiedCount} products assigned to supplier ${req.params.id}`
+    );
+
+    return successResponse(res, {
+        statusCode: 200,
+        message: `${result.modifiedCount} products assigned successfully`,
+        data: {
+            modifiedCount:
+                result.modifiedCount,
+        },
     });
+});
 
 export const unassignProduct = asyncHandler(
     async (req, res) => {
         await supplierService.unassignProduct(
             req.params.productId
+        );
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Supplier unassigned from product ${req.params.productId}`
         );
 
         return successResponse(res, {
@@ -129,8 +155,14 @@ export const unassignProduct = asyncHandler(
 
 export const deleteSupplier = asyncHandler(
     async (req, res) => {
+
         await supplierService.remove(
             req.params.id
+        );
+
+        logInfo(
+            LOG_CONTEXT.INVENTORY,
+            `Supplier deleted: ${req.params.id}`
         );
 
         return successResponse(res, {

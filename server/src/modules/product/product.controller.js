@@ -1,7 +1,11 @@
 import asyncHandler from "express-async-handler";
-
 import * as ProductService from "./product.service.js";
-
+import {
+    logInfo,
+} from "../../shared/logger/index.js";
+import {
+    LOG_CONTEXT,
+} from "../../shared/constants/index.js";
 import {
     createProductSchema,
     updateProductSchema,
@@ -20,11 +24,17 @@ export const createProduct = asyncHandler(
                 payload
             );
 
+        logInfo(
+            LOG_CONTEXT.PRODUCT,
+            `Product created: ${product.name} (${product._id})`
+        );
+
         return successResponse(res, {
             data: product,
             statusCode: 201,
-            message: "Product created successfully"
-        })
+            message:
+                "Product created successfully",
+        });
     }
 );
 
@@ -73,20 +83,19 @@ export const findProducts = asyncHandler(
     }
 );
 
-export const findProductById =
-    asyncHandler(
-        async (req, res) => {
-            const product =
-                await ProductService.findById(
-                    req.params.id
-                );
+export const findProductById = asyncHandler(
+    async (req, res) => {
+        const product =
+            await ProductService.findById(
+                req.params.id
+            );
 
-            return successResponse(res, {
-                statusCode: 200,
-                data: product,
-            })
-        }
-    );
+        return successResponse(res, {
+            statusCode: 200,
+            data: product,
+        })
+    }
+);
 
 export const updateProduct = asyncHandler(
     async (req, res) => {
@@ -101,15 +110,17 @@ export const updateProduct = asyncHandler(
                 payload
             );
 
-        res.status(200).json({
-            success: true,
+        logInfo(
+            LOG_CONTEXT.PRODUCT,
+            `Product updated: ${product.name} (${product._id})`
+        );
 
-        });
         return successResponse(res, {
             statusCode: 200,
-            message: "Product updated successfully",
+            message:
+                "Product updated successfully",
             data: product,
-        })
+        });
     }
 );
 
@@ -119,9 +130,15 @@ export const removeProduct = asyncHandler(
             req.params.id
         );
 
+        logInfo(
+            LOG_CONTEXT.PRODUCT,
+            `Product deleted: ${req.params.id}`
+        );
+
         return successResponse(res, {
             statusCode: 200,
-            message: "Product deleted successfully",
-        })
+            message:
+                "Product deleted successfully",
+        });
     }
 );
