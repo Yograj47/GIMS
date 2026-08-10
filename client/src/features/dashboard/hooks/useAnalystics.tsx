@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
-import type { WeeklyMovementData } from '@/types/Analytics';
+import type { WeeklyMovementData } from '@/types/analytics';
 import { AnalyticsService } from '../../../service/AnalyticsService';
 
 export const useAnalytics = () => {

@@ -52,28 +52,16 @@ const settingSchema = new mongoose.Schema(
     }
 );
 
-settingSchema.pre(
-    "save",
-    async function (next) {
-        if (!this.isNew) {
-            return next();
-        }
+settingSchema.pre("save", async function () {
+    const count =
+        await mongoose.models.Setting.countDocuments();
 
-        const count =
-            await mongoose.models.Setting.countDocuments();
-
-        if (count > 0) {
-            return next(
-                new Error(
-                    "Only one settings document can exist."
-                )
-            );
-        }
-
-        next();
+    if (count > 0 && this.isNew) {
+        throw new Error(
+            "Only one settings document can exist."
+        );
     }
-);
-
+});
 const Setting = mongoose.model(
     "Setting",
     settingSchema

@@ -21,7 +21,7 @@ router
     .get(
         authenticate,
         authorize(
-            PERMISSIONS.ANALYTICS_READ
+            PERMISSIONS.DASHBOARD_READ
         ),
         getDashboardSummary
     );
@@ -31,7 +31,7 @@ router
     .get(
         authenticate,
         authorize(
-            PERMISSIONS.ANALYTICS_READ
+            PERMISSIONS.DASHBOARD_READ
         ),
         getWeeklyMovementStats
     );

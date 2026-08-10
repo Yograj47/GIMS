@@ -33,4 +33,6 @@ export const PERMISSIONS = {
 
     SETTING_READ: "setting:read",
     SETTING_WRITE: "setting:write",
+
+    ACTIVITY_LOG_READ: "activityLog:read"
 };

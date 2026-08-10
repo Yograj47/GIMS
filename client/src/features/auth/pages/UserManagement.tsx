@@ -15,7 +15,7 @@ export default function UserManagement() {
 
     useEffect(() => {
         fetchUsers();
-    }, [fetchUsers]);
+    }, []);
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         try {

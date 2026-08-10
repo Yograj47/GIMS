@@ -62,8 +62,7 @@ export const find = async ({
         ],
     };
 
-    let units = await getUnits(query)
-        .sort({ createdAt: -1 });
+    let units = await getUnits(query);
 
     const totalItems =
         await countUnits(query);

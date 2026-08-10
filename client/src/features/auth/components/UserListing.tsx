@@ -2,7 +2,7 @@ import { Trash2, Check, AlertTriangle} from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { UserData } from "@/types/auth";
+import type { UserData } from "@/types/user";
 
 interface UserListingProps {
   user: UserData;
@@ -15,7 +15,6 @@ interface UserListingProps {
 export default function UserListing({ user, isSelf, isProtected, handleRoleChange, openDeleteDialog }: UserListingProps) {
   return (
     <tr className="group hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
-      {/* 1. PERSONNEL IDENTIFIER (Matched to Product/SKU Style) */}
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-sm bg-blue-600 text-white flex items-center justify-center shadow-sm transition-colors shrink-0">
@@ -32,7 +31,6 @@ export default function UserListing({ user, isSelf, isProtected, handleRoleChang
         </div>
       </td>
 
-      {/* 2. CLEARANCE LEVEL (Select aligned with Filter style) */}
       <td className="px-6 py-4">
         <Select
           defaultValue={user.role}
@@ -50,7 +48,6 @@ export default function UserListing({ user, isSelf, isProtected, handleRoleChang
         </Select>
       </td>
 
-      {/* 3. VERIFICATION STATUS (Matched to Stock Status Badges) */}
       <td className="px-6 py-4">
         <div className="flex justify-center">
           <div className={cn(
@@ -65,7 +62,6 @@ export default function UserListing({ user, isSelf, isProtected, handleRoleChang
         </div>
       </td>
 
-      {/* 4. ACTIONS (Matched to Audit History button) */}
       <td className="px-6 py-4 text-right pr-8">
         <Button
           onClick={() => openDeleteDialog(user._id, user.name)}

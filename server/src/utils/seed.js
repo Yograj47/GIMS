@@ -25,7 +25,6 @@ export const seedInitialUsers = async () => {
 
             const existingUser = await User.findOne({ email: userData.email });
             if (existingUser) {
-                console.log(`User ${userData.email} already exists.`);
                 continue;
             }
 
@@ -37,7 +36,6 @@ export const seedInitialUsers = async () => {
                 role: userData.role,
                 isVerified: userData.isVerified
             });
-            console.log(`User ${userData.email} created successfully.`);
         }
     } catch (error) {
         console.error("Error seeding data:", error);

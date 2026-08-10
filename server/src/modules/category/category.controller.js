@@ -10,6 +10,7 @@ import {
 import {
     LOG_CONTEXT,
 } from "../../shared/constants/index.js";
+import { successResponse } from "../../shared/utils/response.js";
 
 export const createCategory = asyncHandler(
     async (req, res) => {

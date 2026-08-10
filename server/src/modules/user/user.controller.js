@@ -24,7 +24,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
     return successResponse(res, {
         statusCode: 200,
-        data: user,
+        data: users,
         message: "Users fetched successfully"
     });
 });

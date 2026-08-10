@@ -4,12 +4,12 @@ import type { GeneralSettingsAPIResponse, GeneralSettingsFormData } from "@/type
 export const SettingsService = {
 
     getGeneral: async () => {
-        const { data } = await api.get<GeneralSettingsAPIResponse>("/settings/general");
+        const { data } = await api.get<GeneralSettingsAPIResponse>("/settings/");
         return data;
     },
 
     updateGeneral: async (payload: GeneralSettingsFormData) => {
-        const { data } = await api.put<GeneralSettingsAPIResponse>("/settings/general", payload);
+        const { data } = await api.put<GeneralSettingsAPIResponse>("/settings/", payload);
         return data;
     }
 };
