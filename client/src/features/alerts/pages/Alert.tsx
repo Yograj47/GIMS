@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ShieldAlert, Activity } from "lucide-react";
 import { DataTable } from "@/components/common/DataTable";
 import { getAlertColumns } from "../components/AlertColumns";
-import { useAlerts } from "../hooks/UseAlerts";
+import { useAlerts } from "../hooks/useAlerts";
 
 const AlertPage: React.FC = () => {
     const {

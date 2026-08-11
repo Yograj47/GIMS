@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useGlobalStore } from '@/store/globalStore';
 import type { WeeklyMovementData } from '@/types/analytics';
-import { AnalyticsService } from '../../../service/AnalyticsService';
+import { AnalyticsService } from '../api/analytics.service';
 
 export const useAnalytics = () => {
     const [weeklyStats, setWeeklyStats] = useState<WeeklyMovementData[]>([]);
@@ -10,14 +9,14 @@ export const useAnalytics = () => {
         lowItems: 0,
         todayFlow: { value: 0, trend: "0", status: "UP" }
     });
-    const { setLoading, isLoading } = useGlobalStore();
+    const [isLoading, setLoading] = useState(false);
 
     const fetchWeeklyStats = useCallback(async () => {
         try {
             setLoading(true);
             const response = await AnalyticsService.getWeeklyMovements();
-            if (response.status === "Success") {
-                setWeeklyStats(response.data);
+            if (response.success) {
+                setWeeklyStats(response.data as WeeklyMovementData[]);
                 return response.data;
             }
         } catch (error) {
@@ -30,7 +29,7 @@ export const useAnalytics = () => {
         try {
             setLoading(true)
             const response = await AnalyticsService.getSummary();
-            if (response.status === "Success") {
+            if (response.success) {
                 setSummary(response.data);
                 return response.data;
             }

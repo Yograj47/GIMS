@@ -1,5 +1,5 @@
 import { AdminGate } from "@/features/auth/components/AdminGate";
-import type { UnitData } from "@/types/Unit";
+import type { UnitData } from "@/types/unit";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Edit3, Trash2, Scale, Layers } from "lucide-react";
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, LayoutGrid } from "lucide-react";
 import { useCategories } from "../hooks/useCategories";
 import CategoryFormModal from "../components/CategoryFormModal";
-import type { CategoryData, CategoryFormData } from "@/types/Category";
+import type { CategoryData, CategoryFormData } from "@/types/category";
 import { DataTable } from "@/components/common/DataTable";
 import { getCategoryColumns } from "../components/CategoryColumns";
 import { DeleteConfirmDialog } from "@/lib/deleteAlert";

@@ -4,8 +4,8 @@ import Select from "react-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Item } from "@/types/Transaction";
-import type { SellingUnit } from "@/types/Product";
+import type { Item } from "@/types/transaction";
+import type { SellingUnit } from "@/types/product";
 import { useProducts } from "@/features/products/hooks/useProducts";
 
 interface ProductItemModalProps {

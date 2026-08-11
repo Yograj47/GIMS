@@ -1,12 +1,10 @@
+import type { PaginationMetadata } from "./pagination";
+import type { SupplierProduct } from "./supplier";
+
 export interface ApiResponse<T = unknown> {
     success: boolean;
     message?: string;
     data?: T;
-    meta?: {
-        totalItems?: number;
-        itemsPerPage?: number;
-        currentPage?: number;
-        totalPages?: number;
-        paginationDisabled?: boolean;
-    };
+    productData?: SupplierProduct[];
+    meta?: PaginationMetadata;
 }

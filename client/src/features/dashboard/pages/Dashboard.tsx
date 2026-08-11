@@ -10,7 +10,7 @@ import LiveFeedCard from "../components/LiveFeedCard";
 import AlertCard from "../components/AlertCard";
 import { useActivityLogs } from "@/features/activityLogs/hooks/useActivityLogs";
 import { chartData, chartOptions } from "@/lib/dashboardCharts";
-import { useAlerts } from "@/features/alerts/hooks/UseAlerts";
+import { useAlerts } from "@/features/alerts/hooks/useAlerts";
 import { useAnalytics } from "../hooks/useAnalystics";
 import { useAuthStore } from "@/store/authStore";
 

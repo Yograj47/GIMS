@@ -1,29 +1,28 @@
 import { useState, useCallback } from 'react';
-import { useGlobalStore } from '@/store/globalStore';
-import { ActivityLogService } from '../../../service/ActivityLogService';
-import type { ActivityAPIResponse, ActivityLogData } from '@/types/ActivityLog';
+import { ActivityLogService } from '../api/activity-log.service';
+import type { ActivityLogData } from '@/types/activity-log';
 import api from '@/lib/api';
-import type { PaginationMetadata } from '@/types/Pagination';
+import type { PaginationMetadata } from '@/types/pagination';
+import type { ApiResponse } from '@/types/api';
 
 export const useActivityLogs = () => {
     const [logs, setLogs] = useState<ActivityLogData[]>([]);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
-    const { setLoading, isLoading } = useGlobalStore();
+    const [isLoading, setLoading] = useState(false);
 
-    // 1. Fetch Logs (Supports Dashboard live feed and full Audit page)
     const fetchLogs = useCallback(async (
         page?: number, limit?: number, type?: string, search?: string, startDate?: string, endDate?: string) => {
         try {
             setLoading(true);
-            const { data } = await api.get<ActivityAPIResponse>("/activity-logs", {
+            const { data } = await api.get<ApiResponse>("/activity-logs", {
                 params: {
                     page, limit, type, search, startDate, endDate, paginate: true
                 }
             });
 
-            if (data.status === "Success") {
-                setLogs(data.data);
-                setMeta(data.meta || null);
+            if (data.success) {
+                setLogs(data.data as ActivityLogData[]);
+                setMeta(data.meta ? (data.meta as PaginationMetadata) : null);
             }
         } catch (error) {
         } finally {
@@ -31,12 +30,11 @@ export const useActivityLogs = () => {
         }
     }, [setLoading]);
 
-    // 2. Specialized Fetch for Dashboard (Recent 5)
     const fetchRecentLogs = useCallback(async (limit: number = 5) => {
         try {
             const response = await ActivityLogService.getRecent(limit);
-            if (response.status === "Success") {
-                setLogs(response.data);
+            if (response.success) {
+                setLogs(response.data as ActivityLogData[]);
                 return true;
             }
         } finally {

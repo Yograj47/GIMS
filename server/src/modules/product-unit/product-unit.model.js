@@ -53,6 +53,6 @@ productUnitSchema.index(
 );
 
 export default mongoose.model(
-    "ProductUnit",
+    "ProductUnits",
     productUnitSchema
 );

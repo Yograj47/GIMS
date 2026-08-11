@@ -1,4 +1,4 @@
-import type { AlertData } from "@/types/Alert";
+import type { AlertData } from "@/types/alert";
 import { create } from "zustand";
 
 interface AlertState {

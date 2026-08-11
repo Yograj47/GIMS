@@ -12,11 +12,39 @@ export const findSupplierById = async (
     return Supplier.findById(id);
 };
 
-export const findSuppliers = async (
-    query = {},
-    options = {}
+export const findSupplierByName = async (
+    name
 ) => {
-    return Supplier.find(query, null, options);
+    return Supplier.findOne({ name });
+};
+
+export const findSuppliers = async (
+    query,
+    {
+        page = 1,
+        limit = 10,
+        paginate = true,
+    } = {}
+) => {
+    let itemsQuery = Supplier.find(query)
+        .sort({ createdAt: -1 });
+
+    if (paginate) {
+        itemsQuery = itemsQuery
+            .skip((page - 1) * limit)
+            .limit(limit);
+    }
+
+    const [suppliers, totalItems] =
+        await Promise.all([
+            itemsQuery,
+            Supplier.countDocuments(query),
+        ]);
+
+    return {
+        suppliers,
+        totalItems,
+    };
 };
 
 export const createSupplier = async (

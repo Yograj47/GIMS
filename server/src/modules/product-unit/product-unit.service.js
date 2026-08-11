@@ -18,10 +18,30 @@ import {
     findUnitById,
 } from "../unit/unit.repository.js";
 
-export const find = async () => {
-    return findProductUnits();
-};
+export const find = async ({
+    page = 1,
+    limit = 10,
+    search = "",
+    paginate = true,
+}) => {
+    const {
+        items,
+        totalItems,
+    } = await findProductUnits({
+        page,
+        limit,
+        search,
+        paginate,
+    });
 
+    return {
+        items,
+        totalItems,
+        page,
+        limit,
+        paginate,
+    };
+};
 export const create = async (
     payload
 ) => {

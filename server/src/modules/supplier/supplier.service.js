@@ -7,6 +7,7 @@ import {
     findSuppliers,
     updateSupplierById,
     deleteSupplierById,
+    findSupplierByName,
 } from "./supplier.repository.js";
 
 import {
@@ -40,8 +41,47 @@ export const create = async (payload) => {
     return createSupplier(payload);
 };
 
-export const findAll = async (query) => {
-    return findSuppliers(query);
+export const findAll = async ({
+    page = 1,
+    limit = 10,
+    search = "",
+    paginate = true,
+}) => {
+    const query = {};
+
+    if (search) {
+        query.name = {
+            $regex: search,
+            $options: "i",
+        };
+    }
+
+    const {
+        suppliers,
+        totalItems,
+    } = await findSuppliers(query, {
+        page,
+        limit,
+        paginate,
+    });
+
+    return {
+        suppliers,
+        meta: paginate
+            ? {
+                totalItems,
+                currentPage: page,
+                totalPages: Math.ceil(
+                    totalItems / limit
+                ),
+                itemsPerPage:
+                    suppliers.length,
+            }
+            : {
+                totalItems,
+                paginationDisabled: true,
+            },
+    };
 };
 
 export const findById = async (id) => {

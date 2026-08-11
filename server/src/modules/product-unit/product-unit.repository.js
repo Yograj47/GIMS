@@ -1,9 +1,124 @@
 import ProductUnit from "./product-unit.model.js";
 
 export const findProductUnits = async (
-    filter = {}
+    {
+        page = 1,
+        limit = 10,
+        search = "",
+        paginate = true,
+    }
 ) => {
-    return ProductUnit.find(filter);
+    const pipeline = [
+        {
+            $lookup: {
+                from: "products",
+                localField: "productId",
+                foreignField: "_id",
+                as: "product",
+            },
+        },
+        {
+            $unwind: "$product",
+        },
+    ];
+
+    if (search) {
+        pipeline.push({
+            $match: {
+                "product.name": {
+                    $regex: search,
+                    $options: "i",
+                },
+            },
+        });
+    }
+
+    pipeline.push(
+        {
+            $lookup: {
+                from: "units",
+                localField: "unitId",
+                foreignField: "_id",
+                as: "unit",
+            },
+        },
+        {
+            $unwind: "$unit",
+        },
+        {
+            $group: {
+                _id: "$productId",
+
+                productName: {
+                    $first: "$product.name",
+                },
+
+                conversions: {
+                    $push: {
+                        _id: "$_id",
+
+                        unitName:
+                            "$unit.name",
+
+                        shortForm:
+                            "$unit.shortForm",
+
+                        multiplier:
+                            "$multiplier",
+
+                        isDefault:
+                            "$isDefault",
+
+                        isFractionable:
+                            "$isFractionable",
+
+                        isActive:
+                            "$isActive",
+                    },
+                },
+            },
+        },
+        {
+            $sort: {
+                productName: 1,
+            },
+        }
+    );
+
+    let totalItems = 0;
+
+    if (paginate) {
+        const countResult =
+            await ProductUnit.aggregate([
+                ...pipeline,
+                {
+                    $count: "total",
+                },
+            ]);
+
+        totalItems =
+            countResult[0]?.total || 0;
+
+        pipeline.push(
+            {
+                $skip:
+                    (page - 1) * limit,
+            },
+            {
+                $limit: limit,
+            }
+        );
+    }
+
+    const items =
+        await ProductUnit.aggregate(
+            pipeline
+        );
+
+    return {
+        items,
+        totalItems,
+    };
 };
 
 export const findProductUnitById = async (

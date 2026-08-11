@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { ActivityLogData } from "@/types/ActivityLog";
+import type { ActivityLogData } from "@/types/activity-log";
 import { cn } from "@/lib/utils";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 

@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { AlertService } from '../../../service/AlertService';
-import type { AlertData } from '@/types/Alert';
-import type { PaginationMetadata } from '@/types/Pagination';
+import { AlertService } from '../api/alert.service';
+import type { AlertData } from '@/types/alert';
+import type { PaginationMetadata } from '@/types/pagination';
 
 export const useAlerts = () => {
     const {
@@ -25,8 +25,8 @@ export const useAlerts = () => {
             setLoading(true);
             const response = await AlertService.getAllAlerts(page, limit, all);
 
-            if (response.status === "Success") {
-                setAlerts(response.data);
+            if (response.success) {
+                setAlerts(response.data as AlertData[]);
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
@@ -39,7 +39,7 @@ export const useAlerts = () => {
     const fetchActiveAlerts = useCallback(async () => {
         try {
             const response = await AlertService.getActiveAlerts();
-            if (response.status === "Success") {
+            if (response.success) {
                 setActiveAlerts(response.data as AlertData[]);
                 return response.data;
             }
@@ -50,7 +50,7 @@ export const useAlerts = () => {
         try {
             setLoading(true);
             const response = await AlertService.acknowledgeAlert(id);
-            if (response.status === "Success") {
+            if (response.success) {
                 acknowledgeAlertLocally(id);
                 notify.success("Alert acknowledged");
                 return true;

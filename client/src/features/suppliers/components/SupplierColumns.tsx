@@ -1,6 +1,6 @@
 import { Edit3, MapPin, Phone } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { SupplierData } from "@/types/Supplier";
+import type { SupplierData } from "@/types/supplier";
 import type { NavigateFunction } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 

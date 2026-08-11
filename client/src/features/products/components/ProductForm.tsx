@@ -1,9 +1,9 @@
 import { useForm, type Resolver, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { productSchema, type ProductFormData, type ProductData } from "@/types/Product";
+import { productSchema, type ProductFormData, type ProductData } from "@/types/product";
 import { TrendingUp, BadgeIndianRupee, Package, AlertCircle, Percent } from "lucide-react";
-import type { CategoryData } from "@/types/Category";
-import type { UnitData } from "@/types/Unit";
+import type { CategoryData } from "@/types/category";
+import type { UnitData } from "@/types/unit";
 import { useEffect } from "react";
 import Select from "react-select";
 

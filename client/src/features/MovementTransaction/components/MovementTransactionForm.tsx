@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ProductItemModal from "./ProductItemModal";
 
-import { transactionSchema, type Item, type TransactionFormData } from "@/types/Transaction";
+import { transactionSchema, type Item, type TransactionFormData } from "@/types/transaction";
 import { useMovementTransactions } from "../hooks/useMovementTransactions";
 import { cn } from "@/lib/utils";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";

@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import type { AlertData } from "@/types/Alert";
-import type { GeneralSettingsData } from "@/types/Setting";
-import { SettingsService } from "@/service/SettingService";
+import type { AlertData } from "@/types/alert";
+import type { GeneralSettingsData } from "@/types/setting";
+import { SettingsService } from "@/features/settings/api/setting.service";
 
 interface GlobalState {
   isLoading: boolean;

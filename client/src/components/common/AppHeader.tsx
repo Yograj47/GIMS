@@ -7,7 +7,7 @@ import {
     ExternalLink,
     Loader2
 } from "lucide-react";
-import { useAlerts } from "@/features/alerts/hooks/UseAlerts";
+import { useAlerts } from "@/features/alerts/hooks/useAlerts";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";

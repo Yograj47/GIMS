@@ -45,4 +45,4 @@ alertSchema.index(
     { unique: true, partialFilterExpression: { resolved: false } }
 );
 
-export default mongoose.model("Alert", alertSchema)
+export default mongoose.model("Alerts", alertSchema)

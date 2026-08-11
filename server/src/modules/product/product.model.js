@@ -10,19 +10,19 @@ const productSchema = new mongoose.Schema(
 
         categoryId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Category",
+            ref: "Categories",
             required: [true, "Category is required"],
         },
 
         unitId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Unit",
+            ref: "Units",
             required: [true, "Unit is required"],
         },
 
         supplierId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Supplier",
+            ref: "Suppliers",
             default: null,
         },
 
@@ -61,6 +61,6 @@ const productSchema = new mongoose.Schema(
 );
 
 export default mongoose.model(
-    "Product",
+    "Products",
     productSchema
 );

@@ -63,7 +63,7 @@ settingSchema.pre("save", async function () {
     }
 });
 const Setting = mongoose.model(
-    "Setting",
+    "Settings",
     settingSchema
 );
 

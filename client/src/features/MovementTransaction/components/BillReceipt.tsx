@@ -1,5 +1,5 @@
 import { useGlobalStore } from "@/store/globalStore";
-import type { TransactionData } from "@/types/Transaction";
+import type { TransactionData } from "@/types/transaction";
 import { useEffect } from "react";
 
 export const BillReceipt = ({ txn }: { txn: TransactionData }) => {

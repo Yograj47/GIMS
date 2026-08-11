@@ -4,7 +4,7 @@ const activityLogSchema = new mongoose.Schema(
     {
         performedBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "Users",
             required: true,
         },
 
@@ -40,6 +40,6 @@ activityLogSchema.index({ type: 1 });
 activityLogSchema.index({ action: 1 });
 
 export default mongoose.model(
-    "ActivityLog",
+    "ActivityLogs",
     activityLogSchema
 );

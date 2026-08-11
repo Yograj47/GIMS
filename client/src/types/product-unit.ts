@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { PaginationMetadata } from "./Pagination";
 
 export const productUnitSchema = z.object({
     productId: z
@@ -56,9 +55,3 @@ export interface GroupedProductUnit {
     }>;
 }
 
-export interface ProductUnitAPIResponse<T = ProductUnitData | ProductUnitData[] | GroupedProductUnit[]> {
-    status: string;
-    message?: string;
-    data: T;
-    meta?: PaginationMetadata;
-}

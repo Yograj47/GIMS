@@ -4,7 +4,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
 import Select, { type StylesConfig } from 'react-select'; 
 import { X, Scale, AlertCircle, Loader2 } from 'lucide-react';
-import { productUnitSchema, type ProductUnitFormData } from '@/types/ProductUnit';
+import { productUnitSchema, type ProductUnitFormData } from '@/types/product-unit';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';

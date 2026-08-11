@@ -1,9 +1,12 @@
 import api from "@/lib/api";
-import type { ProductAPIResponse, ProductFormData } from "@/types/Product";
+import type { ApiResponse } from "@/types/api";
+import type { ProductFormData } from "@/types/product";
+
+const baseUrl = "/products";
 
 export const productService = {
     getAll: async (page?: number, limit?: number, search?: string, category?: string, stockLevel?: string, all?: boolean) => {
-        const { data } = await api.get<ProductAPIResponse>("/products", {
+        const { data } = await api.get<ApiResponse>(baseUrl, {
             params: all
                 ? { paginate: false, search, category, stockLevel }
                 : { page, limit, search, category, stockLevel }
@@ -12,22 +15,22 @@ export const productService = {
     },
 
     getById: async (id: string) => {
-        const { data } = await api.get<ProductAPIResponse>(`/products/${id}`);
+        const { data } = await api.get<ApiResponse>(`${baseUrl}/${id}`);
         return data;
     },
 
     create: async (payload: ProductFormData) => {
-        const { data } = await api.post<ProductAPIResponse>('/products', payload);
+        const { data } = await api.post<ApiResponse>(baseUrl, payload);
         return data;
     },
 
     updateById: async (id: string, payload: ProductFormData) => {
-        const { data } = await api.put<ProductAPIResponse>(`/products/${id}`, payload);
+        const { data } = await api.put<ApiResponse>(`${baseUrl}/${id}`, payload);
         return data;
     },
 
     delete: async (id: string) => {
-        const { data } = await api.delete(`/products/${id}`);
+        const { data } = await api.delete(`${baseUrl}/${id}`);
         return data;
     }
 };

@@ -1,25 +1,23 @@
 import { useState, useCallback } from 'react';
-import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { productUnitService } from '../../../service/ProductUnitService';
 import type {
     GroupedProductUnit,
     ProductUnitFormData,
-} from '@/types/ProductUnit';
-import type { PaginationMetadata } from '@/types/Pagination';
+} from '@/types/product-unit';
+import type { PaginationMetadata } from '@/types/pagination';
+import { productUnitService } from '@/features/ProductUnit/api/product-unit.service';
 
 export const useProductUnits = () => {
     const [groupedUnits, setGroupedUnits] = useState<GroupedProductUnit[]>([]);
-    const { setLoading, isLoading } = useGlobalStore();
+    const [isLoading, setLoading] = useState(false);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
 
-    // 1. Fetch Grouped Product Units (Aggregation)
     const fetchGroupedUnits = useCallback(async (page?: number, limit?: number, search?: string, all?: boolean) => {
         try {
             setLoading(true);
             const response = await productUnitService.getGroupedUnits(page, limit, search, all);
-            if (response.status === "Success") {
+            if (response.success) {
                 setGroupedUnits(response.data as GroupedProductUnit[]);
                 setMeta(all ? null : (response.meta || null));
             }
@@ -29,12 +27,11 @@ export const useProductUnits = () => {
         }
     }, [setLoading]);
 
-    // 2. Create Product Unit Conversion
     const addProductUnit = async (payload: ProductUnitFormData) => {
         try {
             setLoading(true);
             const response = await productUnitService.create(payload);
-            if (response.status === "Success") {
+            if (response.success) {
                 await fetchGroupedUnits();
                 notify.success("Unit conversion added");
                 return true;
@@ -45,12 +42,11 @@ export const useProductUnits = () => {
         return false;
     };
 
-    // 3. Update Product Unit (Multiplier, Default, etc.)
     const updateProductUnit = async (id: string, payload: Partial<ProductUnitFormData>) => {
         try {
             setLoading(true);
             const response = await productUnitService.update(id, payload);
-            if (response.status === "Success") {
+            if (response.success) {
                 await fetchGroupedUnits();
                 notify.success("Conversion updated");
                 return true;
@@ -61,12 +57,11 @@ export const useProductUnits = () => {
         return false;
     };
 
-    // 4. Remove Product Unit
     const removeProductUnit = async (id: string, productId: string) => {
         try {
             setLoading(true);
             const response = await productUnitService.delete(id);
-            if (response.status === "Success") {
+            if (response.success) {
                 setGroupedUnits((prev) =>
                     prev.map((group) => {
                         if (group._id === productId) {

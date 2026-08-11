@@ -44,6 +44,6 @@ const supplierSchema = new mongoose.Schema(
 );
 
 export default mongoose.model(
-    "Supplier",
+    "Suppliers",
     supplierSchema
 );
