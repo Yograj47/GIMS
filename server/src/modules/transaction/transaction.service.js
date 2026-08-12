@@ -26,6 +26,14 @@ import {
     checkProductStock,
 } from "../alert/alert.service.js";
 
+import {
+    emitToRoom,
+} from "../../shared/socket/emitter.js";
+
+import {
+    SOCKET_EVENTS,
+} from "../../shared/socket/socketEvents.js";
+
 export const create = async (
     payload,
     userId
@@ -33,9 +41,12 @@ export const create = async (
     const session =
         await mongoose.startSession();
 
-    session.startTransaction();
+    let transaction;
+    let affectedProducts = [];
 
     try {
+        session.startTransaction();
+
         const isStockIn = [
             "Purchase",
             "Return",
@@ -95,34 +106,26 @@ export const create = async (
             movements.push({
                 productId:
                     product._id,
-
                 performedBy:
                     userId,
-
                 unitId:
                     item.unitId,
-
                 multiplier:
                     item.multiplier,
-
                 quantity:
                     stockImpact,
-
                 movementType:
                     isStockIn
                         ? "IN"
                         : "OUT",
-
                 reason:
                     payload.transactionType,
-
                 oldQuantity,
-
                 newQuantity,
             });
         }
 
-        const [transaction] =
+        [transaction] =
             await createTransaction(
                 payload,
                 session
@@ -139,12 +142,7 @@ export const create = async (
             );
         }
 
-        await session.commitTransaction();
-
-        const settings =
-            await findSettings();
-
-        const affectedProducts = [
+        affectedProducts = [
             ...new Set(
                 movements.map((m) =>
                     m.productId.toString()
@@ -152,33 +150,71 @@ export const create = async (
             ),
         ];
 
-        try {
-            await Promise.all(
-                affectedProducts.map(
-                    (productId) =>
-                        checkProductStock(
-                            productId,
-                            userId,
-                            settings
-                        )
-                )
-            );
-        } catch (error) {
-            logger.error(
-                "Alert processing failed",
-                error
-            );
+        await session.commitTransaction();
+    } catch (error) {
+        if (
+            session.inTransaction()
+        ) {
+            await session.abortTransaction();
         }
 
-        return transaction;
-    } catch (error) {
-        await session.abortTransaction();
         throw error;
     } finally {
-        session.endSession();
+        await session.endSession();
     }
-};
 
+    // -----------------------------
+    // AFTER COMMIT
+    // -----------------------------
+
+    try {
+        const settings =
+            await findSettings();
+
+        await Promise.all(
+            affectedProducts.map(
+                (productId) =>
+                    checkProductStock(
+                        productId,
+                        userId,
+                        settings
+                    )
+            )
+        );
+    } catch (error) {
+        logger.error(
+            "Alert processing failed",
+            error
+        );
+    }
+
+    try {
+        emitToRoom(
+            "role:owner",
+            SOCKET_EVENTS.STOCK_MOVEMENT_CREATED,
+            {
+                transactionId:
+                    transaction._id,
+            }
+        );
+
+        emitToRoom(
+            "role:owner",
+            SOCKET_EVENTS.INVENTORY_UPDATED,
+            {
+                productIds:
+                    affectedProducts,
+            }
+        );
+    } catch (error) {
+        logger.error(
+            "Socket emit failed",
+            error
+        );
+    }
+
+    return transaction;
+};
 export const find = async ({
     page = 1,
     limit = 100,

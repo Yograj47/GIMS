@@ -190,20 +190,28 @@ export const checkProductStock =
         }
 
         if (!alertType) {
-            const result = await alertRepo.resolveAlerts(
-                {
-                    productId:
-                        product._id,
-                    resolved:
-                        false,
-                }
-            );
+            const alertsToResolve =
+                await alertRepo.findAlerts({
+                    productId: product._id,
+                    resolved: false,
+                });
+
+            const result =
+                await alertRepo.resolveAlerts({
+                    productId: product._id,
+                    resolved: false,
+                });
 
             if (result.modifiedCount > 0) {
-                emitEvent(
-                    SOCKET_EVENTS.ALERT_RESOLVED,
-                    {
-                        productId: product._id,
+                alertsToResolve.forEach(
+                    (alert) => {
+                        emitEvent(
+                            SOCKET_EVENTS.ALERT_RESOLVED,
+                            {
+                                alertId:
+                                    alert._id.toString(),
+                            }
+                        );
                     }
                 );
             }
