@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { UserData } from "@/types/user";
 import { userService } from "@/features/auth/api/user.service";
-import { socket } from "@/socket/socket";
+import { socket } from "@/features/socket/socket";
 
 interface AuthState {
     user: UserData | null;

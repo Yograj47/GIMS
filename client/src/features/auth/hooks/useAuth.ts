@@ -11,7 +11,7 @@ import type {
     ResetPasswordPayload,
     ForgotPasswordFormData,
 } from "@/types/auth";
-import { socket } from "@/socket/socket";
+import { socket } from "@/features/socket/socket";
 
 export const useAuth = () => {
     const {

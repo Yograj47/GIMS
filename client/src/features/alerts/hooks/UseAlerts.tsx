@@ -1,76 +1,139 @@
-import { useCallback, useState } from 'react';
-import { useGlobalStore } from '@/store/globalStore';
-import { notify } from '@/lib/toast';
-import { AlertService } from '../api/alert.service';
-import type { AlertData } from '@/types/alert';
-import type { PaginationMetadata } from '@/types/pagination';
+import { useCallback } from "react";
+
+import { notify } from "@/lib/toast";
+
+import { AlertService }
+    from "../api/alert.service";
+
+import { useAlertStore }
+    from "../store/alert.store";
+
+import type {
+    AlertData,
+} from "@/types/alert";
+
+import type {
+    PaginationMetadata,
+} from "@/types/pagination";
+
+import { useState } from "react";
 
 export const useAlerts = () => {
-    const {
-        activeAlerts,
-        alerts,
-        setActiveAlerts,
-        setAlerts,
-        acknowledgeAlertLocally,
-        setLoading,
-        isLoading
-    } = useGlobalStore();
+    const alerts =
+        useAlertStore(
+            (s) => s.alerts
+        );
 
-    const [meta, setMeta] = useState<PaginationMetadata | null>(null);
+    const setAlerts =
+        useAlertStore(
+            (s) => s.setAlerts
+        );
 
+    const updateAlert =
+        useAlertStore(
+            (s) => s.updateAlert
+        );
 
-    const fetchAllAlerts = useCallback(async (page?: number, limit?: number, all?: boolean) => {
+    const [meta, setMeta] =
+        useState<PaginationMetadata | null>(
+            null
+        );
 
-        try {
-            setLoading(true);
-            const response = await AlertService.getAllAlerts(page, limit, all);
+    const [isLoading, setLoading] =
+        useState(false);
 
-            if (response.success) {
-                setAlerts(response.data as AlertData[]);
-                setMeta(all ? null : (response.meta || null));
-                return true;
+    const fetchAllAlerts =
+        useCallback(
+            async (
+                page?: number,
+                limit?: number,
+                all?: boolean
+            ) => {
+                try {
+                    setLoading(true);
+
+                    const response =
+                        await AlertService.getAllAlerts(
+                            page,
+                            limit,
+                            all
+                        );
+
+                    if (
+                        response.success
+                    ) {
+                        setAlerts(
+                            response.data as AlertData[]
+                        );
+
+                        setMeta(
+                            all
+                                ? null
+                                : response.meta ||
+                                null
+                        );
+
+                        return true;
+                    }
+                } finally {
+                    setLoading(false);
+                }
+
+                return false;
+            },
+            [setAlerts]
+        );
+
+    const acknowledgeAlert =
+        async (id: string) => {
+            try {
+                setLoading(true);
+
+                const response =
+                    await AlertService.acknowledgeAlert(
+                        id
+                    );
+
+                if (
+                    response.success
+                ) {
+                    updateAlert(
+                        response.data as AlertData
+                    );
+
+                    notify.success(
+                        "Alert acknowledged"
+                    );
+
+                    return true;
+                }
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-        } finally {
-            setLoading(false);
-        }
-    }, [setLoading]);
 
-    const fetchActiveAlerts = useCallback(async () => {
-        try {
-            const response = await AlertService.getActiveAlerts();
-            if (response.success) {
-                setActiveAlerts(response.data as AlertData[]);
-                return response.data;
-            }
-        } finally { }
-    }, [setActiveAlerts]);
-
-    const acknowledgeAlert = async (id: string) => {
-        try {
-            setLoading(true);
-            const response = await AlertService.acknowledgeAlert(id);
-            if (response.success) {
-                acknowledgeAlertLocally(id);
-                notify.success("Alert acknowledged");
-                return true;
-            }
-        } finally {
-            setLoading(false);
-        }
-        return false;
-    };
-
+            return false;
+        };
 
     return {
         alerts,
-        activeAlerts,
-        activeCount: activeAlerts.filter(a => !a.acknowledged).length,
-        fetchActiveAlerts,
-        acknowledgeAlert,
-        fetchAllAlerts,
-        isLoading,
-        meta
-    };
 
+        activeAlerts:
+            alerts.filter(
+                (alert) =>
+                    !alert.resolved
+            ),
+
+        activeCount:
+            alerts.filter(
+                (alert) =>
+                    !alert.acknowledged &&
+                    !alert.resolved
+            ).length,
+
+        fetchAllAlerts,
+        acknowledgeAlert,
+
+        isLoading,
+        meta,
+    };
 };

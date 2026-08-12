@@ -20,19 +20,21 @@ function AppHeader() {
     const navigate = useNavigate();
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [showNotifications, setShowNotifications] = useState(false);
-    const { activeAlerts, fetchActiveAlerts, isLoading, acknowledgeAlert } = useAlerts();
-    const { fetchSettings, settings } = useGlobalStore();
+    const {
+        activeAlerts,
+        isLoading,
+        acknowledgeAlert
+    } = useAlerts(); const { fetchSettings, settings } = useGlobalStore();
     const { user } = useAuthStore();
 
     useEffect(() => {
-        fetchActiveAlerts();
         if (!settings) {
             fetchSettings();
         }
-        const interval = setInterval(() => fetchActiveAlerts(), 60000);
-        return () => clearInterval(interval);
-    }, [fetchActiveAlerts, fetchSettings, settings]);
-
+    }, [
+        fetchSettings,
+        settings
+    ]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -50,6 +52,11 @@ function AppHeader() {
         await acknowledgeAlert(id);
     };
 
+    const unreadCount =
+        activeAlerts.filter(
+            (a) => !a.acknowledged
+        ).length;
+
     return (
         <header className="w-full h-16 flex items-center justify-between px-8">
             {/* Left: Branch Status Chip */}
@@ -65,14 +72,18 @@ function AppHeader() {
                 {/* Notifications */}
                 <div className="relative" ref={dropdownRef}>
                     <button
-                        onClick={() => setShowNotifications(!showNotifications)}
+                        onClick={() =>
+                            setShowNotifications(
+                                (prev) => !prev
+                            )
+                        }
                         className={cn(
                             "relative p-2.5 rounded-xl transition-all",
                             showNotifications ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:bg-slate-100"
                         )}
                     >
                         <Bell size={20} />
-                        {activeAlerts.filter(a => !a.acknowledged).length > 0 && (
+                        {unreadCount > 0 && (
                             <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 border-2 border-white" />
                         )}
                     </button>
@@ -94,7 +105,7 @@ function AppHeader() {
                                             key={alert._id}
                                             className={cn(
                                                 "p-4 border-b border-slate-300 hover:bg-slate-50/80 transition-colors group relative cursor-default",
-                                                alert.acknowledged && "opacity-50 bg-amber-50/30" 
+                                                alert.acknowledged && "opacity-50 bg-amber-50/30"
                                             )}
                                         >
                                             <div className="flex gap-3">
@@ -155,7 +166,7 @@ function AppHeader() {
                         <p className="text-[9px] font-bold text-blue-600 uppercase mt-1 tracking-tighter">{user?.role}</p>
                     </div>
                     <div className="w-9 h-9 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                        {user?.name[0]}
+                        {user?.name?.[0] ?? "U"}
                     </div>
                 </Link>
             </div>

@@ -3,28 +3,38 @@ import { ShieldAlert, Activity } from "lucide-react";
 import { DataTable } from "@/components/common/DataTable";
 import { getAlertColumns } from "../components/AlertColumns";
 import { useAlerts } from "../hooks/useAlerts";
+import { useAlertStore } from "../store/alert.store";
 
 const AlertPage: React.FC = () => {
     const {
         alerts,
+        meta,
+        isLoading,
         fetchAllAlerts,
         acknowledgeAlert,
-        isLoading,
-        meta,
-        activeCount,
-        fetchActiveAlerts
     } = useAlerts();
 
+    const activeCount = useAlertStore(
+        (s) =>
+            s.alerts.filter(
+                (a) =>
+                    !a.acknowledged &&
+                    !a.resolved
+            ).length
+    );
+    
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchAllAlerts(pagination.pageIndex + 1, pagination.pageSize);
-            fetchActiveAlerts();
-        }, 400);
-        return () => clearTimeout(timer);
-    }, [fetchAllAlerts, pagination.pageIndex, pagination.pageSize, fetchActiveAlerts]);
-
+        fetchAllAlerts(
+            pagination.pageIndex + 1,
+            pagination.pageSize
+        );
+    }, [
+        fetchAllAlerts,
+        pagination.pageIndex,
+        pagination.pageSize,
+    ]);
     return (
         <div className="h-full animate-in fade-in duration-500">
             <div className="max-w-400 mx-auto space-y-6">

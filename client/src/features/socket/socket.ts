@@ -5,5 +5,11 @@ export const socket = io(
     {
         autoConnect: false,
         withCredentials: true,
+
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+
+        timeout: 10000,
     }
 );

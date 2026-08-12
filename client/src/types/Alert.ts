@@ -1,5 +1,3 @@
-import type { PaginationMetadata } from "./pagination";
-
 export type AlertType = "low-stock" | "out-of-stock" | "price-change" | "threshold-reached";
 export type AlertSeverity = "info" | "warning" | "critical";
 
@@ -23,11 +21,4 @@ export interface AlertData {
     resolvedAt?: string | Date;
     createdAt: string;
     updatedAt: string;
-}
-
-export interface AlertAPIResponse {
-    status: string;
-    data: AlertData[];
-    meta?: PaginationMetadata;
-    message?: string;
 }

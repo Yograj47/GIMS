@@ -46,7 +46,7 @@ import ProductUnitPage from "./features/ProductUnit/pages/ProductUnitPage";
 import ProfilePage from "./features/OtherPages/Profile";
 import Unauthorized from "./features/OtherPages/Unauthorized";
 import HelpPage from "./features/OtherPages/Helper";
-import { SocketProvider } from "./socket/sockerProvider";
+import { SocketProvider } from "./features/socket/socket.context";
 
 axios.defaults.withCredentials = true;
 
