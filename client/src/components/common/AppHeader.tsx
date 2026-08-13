@@ -101,7 +101,7 @@ function AppHeader() {
                             {/* List Body */}
                             <div className="max-h-95 overflow-y-auto">
                                 {activeAlerts.length > 0 ? (
-                                    activeAlerts.map((alert) => (
+                                    activeAlerts.map((alert : AlertData) => (
                                         <div
                                             key={alert._id}
                                             className={cn(

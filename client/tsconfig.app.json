@@ -13,12 +13,16 @@
       "vite/client"
     ],
     "skipLibCheck": true,
-    /* Path mappings directly relative to tsconfig location (no baseUrl needed) */
+
+    /* Path mappings (no baseUrl needed) */
     "paths": {
       "@/*": [
         "./src/*"
       ]
     },
+
+    "forceConsistentCasingInFileNames": true,
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -26,6 +30,7 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
