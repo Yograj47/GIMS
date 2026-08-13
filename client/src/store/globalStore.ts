@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import type { AlertData } from "@/types/Alert";
-import type { GeneralSettingsData } from "@/types/Setting";
-import { SettingsService } from "@/apis/SettingService";
+import type { AlertData } from "@/types/alert";
+import type { GeneralSettingsData } from "@/types/setting";
+import { SettingsService } from "@/features/settings/api/setting.service";
 
 interface GlobalState {
   isLoading: boolean;
@@ -32,7 +32,6 @@ export const useGlobalStore = create<GlobalState>((set) => ({
         set({ settings: response.data });
       }
     } catch (error) {
-      console.error("Failed to sync system settings:", error);
     }
   },
 
@@ -48,7 +47,7 @@ export const useGlobalStore = create<GlobalState>((set) => ({
         ? { ...a, acknowledged: true, acknowledgedAt: new Date().toISOString() }
         : a
     ),
-    activeAlerts: state.activeAlerts.map((a) =>  
+    activeAlerts: state.activeAlerts.map((a) =>
       a._id === id
         ? { ...a, acknowledged: true, acknowledgedAt: new Date().toISOString() }
         : a

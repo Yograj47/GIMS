@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { type ProductData } from "@/types/Product";
+import { type ProductData } from "@/types/product";
 import { Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";

@@ -1,6 +1,6 @@
 import { Edit3, AlertCircle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { ProductData } from "@/types/Product";
+import type { ProductData } from "@/types/product";
 import type { NavigateFunction } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useGlobalStore } from "@/store/globalStore";

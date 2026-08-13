@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useSuppliers } from "../hooks/useSuppliers";
 import { useEffect } from "react";
 import { Loading } from "@/lib/loader";
-import type { SupplierFormData } from "@/types/Supplier";
+import type { SupplierFormData } from "@/types/supplier";
 
 export default function ManageSupplier() {
     const { id } = useParams();

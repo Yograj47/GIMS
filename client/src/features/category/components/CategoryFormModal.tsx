@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, X, LayoutGrid, ShieldAlert } from "lucide-react";
-import { categorySchema, type CategoryFormData, type CategoryData } from "@/types/Category";
+import { categorySchema, type CategoryFormData, type CategoryData } from "@/types/category";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

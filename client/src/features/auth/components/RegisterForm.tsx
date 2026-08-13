@@ -3,28 +3,37 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, User, Mail, Lock, ShieldCheck } from "lucide-react";
-import { registerSchema, type RegisterFormData } from "@/types/Auth";
-import { useAuthStore } from "@/store/useAuth";
+import { registerSchema, type RegisterFormData } from "@/types/auth";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function RegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { registerUser, isLoading } = useAuthStore();
-  
+  const { register: registerUser, isLoading } = useAuth();
+
   const { handleSubmit, register, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
-    registerUser(data);
+  const navigate = useNavigate();
+
+  const onSubmit = async (
+    data: RegisterFormData
+  ) => {
+    const success = await registerUser(data);
+
+    if (success) {
+      navigate("/verify");
+    }
   };
 
   // Refined Midnight Input Classes
   const inputClasses = (error: any) => `
     w-full rounded-xl border pl-11 pr-4 py-2.5 text-sm transition-all outline-none
     focus:ring-4 focus:ring-blue-500/10 
-    ${error 
-      ? 'border-red-500/50 bg-red-500/5 text-red-200 placeholder:text-red-900/50' 
+    ${error
+      ? 'border-red-500/50 bg-red-500/5 text-red-200 placeholder:text-red-900/50'
       : 'border-white/5 bg-slate-950/40 text-slate-200 placeholder:text-slate-600 focus:border-blue-500/50 focus:bg-slate-950/60'}
   `;
 
@@ -86,7 +95,7 @@ function RegisterForm() {
           </div>
         </div>
       </div>
-      
+
       {(errors.password || errors.confirmPassword) && (
         <p className="text-[10px] font-bold text-red-400 ml-1 uppercase tracking-tight">
           {errors.password?.message || errors.confirmPassword?.message}

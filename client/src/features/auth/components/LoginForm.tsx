@@ -3,12 +3,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
-import { loginSchema, type LoginFormData } from "@/types/Auth";
-import { useAuthStore } from "@/store/useAuth";
+import { loginSchema, type LoginFormData } from "@/types/auth";
+import { useAuth } from "../hooks/useAuth";
 
 function LoginForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
-  const { loginUser, isLoading, } = useAuthStore()
+  const { login, isLoading, } = useAuth()
 
   const { handleSubmit, register, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -16,7 +16,7 @@ function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    await loginUser(data)
+    await login(data)
   };
 
   return (

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { PaginationMetadata } from "./Pagination";
 
 export const unitSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").trim(),
@@ -28,12 +27,5 @@ export interface UnitData {
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface UnitAPIResponse {
-  status: string;
-  message?: string;
-  data: UnitData | UnitData[];
-  meta?: PaginationMetadata;
 }
 

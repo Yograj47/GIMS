@@ -1,5 +1,3 @@
-import type { PaginationMetadata } from "./Pagination";
-
 export type MovementData = {
   _id: string;
   product: {
@@ -23,9 +21,3 @@ export type MovementData = {
   reason: string;
   createdAt: string;
 };
-
-export interface MovementAPIResponse {
-  status: string;
-  data: MovementData[] | null;
-  meta?: PaginationMetadata
-}

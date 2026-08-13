@@ -67,9 +67,6 @@ export default function StockMovementReport() {
     }, [IsExporting, isLoading, movements]);
 
 
-    console.log(meta);
-
-
     return (
         <div className="h-full animate-in fade-in duration-500">
             <div className="max-w-400 mx-auto space-y-6">

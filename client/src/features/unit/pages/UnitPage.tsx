@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Scale } from "lucide-react";
 import { useUnits } from "../hooks/useUnits";
 import UnitFormModal from "../components/UnitFormModal";
-import type { UnitFormData, UnitData } from "@/types/Unit";
+import type { UnitFormData, UnitData } from "@/types/unit";
 import { DataTable } from "@/components/common/DataTable";
 import { getUnitColumns } from "../components/UnitColumns";
 import { useDebounce } from "@/lib/debounce";

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { PaginationMetadata } from './Pagination';
 
 const itemSchema = z.object({
   productName: z.string().optional(),
@@ -7,7 +6,7 @@ const itemSchema = z.object({
   unitId: z.string().min(1, "Unit is required"),
   unitName: z.string().optional(),
   multiplier: z.number().min(0.00001, "Invalid multiplier"),
-  pricePerBase: z.number().min(0),   
+  pricePerBase: z.number().min(0),
   qty: z.number().min(0.001, "Quantity must be at least 0.001"),
   rate: z.number().min(0, "Rate cannot be negative"),
   total: z.number(),
@@ -39,16 +38,9 @@ export type TransactionData = Omit<TransactionFormData, 'items'> & {
   updatedAt: string;
 };
 
-export interface TransactionAPIResponse {
-  status: string;
-  data: TransactionData | TransactionData[] | null;
-  message?: string;
-  meta?: PaginationMetadata
-}
-
 export const creditTransactionSchema = z.object({
   isPaid: z.boolean(),
-  notes: z.string().optional().or(z.literal("")), 
+  notes: z.string().optional().or(z.literal("")),
 });
 
 export type CreditTransactionInput = z.infer<typeof creditTransactionSchema>;

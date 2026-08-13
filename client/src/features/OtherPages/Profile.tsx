@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import {
     Key, Camera, LogOut, CheckCircle2
 } from "lucide-react";
-import { useAuthStore } from "@/store/useAuth";
 import { Loading } from "@/lib/loader";
 import { InputGroup } from "@/components/common/InputGroup";
 import { PasswordUpdateModal } from "../auth/components/PasswordUpdateModal";
+import { useUsers } from "../auth/hooks/useUsers";
+import { useAuth } from "../auth/hooks/useAuth";
+import { useAuthStore } from "@/store/authStore";
 
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const { fetchUser, isLoading, user, logout, updateProfile } = useAuthStore();
+    const { isLoading, updateProfile } = useUsers();
+    const { user } = useAuthStore();
+    const { logout } = useAuth();
     const [updatedData, setUpdatedData] = useState({ userId: user?._id || "", name: user?.name || "", email: user?.email || "" });
-
-    useEffect(() => { fetchUser(); }, [fetchUser]);
 
     useEffect(() => {
         if (user) {
@@ -29,7 +31,6 @@ export default function ProfilePage() {
         try {
             await updateProfile(updatedData.name, updatedData.email);
         } catch (error) {
-            console.error("Error updating profile:", error);
         } finally {
             setIsEditing(false);
         }

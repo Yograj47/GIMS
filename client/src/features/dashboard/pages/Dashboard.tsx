@@ -10,21 +10,20 @@ import LiveFeedCard from "../components/LiveFeedCard";
 import AlertCard from "../components/AlertCard";
 import { useActivityLogs } from "@/features/activityLogs/hooks/useActivityLogs";
 import { chartData, chartOptions } from "@/lib/dashboardCharts";
-import { useAlerts } from "@/features/alerts/hooks/UseAlerts";
+import { useAlerts } from "@/features/alerts/hooks/useAlerts";
 import { useAnalytics } from "../hooks/useAnalystics";
-import { useAuthStore } from "@/store/useAuth";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const { logs, fetchRecentLogs } = useActivityLogs();
-    const { activeAlerts, fetchActiveAlerts, acknowledgeAlert } = useAlerts();
+    const { alerts, acknowledgeAlert } = useAlerts();
     const { weeklyStats, fetchWeeklyStats, summary, fetchSummary } = useAnalytics();
 
     useEffect(() => {
         const syncDashboard = async () => {
             const promises = [
-                fetchActiveAlerts(),
                 fetchWeeklyStats(),
                 fetchSummary(),
             ];
@@ -36,7 +35,7 @@ export default function Dashboard() {
             await Promise.all(promises);
         };
         syncDashboard();
-    }, [fetchActiveAlerts, fetchWeeklyStats, fetchSummary, fetchRecentLogs, user]);
+    }, [fetchWeeklyStats, fetchSummary, fetchRecentLogs, user]);
 
     const dynamicData = useMemo(() => {
         if (!weeklyStats || weeklyStats.length === 0) {
@@ -48,9 +47,15 @@ export default function Dashboard() {
         return chartData(stockIn, stockOut, labels);
     }, [weeklyStats]);
 
-    const criticalAlert = useMemo(() =>
-        activeAlerts.find(a => !a.acknowledged) ?? null
-        , [activeAlerts]);
+    const criticalAlert = useMemo(
+        () =>
+            alerts.find(
+                (a) =>
+                    !a.acknowledged &&
+                    a.severity === "critical"
+            ) ?? null,
+        [alerts]
+    );
 
     return (
         <div className="h-full space-y-8 animate-in fade-in duration-700">
@@ -128,8 +133,8 @@ export default function Dashboard() {
                         {criticalAlert ? (
                             <AlertCard
                                 productName={criticalAlert.productId.name}
-                                remainingQty={`${criticalAlert.snapshotValue} ${criticalAlert.productId.unitId?.name || ''}`}
-                                onAction={() => acknowledgeAlert(criticalAlert._id)}
+                                remainingQty={`${criticalAlert.snapshotValue} ${criticalAlert.productId.unitId?.name ?? ""  }`} 
+                                    onAction={() => acknowledgeAlert(criticalAlert._id)}
                             />
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center border border-slate-200 rounded-sm bg-slate-50/30 p-8 text-center">

@@ -1,7 +1,7 @@
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User, MapPin, Notebook, Phone, Mail, Power } from "lucide-react";
-import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/Supplier"
+import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/supplier"
 import { useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 

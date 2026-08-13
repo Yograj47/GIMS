@@ -1,12 +1,7 @@
 export interface WeeklyMovementData {
     _id: {
-        day: string; 
+        day: string;
         type: 'IN' | 'OUT';
     };
     totalQty: number;
-}
-
-export interface AnalyticsAPIResponse {
-    status: string;
-    data: WeeklyMovementData[];
 }

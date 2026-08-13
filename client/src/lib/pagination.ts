@@ -1,4 +1,4 @@
-import type { PaginationMetadata } from "@/types/Pagination";
+import type { PaginationMetadata } from "@/types/pagination";
 
 export interface PaginatedResponse<T> {
     items: T[];

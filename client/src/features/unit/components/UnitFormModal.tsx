@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useForm, Controller, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2, AlertCircle } from "lucide-react";
-import { unitSchema, type UnitData, type UnitFormData } from "@/types/Unit";
+import { unitSchema, type UnitData, type UnitFormData } from "@/types/unit";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";

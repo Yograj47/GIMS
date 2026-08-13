@@ -3,113 +3,135 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { forgotPasswordSchema, resetPasswordSchema, type ForgotPasswordFormData, type ResetPasswordFormData, type ResetPasswordPayload } from "@/types/Auth";
-import { authService } from "@/features/auth/api/AuthService";
+import { forgotPasswordSchema, resetPasswordSchema, type ForgotPasswordFormData, type ResetPasswordFormData} from "@/types/auth";
 import { Loader2, Mail, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { notify } from "@/lib/toast";
+import { useAuth } from "../hooks/useAuth";
 
 export default function ForgotPassword() {
     const [step, setStep] = useState<"email" | "otp" | "password">("email");
-    const [loading, setLoading] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [timer, setTimer] = useState(0);
     const navigate = useNavigate();
+    const {
+        forgotPassword,
+        resetPassword,
+        isLoading,
+    } = useAuth();
 
 
     const requestForm = useForm<ForgotPasswordFormData>({
-        resolver: zodResolver(forgotPasswordSchema),
-    });
+        resolver: zodResolver(forgotPasswordSchema),
+    });
 
-    const resetForm = useForm<ResetPasswordFormData>({
-        resolver: zodResolver(resetPasswordSchema),
-        defaultValues: { otp: "", password: "", confirmPassword: "" }
-    });
+    const resetForm = useForm<ResetPasswordFormData>({
+        resolver: zodResolver(resetPasswordSchema),
+        defaultValues: { otp: "", password: "", confirmPassword: "" }
+    });
 
-    // --- Timer Persistence ---
-    useEffect(() => {
-        const savedExpiry = localStorage.getItem("otp_expiry");
-        if (savedExpiry) {
-            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
-            if (remaining > 0) {
-                setTimer(remaining);
-                setStep("otp");
-                setUserEmail(localStorage.getItem("reset_email") || "");
-            }
-        }
-    }, []);
+    // --- Timer Persistence ---
+    useEffect(() => {
+        const savedExpiry = localStorage.getItem("otp_expiry");
+        if (savedExpiry) {
+            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
+            if (remaining > 0) {
+                setTimer(remaining);
+                setStep("otp");
+                setUserEmail(localStorage.getItem("reset_email") || "");
+            }
+        }
+    }, []);
 
-    useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (timer > 0) {
-            interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-        }
-        return () => clearInterval(interval);
-    }, [timer]);
+    useEffect(() => {
+        let interval: ReturnType<typeof setInterval>;
+        if (timer > 0) {
+            interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
-    // --- Step 1: Request OTP ---
-    const handleSendOtp = async (data: ForgotPasswordFormData) => {
-        setLoading(true);
-        try {
-            await authService.forgotPassword(data);
-            setUserEmail(data.email);
-            setStep("otp");
-            const expiry = Date.now() + 600000; // 10 mins
-            localStorage.setItem("otp_expiry", expiry.toString());
-            localStorage.setItem("reset_email", data.email);
-            setTimer(600);
-            notify.success("OTP sent to your email");
-        } finally {
-            setLoading(false);
-        }
-    };
+    // --- Step 1: Request OTP ---
+    const handleSendOtp = async (
+        data: ForgotPasswordFormData
+    ) => {
+        const success =
+            await forgotPassword(data);
 
-    // --- Step 2: Validate OTP format locally & move to password ---
-    const goToPasswordStep = async () => {
-        const currentOtp = resetForm.getValues("otp");
-        if (currentOtp?.length === 6) {
-            setStep("password");
-        } else {
-            notify.error("Please enter the 6-digit code first");
-        }
-    };
+        if (!success) return;
 
-    // --- Step 3: Final API Call ---
-    const onFinalSubmit = async (data: ResetPasswordFormData) => {
-        setLoading(true);
-        try {
-            const payLoad: ResetPasswordPayload = {
-                email: userEmail,
-                otp: data.otp,
-                newPassword: data.confirmPassword
-            }
-            await authService.resetPassword(payLoad);
-            notify.success("Password updated successfully!");
-            localStorage.removeItem("otp_expiry");
-            localStorage.removeItem("reset_email");
-            navigate("/login");
-        } finally {
-            setLoading(false);
-        }
-    };
+        setUserEmail(data.email);
+        setStep("otp");
 
-    const handleResend = async () => {
-        if (timer > 0 || !userEmail) return;
-        setLoading(true);
-        try {
-            await authService.forgotPassword({ email: userEmail });
-            setTimer(600);
-            notify.success("New code sent!");
-        } finally {
-            setLoading(false);
-        }
-    };
+        const expiry =
+            Date.now() + 600000;
+
+        localStorage.setItem(
+            "otp_expiry",
+            expiry.toString()
+        );
+
+        localStorage.setItem(
+            "reset_email",
+            data.email
+        );
+
+        setTimer(600);
+    };
+
+    // --- Step 2: Validate OTP format locally & move to password ---
+    const goToPasswordStep = async () => {
+        const currentOtp = resetForm.getValues("otp");
+        if (currentOtp?.length === 6) {
+            setStep("password");
+        } else {
+            notify.error("Please enter the 6-digit code first");
+        }
+    };
+
+    // --- Step 3: Final API Call ---
+    const onFinalSubmit = async (
+        data: ResetPasswordFormData
+    ) => {
+        const success =
+            await resetPassword({
+                email: userEmail,
+                otp: data.otp,
+                newPassword:
+                    data.password,
+            });
+
+        if (!success) return;
+
+        localStorage.removeItem(
+            "otp_expiry"
+        );
+
+        localStorage.removeItem(
+            "reset_email"
+        );
+
+        navigate("/login");
+    };
+
+    const handleResend = async () => {
+        if (timer > 0 || !userEmail) return;
+        try {
+            await forgotPassword({ email: userEmail });
+            setTimer(600);
+            notify.success("New code sent!");
+        } catch (err) {
+
+        }
+    };
+
+
     // Midnight Input Style helper
     const midnightInput = "bg-slate-950/40 border-white/5 text-slate-200 placeholder:text-slate-600 focus:border-blue-500/50 focus:bg-slate-950/60 transition-all rounded-2xl py-7 pl-6 shadow-inner";
 
@@ -123,13 +145,13 @@ export default function ForgotPassword() {
                     {step === "otp" && <KeyRound size={32} />}
                     {step === "password" && <ShieldCheck size={32} />}
                 </div>
-                
+
                 <h2 className="text-3xl font-black text-white tracking-tight text-center">
                     {step === "email" && "Reset Access"}
                     {step === "otp" && "Check Email"}
                     {step === "password" && "New Credentials"}
                 </h2>
-                
+
                 <p className="text-slate-400 text-sm text-center mt-3 font-medium leading-relaxed">
                     {step === "email" && "Enter your email to receive a secure recovery code."}
                     {step === "otp" && (
@@ -147,8 +169,8 @@ export default function ForgotPassword() {
                         placeholder="admin@grocery.local"
                         className={midnightInput}
                     />
-                    <Button className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-lg shadow-blue-900/20" disabled={loading}>
-                        {loading ? <Loader2 className="animate-spin" /> : "Request Security Code"}
+                    <Button className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-lg shadow-blue-900/20" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="animate-spin" /> : "Request Security Code"}
                     </Button>
                 </form>
             )}
@@ -190,8 +212,8 @@ export default function ForgotPassword() {
                         placeholder="Repeat New Password"
                         className={midnightInput}
                     />
-                    <Button className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-xl shadow-blue-900/20" disabled={loading}>
-                        {loading ? <Loader2 className="animate-spin" /> : "Update Credentials"}
+                    <Button className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-xl shadow-blue-900/20" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="animate-spin" /> : "Update Credentials"}
                     </Button>
                     <button
                         type="button"
@@ -206,7 +228,7 @@ export default function ForgotPassword() {
             {/* Back to Login Footer */}
             <div className="mt-10 pt-6 border-t border-white/5 text-center">
                 <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2 group">
-                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Return to Login
                 </Link>
             </div>

@@ -3,7 +3,7 @@ import { Trash2, Edit3, CheckCircle2, Search, Scale } from "lucide-react";
 import { useProductUnits } from "../hooks/useProductUnits";
 import { Button } from "@/components/ui/button";
 import { ProductUnitModal } from "../components/ProductUnitModal";
-import type { ProductUnitFormData } from "@/types/ProductUnit";
+import type { ProductUnitFormData } from "@/types/product-unit";
 import { DataTable } from "@/components/common/DataTable";
 import { getProductUnitColumns } from "../components/ProductUnitColumn";
 import { AdminGate } from "@/features/auth/components/AdminGate";
@@ -106,7 +106,7 @@ export default function ProductUnitPage() {
                     setPagination={setPagination}
                     renderExpandedRow={(row) => (
                         <div className="p-4 bg-slate-50 border-t border-slate-100">
-                            {row.original.conversions.length > 0 ? (
+                            {row.original.conversions?.length > 0 ? (
                                 <div className="rounded-md border border-slate-200 bg-white overflow-hidden shadow-sm">
                                     <div className="grid grid-cols-12 gap-4 px-6 py-2.5 bg-slate-50 text-[11px] font-bold text-slate-500 border-b">
                                         <div className="col-span-4">Unit Name</div>

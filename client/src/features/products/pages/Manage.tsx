@@ -4,7 +4,7 @@ import { Save, Trash2, ArrowLeft, Lightbulb, ShieldAlert } from "lucide-react";
 import ProductForm from "../components/ProductForm";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "../hooks/useProducts";
-import type { ProductFormData } from "@/types/Product";
+import type { ProductFormData } from "@/types/product";
 import { useCategories } from "@/features/category/hooks/useCategories";
 import { useUnits } from "@/features/unit/hooks/useUnits";
 import { Loading } from "@/lib/loader";

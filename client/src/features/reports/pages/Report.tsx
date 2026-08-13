@@ -1,7 +1,7 @@
 import { BarChart3, ArrowRightLeft, FileText, ClipboardList, ChevronRight, ChartBar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/store/useAuth";
+import { useAuthStore } from "@/store/authStore";
 
 const REPORT_CONFIG = [
   {

@@ -1,0 +1,14 @@
+export const LOG_CONTEXT = {
+    SERVER: "SERVER",
+    DATABASE: "DATABASE",
+    AUTH: "AUTH",
+    SOCKET: "SOCKET",
+
+    PRODUCT: "PRODUCT",
+    INVENTORY: "INVENTORY",
+    TRANSACTION: "TRANSACTION",
+
+    EMAIL: "EMAIL",
+
+    SYSTEM: "SYSTEM",
+};

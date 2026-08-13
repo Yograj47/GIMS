@@ -1,7 +1,7 @@
 import { CheckCircle2, Bell, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import type { AlertData } from "@/types/Alert";
+import type { AlertData } from "@/types/alert";
 import type { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 

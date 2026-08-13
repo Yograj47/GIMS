@@ -1,6 +1,6 @@
 import { Info, User, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import type { ActivityLogData } from "@/types/ActivityLog";
+import type { ActivityLogData } from "@/types/activity-log";
 import type { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 

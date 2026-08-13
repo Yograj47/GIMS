@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
-import { useGlobalStore } from "@/store/globalStore";
-import { MovementTransactionService } from "../../../apis/MovementTransactionService";
-import type { TransactionData, TransactionFormData } from "@/types/Transaction";
-import type { MovementData } from "@/types/Movement";
+import { MovementTransactionService } from "../api/movement-transaction.service";
+import type { TransactionData, TransactionFormData } from "@/types/transaction";
+import type { MovementData } from "@/types/movement";
 import { notify } from "@/lib/toast";
-import type { PaginationMetadata } from "@/types/Pagination";
+import type { PaginationMetadata } from "@/types/pagination";
 
 export const useMovementTransactions = () => {
     const [transactions, setTransactions] = useState<TransactionData[]>([]);
@@ -12,9 +11,8 @@ export const useMovementTransactions = () => {
     const [productMovements, setProductMovements] = useState<MovementData[]>([]);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
-    const { isLoading, setLoading } = useGlobalStore();
+    const [isLoading, setLoading] = useState(false);
 
-    // 1. Fetch All Transactions
     const fetchTransactions = useCallback(async (
         page?: number,
         limit?: number,
@@ -27,63 +25,57 @@ export const useMovementTransactions = () => {
         try {
             setLoading(true);
             const response = await MovementTransactionService.getAllTransactions(page, limit, search, transactionType, startDate, endDate, all);
-            if (response.status === "Success") {
+            if (response.success) {
                 setTransactions((response.data as TransactionData[]) || []);
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
         } catch (error) {
-            console.error("Fetch Transactions Error:", error);
             notify.error("Failed to load transactions");
         } finally {
             setLoading(false);
         }
     }, [setLoading]);
 
-    // 2. Fetch All Physical Movements
     const fetchMovements = useCallback(async (page?: number, limit?: number, search?: string, movementType?: string, all?: boolean) => {
         try {
             setLoading(true);
             const response = await MovementTransactionService.getAllMovements(page, limit, search, movementType, all);
-            if (response.status === "Success") {
+            if (response.success) {
                 setMovements((response.data as MovementData[]) || []);
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
         } catch (error) {
-            console.error("Fetch Movements Error:", error);
             notify.error("Failed to load stock history");
         } finally {
             setLoading(false);
         }
     }, [setLoading]);
 
-    // 3. Fetch Movements for a Specific Product (Audit Trail)
     const fetchProductMovements = useCallback(async (productId: string, page: number = 1,
         limit: number = 10, all?: boolean) => {
         try {
             setLoading(true);
             const response = await MovementTransactionService.getProductMovements(productId, page, limit, all);
-            if (response.status === "Success") {
+            if (response.success) {
                 setProductMovements((response.data as MovementData[]) || []);
                 setMeta(all ? null : (response.meta || null));
                 return true;
 
             }
         } catch (error) {
-            console.error("Fetch Product Movements Error:", error);
             notify.error("Failed to load product history");
         } finally {
             setLoading(false);
         }
     }, [setLoading]);
 
-    // 4. Create Transaction
     const createTransaction = async (payload: TransactionFormData) => {
         try {
             setLoading(true);
             const response = await MovementTransactionService.createTransaction(payload);
-            if (response.status === "Success") {
+            if (response.success) {
                 notify.success("Transaction completed successfully");
                 const newTransaction = response.data as TransactionData;
                 setTransactions((prev) => [newTransaction, ...prev]);
@@ -91,7 +83,6 @@ export const useMovementTransactions = () => {
                 return true;
             }
         } catch (error) {
-            console.error("Create Transaction Error:", error);
             notify.error("Transaction failed");
         } finally {
             setLoading(false);
@@ -99,12 +90,11 @@ export const useMovementTransactions = () => {
         return false;
     };
 
-    // 5. Update Credit Status
     const updateCreditStatus = async (id: string, payload: { isPaid: boolean; notes?: string }) => {
         try {
             setLoading(true);
             const response = await MovementTransactionService.updateCreditStatus(id, payload);
-            if (response.status === "Success") {
+            if (response.success) {
                 notify.success("Payment status updated");
                 setTransactions((prev) =>
                     prev.map((t) => (t._id === id ? { ...t, ...payload } : t))
@@ -112,7 +102,6 @@ export const useMovementTransactions = () => {
                 return true;
             }
         } catch (error) {
-            console.error("Update Credit Status Error:", error);
             notify.error("Failed to update status");
         } finally {
             setLoading(false);

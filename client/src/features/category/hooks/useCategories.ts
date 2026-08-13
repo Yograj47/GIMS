@@ -1,23 +1,20 @@
 import { useState, useCallback } from 'react';
-import { useGlobalStore } from '@/store/globalStore';
 import { notify } from '@/lib/toast';
-import { CategoryService } from '../../../apis/CategoryService';
-import type { CategoryData, CategoryFormData } from '@/types/Category';
-import type { PaginationMetadata } from '@/types/Pagination';
+import { CategoryService } from '../api/category.service';
+import type { CategoryData, CategoryFormData } from '@/types/category';
+import type { PaginationMetadata } from '@/types/pagination';
 
 export const useCategories = () => {
     const [categories, setCategories] = useState<CategoryData[]>([]);
     const [singleCategory, setSingleCategory] = useState<CategoryData | null>(null);
-    const { setLoading, isLoading } = useGlobalStore();
+    const [isLoading, setLoading] = useState(false);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
-
-    // 1. Fetch All Categories
     const fetchCategories = useCallback(async (page?: number, limit?: number, search?: string, all?: boolean) => {
         try {
             setLoading(true);
             const response = await CategoryService.getAll(page, limit, search, all);
-            if (response.status === "Success") {
+            if (response.success) {
                 setCategories(response.data as CategoryData[]);
                 setMeta(all ? null : (response.meta || null));
                 return true;
@@ -28,12 +25,11 @@ export const useCategories = () => {
         }
     }, [setLoading]);
 
-    // 2. Fetch Single Category (for Edit/View pages)
     const fetchCategoryById = useCallback(async (id: string) => {
         try {
             setLoading(true);
             const response = await CategoryService.getById(id);
-            if (response.status === "Success") {
+            if (response.success) {
                 const data = response.data as CategoryData;
                 setSingleCategory(data);
                 return data;
@@ -43,12 +39,11 @@ export const useCategories = () => {
         }
     }, [setLoading]);
 
-    // 3. Create Category
     const addCategory = async (payload: CategoryFormData) => {
         try {
             setLoading(true);
             const response = await CategoryService.create(payload);
-            if (response.status === "Success") {
+            if (response.success) {
                 setCategories((prev) => [...prev, response.data as CategoryData]);
                 notify.success("Category added successfully");
                 return true;
@@ -59,12 +54,11 @@ export const useCategories = () => {
         return false;
     };
 
-    // 4. Update Category
     const updateCategory = async (id: string, payload: CategoryFormData) => {
         try {
             setLoading(true);
             const response = await CategoryService.updateById(id, payload);
-            if (response.status === "Success") {
+            if (response.success) {
                 setCategories((prev) => prev.map((c) => (c._id === id ? (response.data as CategoryData) : c)));
                 notify.success("Category updated successfully");
                 return true;

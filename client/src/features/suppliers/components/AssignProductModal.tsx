@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Search, X, Check, Package, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils";
-import type { ProductData } from '@/types/Product';
+import type { ProductData } from '@/types/product';
 
 interface AssignProductModalProps {
     isOpen: boolean;
