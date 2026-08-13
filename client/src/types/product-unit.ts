@@ -46,6 +46,7 @@ export interface GroupedProductUnit {
     productName: string;
     conversions: Array<{
         _id: string;
+        unitId: string;
         unitName: string;
         shortName: string;
         multiplier: number;
@@ -54,4 +55,3 @@ export interface GroupedProductUnit {
         isActive: boolean;
     }>;
 }
-

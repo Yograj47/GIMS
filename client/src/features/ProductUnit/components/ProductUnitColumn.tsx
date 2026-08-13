@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { AdminGate } from "@/features/auth/components/AdminGate";
+import type { GroupedProductUnit} from "@/types/product-unit";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus, ChevronRight, ChevronDown, Package, Box } from "lucide-react";
 
 type AddUnitCallback = (id: string, name: string) => void;
 
-export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<any>[] => [
+export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<GroupedProductUnit>[] => [
     {
         id: "expander",
         header: () => <div className="w-8" />,

@@ -3,6 +3,7 @@ import {
     getCoreRowModel,
     getExpandedRowModel,
     useReactTable,
+    type ColumnDef,
     type OnChangeFn,
     type PaginationState,
     type Row
@@ -22,7 +23,7 @@ import { Loading } from "@/lib/loader"
 import React from "react"
 
 interface DataTableProps<TData> {
-    columns: any[]
+    columns: ColumnDef<TData>[]
     data: TData[]
     pageCount: number
     rowCount: number
@@ -44,6 +45,7 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
     const [expanded, setExpanded] = React.useState({})
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -56,7 +58,6 @@ export function DataTable<TData>({
         onExpandedChange: setExpanded,
         getRowCanExpand: () => !!renderExpandedRow
     })
-
 
     return (
         <div className="flex flex-col h-full bg-white border border-slate-300">

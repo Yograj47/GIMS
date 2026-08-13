@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils"
+import type { MovementData } from "@/types/movement"
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowDownLeft, ArrowUpRight, User, Package } from "lucide-react"
 
-export const getMovementColumns: ColumnDef<any>[] = [
+export const getMovementColumns: ColumnDef<MovementData>[] = [
     {
         accessorKey: "createdAt",
         header: "Timestamp",
@@ -60,7 +61,7 @@ export const getMovementColumns: ColumnDef<any>[] = [
             <div className="font-black text-slate-900 text-[13px] tabular-nums">
                 {row.getValue("quantity")} 
                 <span className="text-[9px] text-slate-400 uppercase font-black ml-1">
-                    {row.original.unitId?.name || "PCS"}
+                    {row.original?.unit?.name || "PCS"}
                 </span>
             </div>
         ),

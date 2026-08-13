@@ -19,7 +19,6 @@ export const useCategories = () => {
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
-        } catch (error: any) {
         } finally {
             setLoading(false);
         }

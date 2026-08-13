@@ -8,7 +8,7 @@ import type { ProductFormData } from "@/types/product";
 import { useCategories } from "@/features/category/hooks/useCategories";
 import { useUnits } from "@/features/unit/hooks/useUnits";
 import { Loading } from "@/lib/loader";
-import { DeleteConfirmDialog } from "@/lib/deleteAlert"; // Your new utility
+import { DeleteConfirmDialog } from "@/lib/deleteAlert";
 
 export default function ManageProduct() {
     const { productId } = useParams();
@@ -39,17 +39,16 @@ export default function ManageProduct() {
     }, [productId, isEditMode, fetchProductById, fetchCategories, fetchUnits]);
 
     const handleFormSubmit = async (data: ProductFormData) => {
-        let finalPayload = (!data.supplierId || data.supplierId === "")
-            ? (() => { const { supplierId, ...rest } = data; return rest; })()
-            : data;
+        const { supplierId, ...rest } = data;
+        const finalPayload = (!supplierId || supplierId === "") ? rest : data;
 
-        let success = isEditMode && productId
+        const success = isEditMode && productId
             ? await updateProduct(productId, finalPayload)
             : await addProduct(data);
 
         if (success) navigate("/products");
     };
-
+    
     const confirmDelete = async () => {
         if (!productId) return;
         await removeProduct(productId);

@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import type { NavigateFunction } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
+import type { ProductData } from "@/types/product";
 
-export const getStockColumns = (navigate: NavigateFunction): ColumnDef<any>[] => [
+export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductData>[] => [
     {
         accessorKey: "name",
         header: "Product / Identifier",

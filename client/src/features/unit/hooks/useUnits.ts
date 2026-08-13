@@ -19,7 +19,9 @@ export const useUnits = () => {
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
-        } catch (_error: unknown) {
+        }
+
+        catch {
             notify.error("Operation failed");
         } finally {
             setLoading(false);

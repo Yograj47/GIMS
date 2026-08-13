@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm, Controller, type Resolver, useWatch } from "react-hook-form";
+import { useForm, Controller, type Resolver, useWatch} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Loader2, AlertCircle } from "lucide-react";
 import { unitSchema, type UnitData, type UnitFormData } from "@/types/unit";
@@ -175,13 +175,11 @@ export default function UnitFormModal({
                 <span className="text-[11px] font-semibold text-slate-700">{item.label}</span>
                 <span className="text-[10px] text-slate-400">{item.desc}</span>
               </div>
-              @typescript-eslint/no-explicit-any
               <Controller
                 control={control}
-                name={item.id as any}
-                render={({ field }) => (
+                name={item.id as "name" | "shortForm" | "unitType" | "multiplierToBase" | "baseUnit" | "isFractional" | "isActive"}render={({ field }) => (
                   <Switch
-                    checked={field.value}
+                    checked={field.value as boolean}
                     onCheckedChange={field.onChange}
                     className="data-[state=checked]:bg-blue-600 scale-75"
                   />

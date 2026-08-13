@@ -7,13 +7,14 @@ import {
     ExternalLink,
     Loader2
 } from "lucide-react";
-import { useAlerts } from "@/features/alerts/hooks/useAlerts";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useGlobalStore } from "@/store/globalStore";
 import { useAuthStore } from "@/store/authStore";
+import { useAlerts } from "@/features/alerts/hooks/useAlerts";
+import type { AlertData } from "@/types/alert";
 dayjs.extend(relativeTime);
 
 function AppHeader() {
@@ -54,7 +55,7 @@ function AppHeader() {
 
     const unreadCount =
         activeAlerts.filter(
-            (a) => !a.acknowledged
+            (a: AlertData) => !a.acknowledged
         ).length;
 
     return (

@@ -1,11 +1,11 @@
-import { useForm, type Resolver, Controller } from "react-hook-form";
+import { useForm, type Resolver, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData, type ProductData } from "@/types/product";
 import { TrendingUp, BadgeIndianRupee, Package, AlertCircle, Percent } from "lucide-react";
 import type { CategoryData } from "@/types/category";
 import type { UnitData } from "@/types/unit";
 import { useEffect } from "react";
-import Select from "react-select";
+import Select, { type StylesConfig } from "react-select";
 
 type ProductFormProps = {
     initialData?: ProductData;
@@ -14,8 +14,13 @@ type ProductFormProps = {
     onSubmit?: (data: ProductFormData) => void;
 };
 
+interface SelectOption {
+    value: string;
+    label: string;
+}
+
 export default function ProductForm({ initialData, categories, units, onSubmit }: ProductFormProps) {
-    const { register, handleSubmit, watch, reset, control, formState: { errors } } = useForm<ProductFormData>({
+    const { register, handleSubmit, reset, control, formState: { errors } } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
         defaultValues: {
             name: initialData?.name ?? "",
@@ -33,8 +38,8 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const categoryOptions = categories?.filter(c => c.isActive).map(c => ({ value: c._id, label: c.name })) || [];
     const unitOptions = units?.filter(u => u.isActive).map(u => ({ value: u._id, label: `${u.name} (${u.shortForm})` })) || [];
 
-    const customSelectStyles = {
-        control: (base: any, state: any) => ({
+    const customSelectStyles: StylesConfig<SelectOption, false> = {
+        control: (base, state) => ({
             ...base,
             borderRadius: '0.125rem',
             padding: '2px',
@@ -62,8 +67,8 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
         }
     }, [initialData, reset]);
 
-    const buyPrice = watch("basePrice") || 0;
-    const sellPrice = watch("sellingPrice") || 0;
+    const buyPrice = useWatch({ control, name: "basePrice" }) || 0;
+    const sellPrice = useWatch({ control, name: "sellingPrice" }) || 0;
     const profit = sellPrice - buyPrice;
     const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(1) : 0;
 
@@ -91,10 +96,10 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                             name="categoryId"
                             control={control}
                             render={({ field }) => (
-                                <Select
+                                <Select<SelectOption, false>
                                     {...field}
                                     options={categoryOptions}
-                                    value={categoryOptions.find(opt => opt.value === field.value)}
+                                    value={categoryOptions.find(opt => opt.value === field.value) || null}
                                     onChange={(val) => field.onChange(val?.value)}
                                     styles={customSelectStyles}
                                     isClearable
@@ -110,10 +115,10 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                             name="unitId"
                             control={control}
                             render={({ field }) => (
-                                <Select
+                                <Select<SelectOption, false>
                                     {...field}
                                     options={unitOptions}
-                                    value={unitOptions.find(opt => opt.value === field.value)}
+                                    value={unitOptions.find(opt => opt.value === field.value) || null}
                                     onChange={(val) => field.onChange(val?.value)}
                                     styles={customSelectStyles}
                                     isClearable

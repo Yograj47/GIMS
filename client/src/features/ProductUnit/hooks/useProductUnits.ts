@@ -21,7 +21,6 @@ export const useProductUnits = () => {
                 setGroupedUnits(response.data as GroupedProductUnit[]);
                 setMeta(all ? null : (response.meta || null));
             }
-        } catch (error: any) {
         } finally {
             setLoading(false);
         }

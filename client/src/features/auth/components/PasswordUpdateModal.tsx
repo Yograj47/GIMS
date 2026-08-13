@@ -15,7 +15,6 @@ export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onCl
                 return;
             }
             await updatePassword(updatedPassword.currentPassword, updatedPassword.newPassword);
-        } catch (error) {
         } finally {
             setShowPass(false);
             setUpdatedPassword({ currentPassword: "", newPassword: "" });

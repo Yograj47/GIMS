@@ -14,7 +14,7 @@ export const useSettings = () => {
             if (response.success) {
                 setGeneralData(response.data as GeneralSettingsData);
             }
-        } catch (_error: unknown) {
+        } catch {
             notify.error("Operation failed");
         } finally {
             setIsLoading(false);
@@ -32,7 +32,7 @@ export const useSettings = () => {
                 notify.success("General settings updated successfully");
                 return true;
             }
-        } catch (_error: unknown) {
+        } catch {
             notify.error("Operation failed");
         } finally {
             setIsLoading(false);

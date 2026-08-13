@@ -1,7 +1,15 @@
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
+import React from "react";
 
-export default function ActionTile({ icon, label, color, onClick }: any) {
+interface ActionTileProps {
+    icon: React.ReactNode;
+    label: string;
+    color: string;
+    onClick: () => void;
+}
+
+export default function ActionTile({ icon, label, color, onClick }: ActionTileProps) {
     return (
         <button
             onClick={onClick}

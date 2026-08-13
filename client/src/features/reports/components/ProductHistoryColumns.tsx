@@ -1,8 +1,10 @@
 import { cn } from "@/lib/utils";
+import type { MovementData } from "@/types/movement";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowDownLeft, ArrowUpRight, Clock, User, Hash } from "lucide-react";
 
-export const getProductHistoryColumns: ColumnDef<any>[] = [
+
+export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
     {
         accessorKey: "createdAt",
         header: "Timestamp",

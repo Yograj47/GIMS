@@ -16,12 +16,23 @@ export default function ActivityLogsPage() {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
+    
+    // Track previous filters to detect changes during render without violating rules
+    const [prevFilters, setPrevFilters] = useState({ searchQuery, typeFilter, startDate, endDate });
+
     const navigate = useNavigate();
     const debouncedSearch = useDebounce(searchQuery, 400);
 
-    useEffect(() => {
+    const currentFilters = { searchQuery, typeFilter, startDate, endDate };
+    if (
+        prevFilters.searchQuery !== currentFilters.searchQuery ||
+        prevFilters.typeFilter !== currentFilters.typeFilter ||
+        prevFilters.startDate !== currentFilters.startDate ||
+        prevFilters.endDate !== currentFilters.endDate
+    ) {
+        setPrevFilters(currentFilters);
         setPagination(prev => ({ ...prev, pageIndex: 0 }));
-    }, [debouncedSearch, typeFilter, startDate, endDate]);
+    }
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -87,7 +98,7 @@ export default function ActivityLogsPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1
-                             focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
+                            focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
                         />
                     </div>
 

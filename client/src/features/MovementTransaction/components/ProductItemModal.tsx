@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Package } from "lucide-react";
-import Select from "react-select";
+import Select, { type SingleValue } from "react-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Item } from "@/types/transaction";
-import type { SellingUnit } from "@/types/product";
+import type { ProductData, SellingUnit} from "@/types/product";
 import { useProducts } from "@/features/products/hooks/useProducts";
 
 interface ProductItemModalProps {
@@ -13,23 +13,32 @@ interface ProductItemModalProps {
     onAdd: (item: Item) => void;
 }
 
+interface ProductOption {
+    value: string;
+    label: string;
+    productData: ProductData;
+}
+
+const initialItem: Partial<Item> = {
+    productName: "", productId: "", unitId: "", unitName: "",
+    multiplier: 1, pricePerBase: 0, qty: 1, rate: 0, total: 0,
+};
+
 export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalProps) {
     const [open, setOpen] = useState(false);
     const { products, fetchProducts, isLoading: productsLoading } = useProducts();
-
-    const initialItem: Partial<Item> = {
-        productName: "", productId: "", unitId: "", unitName: "",
-        multiplier: 1, pricePerBase: 0, qty: 1, rate: 0, total: 0,
-    };
-
     const [tempItem, setTempItem] = useState<Partial<Item>>(initialItem);
 
     const selectedProduct = products.find(p => p._id === tempItem.productId);
 
-    useEffect(() => {
-        if (open && products.length === 0) fetchProducts();
-        if (!open) setTempItem(initialItem);
-    }, [open]);
+    const handleOpenChange = (isOpen: boolean) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+            setTempItem(initialItem);
+        } else if (products.length === 0) {
+            fetchProducts();
+        }
+    };
 
     // Build unit options from sellingUnits — works for any number of units
     const unitOptions = useMemo(() => {
@@ -44,13 +53,13 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
             label: `${pu.unitId.name} (${pu.unitId.shortForm})`,
             unitId: pu.unitId._id,
             unitName: pu.unitId.name,
-            multiplier: pu.multiplier,             // e.g. 25 for Sack, 1 for KG
+            multiplier: pu.multiplier,            // e.g. 25 for Sack, 1 for KG
             rate: pricePerBase * pu.multiplier,    // e.g. 96*25=2400 for Sack, 96*1=96 for KG
             pricePerBase,
         }));
     }, [selectedProduct, isStockIn]);
 
-    const handleProductChange = (selectedOption: any) => {
+    const handleProductChange = (selectedOption: SingleValue<ProductOption>) => {
         if (!selectedOption) return;
         const product = selectedOption.productData;
 
@@ -104,7 +113,7 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
     const stockImpact = (tempItem.qty || 0) * (tempItem.multiplier || 1);
     const isInvalidStock = !isStockIn && !!tempItem.productId && stockImpact > (selectedProduct?.quantity || 0);
 
-    const productOptions = products
+    const productOptions: ProductOption[] = products
         .filter(p => p.quantity > 0 || isStockIn)
         .map(p => ({
             value: p._id,
@@ -115,7 +124,7 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
     const labelStyle = "text-sm font-bold text-slate-700 mb-1.5 block";
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button type="button" variant="outline"
                     className="h-11 border-2 border-dashed border-blue-200 text-blue-600 rounded-xl px-6 font-bold">
@@ -139,7 +148,7 @@ export default function ProductItemModal({ isStockIn, onAdd }: ProductItemModalP
                     {/* Product search */}
                     <div>
                         <label className={labelStyle}>Search Product</label>
-                        <Select
+                        <Select<ProductOption, false>
                             isLoading={productsLoading}
                             options={productOptions}
                             isSearchable

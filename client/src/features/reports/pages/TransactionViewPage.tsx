@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { TransactionData } from "@/types/transaction";
+import type { Item, TransactionData } from "@/types/transaction";
 import { useMovementTransactions } from "@/features/MovementTransaction/hooks/useMovementTransactions";
 import { BillReceipt } from "@/features/MovementTransaction/components/BillReceipt";
 import { notify } from "@/lib/toast";
@@ -44,7 +44,7 @@ export default function TransactionViewPage() {
                 notify.success("Status Updated");
                 setIsEditing(false);
             }
-        } catch (_error: unknown) {
+        } catch {
             notify.error("Operation Failed");
         }
     };
@@ -204,19 +204,19 @@ export default function TransactionViewPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
-                                    {txn.items?.map((item: any, idx: number) => (
+                                    {txn.items?.map((item: Item, idx: number) => (
                                         <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-lg bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100">
                                                         <Package size={14} className="text-blue-600" />
                                                     </div>
-                                                    <span className="font-black text-slate-800 text-xs uppercase tracking-tight">{item.product?.name}</span>
+                                                    <span className="font-black text-slate-800 text-xs uppercase tracking-tight">{item.productName}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <span className="text-[11px] font-black text-slate-700">
-                                                    {item.qty} <span className="text-[9px] text-slate-400 ml-0.5 uppercase">{item.unit?.shortForm || item.unit?.name}</span>
+                                                    {item.qty} <span className="text-[9px] text-slate-400 ml-0.5 uppercase">{item.unitName?.slice(0,2) || item.unitName}</span>
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">

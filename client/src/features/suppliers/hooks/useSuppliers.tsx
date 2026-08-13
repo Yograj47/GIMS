@@ -21,7 +21,7 @@ export const useSuppliers = () => {
                 return true;
 
             }
-        } catch (_error: unknown) {
+        } catch{
             notify.error("Operation failed");
         } finally {
             setLoading(false);

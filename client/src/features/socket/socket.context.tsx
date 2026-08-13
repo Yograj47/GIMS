@@ -1,6 +1,5 @@
 import {
     createContext,
-    useContext,
 } from "react";
 
 import { socket } from "./socket";
@@ -24,5 +23,3 @@ export const SocketProvider = ({
         </SocketContext.Provider>
     );
 };
-
-export const useSocketContext = () => useContext(SocketContext);

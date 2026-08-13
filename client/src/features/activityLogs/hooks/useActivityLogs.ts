@@ -24,7 +24,6 @@ export const useActivityLogs = () => {
                 setLogs(data.data as ActivityLogData[]);
                 setMeta(data.meta ? (data.meta as PaginationMetadata) : null);
             }
-        } catch (error) {
         } finally {
             setLoading(false);
         }
@@ -32,12 +31,14 @@ export const useActivityLogs = () => {
 
     const fetchRecentLogs = useCallback(async (limit: number = 5) => {
         try {
+            setLoading(true)
             const response = await ActivityLogService.getRecent(limit);
             if (response.success) {
                 setLogs(response.data as ActivityLogData[]);
                 return true;
             }
         } finally {
+            setLoading(false)
         }
         return false;
     }, []);

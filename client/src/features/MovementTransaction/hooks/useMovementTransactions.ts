@@ -30,7 +30,7 @@ export const useMovementTransactions = () => {
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
-        } catch (error) {
+        } catch {
             notify.error("Failed to load transactions");
         } finally {
             setLoading(false);
@@ -46,7 +46,7 @@ export const useMovementTransactions = () => {
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
-        } catch (error) {
+        } catch {
             notify.error("Failed to load stock history");
         } finally {
             setLoading(false);
@@ -64,7 +64,7 @@ export const useMovementTransactions = () => {
                 return true;
 
             }
-        } catch (error) {
+        } catch {
             notify.error("Failed to load product history");
         } finally {
             setLoading(false);
@@ -82,7 +82,7 @@ export const useMovementTransactions = () => {
                 fetchMovements();
                 return true;
             }
-        } catch (error) {
+        } catch {
             notify.error("Transaction failed");
         } finally {
             setLoading(false);
@@ -101,7 +101,7 @@ export const useMovementTransactions = () => {
                 );
                 return true;
             }
-        } catch (error) {
+        } catch {
             notify.error("Failed to update status");
         } finally {
             setLoading(false);

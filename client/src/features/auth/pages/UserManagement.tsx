@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Loader2, SearchX, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import UserListing from "../components/UserListing";
 import { DeleteConfirmDialog } from "@/lib/deleteAlert";
 import { useUsers } from "../hooks/useUsers";
 import { useAuth } from "../hooks/useAuth";
+import { notify } from "@/lib/toast";
 
 export default function UserManagement() {
     const { users, fetchUsers, isLoading, updateRole, removeUser } = useUsers();
@@ -20,9 +20,9 @@ export default function UserManagement() {
     const handleRoleChange = async (userId: string, newRole: string) => {
         try {
             await updateRole(userId, newRole);
-            toast.success("Access Level Updated");
-        } catch (error) {
-            toast.error("Update Failed");
+            notify.success("Access Level Updated");
+        } catch {
+            notify.error("Update Failed");
         }
     };
 
@@ -35,10 +35,10 @@ export default function UserManagement() {
         if (!userToDelete) return;
         try {
             await removeUser(userToDelete.id);
-            toast.success(`User ${userToDelete.name} Deleted`);
+            notify.success(`User ${userToDelete.name} Deleted`);
             setIsDeleteDialogOpen(false);
-        } catch (error) {
-            toast.error("Action Failed");
+        } catch {
+            notify.error("Action Failed");
         }
     };
 

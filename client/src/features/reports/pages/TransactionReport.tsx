@@ -11,6 +11,7 @@ import { notify } from "@/lib/toast";
 import { exportToCSV } from "@/lib/csvExport";
 import { useDebounce } from "@/lib/debounce";
 import { AdminGate } from "@/features/auth/components/AdminGate";
+import type { Item, TransactionData } from "@/types/transaction";
 
 export default function Transaction() {
     const { fetchTransactions, transactions, isLoading, meta } = useMovementTransactions();
@@ -40,12 +41,12 @@ export default function Transaction() {
         await fetchTransactions(1, 1000, debouncedSearch, transactionType, dateRange.start, dateRange.end, true);
 
         if (transactions) {
-            const rows = transactions.flatMap((t: any) => t.items.map((item: any) => ({
+            const rows = transactions.flatMap((t: TransactionData) => t.items.map((item: Item) => ({
                 "Date": new Date(t.createdAt).toLocaleDateString(),
                 "Invoice": t._id.slice(-6).toUpperCase(),
                 "Type": t.transactionType,
                 "Party": t.partyDetails?.name || "Cash Customer",
-                "Product": item.product?.name,
+                "Product": item.productName,
                 "Total": item.total,
                 "Status": t.isPaid ? "Paid" : "Credit"
             })));

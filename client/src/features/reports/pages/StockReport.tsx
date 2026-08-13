@@ -11,15 +11,15 @@ import { notify } from "@/lib/toast";
 import { Loading } from "@/lib/loader";
 import { useDebounce } from "@/lib/debounce";
 import { AdminGate } from "@/features/auth/components/AdminGate";
+import type { ProductData } from "@/types/product";
 
 export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
     const [searchQuery, setSearchQuery] = useState("");
     const [stockLevel, setStockLevel] = useState<string>("All Levels");
     const navigate = useNavigate();
-    const [IsExporting, setIsExporting] = useState<boolean>(false);
+    const [isExporting, setIsExporting] = useState<boolean>(false);
     const debouncedSearch = useDebounce(searchQuery, 500);
-
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -27,7 +27,7 @@ export default function StockReport() {
     });
 
     useEffect(() => {
-        if (!IsExporting) {
+        if (!isExporting) {
             const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
             fetchProducts(
                 pagination.pageIndex + 1,
@@ -36,38 +36,45 @@ export default function StockReport() {
                 levelFilter
             );
         }
-    }, [fetchProducts, pagination, debouncedSearch, stockLevel]);
+    }, [fetchProducts, pagination, debouncedSearch, stockLevel, isExporting]);
 
-    const handleExport = () => {
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
+            
+            const exportData = await fetchProducts(
+                1,
+                1000,
+                searchQuery,
+                undefined,
+                levelFilter,
+                true
+            );
 
-        setIsExporting(true);
-        const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
-        fetchProducts(
-            1,
-            1000,
-            searchQuery,
-            undefined,
-            levelFilter,
-            true
-        );
-    };
+            const itemsToExport = Array.isArray(exportData) ? exportData : products;
 
-    useEffect(() => {
-        if (IsExporting && !isLoading && products.length > 0) {
+            if (itemsToExport && itemsToExport.length > 0) {
+                const rows = itemsToExport.map((p: ProductData) => ({
+                    "Date": new Date(p.createdAt).toLocaleString(),
+                    "Product": p.name || "N/A",
+                    "Base Price": p.basePrice,
+                    "Selling Price": p.sellingPrice,
+                    "Quantity": p.quantity,
+                    "Threshold": p.threshold,
+                    "Stock Value": p.sellingPrice * p.quantity
+                }));
 
-            const rows = products.map(p => ({
-                "Date": new Date(p.createdAt).toLocaleString(),
-                "Product": p.name || "N/A",
-                "Base Price": p.basePrice,
-                "Selling Price": p.sellingPrice,
-                "Quantity": p.quantity,
-                "Threshold": p.threshold,
-                "Stock Value": p.sellingPrice * p.quantity
-            }));
-
-            exportToCSV(rows, `Stock_Movement_${new Date().toISOString().split('T')[0]}`);
+                exportToCSV(rows, `Stock_Movement_${new Date().toISOString().split('T')[0]}`);
+                notify.success("Export Complete");
+            } else {
+                notify.error("No items available to export");
+            }
+        } catch {
+            notify.error("Failed to export stock report");
+        } finally {
             setIsExporting(false);
-
+            
             const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
             fetchProducts(
                 pagination.pageIndex + 1,
@@ -75,10 +82,8 @@ export default function StockReport() {
                 searchQuery,
                 levelFilter
             );
-            notify.success("Export Complete");
         }
-    }, [IsExporting, isLoading, products]);
-
+    };
 
     const columns = useMemo(() => getStockColumns(navigate), [navigate]);
 
@@ -112,14 +117,13 @@ export default function StockReport() {
                         </div>
                     </div>
 
-
                     <AdminGate allowedRoles={["owner"]}>
                         <Button
                             onClick={handleExport}
-                            disabled={IsExporting}
+                            disabled={isExporting}
                             className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                         >
-                            {IsExporting ? (
+                            {isExporting ? (
                                 <><Loading size="sm" className="mr-2" /> Processing...</>
                             ) : (
                                 <><Download size={14} className="mr-2" /> Export CSV</>
@@ -128,7 +132,7 @@ export default function StockReport() {
                     </AdminGate>
                 </div>
 
-                {/* 2. PRECISION TOOLBAR (Consistent with Products Page) */}
+                {/* 2. PRECISION TOOLBAR */}
                 <div className="flex flex-col lg:flex-row gap-3">
                     {/* Search Field */}
                     <div className="relative flex-1 group">

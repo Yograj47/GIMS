@@ -19,7 +19,6 @@ export const useAnalytics = () => {
                 setWeeklyStats(response.data as WeeklyMovementData[]);
                 return response.data;
             }
-        } catch (error) {
         } finally {
             setLoading(false);
         }
@@ -33,7 +32,6 @@ export const useAnalytics = () => {
                 setSummary(response.data);
                 return response.data;
             }
-        } catch (error) {
         } finally {
             setLoading(false);
         }

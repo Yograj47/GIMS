@@ -18,7 +18,6 @@ export default function VerifyAccount() {
   const handleSendOtp = async () => {
     try {
       await sendVerifyOtp();
-    } catch (err) {
     } finally {
       setOtpSent(true);
     }

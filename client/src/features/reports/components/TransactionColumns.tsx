@@ -1,9 +1,11 @@
-import { Newspaper} from "lucide-react";
+import { Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { NavigateFunction } from "react-router-dom";
+import type { TransactionData } from "@/types/transaction";
 
-export const getTransactionColumns = (navigate: any): ColumnDef<any>[] => [
+export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<TransactionData>[] => [
   {
     accessorKey: "partyDetails.name",
     header: "Party / Invoice",
@@ -55,10 +57,10 @@ export const getTransactionColumns = (navigate: any): ColumnDef<any>[] => [
     header: () => <div className="text-right">Action</div>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="h-8 px-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-indigo-100"
-          onClick={() => navigate(`/reports/transaction/${row.original._id}`, { state: {transaction: row.original}})}
+          onClick={() => navigate(`/reports/transaction/${row.original._id}`, { state: { transaction: row.original } })}
         >
           <Newspaper size={12} className="mr-2" /> View Bill
         </Button>

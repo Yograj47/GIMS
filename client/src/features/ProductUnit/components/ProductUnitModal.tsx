@@ -11,17 +11,33 @@ import { Switch } from '@/components/ui/switch';
 import { useUnits } from '@/features/unit/hooks/useUnits';
 import { Button } from '@/components/ui/button';
 
+interface ProductUnitConversion {
+    _id: string;
+    unitId: string;
+    unitName: string;
+    shortName: string;
+    multiplier: number;
+    isDefault: boolean;
+    isFractionable: boolean;
+    isActive: boolean;
+}
+
 interface ProductUnitModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: ProductUnitFormData) => Promise<void>;
     productId: string;
     productName: string;
-    initialData?: any; 
+    initialData?: ProductUnitConversion; 
+}
+
+interface SelectOption {
+    value: string;
+    label: string;
 }
 
 // Custom Styles for react-select to match your UI
-const selectStyles: StylesConfig<any> = {
+const selectStyles: StylesConfig<SelectOption, false> = {
     control: (base, state) => ({
         ...base,
         minHeight: '36px',
@@ -64,7 +80,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
 
     const currentMultiplier = watch('multiplier');
 
-    const unitOptions = useMemo(() => 
+    const unitOptions: SelectOption[] = useMemo(() => 
         units.map(u => ({
             value: u._id,
             label: `${u.name} (${u.shortForm})`

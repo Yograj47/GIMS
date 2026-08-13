@@ -10,9 +10,33 @@ import { notify } from "@/lib/toast";
 import { useAuth } from "../hooks/useAuth";
 
 export default function ForgotPassword() {
-    const [step, setStep] = useState<"email" | "otp" | "password">("email");
-    const [userEmail, setUserEmail] = useState("");
-    const [timer, setTimer] = useState(0);
+    const [step, setStep] = useState<"email" | "otp" | "password">(() => {
+        const savedExpiry = localStorage.getItem("otp_expiry");
+        if (savedExpiry) {
+            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
+            if (remaining > 0) return "otp";
+        }
+        return "email";
+    });
+
+    const [userEmail, setUserEmail] = useState(() => {
+        const savedExpiry = localStorage.getItem("otp_expiry");
+        if (savedExpiry) {
+            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
+            if (remaining > 0) return localStorage.getItem("reset_email") || "";
+        }
+        return "";
+    });
+
+    const [timer, setTimer] = useState(() => {
+        const savedExpiry = localStorage.getItem("otp_expiry");
+        if (savedExpiry) {
+            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
+            if (remaining > 0) return remaining;
+        }
+        return 0;
+    });
+
     const navigate = useNavigate();
     const {
         forgotPassword,
@@ -28,19 +52,6 @@ export default function ForgotPassword() {
         resolver: zodResolver(resetPasswordSchema),
         defaultValues: { otp: "", password: "", confirmPassword: "" }
     });
-
-    // --- Timer Persistence ---
-    useEffect(() => {
-        const savedExpiry = localStorage.getItem("otp_expiry");
-        if (savedExpiry) {
-            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
-            if (remaining > 0) {
-                setTimer(remaining);
-                setStep("otp");
-                setUserEmail(localStorage.getItem("reset_email") || "");
-            }
-        }
-    }, []);
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
@@ -64,6 +75,7 @@ export default function ForgotPassword() {
         setUserEmail(data.email);
         setStep("otp");
 
+        // eslint-disable-next-line react-hooks/purity
         const expiry = Date.now() + 600000;
         localStorage.setItem("otp_expiry", expiry.toString());
         localStorage.setItem("reset_email", data.email);
@@ -101,7 +113,7 @@ export default function ForgotPassword() {
             await forgotPassword({ email: userEmail });
             setTimer(600);
             notify.success("New code sent!");
-        } catch (_err) {
+        } catch {
             // Error handled via service or ignored safely
         }
     };

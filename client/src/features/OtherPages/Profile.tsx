@@ -36,8 +36,6 @@ export default function ProfilePage() {
     const handleProfileUpdate = async () => {
         try {
             await updateProfile(updatedData.name, updatedData.email);
-        } catch (_error) {
-            // Error handled globally or via toast
         } finally {
             setIsEditing(false);
         }

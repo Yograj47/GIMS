@@ -10,6 +10,17 @@ import { AdminGate } from "@/features/auth/components/AdminGate";
 import { useDebounce } from "@/lib/debounce";
 import { DeleteConfirmDialog } from "@/lib/deleteAlert";
 
+interface ProductUnitConversion {
+    _id: string;
+    unitId: string;
+    unitName: string;
+    shortName: string;
+    multiplier: number;
+    isDefault: boolean;
+    isFractionable: boolean;
+    isActive: boolean;
+}
+
 export default function ProductUnitPage() {
     const {
         groupedUnits,
@@ -22,7 +33,7 @@ export default function ProductUnitPage() {
     } = useProductUnits();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [context, setContext] = useState<{ id: string; name: string; initialData?: any } | null>(null);
+    const [context, setContext] = useState<{ id: string; name: string; initialData?: ProductUnitConversion } | null>(null);
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
     const [searchQuery, setSearchQuery] = useState("");
     const debouncedSearchQuery = useDebounce(searchQuery, 400);
@@ -30,6 +41,13 @@ export default function ProductUnitPage() {
     // DELETE STATES
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [unitToDelete, setUnitToDelete] = useState<{ unitId: string; productId: string; unitName: string } | null>(null);
+
+    // Track previous search to reset page index safely during render
+    const [prevSearch, setPrevSearch] = useState(debouncedSearchQuery);
+    if (prevSearch !== debouncedSearchQuery) {
+        setPrevSearch(debouncedSearchQuery);
+        setPagination(prev => ({ ...prev, pageIndex: 0 }));
+    }
 
     useEffect(() => {
         fetchGroupedUnits(pagination.pageIndex + 1, pagination.pageSize, debouncedSearchQuery);
@@ -117,7 +135,7 @@ export default function ProductUnitPage() {
                                         </AdminGate>
                                     </div>
                                     <div className="divide-y divide-slate-100">
-                                        {row.original.conversions.map((conv: any) => (
+                                        {row.original.conversions.map((conv:ProductUnitConversion) => (
                                             <div key={conv._id} className="grid grid-cols-12 gap-4 px-6 py-3 items-center hover:bg-blue-50/30 transition-colors">
                                                 <div className="col-span-4 flex items-center gap-2 font-semibold text-slate-700 text-sm">
                                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />

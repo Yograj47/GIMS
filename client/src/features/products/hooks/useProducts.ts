@@ -19,7 +19,8 @@ export const useProducts = () => {
                 setMeta(all ? null : (response.meta || null));
                 return true;
             }
-        } catch (error: any) {
+        } catch {
+            notify.error("Failed to fetch")
         } finally {
             setLoading(false);
         }

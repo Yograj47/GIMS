@@ -1,7 +1,19 @@
+import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export default function StatCard({ title, value, desc, trend, trendUp, icon, color, bgColor }: any) {
+interface StatCardProps {
+    title: string;
+    value: string | number;
+    desc: string;
+    trend: string;
+    trendUp: boolean;
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+}
+
+export default function StatCard({ title, value, desc, trend, trendUp, icon, color, bgColor }: StatCardProps) {
     return (
         <Card className="border-slate-300 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50 bg-white group overflow-hidden">
             <CardContent className="p-6">

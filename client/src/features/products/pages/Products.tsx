@@ -8,9 +8,13 @@ import { DataTable } from '@/components/common/DataTable';
 import { getProductColumns } from '../components/ProductColumns';
 import { useDebounce } from '@/lib/debounce';
 import { useCategories } from '@/features/category/hooks/useCategories';
-import Select from "react-select";
+import Select, { type StylesConfig } from "react-select";
 import { AdminGate } from '@/features/auth/components/AdminGate';
 
+interface CategoryOption {
+    value: string;
+    label: string;
+}
 
 const Products: React.FC = () => {
     const navigate = useNavigate();
@@ -39,7 +43,7 @@ const Products: React.FC = () => {
         fetch();
     }, [fetchProducts, fetchCategories, pagination.pageIndex, pagination.pageSize, debouncedSearch, selectCategory, stockLevel]);
 
-    const categoryOptions = useMemo(() => {
+    const categoryOptions = useMemo<CategoryOption[]>(() => {
         return [
             { value: "", label: "ALL CATEGORIES" },
             ...(categories?.map(cat => ({
@@ -49,8 +53,8 @@ const Products: React.FC = () => {
         ];
     }, [categories]);
 
-    const customSelectStyles = {
-        control: (base: any) => ({
+    const customSelectStyles: StylesConfig<CategoryOption, false> = {
+        control: (base) => ({
             ...base,
             height: '40px',
             minHeight: '40px',
@@ -62,7 +66,7 @@ const Products: React.FC = () => {
             boxShadow: 'none',
             '&:hover': { borderColor: '#cbd5e1' }
         }),
-        option: (base: any) => ({
+        option: (base) => ({
             ...base,
             fontSize: '11px',
             fontWeight: 'bold',
@@ -145,11 +149,11 @@ const Products: React.FC = () => {
 
                     {/* Category Filter */}
                     <div className="min-w-50">
-                        <Select
+                        <Select<CategoryOption, false>
                             placeholder="CATEGORY"
                             options={categoryOptions}
-                            value={categoryOptions.find(opt => opt.value === selectCategory)}
-                            onChange={(newValue: any) => {
+                            value={categoryOptions.find(opt => opt.value === selectCategory) || null}
+                            onChange={(newValue) => {
                                 setSelectCategory(newValue?.value || "");
                                 setPagination(prev => ({ ...prev, pageIndex: 0 }));
                             }}
@@ -164,7 +168,7 @@ const Products: React.FC = () => {
                     <Button
                         variant="outline"
                         disabled={!searchQuery && stockLevel === "All Levels"}
-                        onClick={() => { setSearchQuery(""); setStockLevel("All Levels") }}
+                        onClick={() => { setSearchQuery(""); setStockLevel("All Levels"); setSelectCategory(""); }}
                         className="h-10 border-slate-300 text-slate-500 hover:bg-slate-50 rounded-sm text-[11px] font-bold uppercase"
                     >
                         <RotateCcw className="mr-2 h-3 w-3" /> Reset

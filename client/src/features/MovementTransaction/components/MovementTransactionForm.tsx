@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { ArrowLeft, Trash2, Loader2, CreditCard, Info, ReceiptText, ShoppingCart, PackagePlus, PackageMinus, Hash } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm, useFieldArray, type Resolver } from "react-hook-form";
+import { useForm, useFieldArray, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "@/components/ui/input";
@@ -22,8 +22,7 @@ export default function MovementForm() {
 
     const { fetchTransactions, transactions, createTransaction, isLoading } = useMovementTransactions();
 
-
-    const { register, control, handleSubmit, watch, setValue } = useForm<TransactionFormData>({
+    const { register, control, handleSubmit, setValue } = useForm<TransactionFormData>({
         resolver: zodResolver(transactionSchema) as Resolver<TransactionFormData>,
         defaultValues: {
             transactionType: isStockIn ? 'Purchase' : 'Sale',
@@ -36,10 +35,13 @@ export default function MovementForm() {
     });
 
     const { fields, append, remove } = useFieldArray({ control, name: "items" });
-    const currentType = watch("transactionType");
-    const watchedItems = watch("items");
-    const showSettlement = currentType === "Purchase" || currentType === "Sale";
+    const currentType = useWatch({ control, name: "transactionType" });
+    const watchedItems = useWatch({ control, name: "items" });
+    const isPaid = useWatch({ control, name: "isPaid" });
+    const watchedName = useWatch({ control, name: "partyDetails.name" });
 
+    const showSettlement = currentType === "Purchase" || currentType === "Sale";
+    
     const grandTotal = useMemo(() => {
         const total = watchedItems.reduce((sum, item) => sum + (item.total || 0), 0);
         setValue("grandTotal", total);
@@ -53,23 +55,19 @@ export default function MovementForm() {
 
     useEffect(() => {
         if (isStockIn) {
-            fetchSuppliers()
+            fetchSuppliers();
         } else {
             fetchTransactions();
         }
-    }, [isStockIn, fetchTransactions, fetchSuppliers])
+    }, [isStockIn, fetchTransactions, fetchSuppliers]);
 
     const pastCustomers = useMemo(() => {
-
         const customers = transactions
             .filter(t => t.transactionType === "Sale")
-            .map(t => t.partyDetails)
+            .map(t => t.partyDetails);
 
-        return Array.from(new Map(customers.map(c => [c.name, c])).values())
+        return Array.from(new Map(customers.map(c => [c.name, c])).values());
     }, [transactions]);
-
-
-    const watchedName = watch("partyDetails.name");
 
     useEffect(() => {
         const list = isStockIn ? Suppliers : pastCustomers;
@@ -80,28 +78,27 @@ export default function MovementForm() {
     }, [watchedName, isStockIn, Suppliers, pastCustomers, setValue]);
 
     const handleAddProduct = (newItem: Item) => {
-    const existingIndex = fields.findIndex(
-        (item) => item.productId === newItem.productId && item.unitId === newItem.unitId
-    );
+        const existingIndex = fields.findIndex(
+            (item) => item.productId === newItem.productId && item.unitId === newItem.unitId
+        );
 
-    if (existingIndex > -1) {
-        const currentQty = Number(watchedItems[existingIndex].qty);
-        const newQty = currentQty + Number(newItem.qty);
-        const newTotal = newQty * Number(newItem.rate);
+        if (existingIndex > -1) {
+            const currentQty = Number(watchedItems[existingIndex].qty);
+            const newQty = currentQty + Number(newItem.qty);
+            const newTotal = newQty * Number(newItem.rate);
 
-        setValue(`items.${existingIndex}.qty`, newQty);
-        setValue(`items.${existingIndex}.total`, newTotal);
-    } else {
-        append(newItem);
-    }
-};
+            setValue(`items.${existingIndex}.qty`, newQty);
+            setValue(`items.${existingIndex}.total`, newTotal);
+        } else {
+            append(newItem);
+        }
+    };
 
     const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
     const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-700 hover:bg-rose-700";
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
-
             {/* --- TOP BAR / HEADER --- */}
             <div className="flex items-center justify-between border-b border-slate-300 pb-6">
                 <div className="flex items-center gap-4">
@@ -135,10 +132,8 @@ export default function MovementForm() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
                 {/* LEFT COLUMN: PRIMARY INPUTS */}
                 <div className="lg:col-span-8 space-y-6">
-
                     {/* SECTION: CONFIGURATION */}
                     <section className="bg-white border border-slate-300 rounded-xl p-5 overflow-hidden relative">
                         <div className="absolute top-0 right-0 p-2 opacity-[0.03]">
@@ -195,14 +190,14 @@ export default function MovementForm() {
                                                 {String(index + 1).padStart(2, '0')}
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{(field as any).productName}</p>
+                                                <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{(field as Item).productName}</p>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                    Rate: ₹{watchedItems[index].rate} <span className="mx-1">×</span> Qty: {watchedItems[index].qty} {field.unitName}
+                                                    Rate: ₹{watchedItems[index]?.rate} <span className="mx-1">×</span> Qty: {watchedItems[index]?.qty} {field.unitName}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-6">
-                                            <p className="font-mono font-black text-xs text-slate-700">₹{watchedItems[index].total}</p>
+                                            <p className="font-mono font-black text-xs text-slate-700">₹{watchedItems[index]?.total}</p>
                                             <button
                                                 type="button"
                                                 onClick={() => remove(index)}
@@ -240,7 +235,6 @@ export default function MovementForm() {
 
                 {/* RIGHT COLUMN: SETTLEMENT SIDEBAR */}
                 <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
-
                     {showSettlement ? (
                         <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-sm">
                             <div className={cn("px-5 py-3 text-white flex items-center justify-between", themeBg)}>
@@ -249,7 +243,6 @@ export default function MovementForm() {
                                 </h2>
                                 <ActivityIndicator />
                             </div>
-
 
                             <div className="p-5 space-y-5">
                                 <div className="space-y-2">
@@ -260,7 +253,7 @@ export default function MovementForm() {
                                             onClick={() => setValue("isPaid", true)}
                                             className={cn(
                                                 "flex-1 py-2 rounded-md text-[10px] font-black tracking-widest transition-all",
-                                                watch("isPaid") ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                                isPaid ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                                             )}
                                         >
                                             PAID / SETTLED
@@ -270,7 +263,7 @@ export default function MovementForm() {
                                             onClick={() => setValue("isPaid", false)}
                                             className={cn(
                                                 "flex-1 py-2 rounded-md text-[10px] font-black tracking-widest transition-all",
-                                                !watch("isPaid") ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                                !isPaid ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                                             )}
                                         >
                                             CREDIT / DEBT
@@ -281,7 +274,7 @@ export default function MovementForm() {
                                     <div className="space-y-1.5 relative">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex justify-between">
                                             <span>{isStockIn ? "Supplier" : "Customer"}</span>
-                                            {watch("partyDetails.name") && <span className="text-emerald-500 animate-in zoom-in">Verified</span>}
+                                            {watchedName && <span className="text-emerald-500 animate-in zoom-in">Verified</span>}
                                         </label>
                                         <div className="relative group">
                                             <Input

@@ -11,11 +11,21 @@ import { getMovementColumns } from "../components/MovementColumns"
 import { useDebounce } from "@/lib/debounce"
 import { useNavigate } from "react-router-dom"
 
+interface MovementTransaction {
+    createdAt: string;
+    product?: { name?: string };
+    movementType: "IN" | "OUT";
+    quantity: number;
+    unit?: { name?: string };
+    reason: string;
+    performedBy?: { name?: string };
+}
+
 export default function StockMovementReport() {
     const { fetchMovements, movements, isLoading, meta } = useMovementTransactions()
     const [searchQuery, setSearchQuery] = useState("")
     const [movementType, setMovementType] = useState<string>("All Movements")
-    const [IsExporting, setIsExporting] = useState<boolean>(false);
+    const [isExporting, setIsExporting] = useState<boolean>(false);
     const debouncedSearch = useDebounce(searchQuery, 500);
     const navigate = useNavigate();
 
@@ -24,36 +34,43 @@ export default function StockMovementReport() {
         pageSize: 10,
     })
 
+    // Primary data fetch effect with all required dependencies
     useEffect(() => {
-        if (!IsExporting) {
+        if (!isExporting) {
             const typeFilter = movementType === "All Movements" ? "" : movementType;
             fetchMovements(pagination.pageIndex + 1, pagination.pageSize, debouncedSearch, typeFilter);
         }
-    }, [pagination, debouncedSearch, movementType, IsExporting]);
+    }, [pagination, debouncedSearch, movementType, isExporting, fetchMovements]);
 
-    const handleExport = () => {
-        setIsExporting(true);
-        const typeFilter = movementType === "All Movements" ? "" : movementType;
-        fetchMovements(1, 1000, debouncedSearch, typeFilter, true);
-    };
+    // Imperative export handler replacing side-effect based export
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            const typeFilter = movementType === "All Movements" ? "" : movementType;
 
-    useEffect(() => {
-        if (IsExporting && !isLoading && Array.isArray(movements) && movements.length > 0) {
+            const exportData = await fetchMovements(1, 1000, debouncedSearch, typeFilter, true);
+            const itemsToExport = Array.isArray(exportData) ? exportData : movements;
 
-            const rows = movements.map((m: any) => ({
-                "Date": new Date(m.createdAt).toLocaleString(),
-                "Product": m.product?.name || "N/A",
-                "Type": m.movementType,
-                "Qty": m.movementType === "IN" ? `+${m.quantity}` : `-${m.quantity}`,
-                "Unit": m.unit?.name || "Pcs",
-                "Reason": m.reason,
-                "Operator": m.performedBy?.name || "System"
-            }));
+            if (Array.isArray(itemsToExport) && itemsToExport.length > 0) {
+                const rows = itemsToExport.map((m: MovementTransaction) => ({
+                    "Date": new Date(m.createdAt).toLocaleString(),
+                    "Product": m.product?.name || "N/A",
+                    "Type": m.movementType,
+                    "Qty": m.movementType === "IN" ? `+${m.quantity}` : `-${m.quantity}`,
+                    "Unit": m.unit?.name || "Pcs",
+                    "Reason": m.reason,
+                    "Operator": m.performedBy?.name || "System"
+                }));
 
-            exportToCSV(rows, `Stock_Movement_${new Date().toISOString().split('T')[0]}`);
-
+                exportToCSV(rows, `Stock_Movement_${new Date().toISOString().split('T')[0]}`);
+                notify.success("Export Complete");
+            } else {
+                notify.error("No movement records available to export");
+            }
+        } catch {
+            notify.error("Failed to export movement ledger");
+        } finally {
             setIsExporting(false);
-
             const typeFilter = movementType === "All Movements" ? "" : movementType;
             fetchMovements(
                 pagination.pageIndex + 1,
@@ -61,11 +78,8 @@ export default function StockMovementReport() {
                 searchQuery,
                 typeFilter
             );
-
-            notify.success("Export Complete");
         }
-    }, [IsExporting, isLoading, movements]);
-
+    };
 
     return (
         <div className="h-full animate-in fade-in duration-500">
@@ -100,10 +114,10 @@ export default function StockMovementReport() {
 
                     <Button
                         onClick={handleExport}
-                        disabled={IsExporting}
+                        disabled={isExporting}
                         className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                     >
-                        {IsExporting ? (
+                        {isExporting ? (
                             <><Loading size="sm" className="mr-2" /> Extracting...</>
                         ) : (
                             <><Download size={14} className="mr-2" /> Export CSV</>

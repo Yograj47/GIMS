@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, User, Mail, Lock, ShieldCheck } from "lucide-react";
@@ -28,8 +28,7 @@ function RegisterForm() {
     }
   };
 
-  // Refined Midnight Input Classes
-  const inputClasses = (error: any) => `
+  const inputClasses = (error: FieldError | undefined) => `
     w-full rounded-xl border pl-11 pr-4 py-2.5 text-sm transition-all outline-none
     focus:ring-4 focus:ring-blue-500/10 
     ${error

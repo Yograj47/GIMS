@@ -1,9 +1,10 @@
 import { Line } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ChartData, ChartOptions } from 'chart.js';
 
 interface ChartSectionProps {
-    data: any; 
-    options: any;
+    data: ChartData<'line'>; 
+    options: ChartOptions<'line'>;
 }
 
 export default function ChartSection({ data, options }: ChartSectionProps) {
