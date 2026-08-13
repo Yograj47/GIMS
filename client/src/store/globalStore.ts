@@ -32,6 +32,8 @@ export const useGlobalStore = create<GlobalState>((set) => ({
         set({ settings: response.data as GeneralSettingsData });
       }
     } catch (error) {
+      console.log(error);
+
     }
   },
 

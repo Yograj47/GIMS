@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search, X, Check, Package, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils";
@@ -19,7 +19,11 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => { if (!isOpen) { setSelectedIds([]); setSearch(""); } }, [isOpen]);
+    const handleClose = () => {
+        setSelectedIds([]);
+        setSearch("");
+        onClose();
+    };
 
     const toggleProduct = (id: string) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -38,7 +42,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                     <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Link Inventory</h3>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={16} /></button>
+                    <button onClick={handleClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={16} /></button>
                 </div>
 
                 {/* Search */}
@@ -94,10 +98,15 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
 
                 {/* Footer */}
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex gap-2">
-                    <Button variant="ghost" onClick={onClose} className="flex-1 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-slate-100 border">Cancel</Button>
+                    <Button variant="ghost" onClick={handleClose} className="flex-1 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-slate-100 border">Cancel</Button>
                     <Button
                         disabled={selectedIds.length === 0 || isSubmitting}
-                        onClick={async () => { setIsSubmitting(true); await onAssign(selectedIds); setIsSubmitting(false); onClose(); }}
+                        onClick={async () => { 
+                            setIsSubmitting(true); 
+                            await onAssign(selectedIds); 
+                            setIsSubmitting(false); 
+                            handleClose(); 
+                        }}
                         className="flex-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest h-10 shadow-none rounded-lg"
                     >
                         {isSubmitting ? "Processing..." : `Link ${selectedIds.length} Items`}

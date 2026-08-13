@@ -6,11 +6,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { TransactionData } from "@/types/transaction";
 import { useMovementTransactions } from "@/features/MovementTransaction/hooks/useMovementTransactions";
 import { BillReceipt } from "@/features/MovementTransaction/components/BillReceipt";
+import { notify } from "@/lib/toast";
 
 export default function TransactionViewPage() {
     const { state } = useLocation();
@@ -41,11 +41,11 @@ export default function TransactionViewPage() {
             if (!id) return;
             const success = await updateCreditStatus(id, { isPaid, notes });
             if (success) {
-                toast.success("Status Updated");
+                notify.success("Status Updated");
                 setIsEditing(false);
             }
-        } catch (error) {
-            toast.error("Update Failed");
+        } catch (_error: unknown) {
+            notify.error("Operation Failed");
         }
     };
 

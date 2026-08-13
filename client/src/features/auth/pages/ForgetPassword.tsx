@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { forgotPasswordSchema, resetPasswordSchema, type ForgotPasswordFormData, type ResetPasswordFormData} from "@/types/auth";
+import { forgotPasswordSchema, resetPasswordSchema, type ForgotPasswordFormData, type ResetPasswordFormData } from "@/types/auth";
 import { Loader2, Mail, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { notify } from "@/lib/toast";
@@ -19,7 +19,6 @@ export default function ForgotPassword() {
         resetPassword,
         isLoading,
     } = useAuth();
-
 
     const requestForm = useForm<ForgotPasswordFormData>({
         resolver: zodResolver(forgotPasswordSchema),
@@ -58,30 +57,16 @@ export default function ForgotPassword() {
     };
 
     // --- Step 1: Request OTP ---
-    const handleSendOtp = async (
-        data: ForgotPasswordFormData
-    ) => {
-        const success =
-            await forgotPassword(data);
-
+    const handleSendOtp = async (data: ForgotPasswordFormData) => {
+        const success = await forgotPassword(data);
         if (!success) return;
 
         setUserEmail(data.email);
         setStep("otp");
 
-        const expiry =
-            Date.now() + 600000;
-
-        localStorage.setItem(
-            "otp_expiry",
-            expiry.toString()
-        );
-
-        localStorage.setItem(
-            "reset_email",
-            data.email
-        );
-
+        const expiry = Date.now() + 600000;
+        localStorage.setItem("otp_expiry", expiry.toString());
+        localStorage.setItem("reset_email", data.email);
         setTimer(600);
     };
 
@@ -96,27 +81,17 @@ export default function ForgotPassword() {
     };
 
     // --- Step 3: Final API Call ---
-    const onFinalSubmit = async (
-        data: ResetPasswordFormData
-    ) => {
-        const success =
-            await resetPassword({
-                email: userEmail,
-                otp: data.otp,
-                newPassword:
-                    data.password,
-            });
+    const onFinalSubmit = async (data: ResetPasswordFormData) => {
+        const success = await resetPassword({
+            email: userEmail,
+            otp: data.otp,
+            newPassword: data.password,
+        });
 
         if (!success) return;
 
-        localStorage.removeItem(
-            "otp_expiry"
-        );
-
-        localStorage.removeItem(
-            "reset_email"
-        );
-
+        localStorage.removeItem("otp_expiry");
+        localStorage.removeItem("reset_email");
         navigate("/login");
     };
 
@@ -126,19 +101,15 @@ export default function ForgotPassword() {
             await forgotPassword({ email: userEmail });
             setTimer(600);
             notify.success("New code sent!");
-        } catch (err) {
-
+        } catch (_err) {
+            // Error handled via service or ignored safely
         }
     };
 
-
-    // Midnight Input Style helper
     const midnightInput = "bg-slate-950/40 border-white/5 text-slate-200 placeholder:text-slate-600 focus:border-blue-500/50 focus:bg-slate-950/60 transition-all rounded-2xl py-7 pl-6 shadow-inner";
 
     return (
         <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl animate-in fade-in zoom-in duration-500">
-
-            {/* Header UI - Icons & Text adapted for Dark Mode */}
             <div className="mb-10 flex flex-col items-center">
                 <div className="w-16 h-16 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-500 mb-6 shadow-[0_0_20px_rgba(37,99,235,0.1)]">
                     {step === "email" && <Mail size={32} />}
@@ -161,7 +132,6 @@ export default function ForgotPassword() {
                 </p>
             </div>
 
-            {/* STEP 1: EMAIL */}
             {step === "email" && (
                 <form onSubmit={requestForm.handleSubmit(handleSendOtp)} className="space-y-5">
                     <Input
@@ -175,7 +145,6 @@ export default function ForgotPassword() {
                 </form>
             )}
 
-            {/* STEP 2: OTP */}
             {step === "otp" && (
                 <div className="space-y-6">
                     <Input
@@ -197,7 +166,6 @@ export default function ForgotPassword() {
                 </div>
             )}
 
-            {/* STEP 3: PASSWORD */}
             {step === "password" && (
                 <form onSubmit={resetForm.handleSubmit(onFinalSubmit)} className="space-y-4">
                     <Input
@@ -225,7 +193,6 @@ export default function ForgotPassword() {
                 </form>
             )}
 
-            {/* Back to Login Footer */}
             <div className="mt-10 pt-6 border-t border-white/5 text-center">
                 <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2 group">
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />

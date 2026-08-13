@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Key, Camera, LogOut, CheckCircle2
 } from "lucide-react";
@@ -15,22 +15,29 @@ export default function ProfilePage() {
     const { isLoading, updateProfile } = useUsers();
     const { user } = useAuthStore();
     const { logout } = useAuth();
-    const [updatedData, setUpdatedData] = useState({ userId: user?._id || "", name: user?.name || "", email: user?.email || "" });
 
-    useEffect(() => {
-        if (user) {
+    const [updatedData, setUpdatedData] = useState({
+        userId: user?._id || "",
+        name: user?.name || "",
+        email: user?.email || ""
+    });
+
+    const handleToggleEdit = () => {
+        if (!isEditing && user) {
             setUpdatedData({
                 userId: user._id,
                 name: user.name,
                 email: user.email
             });
         }
-    }, [user]);
+        setIsEditing(!isEditing);
+    };
 
     const handleProfileUpdate = async () => {
         try {
             await updateProfile(updatedData.name, updatedData.email);
-        } catch (error) {
+        } catch (_error) {
+            // Error handled globally or via toast
         } finally {
             setIsEditing(false);
         }
@@ -51,22 +58,22 @@ export default function ProfilePage() {
         {
             role: "owner",
             permissions: [
-                "Inventory Control", // Maps from product:read/write/delete
-                "Vendor Registry",    // Maps from supplier:read/write/delete
-                "Financial Audit",    // Maps from transaction:read
-                "Data Reporting",     // Maps from report:read
-                "Security Monitoring", // Maps from alert:read/write
-                "System Configuration" // Maps from generalSetting:read/write
+                "Inventory Control",
+                "Vendor Registry",
+                "Financial Audit",
+                "Data Reporting",
+                "Security Monitoring",
+                "System Configuration"
             ]
         },
         {
             role: "staff",
             permissions: [
-                "Ledger Management",  // Maps from transaction:read/write/audit
-                "Inventory View-Only", // Maps from product:read/category:read
-                "Vendor Registry",     // Maps from supplier:read
-                "Security Monitoring", // Maps from alert:read/write
-                "System Settings View" // Maps from generalSetting:read
+                "Ledger Management",
+                "Inventory View-Only",
+                "Vendor Registry",
+                "Security Monitoring",
+                "System Settings View"
             ]
         }
     ];
@@ -80,7 +87,6 @@ export default function ProfilePage() {
     return (
         <div className="h-full p-2 animate-in fade-in duration-700">
             <div className="max-w-5xl mx-auto">
-
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 pb-12 border-b border-slate-200">
                     <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                         <div className="relative">
@@ -111,14 +117,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-                    {/* --- MAIN CONTENT: Defined White Cards --- */}
                     <div className="lg:col-span-2 space-y-8">
                         <section className="bg-white rounded-[2rem] border border-slate-200 p-10 shadow-sm">
                             <div className="flex justify-between items-center mb-10">
                                 <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Identity Details</h3>
                                 <button
-                                    onClick={() => setIsEditing(!isEditing)}
+                                    onClick={handleToggleEdit}
                                     className="text-xs font-black text-blue-600 uppercase tracking-widest hover:underline decoration-2"
                                 >
                                     {isEditing ? "Discard Changes" : "Edit Profile"}
@@ -191,6 +195,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-
-

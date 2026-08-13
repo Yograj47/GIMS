@@ -14,7 +14,8 @@ export const useSettings = () => {
             if (response.success) {
                 setGeneralData(response.data as GeneralSettingsData);
             }
-        } catch (error: any) {
+        } catch (_error: unknown) {
+            notify.error("Operation failed");
         } finally {
             setIsLoading(false);
         }
@@ -31,8 +32,8 @@ export const useSettings = () => {
                 notify.success("General settings updated successfully");
                 return true;
             }
-        } catch (error: any) {
-            notify.error(error.response?.data?.message || "Failed to update settings");
+        } catch (_error: unknown) {
+            notify.error("Operation failed");
         } finally {
             setIsLoading(false);
         }

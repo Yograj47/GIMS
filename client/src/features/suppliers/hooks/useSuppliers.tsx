@@ -11,7 +11,7 @@ export const useSuppliers = () => {
     const [isLoading, setLoading] = useState(false);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
-    const fetchSuppliers = useCallback(async (page? : number, limit?:number, search?:string, all? :boolean ) => {
+    const fetchSuppliers = useCallback(async (page?: number, limit?: number, search?: string, all?: boolean) => {
         try {
             setLoading(true);
             const response = await SupplierService.getAll(page, limit, search, all);
@@ -21,7 +21,8 @@ export const useSuppliers = () => {
                 return true;
 
             }
-        } catch (error: any) {
+        } catch (_error: unknown) {
+            notify.error("Operation failed");
         } finally {
             setLoading(false);
         }

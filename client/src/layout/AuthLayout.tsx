@@ -1,19 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Box, ShieldCheck, Globe } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 
 function AuthLayout() {
   const { pathname } = useLocation();
-  const [isPathHelper, setPathHelper] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (pathname === "/help") {
-      setPathHelper(true)
-    } else {
-      setPathHelper(false)
-    }
-  }, [pathname])
+  const isPathHelper = pathname === "/help";
 
   return (
     <div className="min-h-screen w-full bg-[#0f172a] text-slate-200 selection:bg-blue-500/30 grid grid-rows-[72px_1fr_60px] font-sans antialiased">

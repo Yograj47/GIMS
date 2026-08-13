@@ -18,19 +18,19 @@ export const generatePaginationRange = (current: number, total: number) => {
     const showRightDots = rightSiblingIndex < total - 2;
 
     if (!showLeftDots && showRightDots) {
-        let leftItemCount = 3 + 2 * siblings;
-        let leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
+        const leftItemCount = 3 + 2 * siblings;
+        const leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
         return [...leftRange, "...", total];
     }
 
     if (showLeftDots && !showRightDots) {
-        let rightItemCount = 3 + 2 * siblings;
-        let rightRange = Array.from({ length: rightItemCount }, (_, i) => total - rightItemCount + i + 1);
+        const rightItemCount = 3 + 2 * siblings;
+        const rightRange = Array.from({ length: rightItemCount }, (_, i) => total - rightItemCount + i + 1);
         return [1, "...", ...rightRange];
     }
 
     if (showLeftDots && showRightDots) {
-        let middleRange = Array.from({ length: rightSiblingIndex - leftSiblingIndex + 1 }, (_, i) => leftSiblingIndex + i);
+        const middleRange = Array.from({ length: rightSiblingIndex - leftSiblingIndex + 1 }, (_, i) => leftSiblingIndex + i);
         return [1, "...", ...middleRange, "...", total];
     }
 };

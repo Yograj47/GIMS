@@ -175,6 +175,7 @@ export default function UnitFormModal({
                 <span className="text-[11px] font-semibold text-slate-700">{item.label}</span>
                 <span className="text-[10px] text-slate-400">{item.desc}</span>
               </div>
+              @typescript-eslint/no-explicit-any
               <Controller
                 control={control}
                 name={item.id as any}

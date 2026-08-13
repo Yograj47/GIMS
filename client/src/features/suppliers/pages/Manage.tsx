@@ -18,7 +18,7 @@ export default function ManageSupplier() {
     }, [id, isEditMode, fetchSupplierById]);
 
     const handleSubmit = async (data: SupplierFormData) => {
-        let success = isEditMode && id
+        const success = isEditMode && id
             ? await updateSupplier(id, data)
             : await addSupplier(data);
             

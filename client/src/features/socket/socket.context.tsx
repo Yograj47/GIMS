@@ -7,8 +7,7 @@ import { socket } from "./socket";
 import { usePresenceSocket } from "./listener/presence.listener";
 import { useAlertSocket } from "./listener/alert.listener";
 
-const SocketContext =
-    createContext(socket);
+const SocketContext = createContext(socket);
 
 export const SocketProvider = ({
     children,
@@ -26,8 +25,4 @@ export const SocketProvider = ({
     );
 };
 
-export const useSocketContext =
-    () =>
-        useContext(
-            SocketContext
-        );
+export const useSocketContext = () => useContext(SocketContext);
