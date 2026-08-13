@@ -28,8 +28,8 @@ export const useGlobalStore = create<GlobalState>((set) => ({
   fetchSettings: async () => {
     try {
       const response = await SettingsService.getGeneral();
-      if (response.status === "Success") {
-        set({ settings: response.data });
+      if (response.success) {
+        set({ settings: response.data as GeneralSettingsData });
       }
     } catch (error) {
     }
