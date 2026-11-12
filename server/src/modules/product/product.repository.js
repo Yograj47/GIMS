@@ -542,3 +542,6 @@ export const updateProductQuantity = async (
         }
     );
 };
+
+export const findProductStock = (productId, session) =>
+    Product.findById(productId, "name quantity", { session });

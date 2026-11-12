@@ -1,7 +1,5 @@
 import { BrevoClient, logging } from "@getbrevo/brevo";
 import logger from "../../logger/logger.js";
-import dotenv from "dotenv";
-dotenv.config();
 
 export const createEmailTemplate = (
     title,

@@ -1,9 +1,11 @@
 import Movement from "./movement.model.js";
 
 export const createMovement = async (
-    payload
+    payload,
+    session
 ) => {
-    return Movement.create(payload);
+    const [movement] = await Movement.create([payload], { session });
+    return movement;
 };
 
 export const findMovementById = async (

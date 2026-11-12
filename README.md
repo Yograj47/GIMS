@@ -87,13 +87,12 @@ root/
 ├── client/                # Frontend (React)
 │
 └── server/                # Backend (Node.js)
-    ├── controllers/
-    ├── routes/
-    ├── models/
-    ├── middleware/
-    ├── validation/
-    ├── config/
-    └── tests/
+    ├── server.js          # HTTP and Socket.IO startup
+    └── src/
+        ├── app.js         # Express app and API routes
+        ├── config/        # Database connection
+        ├── modules/       # Domain routes, services, repositories, and models
+        └── shared/        # Middleware, logging, email, and sockets
 ```
 
 ---
@@ -114,10 +113,13 @@ npm run dev
 ```
 
 ### 3. Setup Backend
+
+Run these commands from the repository root after creating the server environment file. Use a supported Node.js release (20.19+, 22.12+, or 24+) and a MongoDB deployment that supports transactions, such as an Atlas cluster or a local replica set.
+
 ```bash
 cd server
 npm install
-npm run dev
+npm start
 ```
 
 ---
@@ -132,15 +134,22 @@ MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_secret
 CLIENT_URL=http://localhost:5173
 
-SMTP_HOST=smtp-relay.brevo.com
-SMTP_PORT=587
-SMTP_USER=your_email
-SMTP_PASS=your_password
+BREVO_API_KEY=your_brevo_api_key
+SENDER_EMAIL=your_verified_sender_email
+```
+
+For local development, set these values in the client's `.env` file.
+
+```env
+VITE_BASE_URL=http://localhost:5000/api/v1
+VITE_SOCKET_URL=http://localhost:5000
 ```
 
 ---
 
 ## 🔗 API Endpoints
+
+Routes below are relative to `/api/v1`.
 
 | Endpoint        | Description            |
 |----------------|------------------------|
@@ -150,7 +159,7 @@ SMTP_PASS=your_password
 | /categories    | Category management    |
 | /suppliers     | Supplier management    |
 | /transactions  | Stock transactions     |
-| /reports       | Reports                |
+| /analytics     | Analytics              |
 | /alerts        | Alerts                 |
 
 ---

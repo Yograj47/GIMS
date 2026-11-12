@@ -12,8 +12,6 @@ export const socketAuth = async (
             socket.handshake.headers.cookie || ""
         );
 
-        console.log(cookies);
-
         const token = cookies.token;
 
         if (!token) {
@@ -63,11 +61,6 @@ export const socketAuth = async (
             name: user.name,
             email: user.email,
         };
-
-        console.log(
-            "Socket Auth:",
-            socket.user
-        );
 
         next();
     } catch (error) {

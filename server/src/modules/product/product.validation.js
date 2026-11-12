@@ -30,19 +30,23 @@ const productBaseSchema = z.object({
             )
         ),
 
-    quantity: z.number().min(0).default(0),
+    quantity: z.number().min(0),
 
-    threshold: z.number().min(0).default(0),
+    threshold: z.number().min(0),
 
     basePrice: z.number().min(0.01),
 
     sellingPrice: z.number().min(0.01),
 
-    isActive: z.boolean().default(true),
+    isActive: z.boolean(),
 });
 
 export const createProductSchema =
-    productBaseSchema.refine(
+    productBaseSchema.extend({
+        quantity: productBaseSchema.shape.quantity.default(0),
+        threshold: productBaseSchema.shape.threshold.default(0),
+        isActive: productBaseSchema.shape.isActive.default(true),
+    }).refine(
         data =>
             data.sellingPrice >=
             data.basePrice,

@@ -14,7 +14,7 @@ import {
 } from "../movement/movement.repository.js";
 
 import {
-    findProductById,
+    findProductStock,
     updateProductQuantity,
 } from "../product/product.repository.js";
 
@@ -41,127 +41,122 @@ export const create = async (
     const session =
         await mongoose.startSession();
 
-    let transaction;
-    let affectedProducts = [];
+    let result;
 
     try {
-        session.startTransaction();
+        result = await session.withTransaction(async () => {
 
-        const isStockIn = [
-            "Purchase",
-            "Return",
-        ].includes(
-            payload.transactionType
-        );
+            const isStockIn = [
+                "Purchase",
+                "Return",
+            ].includes(
+                payload.transactionType
+            );
 
-        const movements = [];
+            const movements = [];
 
-        for (const item of payload.items) {
-            const product =
-                await findProductById(
-                    item.productId
-                );
+            for (const item of payload.items) {
+                const product =
+                    await findProductStock(
+                        item.productId,
+                        session
+                    );
 
-            if (!product) {
-                throw AppError.notFound(
-                    `Product not found: ${item.productId}`
-                );
-            }
-
-            const stockImpact =
-                Number(item.qty) *
-                Number(item.multiplier);
-
-            const oldQuantity =
-                product.quantity;
-
-            let newQuantity =
-                oldQuantity;
-
-            if (isStockIn) {
-                newQuantity =
-                    oldQuantity +
-                    stockImpact;
-            } else {
-                if (
-                    oldQuantity <
-                    stockImpact
-                ) {
-                    throw AppError.badRequest(
-                        `Insufficient stock for ${product.name}`
+                if (!product) {
+                    throw AppError.notFound(
+                        `Product not found: ${item.productId}`
                     );
                 }
 
-                newQuantity =
-                    oldQuantity -
-                    stockImpact;
+                const stockImpact =
+                    Number(item.qty) *
+                    Number(item.multiplier);
+
+                const oldQuantity =
+                    product.quantity;
+
+                let newQuantity =
+                    oldQuantity;
+
+                if (isStockIn) {
+                    newQuantity =
+                        oldQuantity +
+                        stockImpact;
+                } else {
+                    if (
+                        oldQuantity <
+                        stockImpact
+                    ) {
+                        throw AppError.badRequest(
+                            `Insufficient stock for ${product.name}`
+                        );
+                    }
+
+                    newQuantity =
+                        oldQuantity -
+                        stockImpact;
+                }
+
+                await updateProductQuantity(
+                    product._id,
+                    newQuantity,
+                    session
+                );
+
+                movements.push({
+                    productId:
+                        product._id,
+                    performedBy:
+                        userId,
+                    unitId:
+                        item.unitId,
+                    multiplier:
+                        item.multiplier,
+                    quantity:
+                        stockImpact,
+                    movementType:
+                        isStockIn
+                            ? "IN"
+                            : "OUT",
+                    reason:
+                        payload.transactionType,
+                    oldQuantity,
+                    newQuantity,
+                });
             }
 
-            await updateProductQuantity(
-                product._id,
-                newQuantity,
-                session
-            );
+            const [transaction] =
+                await createTransaction(
+                    payload,
+                    session
+                );
 
-            movements.push({
-                productId:
-                    product._id,
-                performedBy:
-                    userId,
-                unitId:
-                    item.unitId,
-                multiplier:
-                    item.multiplier,
-                quantity:
-                    stockImpact,
-                movementType:
-                    isStockIn
-                        ? "IN"
-                        : "OUT",
-                reason:
-                    payload.transactionType,
-                oldQuantity,
-                newQuantity,
-            });
-        }
+            for (const movement of movements) {
+                await createMovement(
+                    {
+                        ...movement,
+                        transactionId:
+                            transaction._id,
+                    },
+                    session
+                );
+            }
 
-        [transaction] =
-            await createTransaction(
-                payload,
-                session
-            );
+            const affectedProducts = [
+                ...new Set(
+                    movements.map((m) =>
+                        m.productId.toString()
+                    )
+                ),
+            ];
 
-        for (const movement of movements) {
-            await createMovement(
-                {
-                    ...movement,
-                    transactionId:
-                        transaction._id,
-                },
-                session
-            );
-        }
-
-        affectedProducts = [
-            ...new Set(
-                movements.map((m) =>
-                    m.productId.toString()
-                )
-            ),
-        ];
-
-        await session.commitTransaction();
-    } catch (error) {
-        if (
-            session.inTransaction()
-        ) {
-            await session.abortTransaction();
-        }
-
-        throw error;
+            return { transaction, affectedProducts };
+        });
     } finally {
         await session.endSession();
     }
+
+    const { transaction, affectedProducts } = result;
 
     // -----------------------------
     // AFTER COMMIT
