@@ -29,11 +29,13 @@ const Products = lazy(() => import("./features/products/pages/Products"));
 const ManageProduct = lazy(() => import("./features/products/pages/Manage"));
 const Suppliers = lazy(() => import("./features/suppliers/pages/Suppliers"));
 const SupplierView = lazy(() => import("./features/suppliers/pages/ViewSupplier"));
+const SupplierBilling = lazy(() => import("./features/suppliers/pages/SupplierBilling"));
 const ManageSupplier = lazy(() => import("./features/suppliers/pages/Manage"));
 const StockManagement = lazy(() => import("./features/MovementTransaction/pages/MovementHub"));
 const Alert = lazy(() => import("./features/alerts/pages/Alert"));
 const ActivityLogs = lazy(() => import("./features/activityLogs/pages/ActivityLogs"));
 const ReportsHub = lazy(() => import("./features/reports/pages/Report"));
+const AccountingReport = lazy(() => import("./features/reports/pages/AccountingReport"));
 const Transaction = lazy(() => import("./features/reports/pages/TransactionReport"));
 const StockReport = lazy(() => import("./features/reports/pages/StockReport"));
 const StockMovementReport = lazy(() => import("./features/reports/pages/MovementReport"));
@@ -100,6 +102,9 @@ function App() {
                   <Route path="/suppliers">
                     <Route index element={<Suppliers />} />
                     <Route path="v/:id" element={<SupplierView />} />
+                    <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                      <Route path="v/:id/billing" element={<SupplierBilling />} />
+                    </Route>
                     <Route path="add" element={<ManageSupplier />} />
                     <Route path="edit/:id" element={<ManageSupplier />} />
                   </Route>
@@ -119,6 +124,7 @@ function App() {
 
                   <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
                     <Route path="movement" element={<StockMovementReport />} />
+                    <Route path="accounting" element={<AccountingReport />} />
                   </Route>
 
                   <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "staff"]} />}>

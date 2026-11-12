@@ -197,6 +197,23 @@ rejected if the balance changed before it was posted. Increases are added as
 unattributed stock. Decreases consume unattributed stock first and then reduce
 the oldest sellable lots. The resulting movement records the affected lots.
 
+### Billing and accounting
+
+- **Reports → Transactions** lets owners and admins issue a numbered sales
+  invoice and record cash or bank payments. The invoice uses server-calculated
+  line totals and shows the outstanding balance.
+- **Suppliers → Supplier billing** lets owners and admins post one bill per
+  goods receipt, record credits against linked returns, and settle the balance
+  with cash or bank payments. The bill uses the receipt's recorded unit costs.
+- **Reports → Accounting** shows posted debit and credit totals and the number
+  of invoices awaiting inventory cost. Use **Post inventory cost** on a sales
+  invoice after posting the supplier bills for its source lots. Sales with
+  unknown stock provenance require manual reconciliation.
+
+Billing currently uses NPR and sales require a zero configured tax rate.
+Supplier credits apply up to the unpaid balance of the source bill. The
+accounting report covers entries posted through these workflows.
+
 ---
 
 ## 🔄 System Workflow

@@ -1,8 +1,9 @@
 import { useGlobalStore } from "@/store/globalStore";
 import type { TransactionData } from "@/types/transaction";
+import { formatInvoiceMoney, type SalesInvoice } from "@/types/billing";
 import { useEffect } from "react";
 
-export const BillReceipt = ({ txn }: { txn: TransactionData }) => {
+export const BillReceipt = ({ txn, invoice }: { txn: TransactionData; invoice?: SalesInvoice | null }) => {
 
   const { settings, fetchSettings } = useGlobalStore();
 
@@ -18,8 +19,8 @@ export const BillReceipt = ({ txn }: { txn: TransactionData }) => {
       </div>
 
       <div className="flex justify-between text-[10px] mb-4">
-        <span>Invoice: #{txn._id.slice(-6).toUpperCase()}</span>
-        <span>{new Date(txn.createdAt).toLocaleDateString()}</span>
+        <span>{invoice ? `Invoice ${invoice.number}` : `Receipt #${txn._id.slice(-6).toUpperCase()}`}</span>
+        <span>{new Date(invoice?.createdAt ?? txn.createdAt).toLocaleDateString()}</span>
       </div>
 
       <table className="w-full text-xs mb-4">
@@ -33,9 +34,9 @@ export const BillReceipt = ({ txn }: { txn: TransactionData }) => {
         <tbody className="divide-y divide-dotted">
           {txn.items.map((item, idx) => (
             <tr key={idx} className="py-2">
-              <td className="py-1 uppercase font-medium">{item.product?.name}</td>
-              <td className="py-1 text-center">{item.qty}</td>
-              <td className="py-1 text-right">Rs. {item.total}</td>
+              <td className="py-1 uppercase font-medium">{invoice?.items[idx]?.productName ?? item.product?.name ?? item.productName ?? item.productId}</td>
+              <td className="py-1 text-center">{invoice?.items[idx]?.quantity ?? item.qty}</td>
+              <td className="py-1 text-right">{invoice ? formatInvoiceMoney(invoice.items[idx]?.totalMinor ?? 0, invoice.currency) : `Rs. ${item.total}`}</td>
             </tr>
           ))}
         </tbody>
@@ -44,8 +45,14 @@ export const BillReceipt = ({ txn }: { txn: TransactionData }) => {
       <div className="border-t pt-2 space-y-1">
         <div className="flex justify-between font-bold">
           <span>GRAND TOTAL</span>
-          <span>Rs. {txn.grandTotal}</span>
+          <span>{invoice ? formatInvoiceMoney(invoice.totalMinor, invoice.currency) : `Rs. ${txn.grandTotal}`}</span>
         </div>
+        {invoice && (
+          <div className="flex justify-between text-xs">
+            <span>Balance due</span>
+            <span>{formatInvoiceMoney(invoice.totalMinor - invoice.paidMinor, invoice.currency)}</span>
+          </div>
+        )}
         <p className="text-[9px] text-center mt-6">--- Thank You for Shopping! ---</p>
       </div>
     </div>

@@ -35,6 +35,7 @@ const supplierReturn = z.object({
 
 const listing = z.object({
     supplierId: id.optional(),
+    receiptId: id.optional(),
     page: z.coerce.number().int().min(1).max(10000).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(25),
 });
@@ -50,8 +51,9 @@ router.use((req, res, next) => {
 
 for (const [path, model] of [["/receipts", GoodsReceipt], ["/lots", StockLot], ["/returns", SupplierReturn]]) {
     router.get(path, authorize(PERMISSIONS.SUPPLIER_READ), async (req, res) => {
-        const { supplierId, page, limit } = listing.parse(req.query);
+        const { supplierId, receiptId, page, limit } = listing.parse(req.query);
         const filter = supplierId ? { supplierId } : {};
+        if (receiptId) filter[model === GoodsReceipt ? "_id" : "receiptId"] = receiptId;
         const [data, totalItems] = await Promise.all([
             model.find(filter).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * limit).limit(limit).lean(),
             model.countDocuments(filter),

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ArrowLeft, Save, Edit2, Printer, Receipt,
     Calendar, User, CheckCircle2, XCircle, Package,
@@ -11,20 +11,37 @@ import type { Item, TransactionData } from "@/types/transaction";
 import { useMovementTransactions } from "@/features/MovementTransaction/hooks/useMovementTransactions";
 import { BillReceipt } from "@/features/MovementTransaction/components/BillReceipt";
 import { notify } from "@/lib/toast";
+import { SaleBilling } from "../components/SaleBilling";
+import { formatInvoiceMoney, type SalesInvoice } from "@/types/billing";
+import { useAuthStore } from "@/store/authStore";
+import api from "@/lib/api";
+import type { ApiResponse } from "@/types/api";
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 
 export default function TransactionViewPage() {
+    const { id } = useParams();
+    return <TransactionDetailsRoute key={id} id={id} />;
+}
+
+function TransactionDetailsRoute({ id }: { id?: string }) {
     const { state } = useLocation();
     const navigate = useNavigate();
-    const { id } = useParams();
+    const initialTransaction = state?.transaction?._id === id ? state?.transaction as TransactionData : undefined;
+    const [transaction, setTransaction] = useState(initialTransaction);
+    const [loading, setLoading] = useState(Boolean(id && !initialTransaction));
 
-    const txn: TransactionData = state?.transaction;
+    useEffect(() => {
+        if (!id || initialTransaction) return;
+        let active = true;
+        api.get<ApiResponse<TransactionData>>(`/transactions/${id}`).then(
+            ({ data }) => { if (active) setTransaction(data.data); },
+            () => { /* The API interceptor shows the server error. */ },
+        ).finally(() => { if (active) setLoading(false); });
+        return () => { active = false; };
+    }, [id, initialTransaction]);
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [isPaid, setIsPaid] = useState(txn?.isPaid);
-    const [notes, setNotes] = useState(txn?.notes || "");
-    const { updateCreditStatus } = useMovementTransactions();
-
-    if (!txn) {
+    if (loading) return <LoadingSkeleton label="Loading transaction" />;
+    if (!transaction) {
         return (
             <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
                 <div className="p-4 bg-slate-50 rounded-full text-slate-300">
@@ -35,6 +52,21 @@ export default function TransactionViewPage() {
             </div>
         );
     }
+    return <TransactionDetails txn={transaction} />;
+}
+
+function TransactionDetails({ txn }: { txn: TransactionData }) {
+    const navigate = useNavigate();
+    const id = txn._id;
+    const [isEditing, setIsEditing] = useState(false);
+    const [isPaid, setIsPaid] = useState(txn.isPaid);
+    const [notes, setNotes] = useState(txn.notes || "");
+    const [invoice, setInvoice] = useState<SalesInvoice | null>(null);
+    const user = useAuthStore((state) => state.user);
+    const manageBilling = txn.transactionType === "Sale" && user?.isVerified &&
+        (user.role === "owner" || user.role === "admin");
+    const paymentCleared = invoice ? invoice.paidMinor === invoice.totalMinor : isPaid;
+    const { updateCreditStatus } = useMovementTransactions();
 
     const handleUpdate = async () => {
         try {
@@ -65,16 +97,16 @@ export default function TransactionViewPage() {
                         <div className="h-6 w-px bg-slate-100" />
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">Record</span>
-                            <span className="text-sm font-black text-slate-900 uppercase">INV-{id?.slice(-6).toUpperCase()}</span>
+                            <span className="text-sm font-black text-slate-900 uppercase">{invoice?.number ?? `TXN-${id?.slice(-6).toUpperCase()}`}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Button variant="outline" onClick={() => window.print()} className="h-9 rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider border-slate-300 text-slate-600 hover:bg-slate-50 transition-all">
-                            <Printer size={14} className="text-blue-600" /> Print Bill
+                            <Printer size={14} className="text-blue-600" /> {invoice ? "Print invoice" : "Print receipt"}
                         </Button>
 
-                        {!isEditing ? (
+                        {txn.transactionType !== "Sale" && (!isEditing ? (
                             <Button onClick={() => setIsEditing(true)} className="h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider shadow-sm transition-all">
                                 <Edit2 size={14} /> Edit Status
                             </Button>
@@ -87,7 +119,7 @@ export default function TransactionViewPage() {
                                     <Save size={14} /> Commit Changes
                                 </Button>
                             </div>
-                        )}
+                        ))}
                     </div>
                 </div>
 
@@ -135,8 +167,7 @@ export default function TransactionViewPage() {
                             <div className="bg-white p-4 px-6 rounded-2xl border border-slate-300 inline-block">
                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Valuation</p>
                                 <p className="text-3xl font-black text-slate-900 tabular-nums">
-                                    <span className="text-sm mr-1 text-slate-300 font-bold uppercase">Rs</span>
-                                    {txn.grandTotal?.toLocaleString()}
+                                    {invoice ? formatInvoiceMoney(invoice.totalMinor, invoice.currency) : `Rs. ${txn.grandTotal?.toLocaleString()}`}
                                 </p>
                             </div>
                         </div>
@@ -165,9 +196,9 @@ export default function TransactionViewPage() {
                                 </div>
                             ) : (
                                 <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[11px] uppercase tracking-wider border",
-                                    isPaid ? "bg-emerald-50/50 text-emerald-700 border-emerald-100" : "bg-rose-50/50 text-rose-700 border-rose-100")}>
-                                    {isPaid ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                                    {isPaid ? "Payment Cleared" : "Outstanding Credit"}
+                                    paymentCleared ? "bg-emerald-50/50 text-emerald-700 border-emerald-100" : "bg-rose-50/50 text-rose-700 border-rose-100")}>
+                                    {paymentCleared ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                                    {paymentCleared ? "Payment Cleared" : "Outstanding Credit"}
                                 </div>
                             )}
                         </div>
@@ -223,7 +254,9 @@ export default function TransactionViewPage() {
                                                 <span className="text-[11px] font-bold text-slate-400 italic">Rs. {item.rate?.toLocaleString()}</span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <span className="text-xs font-black text-slate-900 tabular-nums uppercase">Rs. {item.total?.toLocaleString()}</span>
+                                                <span className="text-xs font-black text-slate-900 tabular-nums uppercase">
+                                                    {invoice?.items[idx] ? formatInvoiceMoney(invoice.items[idx].totalMinor, invoice.currency) : `Rs. ${item.total?.toLocaleString()}`}
+                                                </span>
                                             </td>
                                         </tr>
                                     ))}
@@ -234,7 +267,10 @@ export default function TransactionViewPage() {
                 </div>
             </div>
 
-            <BillReceipt txn={txn} />
+            {manageBilling && (
+                <SaleBilling saleId={txn._id} wasPaid={txn.isPaid} invoice={invoice} onInvoice={setInvoice} />
+            )}
+            <BillReceipt txn={txn} invoice={invoice} />
         </div>
     );
 }

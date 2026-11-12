@@ -1,9 +1,18 @@
-import { BarChart3, ArrowRightLeft, FileText, ClipboardList, ChevronRight, ChartBar } from "lucide-react";
+import { BarChart3, ArrowRightLeft, FileText, ClipboardList, ChevronRight, ChartBar, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 
 const REPORT_CONFIG = [
+  {
+    title: "Accounting Report",
+    description: "Posted debits, credits, and inventory costs awaiting reconciliation.",
+    icon: BookOpen,
+    path: "/reports/accounting",
+    color: "text-indigo-600",
+    bg: "bg-indigo-50",
+    roles: ["admin", "owner"]
+  },
   {
     title: "Stock Report",
     description: "Inventory levels, valuation, and threshold analysis.",

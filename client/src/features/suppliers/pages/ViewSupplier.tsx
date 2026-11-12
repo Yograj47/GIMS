@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Pencil, ArrowLeft, Package, SearchX, Trash2, Plus, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
@@ -178,6 +178,10 @@ export default function SupplierView() {
                     </div>
                 </div>
             </div>
+
+            {user?.isVerified && canWrite && (
+                <Button asChild variant="outline"><Link to={`/suppliers/v/${singleSupplier._id}/billing`}>Supplier billing</Link></Button>
+            )}
 
             {user?.isVerified && (
                 <SupplierReceiving

@@ -26,6 +26,7 @@ export const PERMISSIONS = {
     TRANSACTION_READ: "transaction:read",
     TRANSACTION_WRITE: "transaction:write",
     TRANSACTION_AUDIT: "transaction:audit",
+    BILLING_MANAGE: "billing:manage",
 
     USER_READ: "user:read",
     USER_WRITE: "user:write",
