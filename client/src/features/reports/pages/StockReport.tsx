@@ -12,12 +12,15 @@ import { Loading } from "@/lib/loader";
 import { useDebounce } from "@/lib/debounce";
 import { AdminGate } from "@/features/auth/components/AdminGate";
 import type { ProductData } from "@/types/product";
+import { StockReconciliation } from "../components/StockReconciliation";
+import { useAuthStore } from "@/store/authStore";
 
 export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
     const [searchQuery, setSearchQuery] = useState("");
     const [stockLevel, setStockLevel] = useState<string>("All Levels");
     const navigate = useNavigate();
+    const user = useAuthStore((state) => state.user);
     const [isExporting, setIsExporting] = useState<boolean>(false);
     const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -33,6 +36,7 @@ export default function StockReport() {
                 pagination.pageIndex + 1,
                 pagination.pageSize,
                 debouncedSearch,
+                undefined,
                 levelFilter
             );
         }
@@ -80,6 +84,7 @@ export default function StockReport() {
                 pagination.pageIndex + 1,
                 pagination.pageSize,
                 searchQuery,
+                undefined,
                 levelFilter
             );
         }
@@ -124,7 +129,7 @@ export default function StockReport() {
                             className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                         >
                             {isExporting ? (
-                                <><Loading size="sm" className="mr-2" /> Processing...</>
+                                <><Loading className="mr-2" /> Processing...</>
                             ) : (
                                 <><Download size={14} className="mr-2" /> Export CSV</>
                             )}
@@ -156,12 +161,16 @@ export default function StockReport() {
                         </div>
                         <select
                             value={stockLevel}
-                            onChange={(e) => setStockLevel(e.target.value)}
+                            onChange={(e) => {
+                                setStockLevel(e.target.value);
+                                setPagination((previous) => ({ ...previous, pageIndex: 0 }));
+                            }}
                             className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-blue-500 appearance-none cursor-pointer transition-all"
                         >
                             <option value="All Levels">All Levels</option>
-                            <option value="Low Stock">Low Stock Warning</option>
-                            <option value="Healthy">Healthy Inventory</option>
+                            <option value="low">Low Stock Warning</option>
+                            <option value="healthy">Healthy Inventory</option>
+                            <option value="out">Out of Stock</option>
                         </select>
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                             <svg width="8" height="8" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 1L5 5L9 1" /></svg>
@@ -181,6 +190,17 @@ export default function StockReport() {
                         isLoading={isLoading}
                     />
                 </div>
+                {user?.isVerified && <StockReconciliation
+                    products={products}
+                    canWrite={user.role === "admin" || user.role === "owner"}
+                    onCount={() => fetchProducts(
+                        pagination.pageIndex + 1,
+                        pagination.pageSize,
+                        debouncedSearch,
+                        undefined,
+                        stockLevel === "All Levels" ? "" : stockLevel,
+                    )}
+                />}
             </div>
         </div>
     );

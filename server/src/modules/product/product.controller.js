@@ -49,8 +49,9 @@ export const findProducts = asyncHandler(
                     req.query.limit
                 ) || 10,
                 search:
-                    req.query.search ||
-                    "",
+                    typeof req.query.search === "string" ? req.query.search : "",
+                category: req.query.category,
+                stockLevel: req.query.stockLevel,
                 paginate:
                     req.query.paginate !==
                     "false",

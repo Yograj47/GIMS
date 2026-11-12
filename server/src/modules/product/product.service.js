@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
 
 import {
@@ -7,6 +8,7 @@ import {
     deleteProductById,
     findProductByName,
     findProducts,
+    findProductStock,
 } from "./product.repository.js";
 
 import {
@@ -98,16 +100,33 @@ export const find = async ({
     page = 1,
     limit = 10,
     search = "",
+    category,
+    stockLevel,
     paginate = true,
 }) => {
     const query = {};
 
     if (search) {
         query.name = {
-            $regex: search,
+            $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
             $options: "i",
         };
     }
+
+    if (category) {
+        if (typeof category !== "string" || !mongoose.isObjectIdOrHexString(category)) {
+            throw AppError.badRequest("Invalid category filter");
+        }
+        query.categoryId = new mongoose.Types.ObjectId(category);
+    }
+
+    if (stockLevel === "out") query.quantity = { $lte: 0 };
+    else if (stockLevel === "low" || stockLevel === "healthy") {
+        query.quantity = { $gt: 0 };
+        query.$expr = {
+            [stockLevel === "low" ? "$lte" : "$gt"]: ["$quantity", "$threshold"],
+        };
+    } else if (stockLevel) throw AppError.badRequest("Invalid stock level filter");
 
     const {
         items,
@@ -197,6 +216,9 @@ export const update = async (
         );
 
     if (!product) {
+        if (await findProductStock(productId)) {
+            throw AppError.conflict("Use a stock movement to change quantity. The base unit can only change before stock is recorded");
+        }
         throw AppError.notFound(
             "Product not found"
         );
@@ -214,6 +236,9 @@ export const remove = async (
         );
 
     if (!product) {
+        if ((await findProductStock(productId))?.hasStockLots) {
+            throw AppError.conflict("Deactivate this product to preserve its receipt history");
+        }
         throw AppError.notFound(
             "Product not found"
         );

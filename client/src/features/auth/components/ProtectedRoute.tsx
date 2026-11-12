@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { useAuthStore } from "@/store/authStore";
 
-import { Loading } from "@/lib/loader";
+import { StartupSkeleton } from "@/components/common/LoadingSkeleton";
 import type { UserRole } from "@/types/user";
 
 
@@ -25,7 +25,7 @@ export const ProtectedRoute = ({
 
 
   if (isInitialLoading) {
-    return <Loading fullPage />;
+    return <StartupSkeleton label="Checking your session" />;
   }
 
   if (!isAuthenticated || !user) {

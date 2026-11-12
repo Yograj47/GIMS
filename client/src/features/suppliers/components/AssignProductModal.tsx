@@ -30,7 +30,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
     };
 
     const filteredProducts = useMemo(() => {
-        return Products.filter(p => p.supplier === null && !excludeIds.includes(p._id) && p.name.toLowerCase().includes(search.toLowerCase()));
+        return Products.filter(p => p.isActive && !excludeIds.includes(p._id) && p.name.toLowerCase().includes(search.toLowerCase()));
     }, [Products, search, excludeIds]);
 
     if (!isOpen) return null;

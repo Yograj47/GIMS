@@ -17,6 +17,7 @@ import SettingsLayout from "./layout/SettingLayout";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
 import { SocketProvider } from "./features/socket/socket.context";
+import { StartupSkeleton } from "./components/common/LoadingSkeleton";
 
 // --- Lazy Loaded Pages ---
 const Login = lazy(() => import("./features/auth/pages/Login"));
@@ -52,13 +53,6 @@ const HelpPage = lazy(() => import("./features/OtherPages/Helper"));
 
 axios.defaults.withCredentials = true;
 
-// Page Loading Fallback Spinner
-const PageLoader = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-background">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-  </div>
-);
-
 function App() {
   useEffect(() => {
     void useAuthStore.getState().fetchUser();
@@ -68,7 +62,7 @@ function App() {
     <SocketProvider>
       <BrowserRouter>
         <div className="antialiased selection:bg-blue-100 selection:text-blue-700">
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<StartupSkeleton />}>
             <Routes>
               {/* --- Public / Auth Routes --- */}
               <Route element={<AuthLayout />}>

@@ -94,7 +94,7 @@ export default function Transaction() {
                             disabled={IsExporting}
                             className="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                         >
-                            {IsExporting ? <><Loading size="sm" className="mr-2" /> Processing...</> : <><Download size={14} className="mr-2" /> Export CSV</>}
+                            {IsExporting ? <><Loading className="mr-2" /> Processing...</> : <><Download size={14} className="mr-2" /> Export CSV</>}
                         </Button>
                     </AdminGate>
                 </div>

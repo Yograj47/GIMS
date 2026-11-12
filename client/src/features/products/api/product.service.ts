@@ -24,7 +24,7 @@ export const productService = {
         return data;
     },
 
-    updateById: async (id: string, payload: ProductFormData) => {
+    updateById: async (id: string, payload: Partial<ProductFormData>) => {
         const { data } = await api.put<ApiResponse>(`${baseUrl}/${id}`, payload);
         return data;
     },

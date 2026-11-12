@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Suspense, useState, useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import Sidebar from "../components/common/SideBar";
 import { cn } from "@/lib/utils";
 import AppHeader from "@/components/common/AppHeader";
@@ -22,6 +23,8 @@ function AppLayout() {
     }, []);
 
     const collapsed = screen === "desktop" ? !sidebarOpen : true;
+    const { pathname } = useLocation();
+    const loadingLayout = pathname === "/dashboard" ? "dashboard" : /\/(add|edit|form)(\/|$)/.test(pathname) ? "form" : "table";
 
     return (
 
@@ -52,7 +55,9 @@ function AppLayout() {
                     {/* Main */}
                     <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[#f1f1f1]">
                         <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <Outlet />
+                            <Suspense key={pathname} fallback={<LoadingSkeleton layout={loadingLayout} />}>
+                                <Outlet />
+                            </Suspense>
                         </div>
                     </main>
                 </div>

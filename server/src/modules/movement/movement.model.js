@@ -2,6 +2,19 @@ import mongoose from "mongoose";
 
 const movementSchema = new mongoose.Schema(
     {
+        stockCountKey: String,
+        receiptId: { type: mongoose.Schema.Types.ObjectId, ref: "GoodsReceipts" },
+        lotId: { type: mongoose.Schema.Types.ObjectId, ref: "StockLots" },
+        supplierReturnId: { type: mongoose.Schema.Types.ObjectId, ref: "SupplierReturns" },
+        quarantinedQuantity: Number,
+        lotAllocations: {
+            type: [{
+                _id: false,
+                lotId: { type: mongoose.Schema.Types.ObjectId, ref: "StockLots", required: true },
+                quantity: { type: Number, required: true },
+            }],
+            default: undefined,
+        },
         productId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Products",
@@ -65,6 +78,11 @@ const movementSchema = new mongoose.Schema(
         },
     }
 );
+
+movementSchema.index({ stockCountKey: 1 }, {
+    unique: true,
+    partialFilterExpression: { stockCountKey: { $type: "string" } },
+});
 
 export default mongoose.model(
     "Movements",

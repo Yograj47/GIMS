@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Suspense, useState, useEffect } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import {
   ArrowLeft, Store, LayoutGrid, Ruler, Calculator, ShieldCheck, Settings2
 } from "lucide-react";
@@ -23,6 +24,8 @@ export default function SettingsLayout() {
   }, []);
 
   const collapsed = screen === "desktop" ? !sidebarOpen : true;
+  const { pathname } = useLocation();
+  const loadingLayout = pathname === "/settings" ? "form" : "table";
 
   const menuItems = [
     { id: "general", label: "General Registry", path: "/settings", icon: Store, exact: true },
@@ -138,7 +141,9 @@ export default function SettingsLayout() {
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Outlet />
+            <Suspense key={pathname} fallback={<LoadingSkeleton layout={loadingLayout} />}>
+                <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

@@ -3,7 +3,7 @@ import { Download, Upload, History, ChevronRight, Activity } from 'lucide-react'
 import { cn } from "@/lib/utils";
 import { useAnalytics } from '@/features/dashboard/hooks/useAnalystics';
 import { useEffect } from 'react';
-import { Loading } from '@/lib/loader';
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 
 export default function StockManagement() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function StockManagement() {
     fetchSummary();
   }, [fetchSummary])
 
-  if (isLoading) return <Loading fullPage />
+  if (isLoading) return <LoadingSkeleton layout="table" label="Loading stock movements" />
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 animate-in fade-in duration-500">

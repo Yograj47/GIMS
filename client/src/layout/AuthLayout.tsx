@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Box, ShieldCheck, Globe } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { Suspense } from "react";
+import { AuthSkeleton } from "@/components/common/LoadingSkeleton";
 
 function AuthLayout() {
   const { pathname } = useLocation();
@@ -45,7 +47,9 @@ function AuthLayout() {
 
       <main className="relative flex items-center justify-center p-6 overflow-y-auto">
         <div className={`w-full ${isPathHelper ? "max-w-7xl" : "max-w-110"} relative z-10`}>
-          <Outlet />
+          <Suspense key={pathname} fallback={<AuthSkeleton />}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
 

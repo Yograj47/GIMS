@@ -35,7 +35,7 @@ export const useSuppliers = () => {
             if (response.success) {
                 const data = response.data as SupplierData;
                 setSingleSupplier(data);
-                setProductData(response.productData as SupplierProduct[]);
+                setProductData(response.meta?.products ?? response.productData ?? []);
                 return data;
             }
         } finally {
@@ -92,7 +92,7 @@ export const useSuppliers = () => {
         try {
             setLoading(true);
             const response = await SupplierService.assignProducts(supplierId, productIds);
-            if (response.status === "Success") {
+            if (response.success) {
                 notify.success(response.message || "Products linked successfully");
                 await fetchSupplierById(supplierId);
                 return true;
@@ -106,16 +106,13 @@ export const useSuppliers = () => {
     const removeProductFromSupplier = async (supplierId: string, productId: string) => {
         try {
             setLoading(true);
-            const response = await SupplierService.unassignProduct(productId);
-            if (response.status === "Success") {
-                notify.success("Product removed from catalog");
-                await fetchSupplierById(supplierId);
-                return true;
-            }
+            await SupplierService.unassignProduct(supplierId, productId);
+            notify.success("Product removed from catalog");
+            await fetchSupplierById(supplierId);
+            return true;
         } finally {
             setLoading(false);
         }
-        return false;
     };
 
     return {

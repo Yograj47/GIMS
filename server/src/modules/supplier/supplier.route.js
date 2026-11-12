@@ -8,6 +8,7 @@ import {
     deleteSupplier,
     assignProductsToSupplier,
     unassignProduct,
+    unlinkCatalogProduct,
 } from "./supplier.controller.js";
 
 import {
@@ -60,5 +61,7 @@ router.patch(
     authorize(PERMISSIONS.SUPPLIER_WRITE),
     unassignProduct
 );
+
+router.delete("/:id/catalog/:productId", authorize(PERMISSIONS.SUPPLIER_WRITE), unlinkCatalogProduct);
 
 export default router;

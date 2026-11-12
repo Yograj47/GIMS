@@ -118,7 +118,7 @@ export default function StockMovementReport() {
                         className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                     >
                         {isExporting ? (
-                            <><Loading size="sm" className="mr-2" /> Extracting...</>
+                            <><Loading className="mr-2" /> Extracting...</>
                         ) : (
                             <><Download size={14} className="mr-2" /> Export CSV</>
                         )}

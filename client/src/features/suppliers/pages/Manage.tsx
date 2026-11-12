@@ -4,7 +4,7 @@ import SupplierForm from "../components/SupplierForm";
 import { Button } from "@/components/ui/button";
 import { useSuppliers } from "../hooks/useSuppliers";
 import { useEffect } from "react";
-import { Loading } from "@/lib/loader";
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import type { SupplierFormData } from "@/types/supplier";
 
 export default function ManageSupplier() {
@@ -25,7 +25,7 @@ export default function ManageSupplier() {
         if (success) navigate("/suppliers");
     };
 
-    if (isEditMode && !singleSupplier && isLoading) return <Loading fullPage />;
+    if (isEditMode && !singleSupplier && isLoading) return <LoadingSkeleton layout="form" label="Loading supplier" />;
 
     return (
         <div className="h-full animate-in fade-in duration-500">

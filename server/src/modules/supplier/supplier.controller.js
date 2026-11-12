@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import { z } from "zod";
 
 import {
     createSupplierSchema,
@@ -108,14 +109,16 @@ export const updateSupplier = asyncHandler(
     }
 );
 
+const catalogId = z.string().regex(/^[a-f0-9]{24}$/i);
+
 export const assignProductsToSupplier = asyncHandler(async (req, res) => {
-    const { productIds } = req.body;
+    const productIds = z.array(catalogId).min(1).max(100).parse(req.body?.productIds);
 
     const result =
         await supplierService.assignProducts(
             {
                 supplierId:
-                    req.params.id,
+                    catalogId.parse(req.params.id),
                 productIds,
             }
         );
@@ -133,6 +136,11 @@ export const assignProductsToSupplier = asyncHandler(async (req, res) => {
                 result.modifiedCount,
         },
     });
+});
+
+export const unlinkCatalogProduct = asyncHandler(async (req, res) => {
+    await supplierService.unlinkCatalogProduct(catalogId.parse(req.params.id), catalogId.parse(req.params.productId));
+    res.status(204).end();
 });
 
 export const unassignProduct = asyncHandler(

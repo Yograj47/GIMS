@@ -2,16 +2,21 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Pencil, ArrowLeft, Package, SearchX, Trash2, Plus, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Loading } from '@/lib/loader';
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { useSuppliers } from '../hooks/useSuppliers';
 import { cn } from "@/lib/utils";
 import { AssignProductModal } from '../components/AssignProductModal';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { DeleteConfirmDialog } from '@/lib/deleteAlert';
+import { SupplierReceiving } from '../components/SupplierReceiving';
+import { useAuthStore } from '@/store/authStore';
+import { useGlobalStore } from '@/store/globalStore';
 
 export default function SupplierView() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const user = useAuthStore((state) => state.user);
+    const { settings, fetchSettings } = useGlobalStore();
     const { singleSupplier, productData, fetchSupplierById, removeSupplier, isLoading, removeProductFromSupplier, assignProducts } = useSuppliers();
     const { products, fetchProducts } = useProducts();
     const [isAssigning, setIsAssigning] = useState(false);
@@ -23,15 +28,17 @@ export default function SupplierView() {
         fetchProducts(undefined, undefined, undefined, undefined, undefined, true);
     }, [id, fetchSupplierById, fetchProducts]);
 
+    useEffect(() => { void fetchSettings(); }, [fetchSettings]);
+
     const assignedProductIds = useMemo(() => productData?.map(p => p._id) || [], [productData]);
+    const canWrite = user?.role === "admin" || user?.role === "owner";
+    const catalogProducts = products.filter((product) => assignedProductIds.includes(product._id));
 
     const handleAssignProducts = async (productIds: string[]) => {
         if (!id) return;
         const success = await assignProducts(id, productIds);
         if (success) {
             setIsAssigning(false);
-            fetchSupplierById(id);
-            navigate(`/suppliers`);
         }
     };
 
@@ -43,7 +50,7 @@ export default function SupplierView() {
         navigate("/suppliers");
     }
 
-    if (isLoading) return <Loading fullPage />;
+    if (isLoading) return <LoadingSkeleton layout="dashboard" label="Loading supplier" />;
     if (!singleSupplier) return <NotFoundState onBack={() => navigate('/suppliers')} />;
 
     return (
@@ -119,12 +126,12 @@ export default function SupplierView() {
                                 <Package size={16} className="text-slate-400" />
                                 <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-800">Linked Inventory</h2>
                             </div>
-                            <Button
+                        {canWrite && <Button
                                 onClick={() => setIsAssigning(true)}
                                 className="h-8 text-[9px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 shadow-none rounded-lg"
                             >
                                 <Plus size={12} className="mr-1" strokeWidth={4} /> Assign
-                            </Button>
+                        </Button>}
                         </div>
 
                         <div className="overflow-x-auto">
@@ -137,8 +144,8 @@ export default function SupplierView() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {products?.length ? (
-                                        products.filter((p) => p.supplier?._id === id).map((product) => (
+                                    {catalogProducts.length ? (
+                                        catalogProducts.map((product) => (
                                             <tr key={product._id} className="hover:bg-slate-50/30 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
@@ -150,16 +157,13 @@ export default function SupplierView() {
                                                     <span className="text-xs font-mono font-bold text-slate-600">₹{product.basePrice}</span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button
-                                                        onClick={() => {
-                                                            removeProductFromSupplier(id!, product._id)
-                                                            navigate(`/suppliers`)
-                                                        }
-                                                        }
+                                                    {canWrite && <button
+                                                        aria-label={`Remove ${product.name} from supplier catalog`}
+                                                        onClick={() => void removeProductFromSupplier(singleSupplier._id, product._id)}
                                                         className="text-slate-300 hover:text-rose-500 transition-colors"
                                                     >
                                                         <Trash2 size={14} />
-                                                    </button>
+                                                    </button>}
                                                 </td>
                                             </tr>
                                         ))
@@ -174,6 +178,16 @@ export default function SupplierView() {
                     </div>
                 </div>
             </div>
+
+            {user?.isVerified && (
+                <SupplierReceiving
+                    key={singleSupplier._id}
+                    supplierId={singleSupplier._id}
+                    products={products}
+                    canWrite={canWrite}
+                    currency={settings?.currency ?? "NPR"}
+                />
+            )}
 
             <AssignProductModal
                 isOpen={isAssigning}

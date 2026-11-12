@@ -206,9 +206,18 @@ export const updateProductById = async (
     id,
     payload
 ) => {
-    return Product.findByIdAndUpdate(
-        id,
-        payload,
+    const filter = { _id: id };
+    const { quantity, ...changes } = payload;
+    if (quantity !== undefined) filter.quantity = quantity;
+    if (changes.unitId !== undefined) {
+        filter.$or = [
+            { unitId: changes.unitId },
+            { quantity: 0, hasStockLots: { $ne: true } },
+        ];
+    }
+    return Product.findOneAndUpdate(
+        filter,
+        changes,
         {
             new: true,
             runValidators: true,
@@ -219,7 +228,7 @@ export const updateProductById = async (
 export const deleteProductById = async (
     id
 ) => {
-    return Product.findByIdAndDelete(id);
+    return Product.findOneAndDelete({ _id: id, hasStockLots: { $ne: true } });
 };
 
 export const findProducts = async (
@@ -534,7 +543,7 @@ export const updateProductQuantity = async (
 ) => {
     return Product.findByIdAndUpdate(
         productId,
-        { quantity },
+        { $set: { quantity }, $inc: { stockRevision: 1 } },
         {
             new: true,
             runValidators: true,
@@ -544,4 +553,4 @@ export const updateProductQuantity = async (
 };
 
 export const findProductStock = (productId, session) =>
-    Product.findById(productId, "name quantity", { session });
+    Product.findById(productId, "name quantity hasStockLots", { session });

@@ -1,4 +1,7 @@
+import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
+import Product from "../product/product.model.js";
+import { GoodsReceipt, SupplierProduct } from "../receiving/receiving.model.js";
 
 import {
     createSupplier,
@@ -12,9 +15,7 @@ import {
 
 import {
     countProductsBySupplier,
-    assignSupplierToProducts,
     removeSupplierFromProduct,
-    getProductsBySupplier,
 } from "../product/product.repository.js";
 
 export const create = async (payload) => {
@@ -94,8 +95,13 @@ export const findById = async (id) => {
         );
     }
 
-    const products =
-        await getProductsBySupplier(id);
+    const links = await SupplierProduct.find({ supplierId: id }).lean();
+    const products = await Product.find({
+        $or: [
+            { _id: { $in: links.filter((link) => link.isActive).map((link) => link.productId) } },
+            { supplierId: id, _id: { $nin: links.map((link) => link.productId) } },
+        ],
+    }).select("name basePrice sellingPrice quantity").lean();
 
     return {
         supplier,
@@ -165,11 +171,35 @@ export const assignProducts = async ({
         );
     }
 
-    return assignSupplierToProducts(
-        supplierId,
-        productIds
-    );
+    const ids = [...new Set(productIds.map((id) => id.toLowerCase()))];
+    if (await Product.countDocuments({ _id: { $in: ids } }) !== ids.length) {
+        throw AppError.notFound("One or more products were not found");
+    }
+    await SupplierProduct.init();
+    return mongoose.connection.transaction(async (session) => {
+        const result = await SupplierProduct.bulkWrite(ids.map((productId) => ({
+            updateOne: {
+                filter: { supplierId, productId },
+                update: { $set: { isActive: true } },
+                upsert: true,
+            },
+        })), { session });
+        return { modifiedCount: result.modifiedCount + result.upsertedCount };
+    });
 };
+
+export async function unlinkCatalogProduct(supplierId, productId) {
+    const supplier = await findSupplierById(supplierId);
+    if (!supplier || !await Product.exists({ _id: productId })) {
+        throw AppError.notFound("Supplier or product not found");
+    }
+    await SupplierProduct.init();
+    await SupplierProduct.updateOne(
+        { supplierId, productId },
+        { $set: { isActive: false } },
+        { upsert: true },
+    );
+}
 
 export const unassignProduct = async (
     productId
@@ -187,6 +217,10 @@ export const remove = async (id) => {
         throw AppError.badRequest(
             `Cannot delete supplier. ${count} products are assigned to it.`
         );
+    }
+
+    if (await GoodsReceipt.exists({ supplierId: id }) || await SupplierProduct.exists({ supplierId: id, isActive: true })) {
+        throw AppError.conflict("Deactivate this supplier to preserve receipt and catalog records");
     }
 
     const supplier =

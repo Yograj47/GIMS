@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import { AppError } from "../../shared/errors/index.js";
 import logger from "../../shared/logger/logger.js";
+import { consumeReceivedStock, resolveStockUnit } from "../receiving/receiving.service.js";
 
 import {
     createTransaction,
@@ -68,6 +69,13 @@ export const create = async (
                     );
                 }
 
+                if (product.hasStockLots) {
+                    const unit = await resolveStockUnit(product.id, item.unitId, item.qty, session);
+                    if (item.multiplier !== unit.multiplier) {
+                        throw AppError.conflict("Product unit conversion changed. Refresh the product and try again");
+                    }
+                }
+
                 const stockImpact =
                     Number(item.qty) *
                     Number(item.multiplier);
@@ -103,7 +111,12 @@ export const create = async (
                     session
                 );
 
+                const lotAllocations = !isStockIn && product.hasStockLots
+                    ? await consumeReceivedStock(product._id, stockImpact, session)
+                    : undefined;
+
                 movements.push({
+                    lotAllocations,
                     productId:
                         product._id,
                     performedBy:

@@ -19,7 +19,7 @@ import {
 } from "../ui/table"
 
 import { DataTablePagination } from "./DataTablePagination"
-import { Loading } from "@/lib/loader"
+import { Skeleton } from "@/components/ui/skeleton"
 import React from "react"
 
 interface DataTableProps<TData> {
@@ -61,7 +61,8 @@ export function DataTable<TData>({
 
     return (
         <div className="flex flex-col h-full bg-white border border-slate-300">
-            <div className="flex-1 overflow-auto custom-scrollbar">
+            {isLoading && <span role="status" className="sr-only">Loading records</span>}
+            <div aria-busy={isLoading} className="flex-1 overflow-auto custom-scrollbar">
                 <Table className="w-full border-separate border-spacing-0">
                     <TableHeader className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-sm">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -79,16 +80,15 @@ export function DataTable<TData>({
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-64 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-2">
-                                        <Loading size="md" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                            Synchronizing...
-                                        </span>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                            Array.from({ length: Math.min(5, pagination.pageSize) }, (_, rowIndex) => (
+                                <TableRow key={rowIndex} aria-hidden="true">
+                                    {table.getVisibleLeafColumns().map((column, columnIndex) => (
+                                        <TableCell key={column.id} className="px-6 py-4">
+                                            <Skeleton className={columnIndex === 0 ? "h-3 w-24" : "h-3 w-14"} />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
                         ) : table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <React.Fragment key={row.id}>

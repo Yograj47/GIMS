@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
     Key, Camera, LogOut, CheckCircle2
 } from "lucide-react";
-import { Loading } from "@/lib/loader";
 import { InputGroup } from "@/components/common/InputGroup";
 import { PasswordUpdateModal } from "../auth/components/PasswordUpdateModal";
 import { useUsers } from "../auth/hooks/useUsers";
@@ -80,8 +79,6 @@ export default function ProfilePage() {
         (item) => item.role === user?.role?.toLowerCase()
     );
 
-    if (isLoading) return <Loading fullPage />;
-
     return (
         <div className="h-full p-2 animate-in fade-in duration-700">
             <div className="max-w-5xl mx-auto">
@@ -133,8 +130,8 @@ export default function ProfilePage() {
                             </div>
 
                             {isEditing && (
-                                <button onClick={handleProfileUpdate} className="mt-10 px-8 py-4 bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-                                    Save Changes
+                                <button onClick={handleProfileUpdate} disabled={isLoading} className="mt-10 px-8 py-4 bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-60">
+                                    {isLoading ? "Saving…" : "Save Changes"}
                                 </button>
                             )}
                         </section>

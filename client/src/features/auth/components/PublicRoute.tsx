@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuthStore } from "@/store/authStore";
 
-import { Loading } from "@/lib/loader";
+import { AuthSkeleton } from "@/components/common/LoadingSkeleton";
 
 export const PublicRoute = () => {
     const {
@@ -11,7 +11,7 @@ export const PublicRoute = () => {
     } = useAuthStore();
 
     if (isInitialLoading) {
-        return <Loading fullPage />;
+        return <AuthSkeleton label="Checking your session" />;
     }
 
     if (isAuthenticated) {

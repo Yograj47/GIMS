@@ -182,7 +182,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                         <label className={labelStyle}>In-Hand Quantity</label>
-                        <input type="number" {...register("quantity", { valueAsNumber: true })} className={inputStyle} />
+                        <input type="number" {...register("quantity", { valueAsNumber: true })} readOnly={Boolean(initialData)} className={inputStyle} />
                     </div>
                     <div className="space-y-2">
                         <label className={labelStyle}>Critical Alert Level</label>

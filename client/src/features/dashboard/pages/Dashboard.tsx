@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { Package, AlertCircle, Activity, Plus, ArrowUpRight, Truck, CheckCircle2, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -20,22 +21,27 @@ export default function Dashboard() {
     const { logs, fetchRecentLogs } = useActivityLogs();
     const { alerts, acknowledgeAlert } = useAlerts();
     const { weeklyStats, fetchWeeklyStats, summary, fetchSummary } = useAnalytics();
+    const [isInitialLoading, setInitialLoading] = useState(true);
+    const role = user?.role;
 
     useEffect(() => {
+        let active = true;
         const syncDashboard = async () => {
             const promises = [
                 fetchWeeklyStats(),
                 fetchSummary(),
             ];
 
-            if (user?.role === 'admin' || user?.role === 'owner') {
+            if (role === 'admin' || role === 'owner') {
                 promises.push(fetchRecentLogs(5));
             }
 
-            await Promise.all(promises);
+            await Promise.allSettled(promises);
+            if (active) setInitialLoading(false);
         };
-        syncDashboard();
-    }, [fetchWeeklyStats, fetchSummary, fetchRecentLogs, user]);
+        void syncDashboard();
+        return () => { active = false; };
+    }, [fetchWeeklyStats, fetchSummary, fetchRecentLogs, role]);
 
     const dynamicData = useMemo(() => {
         if (!weeklyStats || weeklyStats.length === 0) {
@@ -56,6 +62,8 @@ export default function Dashboard() {
             ) ?? null,
         [alerts]
     );
+
+    if (isInitialLoading) return <LoadingSkeleton layout="dashboard" label="Loading dashboard" />;
 
     return (
         <div className="h-full space-y-8 animate-in fade-in duration-700">

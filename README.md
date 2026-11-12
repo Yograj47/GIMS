@@ -162,6 +162,41 @@ Routes below are relative to `/api/v1`.
 | /analytics     | Analytics              |
 | /alerts        | Alerts                 |
 
+### Supplier receiving and returns
+
+Verified users with supplier access can list receipts, lots, and returns under
+`/api/v1/receiving`. The list endpoints accept `supplierId`, `page`, and `limit`.
+Supplier write permission is required to post a receipt or return.
+
+- `POST /receiving/receipts` accepts a UUID `requestKey`, `supplierId`,
+  three-letter `currency`, optional `deliveryReference`, and an `items` array.
+  Each item has `productId`, `unitId`, `quantity` in the selected unit,
+  `unitCost` as a decimal string per selected unit, and optional
+  `quarantinedQuantity` in base units, `batchNumber`, and `expiresOn`
+  as a calendar date in `YYYY-MM-DD` format.
+- `POST /receiving/returns` accepts a UUID `requestKey`, `lotId`, `bucket`
+  (`sellable` or `quarantined`), `quantity` in base units, and `reason`.
+  It records the source receipt and supplier automatically.
+
+A repeated request key returns HTTP 409. Existing stock stays available as
+unattributed stock. Stock-out transactions use received lots in receipt order
+before drawing on unattributed stock. Expiry is captured for traceability.
+
+The product list accepts `category` (a category ID) and `stockLevel`
+(`healthy`, `low`, or `out`). Filters apply to both the results and the total count.
+
+The supplier details page lets a product be linked to several suppliers.
+Removing one link leaves the other supplier links and receipt history intact.
+Existing supplier assignments appear in the catalog when there is no newer
+link record for that supplier and product.
+
+Use **Reports → Stock → Stock reconciliation** to compare the sellable product
+balance with supplier lots, unattributed stock, and quarantined stock. Owners
+and admins can record a physical sellable count with a reason. A count is
+rejected if the balance changed before it was posted. Increases are added as
+unattributed stock. Decreases consume unattributed stock first and then reduce
+the oldest sellable lots. The resulting movement records the affected lots.
+
 ---
 
 ## 🔄 System Workflow

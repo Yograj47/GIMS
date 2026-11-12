@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import type { ApiResponse } from "@/types/api";
-import type { SupplierFormData } from "@/types/supplier";
+import type { SupplierFormData, SupplierProduct } from "@/types/supplier";
 
 const baseUrl = "/suppliers"
 
@@ -15,7 +15,7 @@ export const SupplierService = {
     },
 
     getById: async (id: string) => {
-        const { data } = await api.get<ApiResponse>(`${baseUrl}/${id}`);
+        const { data } = await api.get<ApiResponse & { meta?: { products?: SupplierProduct[] } }>(`${baseUrl}/${id}`);
         return data;
     },
 
@@ -35,15 +35,14 @@ export const SupplierService = {
     },
 
     assignProducts: async (supplierId: string, productIds: string[]) => {
-        const { data } = await api.patch(`${baseUrl}/${supplierId}/assign-products`, {
+        const { data } = await api.patch<ApiResponse>(`${baseUrl}/${supplierId}/assign-products`, {
             productIds,
         });
         return data;
     },
 
-    unassignProduct: async (productId: string) => {
-        const { data } = await api.patch(`${baseUrl}/unassign-product/${productId}`);
-        return data;
+    unassignProduct: async (supplierId: string, productId: string) => {
+        await api.delete(`${baseUrl}/${supplierId}/catalog/${productId}`);
     }
 }
 

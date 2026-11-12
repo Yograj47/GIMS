@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Loader2, SearchX, ShieldCheck } from "lucide-react";
+import { SearchX, ShieldCheck } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import UserListing from "../components/UserListing";
 import { DeleteConfirmDialog } from "@/lib/deleteAlert";
@@ -72,7 +73,8 @@ export default function UserManagement() {
 
                 {/* 2. PRECISION TABLE CONTAINER */}
                 <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-hidden min-h-100">
-                    <table className="w-full text-left border-collapse">
+                    {isLoading && <span role="status" className="sr-only">Loading users</span>}
+                    <table aria-busy={isLoading} className="w-full text-left border-collapse">
                         <thead className="bg-slate-50/50 border-b border-slate-200">
                             <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                                 <th className="px-6 py-4">Personnel / Identifier</th>
@@ -83,14 +85,14 @@ export default function UserManagement() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {isLoading ? (
-                                <tr>
-                                    <td colSpan={4} className="py-24 text-center">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <Loader2 className="animate-spin text-blue-600" size={24} strokeWidth={3} />
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synchronizing Registry...</p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                Array.from({ length: 5 }, (_, index) => (
+                                    <tr key={index} aria-hidden="true">
+                                        <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                                        <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
+                                        <td className="px-6 py-4"><Skeleton className="mx-auto h-5 w-12 rounded-full" /></td>
+                                        <td className="px-6 py-4"><Skeleton className="ml-auto h-6 w-8" /></td>
+                                    </tr>
+                                ))
                             ) : users?.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="py-24 text-center">

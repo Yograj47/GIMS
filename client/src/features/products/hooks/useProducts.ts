@@ -55,7 +55,7 @@ export const useProducts = () => {
         return false;
     };
 
-    const updateProduct = async (id: string, payload: ProductFormData) => {
+    const updateProduct = async (id: string, payload: Partial<ProductFormData>) => {
         try {
             setLoading(true);
             const response = await productService.updateById(id, payload);

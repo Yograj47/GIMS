@@ -32,6 +32,16 @@ const productSchema = new mongoose.Schema(
             default: 0,
         },
 
+        hasStockLots: {
+            type: Boolean,
+            default: false,
+        },
+
+        stockRevision: {
+            type: Number,
+            default: 0,
+        },
+
         threshold: {
             type: Number,
             min: 0,
