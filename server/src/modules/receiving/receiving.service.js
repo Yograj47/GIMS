@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
+import { reservedStock } from "../checkout/reservation.js";
 import { createMovement } from "../movement/movement.repository.js";
 import Product from "../product/product.model.js";
 import ProductUnit from "../product-unit/product-unit.model.js";
@@ -105,7 +106,9 @@ export async function returnGoods(payload, userId) {
 
         const oldQuantity = product.quantity;
         if (payload.bucket === "sellable") {
-            if (oldQuantity < payload.quantity) throw AppError.conflict("Insufficient sellable stock");
+            if (oldQuantity - await reservedStock(product.id, session) < payload.quantity) {
+                throw AppError.conflict("Insufficient unreserved sellable stock");
+            }
             product.quantity -= payload.quantity;
         }
         product.stockRevision += 1;

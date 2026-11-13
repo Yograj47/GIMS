@@ -52,6 +52,11 @@ export default function StockManagement() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Stock Movements</h1>
         </div>
 
+        <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => navigate("/stock-movements/orders")}
+          className="h-10 rounded-lg border border-slate-300 px-4 text-xs font-semibold hover:bg-slate-50">
+          Checkout orders
+        </button>
         <button
           onClick={() => navigate('/reports/stock')}
           className="h-10 px-4 flex items-center gap-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-all group"
@@ -59,6 +64,7 @@ export default function StockManagement() {
           <History size={14} className="text-slate-400 group-hover:text-indigo-600" />
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:text-indigo-600">Movement Logs</span>
         </button>
+        </div>
       </div>
 
       {/* --- MAIN ACTION GRID --- */}

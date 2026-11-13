@@ -52,6 +52,9 @@ const ProductUnitPage = lazy(() => import("./features/ProductUnit/pages/ProductU
 const ProfilePage = lazy(() => import("./features/OtherPages/Profile"));
 const Unauthorized = lazy(() => import("./features/OtherPages/Unauthorized"));
 const HelpPage = lazy(() => import("./features/OtherPages/Helper"));
+const Shop = lazy(() => import("./features/checkout/Shop"));
+const CheckoutStatus = lazy(() => import("./features/checkout/CheckoutStatus"));
+const StaffOrders = lazy(() => import("./features/checkout/StaffOrders"));
 
 axios.defaults.withCredentials = true;
 
@@ -114,6 +117,7 @@ function App() {
                     <Route path="/stock-movements">
                       <Route index element={<StockManagement />} />
                       <Route path="form" element={<StockMovementForm />} />
+                      <Route path="orders" element={<StaffOrders />} />
                     </Route>
                   </Route>
 
@@ -150,6 +154,8 @@ function App() {
                 </Route>
               </Route>
 
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/checkout/return" element={<CheckoutStatus />} />
               {/* --- 404 Route --- */}
               <Route path="/unauthorized" element={<Unauthorized />} />
               <Route path="*" element={<NotFound />} />

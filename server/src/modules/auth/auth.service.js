@@ -37,6 +37,7 @@ export const registerUser = async ({
         name,
         email,
         password: hashedPassword,
+        role: ROLES.CUSTOMER,
     });
 
     const token = generateToken(user);

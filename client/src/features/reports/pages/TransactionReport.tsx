@@ -12,6 +12,7 @@ import { exportToCSV } from "@/lib/csvExport";
 import { useDebounce } from "@/lib/debounce";
 import { AdminGate } from "@/features/auth/components/AdminGate";
 import type { Item, TransactionData } from "@/types/transaction";
+import { SalesChannels } from "../components/SalesChannels";
 
 export default function Transaction() {
     const { fetchTransactions, transactions, isLoading, meta } = useMovementTransactions();
@@ -34,17 +35,20 @@ export default function Transaction() {
                 dateRange.end
             );
         }
-    }, [pagination, debouncedSearch, transactionType, dateRange]);
+    }, [fetchTransactions, pagination, debouncedSearch, transactionType, dateRange, IsExporting]);
 
     const handleExport = async () => {
         setIsExporting(true);
-        await fetchTransactions(1, 1000, debouncedSearch, transactionType, dateRange.start, dateRange.end, true);
-
-        if (transactions) {
-            const rows = transactions.flatMap((t: TransactionData) => t.items.map((item: Item) => ({
+        try {
+            const records = await fetchTransactions(1, 1000, debouncedSearch, transactionType, dateRange.start, dateRange.end, true);
+            if (!records) return;
+            const rows = records.flatMap((t: TransactionData) => t.items.map((item: Item) => ({
                 "Date": new Date(t.createdAt).toLocaleDateString(),
                 "Invoice": t._id.slice(-6).toUpperCase(),
                 "Type": t.transactionType,
+                "Channel": t.transactionType === "Sale" ? t.channel ?? "in_store" : "",
+                "Payment method": t.paymentMethod ?? "",
+                "Fulfillment": t.fulfillment ?? "",
                 "Party": t.partyDetails?.name || "Cash Customer",
                 "Product": item.productName,
                 "Total": item.total,
@@ -52,8 +56,9 @@ export default function Transaction() {
             })));
             exportToCSV(rows, `Transactions_${new Date().toISOString().split('T')[0]}`);
             notify.success("Export Complete");
+        } finally {
+            setIsExporting(false);
         }
-        setIsExporting(false);
     };
 
     const columns = useMemo(() => getTransactionColumns(navigate), [navigate]);
@@ -130,6 +135,7 @@ export default function Transaction() {
                     </div>
                 </div>
 
+                <SalesChannels />
                 <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-hidden">
                     <DataTable
                         columns={columns}

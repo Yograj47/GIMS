@@ -30,7 +30,7 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
           "text-[10px] font-black px-2 py-0.5 rounded-sm uppercase border",
           isSale ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
         )}>
-          {row.original.transactionType}
+          {row.original.transactionType}{isSale && (row.original.channel === "online" ? " · Online" : " · In store")}
         </span>
       );
     }

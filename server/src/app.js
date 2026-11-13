@@ -20,6 +20,7 @@ import activityLogRoute from "./modules/activity-log/activity-log.route.js";
 import analyticsRoute from "./modules/analytics/analytics.route.js";
 import receivingRoute from "./modules/receiving/receiving.route.js";
 import billingRoute from "./modules/billing/billing.route.js";
+import checkoutRoute from "./modules/checkout/checkout.route.js";
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use(`${API}${ROUTES.ACTIVITY_LOGS}`, activityLogRoute);
 app.use(`${API}${ROUTES.ANALYTICS}`, analyticsRoute);
 app.use(`${API}/receiving`, receivingRoute);
 app.use(`${API}/billing`, billingRoute);
+app.use(`${API}/checkout`, checkoutRoute);
 
 /*
 |--------------------------------------------------------------------------

@@ -39,9 +39,9 @@ const Home = () => {
                     variant="ghost"
                     className="w-full sm:w-auto text-slate-400 hover:text-white hover:bg-white/5 h-12 px-8 rounded-xl transition-all"
                 >
-                    <Link to="/about" className="flex items-center gap-2">
+                    <Link to="/shop" className="flex items-center gap-2">
                         <Info className="w-4 h-4" />
-                        Learn More
+                        Shop groceries
                     </Link>
                 </Button>
             </div>

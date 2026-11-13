@@ -50,6 +50,8 @@ export const ProtectedRoute = ({
     );
   }
 
+  if (user.role === "customer") return <Navigate to="/shop" replace />;
+
   if (
     allowedRoles &&
     !allowedRoles.includes(

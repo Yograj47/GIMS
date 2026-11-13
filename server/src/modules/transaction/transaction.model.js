@@ -47,6 +47,10 @@ const transactionItemSchema = new mongoose.Schema(
 
 const transactionSchema = new mongoose.Schema(
     {
+        channel: { type: String, enum: ["in_store", "online"] },
+        checkoutOrderId: { type: mongoose.Schema.Types.ObjectId, ref: "CheckoutOrders" },
+        paymentMethod: { type: String, enum: ["cash", "gateway"] },
+        fulfillment: { type: String, enum: ["counter", "pickup", "delivery"] },
         transactionType: {
             type: String,
             enum: [

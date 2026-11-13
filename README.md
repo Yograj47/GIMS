@@ -214,6 +214,31 @@ Billing currently uses NPR and sales require a zero configured tax rate.
 Supplier credits apply up to the unpaid balance of the source bill. The
 accounting report covers entries posted through these workflows.
 
+### Checkout and sales channels
+
+Open **Shop groceries** for online orders with store pickup or delivery.
+Use **Stock movements → Stock outflow** for counter sales and
+**Stock movements → Checkout orders** to verify payments and fulfill orders.
+Cash at pickup and cash on delivery are recorded when staff collect the money.
+Completed checkouts create a sale, invoice, payment, and journal entries
+in the same database transaction. The transaction report shows store and
+online sales separately.
+
+Set `KHALTI_SECRET_KEY` and `CHECKOUT_CLIENT_URL` on the server to enable
+hosted online payment. The client URL is the shop's public origin, with
+`/checkout/return` served by the SPA. Khalti uses its sandbox by default.
+Set `KHALTI_MODE=live` with the live merchant key when ready. Available
+cards and wallets depend on the merchant setup. Only confirmed provider
+payments with matching amounts can be fulfilled. A payment confirmed after
+the stock hold ends appears as `payment_review` for manual resolution.
+
+Online cash orders hold stock for 24 hours unless cancelled. Online payment
+holds start at 15 minutes and use the provider expiry once a payment session
+opens. Confirmed online payments hold stock until staff fulfill the order.
+Public sign-ups create customer accounts. Assign staff access explicitly
+and review existing staff accounts created through the old registration flow.
+Checkout uses NPR and requires a zero configured tax rate.
+
 ---
 
 ## 🔄 System Workflow

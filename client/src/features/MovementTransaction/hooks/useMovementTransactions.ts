@@ -26,9 +26,12 @@ export const useMovementTransactions = () => {
             setLoading(true);
             const response = await MovementTransactionService.getAllTransactions(page, limit, search, transactionType, startDate, endDate, all);
             if (response.success) {
-                setTransactions((response.data as TransactionData[]) || []);
-                setMeta(all ? null : (response.meta || null));
-                return true;
+                const records = (response.data as TransactionData[]) || [];
+                if (!all) {
+                    setTransactions(records);
+                    setMeta(response.meta || null);
+                }
+                return records;
             }
         } catch {
             notify.error("Failed to load transactions");

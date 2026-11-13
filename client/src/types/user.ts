@@ -11,4 +11,5 @@ export interface UserData {
 export type UserRole =
     | "admin"
     | "owner"
-    | "staff";
+    | "staff"
+    | "customer";

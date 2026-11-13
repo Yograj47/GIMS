@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
+import { reservedStock } from "../checkout/reservation.js";
 import Movement from "../movement/movement.model.js";
 import { createMovement } from "../movement/movement.repository.js";
 import Product from "../product/product.model.js";
@@ -58,6 +59,9 @@ export async function recordStockCount(productId, input, userId) {
         const balance = await summarize(product, session);
         if (balance.excessTracked > 1e-8) throw AppError.conflict("Lot stock exceeds the product balance");
         const difference = input.countedQuantity - oldQuantity;
+        if (input.countedQuantity < await reservedStock(product.id, session)) {
+            throw AppError.conflict("The count is below reserved stock. Resolve the affected orders first");
+        }
         if (Math.abs(difference) < 0.001) {
             throw AppError.badRequest("The count must differ from the system balance by at least 0.001 base units");
         }

@@ -30,6 +30,9 @@ export type Item = z.infer<typeof itemSchema>;
 
 export type TransactionData = Omit<TransactionFormData, 'items'> & {
   _id: string;
+  channel?: "in_store" | "online";
+  paymentMethod?: "cash" | "gateway";
+  fulfillment?: "counter" | "pickup" | "delivery";
   items: Array<Omit<Item, 'product' | 'unit'> & {
     product: { _id: string; name: string };
     unit: { _id: string; name: string };

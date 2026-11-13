@@ -31,7 +31,7 @@ const paymentSchema = new Schema({
     invoiceId: reference("SalesInvoices"),
     recordedBy: reference("Users"),
     amountMinor: money,
-    method: { type: String, enum: ["cash", "bank"], required: true },
+    method: { type: String, enum: ["cash", "bank", "gateway"], required: true },
     reference: String,
 }, { timestamps: true });
 paymentSchema.index({ invoiceId: 1, createdAt: 1 });
@@ -39,7 +39,7 @@ paymentSchema.index({ invoiceId: 1, createdAt: 1 });
 const journalLine = new Schema({
     account: {
         type: String,
-        enum: ["accounts_receivable", "sales_revenue", "cash_on_hand", "bank", "accounts_payable", "inventory", "cost_of_goods_sold"],
+        enum: ["accounts_receivable", "sales_revenue", "cash_on_hand", "bank", "gateway_clearing", "accounts_payable", "inventory", "cost_of_goods_sold"],
         required: true,
     },
     side: { type: String, enum: ["debit", "credit"], required: true },

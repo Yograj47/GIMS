@@ -8,6 +8,7 @@ export const PublicRoute = () => {
     const {
         isAuthenticated,
         isInitialLoading,
+        user,
     } = useAuthStore();
 
     if (isInitialLoading) {
@@ -17,7 +18,7 @@ export const PublicRoute = () => {
     if (isAuthenticated) {
         return (
             <Navigate
-                to="/dashboard"
+                to={user?.role === "customer" ? "/shop" : "/dashboard"}
                 replace
             />
         );

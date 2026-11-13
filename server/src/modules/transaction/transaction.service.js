@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
 import logger from "../../shared/logger/logger.js";
 import { consumeReceivedStock, resolveStockUnit } from "../receiving/receiving.service.js";
+import { reservedStock } from "../checkout/reservation.js";
 
 import {
     createTransaction,
@@ -35,141 +36,130 @@ import {
     SOCKET_EVENTS,
 } from "../../shared/socket/socketEvents.js";
 
-export const create = async (
-    payload,
-    userId
-) => {
-    const session =
-        await mongoose.startSession();
+export async function writeStockTransaction(payload, userId, session, { excludeOrderId, useUnitSnapshot = false } = {}) {
+    const isStockIn = [
+        "Purchase",
+        "Return",
+    ].includes(
+        payload.transactionType
+    );
 
-    let result;
+    const movements = [];
 
-    try {
-        result = await session.withTransaction(async () => {
-
-            const isStockIn = [
-                "Purchase",
-                "Return",
-            ].includes(
-                payload.transactionType
+    for (const item of payload.items) {
+        const product =
+            await findProductStock(
+                item.productId,
+                session
             );
 
-            const movements = [];
+        if (!product) {
+            throw AppError.notFound(
+                `Product not found: ${item.productId}`
+            );
+        }
 
-            for (const item of payload.items) {
-                const product =
-                    await findProductStock(
-                        item.productId,
-                        session
-                    );
-
-                if (!product) {
-                    throw AppError.notFound(
-                        `Product not found: ${item.productId}`
-                    );
-                }
-
-                if (product.hasStockLots) {
-                    const unit = await resolveStockUnit(product.id, item.unitId, item.qty, session);
-                    if (item.multiplier !== unit.multiplier) {
-                        throw AppError.conflict("Product unit conversion changed. Refresh the product and try again");
-                    }
-                }
-
-                const stockImpact =
-                    Number(item.qty) *
-                    Number(item.multiplier);
-
-                const oldQuantity =
-                    product.quantity;
-
-                let newQuantity =
-                    oldQuantity;
-
-                if (isStockIn) {
-                    newQuantity =
-                        oldQuantity +
-                        stockImpact;
-                } else {
-                    if (
-                        oldQuantity <
-                        stockImpact
-                    ) {
-                        throw AppError.badRequest(
-                            `Insufficient stock for ${product.name}`
-                        );
-                    }
-
-                    newQuantity =
-                        oldQuantity -
-                        stockImpact;
-                }
-
-                await updateProductQuantity(
-                    product._id,
-                    newQuantity,
-                    session
-                );
-
-                const lotAllocations = !isStockIn && product.hasStockLots
-                    ? await consumeReceivedStock(product._id, stockImpact, session)
-                    : undefined;
-
-                movements.push({
-                    lotAllocations,
-                    productId:
-                        product._id,
-                    performedBy:
-                        userId,
-                    unitId:
-                        item.unitId,
-                    multiplier:
-                        item.multiplier,
-                    quantity:
-                        stockImpact,
-                    movementType:
-                        isStockIn
-                            ? "IN"
-                            : "OUT",
-                    reason:
-                        payload.transactionType,
-                    oldQuantity,
-                    newQuantity,
-                });
+        if (product.hasStockLots && !useUnitSnapshot) {
+            const unit = await resolveStockUnit(product.id, item.unitId, item.qty, session);
+            if (item.multiplier !== unit.multiplier) {
+                throw AppError.conflict("Product unit conversion changed. Refresh the product and try again");
             }
+        }
 
-            const [transaction] =
-                await createTransaction(
-                    payload,
-                    session
-                );
+        const stockImpact =
+            Number(item.qty) *
+            Number(item.multiplier);
 
-            for (const movement of movements) {
-                await createMovement(
-                    {
-                        ...movement,
-                        transactionId:
-                            transaction._id,
-                    },
-                    session
+        const oldQuantity =
+            product.quantity;
+
+        let newQuantity =
+            oldQuantity;
+
+        if (isStockIn) {
+            newQuantity =
+                oldQuantity +
+                stockImpact;
+        } else {
+            if (
+                oldQuantity - await reservedStock(product._id, session, excludeOrderId) <
+                stockImpact
+            ) {
+                throw AppError.badRequest(
+                    `Insufficient stock for ${product.name}`
                 );
             }
 
-            const affectedProducts = [
-                ...new Set(
-                    movements.map((m) =>
-                        m.productId.toString()
-                    )
-                ),
-            ];
+            newQuantity =
+                oldQuantity -
+                stockImpact;
+        }
 
-            return { transaction, affectedProducts };
+        await updateProductQuantity(
+            product._id,
+            newQuantity,
+            session
+        );
+
+        const lotAllocations = !isStockIn && product.hasStockLots
+            ? await consumeReceivedStock(product._id, stockImpact, session)
+            : undefined;
+
+        movements.push({
+            lotAllocations,
+            productId:
+                product._id,
+            performedBy:
+                userId,
+            unitId:
+                item.unitId,
+            multiplier:
+                item.multiplier,
+            quantity:
+                stockImpact,
+            movementType:
+                isStockIn
+                    ? "IN"
+                    : "OUT",
+            reason:
+                payload.transactionType,
+            oldQuantity,
+            newQuantity,
         });
-    } finally {
-        await session.endSession();
     }
 
-    const { transaction, affectedProducts } = result;
+    const [transaction] =
+        await createTransaction(
+            {
+                ...payload,
+                ...(payload.transactionType === "Sale" && { channel: payload.channel ?? "in_store" }),
+            },
+            session
+        );
+
+    for (const movement of movements) {
+        await createMovement(
+            {
+                ...movement,
+                transactionId:
+                    transaction._id,
+            },
+            session
+        );
+    }
+
+    const affectedProducts = [
+        ...new Set(
+            movements.map((m) =>
+                m.productId.toString()
+            )
+        ),
+    ];
+
+    return { transaction, affectedProducts };
+}
+
+export async function notifyStockTransaction({ transaction, affectedProducts }, userId) {
 
     // -----------------------------
     // AFTER COMMIT
@@ -221,7 +211,12 @@ export const create = async (
         );
     }
 
-    return transaction;
+}
+
+export const create = async (payload, userId) => {
+    const result = await mongoose.connection.transaction((session) => writeStockTransaction(payload, userId, session));
+    await notifyStockTransaction(result, userId);
+    return result.transaction;
 };
 export const find = async ({
     page = 1,

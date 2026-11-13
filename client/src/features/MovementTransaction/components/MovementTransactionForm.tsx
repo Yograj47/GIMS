@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Trash2, Loader2, CreditCard, Info, ReceiptText, ShoppingCart, PackagePlus, PackageMinus, Hash } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useFieldArray, type Resolver, useWatch } from "react-hook-form";
@@ -12,6 +12,8 @@ import { transactionSchema, type Item, type TransactionFormData } from "@/types/
 import { useMovementTransactions } from "../hooks/useMovementTransactions";
 import { cn } from "@/lib/utils";
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
+import api from "@/lib/api";
+import { checkoutPost, checkoutTokenKey, goToPayment } from "@/features/checkout/checkout";
 
 export default function MovementForm() {
     const [searchParams] = useSearchParams();
@@ -21,6 +23,10 @@ export default function MovementForm() {
     const { Suppliers, fetchSuppliers } = useSuppliers();
 
     const { fetchTransactions, transactions, createTransaction, isLoading } = useMovementTransactions();
+    const [gatewayEnabled, setGatewayEnabled] = useState(false);
+    const [checkoutMethod, setCheckoutMethod] = useState("cash");
+    const [checkingOut, setCheckingOut] = useState(false);
+    const checkoutRequest = useRef<{ signature: string; token: string } | null>(null);
 
     const { register, control, handleSubmit, setValue } = useForm<TransactionFormData>({
         resolver: zodResolver(transactionSchema) as Resolver<TransactionFormData>,
@@ -49,9 +55,45 @@ export default function MovementForm() {
     }, [watchedItems, setValue]);
 
     const onFormSubmit = async (data: TransactionFormData) => {
+        if (data.transactionType === "Sale" && checkoutMethod !== "credit") {
+            if (checkingOut) return;
+            const payload = {
+                items: data.items.map((item) => ({ productId: item.productId, unitId: item.unitId, quantity: item.qty })),
+                fulfillment: "counter",
+                paymentMethod: checkoutMethod,
+                customer: data.partyDetails,
+            };
+            const signature = JSON.stringify(payload);
+            if (checkoutRequest.current?.signature !== signature) checkoutRequest.current = { signature, token: crypto.randomUUID() };
+            const token = checkoutRequest.current.token;
+            setCheckingOut(true);
+            try {
+                const order = await checkoutPost("counter", { ...payload, token });
+                if (checkoutMethod === "gateway") {
+                    sessionStorage.setItem(checkoutTokenKey, token);
+                    try { await goToPayment(token); } catch { navigate("/checkout/return"); }
+                } else if (order.transactionId) navigate(`/reports/transaction/${order.transactionId}`);
+            } catch {
+                // The API shows stock and payment errors.
+            } finally {
+                setCheckingOut(false);
+            }
+            return;
+        }
+        if (data.transactionType === "Sale") data = { ...data, isPaid: false };
         const success = await createTransaction(data);
         if (success) navigate("/reports/transactions");
     };
+
+    useEffect(() => {
+        if (isStockIn) return;
+        let active = true;
+        api.get<{ data: { gatewayEnabled: boolean } }>("/checkout/methods").then(
+            ({ data }) => { if (active) setGatewayEnabled(data.data.gatewayEnabled); },
+            () => { /* Cash checkout remains available. */ },
+        );
+        return () => { active = false; };
+    }, [isStockIn]);
 
     useEffect(() => {
         if (isStockIn) {
@@ -98,7 +140,7 @@ export default function MovementForm() {
     const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-700 hover:bg-rose-700";
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <form onSubmit={(event) => void handleSubmit(onFormSubmit)(event)} className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
             {/* --- TOP BAR / HEADER --- */}
             <div className="flex items-center justify-between border-b border-slate-300 pb-6">
                 <div className="flex items-center gap-4">
@@ -245,7 +287,16 @@ export default function MovementForm() {
                             </div>
 
                             <div className="p-5 space-y-5">
-                                <div className="space-y-2">
+                                {currentType === "Sale" ? (
+                                    <label className="grid gap-2 text-xs font-semibold">Payment method
+                                        <select className="rounded-lg border border-slate-300 bg-white px-3 py-2" value={checkoutMethod} onChange={(event) => setCheckoutMethod(event.target.value)}>
+                                            <option value="cash">Cash</option>
+                                            {gatewayEnabled && <option value="gateway">Card or wallet via Khalti</option>}
+                                            <option value="credit">Invoice on credit</option>
+                                        </select>
+                                        {checkoutMethod !== "credit" && <span className="font-normal text-slate-600">Checkout uses the catalog price for each unit.</span>}
+                                    </label>
+                                ) : <div className="space-y-2">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment Status</label>
                                     <div className="flex gap-1 p-1 bg-slate-100 rounded-lg border border-slate-200">
                                         <button
@@ -269,7 +320,7 @@ export default function MovementForm() {
                                             CREDIT / DEBT
                                         </button>
                                     </div>
-                                </div>
+                                </div>}
                                 <div className="space-y-4 pt-2 border-t border-slate-100">
                                     <div className="space-y-1.5 relative">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex justify-between">
@@ -321,13 +372,13 @@ export default function MovementForm() {
 
                     <Button
                         type="submit"
-                        disabled={isLoading || fields.length === 0}
+                        disabled={isLoading || checkingOut || fields.length === 0}
                         className={cn(
                             "w-full h-12 rounded-xl text-[12px] font-black uppercase shadow-none",
                             themeBg, "hover:opacity-90 text-white"
                         )}
                     >
-                        {isLoading ? <Loader2 className="animate-spin mr-2" size={14} /> : "Finalize Transaction"}
+                        {isLoading || checkingOut ? <Loader2 className="animate-spin mr-2" size={14} /> : currentType === "Sale" && checkoutMethod === "cash" ? "Cash collected · checkout" : currentType === "Sale" && checkoutMethod === "gateway" ? "Continue to payment" : "Finalize Transaction"}
                     </Button>
                 </div>
             </div>
