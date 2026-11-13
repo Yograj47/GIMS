@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import axios from "axios";
 
 // Shadcn UI Components
@@ -32,7 +32,6 @@ const SupplierView = lazy(() => import("./features/suppliers/pages/ViewSupplier"
 const SupplierBilling = lazy(() => import("./features/suppliers/pages/SupplierBilling"));
 const ManageSupplier = lazy(() => import("./features/suppliers/pages/Manage"));
 const StockManagement = lazy(() => import("./features/MovementTransaction/pages/MovementHub"));
-const Alert = lazy(() => import("./features/alerts/pages/Alert"));
 const ActivityLogs = lazy(() => import("./features/activityLogs/pages/ActivityLogs"));
 const ReportsHub = lazy(() => import("./features/reports/pages/Report"));
 const AccountingReport = lazy(() => import("./features/reports/pages/AccountingReport"));
@@ -46,6 +45,7 @@ const CategoryPage = lazy(() => import("./features/category/pages/CategoryPage")
 const UnitPage = lazy(() => import("./features/unit/pages/UnitPage"));
 const ForgotPassword = lazy(() => import("./features/auth/pages/ForgetPassword"));
 const StockMovementForm = lazy(() => import("./features/MovementTransaction/components/MovementTransactionForm"));
+const SupplierMovement = lazy(() => import("./features/MovementTransaction/pages/SupplierMovement"));
 const ProductMovementHistory = lazy(() => import("./features/reports/pages/ProductMovementHistory"));
 const TransactionViewPage = lazy(() => import("./features/reports/pages/TransactionViewPage"));
 const ProductUnitPage = lazy(() => import("./features/ProductUnit/pages/ProductUnitPage"));
@@ -66,7 +66,7 @@ function App() {
   return (
     <SocketProvider>
       <BrowserRouter>
-        <div className="antialiased selection:bg-blue-100 selection:text-blue-700">
+        <div className="antialiased selection:bg-brand-100 selection:text-brand-700">
           <Suspense fallback={<StartupSkeleton />}>
             <Routes>
               {/* --- Public / Auth Routes --- */}
@@ -76,9 +76,11 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/help" element={<HelpPage />} />
+                  <Route path="/forget-password" element={<ForgotPassword />} />
                 </Route>
-                <Route path="/verify" element={<VerifyAccount />} />
-                <Route path="/forget-password" element={<ForgotPassword />} />
+                <Route element={<ProtectedRoute requireVerified={false} />}>
+                  <Route path="/verify" element={<VerifyAccount />} />
+                </Route>
               </Route>
 
               {/* --- Protected Inventory/Admin Routes --- */}
@@ -86,7 +88,7 @@ function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/me" element={<ProfilePage />} />
-                  <Route path="/alerts" element={<Alert />} />
+                  <Route path="/alerts" element={<Navigate replace to="/reports/stock?level=low" />} />
 
                   {/* 1. Admin/Owner Only: User Management */}
                   <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
@@ -113,11 +115,12 @@ function App() {
                   </Route>
 
                   {/* 3. Admin/Staff Only: Stock Movements */}
-                  <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
+                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "staff"]} />}>
                     <Route path="/stock-movements">
                       <Route index element={<StockManagement />} />
-                      <Route path="form" element={<StockMovementForm />} />
-                      <Route path="orders" element={<StaffOrders />} />
+                      <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
+                        <Route path="orders" element={<StaffOrders />} />
+                      </Route>
                     </Route>
                   </Route>
 
@@ -141,7 +144,6 @@ function App() {
                     </Route>
                   </Route>
                 </Route>
-
                 <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
                   <Route element={<SettingsLayout />}>
                     <Route path="/settings">
@@ -152,6 +154,17 @@ function App() {
                     </Route>
                   </Route>
                 </Route>
+              </Route>
+
+              <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
+                <Route path="/stock-movements/form" element={<StockMovementForm />} />
+                <Route path="/stock-movements/sale" element={<StockMovementForm purpose="Sale" />} />
+                <Route path="/stock-movements/customer-return" element={<StockMovementForm purpose="Return" />} />
+                <Route path="/stock-movements/adjustment" element={<StockMovementForm purpose="Adjustment" />} />
+              </Route>
+              <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route path="/stock-movements/purchase" element={<SupplierMovement mode="purchase" />} />
+                <Route path="/stock-movements/supplier-return" element={<SupplierMovement mode="return" />} />
               </Route>
 
               <Route path="/shop" element={<Shop />} />

@@ -13,13 +13,11 @@ export default function ActionTile({ icon, label, color, onClick }: ActionTilePr
     return (
         <button
             onClick={onClick}
-            className="w-full p-4 rounded-xl bg-white border border-slate-300 flex items-center justify-between group transition-all duration-200 hover:border-blue-500 hover:shadow-md active:scale-[0.98] relative overflow-hidden"
+            className="flex min-h-14 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-brand-500 hover:bg-brand-50"
         >
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 items-center gap-2">
                 <div className={cn(
-                    "p-2 rounded-lg text-white shadow-md transition-transform group-hover:scale-110",
+                    "shrink-0 rounded-lg p-2 text-white",
                     color
                 )}>
                     {icon}
@@ -28,16 +26,13 @@ export default function ActionTile({ icon, label, color, onClick }: ActionTilePr
                     <span className="block font-bold text-[12px] text-slate-900 uppercase tracking-tight">
                         {label}
                     </span>
-                    <span className="block text-[9px] font-bold text-slate-600 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
-                        Execute Command
-                    </span>
                 </div>
             </div>
 
             <div className="flex items-center">
                 <ChevronRight
                     size={16}
-                    className="text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all"
+                    className="text-slate-400"
                 />
             </div>
         </button>

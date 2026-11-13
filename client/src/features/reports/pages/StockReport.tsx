@@ -2,7 +2,7 @@ import { Search, Download, Filter, PackageSearch, ArrowLeft } from "lucide-react
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "@/features/products/hooks/useProducts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/common/DataTable";
 import { getStockColumns } from "../components/StockColumns";
@@ -18,7 +18,11 @@ import { useAuthStore } from "@/store/authStore";
 export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
     const [searchQuery, setSearchQuery] = useState("");
-    const [stockLevel, setStockLevel] = useState<string>("All Levels");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requestedLevel = searchParams.get("level");
+    const stockLevel = requestedLevel === "low" || requestedLevel === "out" || requestedLevel === "healthy"
+        ? requestedLevel
+        : "";
     const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const [isExporting, setIsExporting] = useState<boolean>(false);
@@ -31,13 +35,12 @@ export default function StockReport() {
 
     useEffect(() => {
         if (!isExporting) {
-            const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
             fetchProducts(
                 pagination.pageIndex + 1,
                 pagination.pageSize,
                 debouncedSearch,
                 undefined,
-                levelFilter
+                stockLevel
             );
         }
     }, [fetchProducts, pagination, debouncedSearch, stockLevel, isExporting]);
@@ -45,14 +48,13 @@ export default function StockReport() {
     const handleExport = async () => {
         try {
             setIsExporting(true);
-            const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
             
             const exportData = await fetchProducts(
                 1,
                 1000,
                 searchQuery,
                 undefined,
-                levelFilter,
+                stockLevel,
                 true
             );
 
@@ -79,13 +81,12 @@ export default function StockReport() {
         } finally {
             setIsExporting(false);
             
-            const levelFilter = stockLevel === "All Levels" ? "" : stockLevel;
             fetchProducts(
                 pagination.pageIndex + 1,
                 pagination.pageSize,
                 searchQuery,
                 undefined,
-                levelFilter
+                stockLevel
             );
         }
     };
@@ -103,13 +104,13 @@ export default function StockReport() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-blue-600 group"
+                            className="text-slate-500 hover:text-brand-600 group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
-                        <div className="p-2 bg-blue-600 rounded-sm text-white">
+                        <div className="p-2 bg-brand-600 rounded-sm text-white">
                             <PackageSearch size={20} />
                         </div>
                         <div>
@@ -117,7 +118,7 @@ export default function StockReport() {
                                 Stock Report
                             </h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Inventory Valuation • <span className="text-blue-600 italic">Audit Mode</span>
+                                Inventory levels and stock counts
                             </p>
                         </div>
                     </div>
@@ -126,7 +127,7 @@ export default function StockReport() {
                         <Button
                             onClick={handleExport}
                             disabled={isExporting}
-                            className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                            className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                         >
                             {isExporting ? (
                                 <><Loading className="mr-2" /> Processing...</>
@@ -137,12 +138,11 @@ export default function StockReport() {
                     </AdminGate>
                 </div>
 
-                {/* 2. PRECISION TOOLBAR */}
                 <div className="flex flex-col lg:flex-row gap-3">
                     {/* Search Field */}
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
@@ -150,7 +150,7 @@ export default function StockReport() {
                             placeholder="Filter stock by name or SKU..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300"
+                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-brand-500 transition-all shadow-none placeholder:text-slate-300"
                         />
                     </div>
 
@@ -160,16 +160,17 @@ export default function StockReport() {
                             <Filter size={12} className="text-slate-400" strokeWidth={3} />
                         </div>
                         <select
+                            aria-label="Stock level"
                             value={stockLevel}
                             onChange={(e) => {
-                                setStockLevel(e.target.value);
+                                setSearchParams(e.target.value ? { level: e.target.value } : {}, { replace: true });
                                 setPagination((previous) => ({ ...previous, pageIndex: 0 }));
                             }}
-                            className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-blue-500 appearance-none cursor-pointer transition-all"
+                            className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-brand-500 appearance-none cursor-pointer transition-all"
                         >
-                            <option value="All Levels">All Levels</option>
-                            <option value="low">Low Stock Warning</option>
-                            <option value="healthy">Healthy Inventory</option>
+                            <option value="">All Levels</option>
+                            <option value="low">Low Stock</option>
+                            <option value="healthy">Healthy Stock</option>
                             <option value="out">Out of Stock</option>
                         </select>
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
@@ -198,7 +199,7 @@ export default function StockReport() {
                         pagination.pageSize,
                         debouncedSearch,
                         undefined,
-                        stockLevel === "All Levels" ? "" : stockLevel,
+                        stockLevel,
                     )}
                 />}
             </div>

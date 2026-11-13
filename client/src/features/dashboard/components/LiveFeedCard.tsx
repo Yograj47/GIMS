@@ -17,7 +17,7 @@ export default function LiveFeedCard({ logs, onViewAll }: LiveFeedProps) {
                 <Button
                     onClick={onViewAll}
                     variant="ghost"
-                    className="h-7 text-[9px] font-black text-blue-600 hover:bg-blue-50 px-3 uppercase tracking-widest border border-blue-300"
+                    className="h-7 text-[9px] font-black text-brand-600 hover:bg-brand-50 px-3 uppercase tracking-widest border border-brand-300"
                 >
                     View Logs
                 </Button>
@@ -31,7 +31,7 @@ export default function LiveFeedCard({ logs, onViewAll }: LiveFeedProps) {
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
                                         "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
-                                        type === 'IN' ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
+                                        type === 'IN' ? "bg-brand-50 text-brand-600" : "bg-emerald-50 text-emerald-600"
                                     )}>
                                         {type === 'IN' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
                                     </div>

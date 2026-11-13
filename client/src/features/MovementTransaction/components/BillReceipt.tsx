@@ -34,9 +34,9 @@ export const BillReceipt = ({ txn, invoice }: { txn: TransactionData; invoice?: 
         <tbody className="divide-y divide-dotted">
           {txn.items.map((item, idx) => (
             <tr key={idx} className="py-2">
-              <td className="py-1 uppercase font-medium">{invoice?.items[idx]?.productName ?? item.product?.name ?? item.productName ?? item.productId}</td>
-              <td className="py-1 text-center">{invoice?.items[idx]?.quantity ?? item.qty}</td>
-              <td className="py-1 text-right">{invoice ? formatInvoiceMoney(invoice.items[idx]?.totalMinor ?? 0, invoice.currency) : `Rs. ${item.total}`}</td>
+              <td className="py-2 pr-2 break-words font-medium">{invoice?.items[idx]?.productName ?? item.product?.name ?? item.productName ?? item.productId}</td>
+              <td className="whitespace-nowrap px-1 py-2 text-center tabular-nums">{invoice?.items[idx]?.quantity ?? item.qty}</td>
+              <td className="whitespace-nowrap py-2 text-right tabular-nums">{invoice ? formatInvoiceMoney(invoice.items[idx]?.totalMinor ?? 0, invoice.currency) : `Rs. ${item.total}`}</td>
             </tr>
           ))}
         </tbody>

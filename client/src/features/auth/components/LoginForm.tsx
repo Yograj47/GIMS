@@ -27,7 +27,7 @@ function LoginForm() {
           Email Address
         </label>
         <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-600 group-focus-within:text-blue-500 transition-colors">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-600 group-focus-within:text-brand-500 transition-colors">
             <Mail size={18} />
           </div>
           <input
@@ -35,10 +35,10 @@ function LoginForm() {
             type="email"
             {...register("email")}
             placeholder="admin@grocerypro.com"
-            className={`w-full rounded-xl border pl-11 pr-4 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 
+            className={`w-full rounded-xl border pl-11 pr-4 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-brand-500/10
           ${errors.email
                 ? 'border-red-500/50 bg-red-500/5 text-red-200'
-                : 'border-white/5 bg-slate-950/40 text-slate-200 focus:border-blue-500/50 focus:bg-slate-950/60'}`}
+                : 'border-white/5 bg-slate-950/40 text-slate-200 focus:border-brand-500/50 focus:bg-slate-950/60'}`}
           />
         </div>
         {errors.email && <p className="text-[11px] font-bold text-red-400 ml-1">{errors.email.message}</p>}
@@ -50,13 +50,13 @@ function LoginForm() {
           <label htmlFor="password" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
             Password
           </label>
-          <button onClick={() => window.location.href = "/forget-password"} type="button" className="text-[11px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest">
+          <button onClick={() => window.location.href = "/forget-password"} type="button" className="text-[11px] font-bold text-brand-500 hover:text-brand-400 uppercase tracking-widest">
             Forgot?
           </button>
         </div>
 
         <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-600 group-focus-within:text-blue-500 transition-colors">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-600 group-focus-within:text-brand-500 transition-colors">
             <Lock size={18} />
           </div>
           <input
@@ -64,10 +64,10 @@ function LoginForm() {
             type={isPasswordVisible ? "text" : "password"}
             {...register("password")}
             placeholder="••••••••"
-            className={`w-full rounded-xl border pl-11 pr-11 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 
+            className={`w-full rounded-xl border pl-11 pr-11 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-brand-500/10
           ${errors.password
                 ? 'border-red-500/50 bg-red-500/5 text-red-200'
-                : 'border-white/5 bg-slate-950/40 text-slate-200 focus:border-blue-500/50 focus:bg-slate-950/60'}`}
+                : 'border-white/5 bg-slate-950/40 text-slate-200 focus:border-brand-500/50 focus:bg-slate-950/60'}`}
           />
           <button
             type="button"
@@ -83,7 +83,7 @@ function LoginForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full h-12 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 rounded-xl mt-4 active:scale-95 transition-all"
+        className="w-full h-12 text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-900/20 rounded-xl mt-4 active:scale-95 transition-all"
       >
         {isLoading ? (
           <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Securing Session...</>

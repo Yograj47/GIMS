@@ -1,152 +1,76 @@
-import { Suspense, useState, useEffect } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Suspense } from "react";
+import { ArrowLeft, Box, Calculator, LayoutGrid, Ruler, Settings2, Store } from "lucide-react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
-import {
-  ArrowLeft, Store, LayoutGrid, Ruler, Calculator, ShieldCheck, Settings2
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const sections = [
+    { title: "Store", links: [{ label: "General", to: "/settings", icon: Store }] },
+    { title: "Inventory", links: [
+        { label: "Categories", to: "/settings/categories", icon: LayoutGrid },
+        { label: "Measurement units", to: "/settings/units", icon: Ruler },
+        { label: "Product units", to: "/settings/uoms", icon: Calculator },
+    ] },
+];
+
+function SectionLinks({ mobile = false }: { mobile?: boolean }) {
+    return sections.map(({ title, links }) => (
+        <div key={title} className={mobile ? "contents" : "space-y-1"}>
+            {!mobile && <h2 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h2>}
+            {links.map(({ label, to, icon: Icon }) => (
+                <NavLink key={to} to={to} end
+                    className={({ isActive }) => cn(
+                        "flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-brand-600",
+                        mobile && "shrink-0 whitespace-nowrap",
+                        isActive ? "bg-brand-100 text-brand-700" : "text-slate-600 hover:bg-white hover:text-slate-950",
+                    )}>
+                    <Icon size={17} className="shrink-0" aria-hidden="true" />
+                    {label}
+                </NavLink>
+            ))}
+        </div>
+    ));
+}
+
 export default function SettingsLayout() {
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
+    const { pathname } = useLocation();
 
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w < 768) setScreen("mobile");
-      else if (w < 1024) setScreen("tablet");
-      else setScreen("desktop");
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  const collapsed = screen === "desktop" ? !sidebarOpen : true;
-  const { pathname } = useLocation();
-  const loadingLayout = pathname === "/settings" ? "form" : "table";
-
-  const menuItems = [
-    { id: "general", label: "General Registry", path: "/settings", icon: Store, exact: true },
-    { id: "categories", label: "Category Management", path: "/settings/categories", icon: LayoutGrid },
-    { id: "units", label: "Measurement Units", path: "/settings/units", icon: Ruler },
-    { id: "uoms", label: "UOM Matrix", path: "/settings/uoms", icon: Calculator },
-  ];
-
-  return (
-    <div className="flex h-screen w-full bg-[#f1f1f1] overflow-hidden font-sans antialiased text-slate-900">
-
-      {/* 1. SETTINGS SIDEBAR  */}
-      <aside
-        className={cn(
-          "no-print fixed inset-y-0 left-0 z-60 bg-white border-r border-slate-200 transition-all duration-500 ease-in-out flex flex-col",
-          collapsed ? "w-20" : "w-64",
-          screen === "mobile" && (sidebarOpen ? "translate-x-0" : "-translate-x-full")
-        )}
-      >
-        {/* Back to App Header */}
-        <div className="p-6 border-b border-slate-200">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 text-slate-600 hover:text-blue-600 transition-colors group"
-          >
-            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-              <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+    return (
+        <div className="min-h-dvh bg-white text-slate-900 md:grid md:grid-cols-[11rem_minmax(0,1fr)] lg:grid-cols-[4.25rem_12rem_minmax(0,1fr)] xl:grid-cols-[4.25rem_14rem_minmax(0,1fr)] print:block">
+            <aside aria-label="Workspace shortcuts" className="no-print sticky top-0 hidden h-dvh flex-col items-center gap-3 self-start border-r border-slate-200 bg-market-paper py-4 lg:flex">
+                <Link to="/dashboard" aria-label="Back to dashboard" title="Back to dashboard" className="grid size-11 place-items-center rounded-xl bg-market-yellow text-brand-700 hover:bg-brand-100">
+                    <Box size={22} aria-hidden="true" />
+                </Link>
+                <div className="h-px w-8 bg-slate-200" />
+                <Link to="/settings" aria-label="General settings" title="General settings" className="grid size-11 place-items-center rounded-xl bg-brand-600 text-white hover:bg-brand-700">
+                    <Settings2 size={20} aria-hidden="true" />
+                </Link>
+            </aside>
+            <aside className="no-print sticky top-0 hidden h-dvh self-start overflow-y-auto border-r border-slate-200 bg-slate-50 px-3 py-5 md:block">
+                <Link to="/dashboard" className="mb-7 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-brand-700 hover:bg-white lg:hidden">
+                    <ArrowLeft size={17} aria-hidden="true" /> Dashboard
+                </Link>
+                <nav aria-label="Settings sections" className="space-y-6"><SectionLinks /></nav>
+            </aside>
+            <div className="min-w-0">
+                <header className="no-print sticky top-0 z-40 border-b border-slate-200 bg-white">
+                    <div className="flex min-h-16 items-center gap-3 px-3 sm:px-6 xl:px-8">
+                        <Link to="/dashboard" aria-label="Back to dashboard" className="grid size-11 shrink-0 place-items-center rounded-lg text-brand-700 hover:bg-brand-50 md:hidden">
+                            <ArrowLeft size={20} aria-hidden="true" />
+                        </Link>
+                        <Settings2 size={20} aria-hidden="true" className="hidden text-brand-600 md:block" />
+                        <p className="text-lg font-semibold">Settings</p>
+                    </div>
+                    <nav aria-label="Settings sections" className="flex gap-1 overflow-x-auto bg-slate-50 px-3 py-1.5 md:hidden">
+                        <SectionLinks mobile />
+                    </nav>
+                </header>
+                <main className="workspace-content mx-auto w-full min-w-0 max-w-[82rem] px-3 py-4 sm:px-6 sm:py-6 xl:px-8">
+                    <Suspense key={pathname} fallback={<LoadingSkeleton layout={pathname === "/settings" ? "form" : "table"} />}>
+                        <Outlet />
+                    </Suspense>
+                </main>
             </div>
-            {!collapsed && (
-              <span className="text-[10px] font-black uppercase tracking-widest">Exit Settings</span>
-            )}
-          </button>
         </div>
-
-        {/* Nav Nodes */}
-        <nav className="flex-1 px-3 py-6 space-y-1">
-          {!collapsed && (
-            <p className="px-4 mb-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Configuration</p>
-          )}
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                end={item.exact}
-                className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-3 rounded-sm text-[12px] font-bold transition-all group",
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                )}
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon size={18} strokeWidth={isActive ? 3 : 2} className="shrink-0" />
-                    {!collapsed && <span className="uppercase tracking-tight">{item.label}</span>}
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        {/* Admin Status Footer */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-          <div className={cn(
-            "flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-sm shadow-sm",
-            collapsed && "justify-center px-0"
-          )}>
-            <div className="w-8 h-8 rounded-sm bg-slate-900 flex items-center justify-center text-white shrink-0">
-              <ShieldCheck size={16} />
-            </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <p className="text-[10px] font-black text-slate-900 uppercase truncate">Primary Admin</p>
-                <p className="text-[8px] font-bold text-emerald-500 uppercase tracking-tighter">Verified Access</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. MAIN CONTENT AREA */}
-      <div
-        className={cn(
-          "flex flex-col flex-1 min-w-0 transition-all duration-500 ease-in-out",
-          collapsed ? "ml-20" : "ml-64",
-          screen === "mobile" && "ml-0"
-        )}
-      >
-        {/* Sub-Header (Settings Title Bar) */}
-        <header className="no-print h-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between px-8">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm">
-              <Settings2 size={18} />
-            </div>
-            <div>
-              <h1 className="text-lg font-black text-slate-900 tracking-tighter uppercase leading-none">
-                System Configuration<span className="text-blue-600">.</span>
-              </h1>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Audit Mode Active</p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-slate-100 rounded-sm transition-colors text-slate-400"
-          >
-            <LayoutGrid size={18} />
-          </button>
-        </header>
-
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Suspense key={pathname} fallback={<LoadingSkeleton layout={loadingLayout} />}>
-                <Outlet />
-            </Suspense>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+    );
 }

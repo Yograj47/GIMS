@@ -50,7 +50,7 @@ export default function UserManagement() {
                 {/* 1. PRECISION HEADER (Stock Report Style) */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
                     <div className="flex items-center gap-4">
-                        <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm">
+                        <div className="p-2 bg-brand-600 rounded-sm text-white shadow-sm">
                             <ShieldCheck size={20} />
                         </div>
                         <div>
@@ -58,7 +58,7 @@ export default function UserManagement() {
                                 Access Control
                             </h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Personnel Authorization • <span className="text-blue-600 italic">Audit Mode</span>
+                                Personnel Authorization • <span className="text-brand-600 italic">Audit Mode</span>
                             </p>
                         </div>
                     </div>
@@ -72,9 +72,9 @@ export default function UserManagement() {
                 </div>
 
                 {/* 2. PRECISION TABLE CONTAINER */}
-                <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-hidden min-h-100">
+                <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-x-auto min-h-100">
                     {isLoading && <span role="status" className="sr-only">Loading users</span>}
-                    <table aria-busy={isLoading} className="w-full text-left border-collapse">
+                    <table aria-label="Users" aria-busy={isLoading} className="records-table w-full text-left border-collapse">
                         <thead className="bg-slate-50/50 border-b border-slate-200">
                             <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                                 <th className="px-6 py-4">Personnel / Identifier</th>

@@ -106,7 +106,7 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
 
     return (
         <div className="mx-auto max-w-5xl space-y-5">
-            <Link to={`/suppliers/v/${supplierId}`} className="text-sm text-blue-700">Back to supplier</Link>
+            <Link to={`/suppliers/v/${supplierId}`} className="text-sm text-brand-700">Back to supplier</Link>
             <h1 className="text-xl font-bold">Supplier billing</h1>
             {message && <p role="status" className="text-sm text-emerald-700">{message}</p>}
             {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
@@ -121,9 +121,14 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
                                     {receipts.map((receipt) => <option key={receipt._id} value={receipt._id}>{receipt.deliveryReference || receipt._id.slice(-8)} · {new Date(receipt.createdAt).toLocaleDateString()}</option>)}
                                 </select>
                             </label>
-                            <label className="grid gap-1 text-sm">Supplier invoice number<input className={field} name="number" maxLength={120} required /></label>
+                            <label className="grid gap-1 text-sm">Supplier invoice number
+                                <input className={field} name="number" placeholder="e.g. INV-1042" aria-describedby="supplier-invoice-number-help" maxLength={120} required />
+                            </label>
                             <Button type="submit" disabled={busy || receipts.length === 0}>Post bill</Button>
                         </div>
+                        <p id="supplier-invoice-number-help" className="text-sm text-slate-600">
+                            Copy the invoice or bill number printed on the supplier’s invoice for this delivery.
+                        </p>
                         {pageControls(receiptPage, totals.receipts, setReceiptPage, "Receipt pages")}
                     </form>
                     <section className="space-y-3 rounded-lg border bg-white p-5">

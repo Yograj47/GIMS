@@ -15,7 +15,7 @@ export function LoadingSkeleton({
             <span className="sr-only">{label}</span>
             <div aria-hidden="true" className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-200 pb-5">
-                    <Skeleton className="size-10 shrink-0 rounded-lg bg-blue-100" />
+                    <Skeleton className="size-10 shrink-0 rounded-lg bg-brand-100" />
                     <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-36 max-w-full" />
                         <Skeleton className="h-2.5 w-52 max-w-full" />
@@ -66,15 +66,15 @@ export function LoadingSkeleton({
 
 export function StartupSkeleton({ label = "Loading GroceryPro" }: { label?: string }) {
     return (
-        <div role="status" className="grid min-h-dvh place-items-center bg-[#0f172a] px-5 py-8">
+        <div role="status" className="grid min-h-dvh place-items-center bg-brand-950 px-5 py-8">
             <span className="sr-only">{label}</span>
             <div aria-hidden="true" className="w-full max-w-sm">
                 <div className="mb-7 flex items-center justify-center gap-3">
-                    <span className="grid size-11 place-items-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-950/50">
+                    <span className="grid size-11 place-items-center rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-950/50">
                         <Box className="size-6" />
                     </span>
                     <span className="text-xl font-bold tracking-tight text-white">
-                        Grocery<span className="text-blue-400">Pro</span>
+                        Grocery<span className="text-brand-400">Pro</span>
                     </span>
                 </div>
                 <AuthPlaceholder />
@@ -90,7 +90,7 @@ function AuthPlaceholder() {
             <Skeleton className="h-3 w-3/5 bg-slate-700" />
             <Skeleton className="mt-6 h-9 w-full bg-slate-700" />
             <Skeleton className="h-9 w-full bg-slate-700" />
-            <Skeleton className="h-9 w-full bg-blue-900/70" />
+            <Skeleton className="h-9 w-full bg-brand-900/70" />
         </div>
     );
 }

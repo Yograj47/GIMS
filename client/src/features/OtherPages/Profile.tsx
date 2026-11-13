@@ -88,14 +88,14 @@ export default function ProfilePage() {
                             <div className="w-24 h-24 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 text-3xl font-black overflow-hidden">
                                 {user?.name ? user.name[0] : 'U'}
                             </div>
-                            <button className="absolute -bottom-1 -right-1 p-2 bg-slate-600 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all border-2 border-white">
+                            <button className="absolute -bottom-1 -right-1 p-2 bg-slate-600 text-white rounded-full shadow-lg hover:bg-brand-600 transition-all border-2 border-white">
                                 <Camera size={14} />
                             </button>
                         </div>
                         <div>
                             <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{user?.name}</h1>
                             <div className="flex items-center gap-3 mt-3">
-                                <span className="px-2.5 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md">
+                                <span className="px-2.5 py-1 bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md">
                                     {user?.role}
                                 </span>
                                 <span className="text-slate-500 font-bold text-sm tracking-tight">{user?.email}</span>
@@ -118,7 +118,7 @@ export default function ProfilePage() {
                                 <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Identity Details</h3>
                                 <button
                                     onClick={handleToggleEdit}
-                                    className="text-xs font-black text-blue-600 uppercase tracking-widest hover:underline decoration-2"
+                                    className="text-xs font-black text-brand-600 uppercase tracking-widest hover:underline decoration-2"
                                 >
                                     {isEditing ? "Discard Changes" : "Edit Profile"}
                                 </button>
@@ -130,7 +130,7 @@ export default function ProfilePage() {
                             </div>
 
                             {isEditing && (
-                                <button onClick={handleProfileUpdate} disabled={isLoading} className="mt-10 px-8 py-4 bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-60">
+                                <button onClick={handleProfileUpdate} disabled={isLoading} className="mt-10 px-8 py-4 bg-brand-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-brand-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-60">
                                     {isLoading ? "Saving…" : "Save Changes"}
                                 </button>
                             )}
@@ -165,8 +165,8 @@ export default function ProfilePage() {
                             <div className="space-y-5">
                                 {currentAccess?.permissions.map((perm) => (
                                     <div key={perm} className="flex items-center gap-4 group">
-                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                                            <CheckCircle2 size={14} className="text-blue-400" />
+                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-700/20 transition-colors">
+                                            <CheckCircle2 size={14} className="text-brand-400" />
                                         </div>
                                         <span className="text-[11px] font-bold text-slate-200 uppercase tracking-tighter">{perm}</span>
                                     </div>

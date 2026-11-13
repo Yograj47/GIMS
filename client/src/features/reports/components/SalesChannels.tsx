@@ -35,10 +35,10 @@ export function SalesChannels() {
                     {data.products.length > 0 && <details>
                         <summary className="cursor-pointer text-sm font-semibold">Top products by channel</summary>
                         <div className="overflow-x-auto">
-                            <table className="mt-2 w-full text-left text-sm">
-                                <thead><tr><th className="p-2">Product</th><th className="p-2">Channel</th><th className="p-2 text-right">Base units sold</th><th className="p-2 text-right">Sales</th></tr></thead>
+                            <table className="records-table mt-2 w-full text-left text-sm">
+                                <thead><tr><th className="p-2">Product</th><th className="p-2">Channel</th><th className="whitespace-nowrap p-2 text-right">Base units sold</th><th className="whitespace-nowrap p-2 text-right">Sales</th></tr></thead>
                                 <tbody className="divide-y">{data.products.map((row) => (
-                                    <tr key={`${row._id.productId}:${row._id.channel}`}><td className="p-2">{row.name ?? row._id.productId}</td><td className="p-2">{label[row._id.channel]}</td><td className="p-2 text-right">{row.baseQuantity.toLocaleString()}</td><td className="p-2 text-right">{money.format(row.revenue)}</td></tr>
+                                    <tr data-record key={`${row._id.productId}:${row._id.channel}`}><td className="p-2">{row.name ?? row._id.productId}</td><td className="p-2">{label[row._id.channel]}</td><td className="whitespace-nowrap p-2 text-right">{row.baseQuantity.toLocaleString()}</td><td className="whitespace-nowrap p-2 text-right">{money.format(row.revenue)}</td></tr>
                                 ))}</tbody>
                             </table>
                         </div>

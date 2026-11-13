@@ -74,13 +74,13 @@ export default function Transaction() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-blue-600 group"
+                            className="text-slate-500 hover:text-brand-600 group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
-                        <div className="p-2 bg-indigo-600 rounded-sm text-white">
+                        <div className="p-2 bg-brand-600 rounded-sm text-white">
                             <History size={20} />
                         </div>
                         <div>
@@ -88,7 +88,7 @@ export default function Transaction() {
                                 Transaction List
                             </h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Financial History • <span className="text-indigo-600 italic">Audit Mode</span>
+                                Financial History • <span className="text-brand-600 italic">Audit Mode</span>
                             </p>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ export default function Transaction() {
                         <Button
                             onClick={handleExport}
                             disabled={IsExporting}
-                            className="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                            className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                         >
                             {IsExporting ? <><Loading className="mr-2" /> Processing...</> : <><Download size={14} className="mr-2" /> Export CSV</>}
                         </Button>
@@ -112,7 +112,7 @@ export default function Transaction() {
                             placeholder="Search by Party, Notes..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-indigo-500 shadow-none"
+                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-brand-500 shadow-none"
                         />
                     </div>
 

@@ -11,7 +11,7 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
         header: "Product / Identifier",
         cell: ({ row }) => (
             <div className="flex items-center gap-3 py-1">
-                <div className="w-8 h-8 rounded-sm bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm">
                     <Package size={14} />
                 </div>
                 <div className="flex flex-col">
@@ -40,17 +40,21 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
         cell: ({ row }) => {
             const qty = row.getValue("quantity") as number;
             const threshold = row.original.threshold;
-            const isLow = qty <= threshold;
+            const isOut = qty <= 0;
+            const isLow = !isOut && qty <= threshold;
 
             return (
                 <div className="flex items-center gap-3 tabular-nums">
                     <span className={cn(
                         "text-[13px] font-bold px-2 py-0.5 rounded",
-                        isLow ? "text-rose-700 bg-rose-50" : "text-emerald-700 bg-emerald-50"
+                        isOut ? "text-rose-700 bg-rose-50" : isLow ? "text-amber-800 bg-amber-50" : "text-emerald-700 bg-emerald-50"
                     )}>
-                        {qty} <span className="text-[9px] uppercase font-black opacity-60 ml-1">{row.original.unit?.shortForm}</span>
+                        {qty} <span className="text-[9px] uppercase font-black opacity-60 ml-1">{row.original.baseUnit?.shortForm ?? row.original.unit?.shortForm}</span>
                     </span>
                     <div className="flex flex-col border-l border-slate-100 pl-3">
+                        <span className="text-xs font-medium text-slate-700">
+                            {isOut ? "Out of stock" : isLow ? "Low stock" : "Healthy"}
+                        </span>
                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                             Threshold: {threshold}
                         </span>
@@ -66,7 +70,7 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
             <div className="flex justify-end">
                 <Button 
                     variant="ghost" 
-                    className="h-8 px-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-blue-100"
+                    className="h-8 px-3 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
                     onClick={() => navigate(`/reports/stock/product-history/${row.original._id}`)}
                 >
                     <History size={12} strokeWidth={3} />

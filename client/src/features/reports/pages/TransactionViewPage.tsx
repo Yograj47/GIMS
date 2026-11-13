@@ -85,14 +85,14 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
         <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500 text-slate-900">
             {/* 1. COMMAND STRIP HEADER */}
             <div className="no-print space-y-6">
-                <div className="flex justify-between items-center rounded-lg bg-white h-14 px-4 border border-slate-300 ">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:px-4">
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"
                             onClick={() => navigate(-1)}
-                            className="h-9 px-0 hover:bg-transparent text-slate-400 hover:text-blue-600 transition-colors"
+                            className="h-9 px-0 hover:bg-transparent text-slate-400 hover:text-brand-600 transition-colors"
                         >
-                            <ArrowLeft size={18} />
+                            <ArrowLeft size={18} aria-hidden="true" />
                         </Button>
                         <div className="h-6 w-px bg-slate-100" />
                         <div className="flex flex-col">
@@ -101,13 +101,13 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         <Button variant="outline" onClick={() => window.print()} className="h-9 rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider border-slate-300 text-slate-600 hover:bg-slate-50 transition-all">
-                            <Printer size={14} className="text-blue-600" /> {invoice ? "Print invoice" : "Print receipt"}
+                            <Printer size={14} className="text-brand-600" /> {invoice ? "Print invoice" : "Print receipt"}
                         </Button>
 
                         {txn.transactionType !== "Sale" && (!isEditing ? (
-                            <Button onClick={() => setIsEditing(true)} className="h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider shadow-sm transition-all">
+                            <Button onClick={() => setIsEditing(true)} className="h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider shadow-sm transition-all">
                                 <Edit2 size={14} /> Edit Status
                             </Button>
                         ) : (
@@ -115,7 +115,7 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                                 <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-9 text-rose-500 font-bold text-[11px] uppercase tracking-wider hover:bg-rose-50  hover:text-rose-600 rounded-xl">
                                     Cancel
                                 </Button>
-                                <Button onClick={handleUpdate} className="h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider shadow-md transition-all">
+                                <Button onClick={handleUpdate} className="h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider shadow-md transition-all">
                                     <Save size={14} /> Commit Changes
                                 </Button>
                             </div>
@@ -123,20 +123,24 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                     </div>
                 </div>
 
+                {manageBilling && (
+                    <SaleBilling saleId={txn._id} wasPaid={txn.isPaid} invoice={invoice} onInvoice={setInvoice} />
+                )}
+
                 {/* 2. THE AUDIT CARD */}
                 <div className="bg-white border border-slate-300 rounded-lg shadow-sm overflow-hidden">
                     {/* Brand Header */}
                     <div className="p-8 bg-slate-50/40 border-b border-slate-100 flex justify-between items-end">
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-100">
+                                <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-100">
                                     <Receipt size={24} />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Transaction Voucher</h2>
                                         <Badge className={cn("px-2 py-0.5 rounded-lg border-none font-black text-[9px] uppercase tracking-widest",
-                                            txn.transactionType === 'Sale' ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700")}>
+                                            txn.transactionType === 'Sale' ? "bg-brand-100 text-brand-700" : "bg-emerald-100 text-emerald-700")}>
                                             {txn.transactionType}
                                         </Badge>
                                     </div>
@@ -148,7 +152,7 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                                 <div className="space-y-1">
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Issuance Date</p>
                                     <p className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase">
-                                        <Calendar size={12} className="text-blue-600" />
+                                        <Calendar size={12} className="text-brand-600" />
                                         {new Date(txn.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     </p>
                                 </div>
@@ -156,7 +160,7 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                                 <div className="space-y-1">
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Party / Entity</p>
                                     <p className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase">
-                                        <User size={12} className="text-blue-600" />
+                                        <User size={12} className="text-brand-600" />
                                         {txn.partyDetails?.name || "Walking Customer"}
                                     </p>
                                 </div>
@@ -211,7 +215,7 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                                 <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
-                                    className="w-full h-20 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-medium focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-300"
+                                    className="w-full h-20 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-medium focus:ring-1 focus:ring-brand-500 outline-none transition-all placeholder:text-slate-300"
                                     placeholder="Internal auditing notes..."
                                 />
                             ) : (
@@ -223,37 +227,37 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                     </div>
 
                     {/* 4. ITEMIZATION TABLE */}
-                    <div className="px-8 pb-10">
-                        <div className="border border-slate-300 overflow-hidden shadow-sm">
-                            <table className="w-full">
+                    <div className="px-3 pb-6 sm:px-8 sm:pb-10">
+                        <div className="overflow-x-auto rounded-lg border border-slate-200">
+                            <table aria-label="Transaction items" className="records-table w-full text-sm">
                                 <thead>
-                                    <tr className="bg-slate-600 text-[12px] font-black text-white uppercase tracking-[0.25em]">
-                                        <th className="px-6 py-4 text-left">Description</th>
-                                        <th className="px-6 py-4 text-center">Qty / Unit</th>
-                                        <th className="px-6 py-4 text-center">Price</th>
-                                        <th className="px-6 py-4 text-right">Line Total</th>
+                                    <tr className="bg-slate-50 text-xs font-semibold text-slate-700">
+                                        <th className="px-3 py-3 sm:px-5 text-left">Description</th>
+                                        <th className="px-3 py-3 sm:px-5 text-center">Qty / Unit</th>
+                                        <th className="px-3 py-3 sm:px-5 text-center">Price</th>
+                                        <th className="px-3 py-3 sm:px-5 text-right">Line Total</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {txn.items?.map((item: Item, idx: number) => (
-                                        <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
-                                            <td className="px-6 py-4">
+                                        <tr key={idx} data-record className="hover:bg-slate-50/30 transition-colors">
+                                            <td className="px-3 py-3 sm:px-5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-lg bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100">
-                                                        <Package size={14} className="text-blue-600" />
+                                                        <Package size={14} className="text-brand-600" />
                                                     </div>
-                                                    <span className="font-black text-slate-800 text-xs uppercase tracking-tight">{item.productName}</span>
+                                                    <span className="text-sm font-semibold text-slate-900">{item.productName}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-3 py-3 sm:px-5 text-center">
                                                 <span className="text-[11px] font-black text-slate-700">
                                                     {item.qty} <span className="text-[9px] text-slate-400 ml-0.5 uppercase">{item.unitName?.slice(0,2) || item.unitName}</span>
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-3 py-3 sm:px-5 text-center">
                                                 <span className="text-[11px] font-bold text-slate-400 italic">Rs. {item.rate?.toLocaleString()}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-3 py-3 sm:px-5 text-right">
                                                 <span className="text-xs font-black text-slate-900 tabular-nums uppercase">
                                                     {invoice?.items[idx] ? formatInvoiceMoney(invoice.items[idx].totalMinor, invoice.currency) : `Rs. ${item.total?.toLocaleString()}`}
                                                 </span>
@@ -266,10 +270,6 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                     </div>
                 </div>
             </div>
-
-            {manageBilling && (
-                <SaleBilling saleId={txn._id} wasPaid={txn.isPaid} invoice={invoice} onInvoice={setInvoice} />
-            )}
             <BillReceipt txn={txn} invoice={invoice} />
         </div>
     );

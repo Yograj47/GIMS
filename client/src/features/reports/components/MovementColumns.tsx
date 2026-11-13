@@ -23,7 +23,7 @@ export const getMovementColumns: ColumnDef<MovementData>[] = [
         header: "Inventory / Reason",
         cell: ({ row }) => (
             <div className="flex items-center gap-3 py-1">
-                <div className="w-8 h-8 rounded-sm bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm">
                     <Package size={14} />
                 </div>
                 <div className="flex flex-col">
@@ -74,7 +74,7 @@ export const getMovementColumns: ColumnDef<MovementData>[] = [
                 <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">
                     {row.original.performedBy?.name || "System"}
                 </span>
-                <div className="w-6 h-6 rounded-sm bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                <div className="w-6 h-6 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm">
                     <User size={12} strokeWidth={2.5} />
                 </div>
             </div>

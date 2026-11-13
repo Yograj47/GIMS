@@ -13,15 +13,17 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
         cell: ({ row }) => (
             <div className="flex justify-center">
                 <button
+                    aria-expanded={row.getIsExpanded()}
+                    aria-label={`${row.getIsExpanded() ? "Hide" : "Show"} conversions for ${row.original.productName}`}
                     onClick={(e) => {
                         e.stopPropagation();
                         row.toggleExpanded();
                     }}
-                    className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 transition-all active:scale-90"
+                    className="grid size-9 place-items-center rounded-md text-slate-600 hover:bg-brand-100 focus-visible:outline-2 focus-visible:outline-brand-600"
                     type="button"
                 >
                     {row.getIsExpanded() ? (
-                        <ChevronDown size={18} className="text-blue-600" />
+                        <ChevronDown size={18} className="text-brand-600" />
                     ) : (
                         <ChevronRight size={18} />
                     )}
@@ -86,7 +88,7 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
                         onAddUnit(row.original._id, row.original.productName);
                     }}
                     size="sm"
-                    className="h-8 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 transition-all active:scale-95 flex items-center gap-2"
+                    className="h-8 rounded-md bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs px-4 transition-all active:scale-95 flex items-center gap-2"
                 >
                     <Plus size={14} strokeWidth={2.5} />
                     Map Unit

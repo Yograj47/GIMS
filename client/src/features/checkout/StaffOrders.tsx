@@ -37,7 +37,7 @@ export default function StaffOrders() {
 
     return (
         <section className="mx-auto max-w-5xl space-y-4">
-            <Link to="/stock-movements" className="text-sm text-blue-700">Back to stock movements</Link>
+            <Link to="/stock-movements" className="text-sm text-brand-700">Back to stock movements</Link>
             <div className="flex items-center justify-between"><h1 className="text-xl font-bold">Checkout orders</h1><Button variant="outline" onClick={() => setReload(reload + 1)}>Refresh</Button></div>
             {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
             {!orders && !error && <LoadingSkeleton label="Loading checkout orders" />}

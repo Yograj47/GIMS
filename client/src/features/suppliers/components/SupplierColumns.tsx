@@ -2,6 +2,8 @@ import { Edit3, MapPin, Phone } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { SupplierData } from "@/types/supplier";
 import type { NavigateFunction } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { AdminGate } from "@/features/auth/components/AdminGate";
 import { Button } from "@/components/ui/button";
 
 export const getSupplierColumns = (navigate: NavigateFunction): ColumnDef<SupplierData>[] => [
@@ -10,10 +12,12 @@ export const getSupplierColumns = (navigate: NavigateFunction): ColumnDef<Suppli
         header: "Supplier Details",
         cell: ({ row }) => (
             <div className="flex flex-col py-1">
-                <span className="font-bold text-slate-900 text-[13px] leading-tight hover:text-blue-600 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/suppliers/v/${row.original._id}`)}>
+                <Link className="text-sm font-semibold text-brand-700 underline-offset-4 hover:underline"
+                      to={`/suppliers/v/${row.original._id}`}>
                     {row.original.name}
-                </span>
+                </Link>
+                <Link className="mt-1 w-fit text-xs text-slate-600 underline-offset-4 hover:underline"
+                      to={`/suppliers/v/${row.original._id}#receiving`}>Receiving and returns</Link>
                 <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
                     REF · {row.original._id.slice(-6).toUpperCase()}
                 </span>
@@ -25,7 +29,7 @@ export const getSupplierColumns = (navigate: NavigateFunction): ColumnDef<Suppli
         header: "Contact Info",
         cell: ({ row }) => (
             <div className="flex flex-col tabular-nums">
-                <div className="flex items-center gap-1.5 text-blue-600 font-bold text-[12px]">
+                <div className="flex items-center gap-1.5 text-brand-600 font-bold text-[12px]">
                     <Phone size={10} strokeWidth={3} />
                     {row.original.phone}
                 </div>
@@ -65,11 +69,13 @@ export const getSupplierColumns = (navigate: NavigateFunction): ColumnDef<Suppli
         id: "actions",
         header: "",
         cell: ({ row }) => (
-            <div className="flex justify-end">
+            <AdminGate allowedRoles={["owner"]}><div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" asChild><Link to={`/suppliers/v/${row.original._id}/billing`}>Billing</Link></Button>
                 <Button
+                    aria-label={`Edit ${row.original.name}`}
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                    className="h-8 w-8 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"
                     onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/suppliers/edit/${row.original._id}`);
@@ -77,7 +83,7 @@ export const getSupplierColumns = (navigate: NavigateFunction): ColumnDef<Suppli
                 >
                     <Edit3 size={14} />
                 </Button>
-            </div>
+            </div></AdminGate>
         ),
     },
 ];

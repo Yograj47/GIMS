@@ -59,13 +59,13 @@ export default function ActivityLogsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-blue-600 group"
+                            className="text-slate-500 hover:text-brand-600 group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
-                        <div className="p-2 bg-blue-600 rounded-sm text-white">
+                        <div className="p-2 bg-brand-600 rounded-sm text-white">
                             <Info size={20} />
                         </div>
                         <div>
@@ -73,7 +73,7 @@ export default function ActivityLogsPage() {
                                 Activity Logs
                             </h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                System Audit Trail • <span className="text-blue-600 italic">Audit Mode</span>
+                                System Audit Trail • <span className="text-brand-600 italic">Audit Mode</span>
                             </p>
                         </div>
                     </div>
@@ -89,7 +89,7 @@ export default function ActivityLogsPage() {
                     {/* Search Field */}
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-blue-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-brand-600 transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
@@ -98,7 +98,7 @@ export default function ActivityLogsPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1
-                            focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
+                            focus-visible:ring-brand-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
                         />
                     </div>
 
@@ -125,7 +125,7 @@ export default function ActivityLogsPage() {
                         <select
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="w-full h-10 px-4 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-blue-500 appearance-none cursor-pointer transition-all"
+                            className="w-full h-10 px-4 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-brand-500 appearance-none cursor-pointer transition-all"
                         >
                             <option value="">All Modules</option>
                             <option value="INVENTORY">Inventory</option>

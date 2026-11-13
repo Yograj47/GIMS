@@ -102,16 +102,16 @@ export default function Shop() {
     }
 
     return (
-        <div className="min-h-dvh bg-slate-50 text-slate-900">
+        <div className="min-h-dvh bg-market-paper text-slate-900">
             <header className="border-b bg-white">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-                    <Link to="/shop" className="flex items-center gap-2 text-lg font-bold"><Box className="size-5 text-blue-600" /> GroceryPro</Link>
-                    <Link to="/checkout/return" className="text-sm text-blue-700">Order status</Link>
+                    <Link to="/shop" className="flex items-center gap-2 text-lg font-bold"><span className="grid size-9 place-items-center rounded-lg bg-market-yellow"><Box className="size-5 text-brand-600" /></span> GroceryPro</Link>
+                    <Link to="/checkout/return" className="text-sm text-brand-700">Order status</Link>
                 </div>
             </header>
             <main className="mx-auto grid max-w-7xl gap-6 px-5 py-7 lg:grid-cols-[1fr_340px]">
                 <section className="space-y-4">
-                    <h1 className="text-2xl font-bold">Shop groceries</h1>
+                    <h1 className="rounded-lg border-l-4 border-market-orange bg-market-yellow px-5 py-4 text-2xl font-bold">Shop groceries</h1>
                     {notice && <p role="status" className="sr-only">{notice}</p>}
                     {catalog ? (
                         <>
@@ -126,7 +126,7 @@ export default function Shop() {
                     ) : !error && <Skeleton role="status" aria-label="Loading shop" className="h-56 w-full" />}
                 </section>
                 <form onSubmit={checkout} className="h-fit space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-                    <h2 className="text-lg font-bold">Your cart</h2>
+                    <h2 className="border-b-2 border-market-orange/60 pb-3 text-lg font-bold">Your cart</h2>
                     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
                     {cart.length === 0 ? <p className="text-sm text-slate-600">Add an item to get started.</p> : (
                         <>

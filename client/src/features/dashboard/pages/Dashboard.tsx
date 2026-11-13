@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
-import { Package, AlertCircle, Activity, Plus, ArrowUpRight, Truck, CheckCircle2, LayoutDashboard } from "lucide-react";
+import { Package, AlertCircle, Activity, Plus, ArrowUpRight, Truck, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // Our New Components
@@ -9,6 +9,7 @@ import ActionTile from "../components/ActionTile";
 import ChartSection from "../components/ChartSection";
 import LiveFeedCard from "../components/LiveFeedCard";
 import AlertCard from "../components/AlertCard";
+import { DashboardPageHeader } from "../components/DashboardPageHeader";
 import { useActivityLogs } from "@/features/activityLogs/hooks/useActivityLogs";
 import { chartData, chartOptions } from "@/lib/dashboardCharts";
 import { useAlerts } from "@/features/alerts/hooks/useAlerts";
@@ -66,49 +67,23 @@ export default function Dashboard() {
     if (isInitialLoading) return <LoadingSkeleton layout="dashboard" label="Loading dashboard" />;
 
     return (
-        <div className="h-full space-y-8 animate-in fade-in duration-700">
+        <div className="space-y-5 sm:space-y-7">
 
-            {/* 1. Page Header */}
-            <div className="flex items-center justify-between border-b border-slate-300 pb-8">
-                <div className="flex items-center gap-4">
-                    <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
-                        <LayoutDashboard size={20} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
-                            System Overview
-                        </h1>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
-                            Real-time Inventory Analytics & Control
-                        </p>
-                    </div>
-                </div>
-                <div className="hidden md:block text-right">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Status</p>
-                    <div className="flex items-center gap-2 justify-end mt-1">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-xs font-bold text-slate-700 uppercase">Live Sync</span>
-                    </div>
-                </div>
-            </div>
+            <DashboardPageHeader />
 
             {/* 2. Metrics Row - Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                 <StatCard
                     title="Stock Value"
                     value={summary ? `Rs ${summary.stockValue.toLocaleString()}` : 'Rs 0'}
-                    trend="+5.4% UP"
-                    trendUp={true}
                     icon={<Package size={20} />}
-                    color="text-blue-600"
-                    bgColor="bg-blue-50"
+                    color="text-brand-600"
+                    bgColor="bg-brand-50"
                     desc="Total inventory valuation"
                 />
                 <StatCard
                     title="Low Items"
                     value={summary?.lowItems ?? '0'}
-                    trend="CRITICAL"
-                    trendUp={false}
                     icon={<AlertCircle size={20} />}
                     color="text-rose-600"
                     bgColor="bg-rose-50"
@@ -127,15 +102,15 @@ export default function Dashboard() {
             </div>
 
             {/* 3. Main Body - 3/4 Chart, 1/4 Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12">
+            <div className="grid min-w-0 gap-5 pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(12rem,17rem)]">
                 {/* Primary Analytics Surface */}
-                <div className="lg:col-span-9 space-y-8">
-                    <div className="bg-white border border-slate-300 rounded-sm shadow-sm p-6">
+                <div className="min-w-0 space-y-5">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-6">
                         <ChartSection data={dynamicData} options={chartOptions} />
                     </div>
 
                     {/* Secondary Data Surface */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid gap-4 lg:grid-cols-2">
                         <LiveFeedCard logs={logs} onViewAll={() => navigate('/reports/activity')} />
 
                         {criticalAlert ? (
@@ -155,30 +130,14 @@ export default function Dashboard() {
                 </div>
 
                 {/* Sidebar - Command Center */}
-                <div className="lg:col-span-3">
-                    <div className="sticky top-8 space-y-6">
-                        <div className="border-l-4 border-blue-600 pl-4 py-1">
-                            <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Quick Actions</h3>
-                            <p className="text-[9px] font-bold text-slate-600 uppercase">Command Center</p>
-                        </div>
-
-                        <div className="space-y-3">
-                            <ActionTile icon={<Plus size={18} />} label="New Product" color="bg-blue-600" onClick={() => navigate('/products/add')} />
-                            <ActionTile icon={<ArrowUpRight size={18} />} label="Record Sale" color="bg-emerald-500" onClick={() => navigate('/stock-movements/form?mode=in')} />
-                            <ActionTile icon={<Truck size={18} />} label="Suppliers" color="bg-slate-900" onClick={() => navigate('/suppliers')} />
-                        </div>
-
-                        {/* Dashboard Tip/Info Card */}
-                        <div className="p-6 bg-slate-600 rounded-sm text-white shadow-xl shadow-slate-200 mt-10 relative overflow-hidden">
-                            <h4 className="font-black text-[10px] uppercase tracking-[0.2em] mb-3 text-white">Pro Analysis</h4>
-                            <p className="text-[11px] font-medium text-slate-200 leading-relaxed">
-                                Click on any <span className="text-white font-bold">"Low Items"</span> alert to see detailed movement history and projected depletion dates.
-                            </p>
-                            {/* Decorative background element */}
-                            <div className="absolute -right-4 -top-4 h-16 w-16 bg-gray-400 rounded-full" />
-                        </div>
+                <section className="row-start-1 space-y-3 self-start xl:col-start-2 xl:sticky xl:top-21">
+                    <h2 className="text-sm font-semibold">Quick actions</h2>
+                    <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
+                        {role !== "staff" && <ActionTile icon={<Plus size={18} />} label="New Product" color="bg-brand-600" onClick={() => navigate('/products/add')} />}
+                        {role !== "owner" && <ActionTile icon={<ArrowUpRight size={18} />} label="Record Sale" color="bg-brand-600" onClick={() => navigate('/stock-movements/sale')} />}
+                        <ActionTile icon={<Truck size={18} />} label="Suppliers" color="bg-slate-800" onClick={() => navigate('/suppliers')} />
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     );

@@ -1,15 +1,16 @@
 import api from "@/lib/api";
 import type { ApiResponse } from "@/types/api";
-import type { ProductFormData } from "@/types/product";
+import type { ProductData, ProductFormData } from "@/types/product";
 
 const baseUrl = "/products";
 
 export const productService = {
-    getAll: async (page?: number, limit?: number, search?: string, category?: string, stockLevel?: string, all?: boolean) => {
-        const { data } = await api.get<ApiResponse>(baseUrl, {
+    getAll: async (page?: number, limit?: number, search?: string, category?: string, stockLevel?: string, all?: boolean, sort?: string, signal?: AbortSignal) => {
+        const { data } = await api.get<ApiResponse<ProductData[]>>(baseUrl, {
+            signal,
             params: all
                 ? { paginate: false, search, category, stockLevel }
-                : { page, limit, search, category, stockLevel }
+                : { page, limit, search, category, stockLevel, sort }
         });
         return data;
     },

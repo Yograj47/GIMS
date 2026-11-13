@@ -52,6 +52,7 @@ export const findProducts = asyncHandler(
                     typeof req.query.search === "string" ? req.query.search : "",
                 category: req.query.category,
                 stockLevel: req.query.stockLevel,
+                sort: req.query.sort,
                 paginate:
                     req.query.paginate !==
                     "false",

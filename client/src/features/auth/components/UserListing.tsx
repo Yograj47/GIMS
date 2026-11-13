@@ -14,41 +14,42 @@ interface UserListingProps {
 
 export default function UserListing({ user, isSelf, isProtected, handleRoleChange, openDeleteDialog }: UserListingProps) {
   return (
-    <tr className="group hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
-      <td className="px-6 py-4">
+    <tr data-record className="group hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+      <td className="px-3 py-3 sm:px-5">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-sm bg-blue-600 text-white flex items-center justify-center shadow-sm transition-colors shrink-0">
+          <div className="w-8 h-8 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm transition-colors shrink-0">
             <span className="font-black text-[10px] uppercase">{user.name.charAt(0)}</span>
           </div>
           <div className="flex flex-col">
-            <p className="text-[12px] font-black text-slate-600 uppercase tracking-tight leading-none mb-1">
-              {user.name} {isSelf && <span className="text-blue-600 ml-1 text-[8px] italic tracking-normal">(Self)</span>}
+            <p className="text-sm font-semibold text-slate-900">
+              {user.name} {isSelf && <span className="text-brand-600 ml-1 text-[8px] italic tracking-normal">(Self)</span>}
             </p>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-              UID · {user._id}
+            <p className="text-xs text-slate-600">
+              {user.email}
             </p>
           </div>
         </div>
       </td>
 
-      <td className="px-6 py-4">
+      <td className="px-3 py-3 sm:px-5">
         <Select
-          defaultValue={user.role}
+          value={user.role}
           onValueChange={(value) => handleRoleChange(user._id, value)}
           disabled={isProtected || isSelf}
         >
-          <SelectTrigger className="h-8 w-32 rounded-sm border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-600 focus:ring-1 focus:ring-blue-500 shadow-none transition-all">
+          <SelectTrigger aria-label={`Role for ${user.name}`} className="h-8 w-32 rounded-sm border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-600 focus:ring-1 focus:ring-brand-500 shadow-none transition-all">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="rounded-sm border-slate-200">
             <SelectItem value="admin" className="text-[10px] font-black uppercase tracking-widest">Admin</SelectItem>
             <SelectItem value="owner" className="text-[10px] font-black uppercase tracking-widest">Owner</SelectItem>
             <SelectItem value="staff" className="text-[10px] font-black uppercase tracking-widest">Staff</SelectItem>
+            <SelectItem value="customer">Customer</SelectItem>
           </SelectContent>
         </Select>
       </td>
 
-      <td className="px-6 py-4">
+      <td className="px-3 py-3 sm:px-5">
         <div className="flex justify-center">
           <div className={cn(
             "flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest border tabular-nums",
@@ -62,8 +63,9 @@ export default function UserListing({ user, isSelf, isProtected, handleRoleChang
         </div>
       </td>
 
-      <td className="px-6 py-4 text-right pr-8">
+      <td className="px-3 py-3 sm:px-5 text-right pr-8">
         <Button
+          aria-label={`Delete ${user.name}`}
           onClick={() => openDeleteDialog(user._id, user.name)}
           variant="ghost"
           size="sm"

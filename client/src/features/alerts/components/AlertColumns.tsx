@@ -27,7 +27,7 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
                         </span>
                         <span className={cn(
                             "text-[9px] font-bold uppercase tracking-tight",
-                            isCritical ? "text-rose-600" : "text-blue-600"
+                            isCritical ? "text-rose-600" : "text-brand-600"
                         )}>
                             VAL: {row.original.snapshotValue}
                         </span>

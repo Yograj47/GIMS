@@ -1,26 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Trash2, Loader2, CreditCard, Info, ReceiptText, ShoppingCart, PackagePlus, PackageMinus, Hash } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Trash2, Loader2, ShoppingCart } from "lucide-react";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useFieldArray, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ProductItemModal from "./ProductItemModal";
+import { RegisterCatalog } from "./RegisterCatalog";
+import { formatInvoiceMoney } from "@/types/billing";
 
 import { transactionSchema, type Item, type TransactionFormData } from "@/types/transaction";
 import { useMovementTransactions } from "../hooks/useMovementTransactions";
-import { cn } from "@/lib/utils";
-import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers";
 import api from "@/lib/api";
 import { checkoutPost, checkoutTokenKey, goToPayment } from "@/features/checkout/checkout";
 
-export default function MovementForm() {
+type Purpose = "Sale" | "Return" | "Adjustment";
+const titles = { Sale: "Sales register", Return: "Customer return", Adjustment: "Stock adjustment" };
+
+export default function MovementForm({ purpose }: { purpose?: Purpose }) {
     const [searchParams] = useSearchParams();
-    const mode = searchParams.get('mode') || 'in';
-    const isStockIn = mode === "in";
+    if (!purpose) return <Navigate replace to={searchParams.get("mode") === "out" ? "/stock-movements/sale" : "/stock-movements/purchase"} />;
+    return <MovementRegister key={purpose} purpose={purpose} />;
+}
+
+function MovementRegister({ purpose }: { purpose: Purpose }) {
+    const isStockIn = purpose === "Return";
     const navigate = useNavigate();
-    const { Suppliers, fetchSuppliers } = useSuppliers();
 
     const { fetchTransactions, transactions, createTransaction, isLoading } = useMovementTransactions();
     const [gatewayEnabled, setGatewayEnabled] = useState(false);
@@ -28,10 +33,10 @@ export default function MovementForm() {
     const [checkingOut, setCheckingOut] = useState(false);
     const checkoutRequest = useRef<{ signature: string; token: string } | null>(null);
 
-    const { register, control, handleSubmit, setValue } = useForm<TransactionFormData>({
+    const { register, control, handleSubmit, setValue, getValues, formState: { errors } } = useForm<TransactionFormData>({
         resolver: zodResolver(transactionSchema) as Resolver<TransactionFormData>,
         defaultValues: {
-            transactionType: isStockIn ? 'Purchase' : 'Sale',
+            transactionType: purpose,
             items: [],
             grandTotal: 0,
             isPaid: false,
@@ -43,16 +48,18 @@ export default function MovementForm() {
     const { fields, append, remove } = useFieldArray({ control, name: "items" });
     const currentType = useWatch({ control, name: "transactionType" });
     const watchedItems = useWatch({ control, name: "items" });
-    const isPaid = useWatch({ control, name: "isPaid" });
     const watchedName = useWatch({ control, name: "partyDetails.name" });
 
-    const showSettlement = currentType === "Purchase" || currentType === "Sale";
+    const showSettlement = currentType === "Return" || currentType === "Sale";
     
-    const grandTotal = useMemo(() => {
-        const total = watchedItems.reduce((sum, item) => sum + (item.total || 0), 0);
-        setValue("grandTotal", total);
-        return total;
-    }, [watchedItems, setValue]);
+    const canEditRate = currentType !== "Sale" || checkoutMethod === "credit";
+    const lineRate = (item: Item) => canEditRate ? item.rate : Math.round(item.pricePerBase * item.multiplier * 100) / 100;
+    const lineTotalMinor = (item: Item) => Math.round(item.qty * Math.round(lineRate(item) * 100));
+    const grandTotal = watchedItems.reduce((sum, item) => sum + lineTotalMinor(item), 0) / 100;
+    const usedStock = new Map<string, number>();
+    for (const item of watchedItems) {
+        usedStock.set(item.productId, (usedStock.get(item.productId) ?? 0) + item.baseQuantity);
+    }
 
     const onFormSubmit = async (data: TransactionFormData) => {
         if (data.transactionType === "Sale" && checkoutMethod !== "credit") {
@@ -80,7 +87,12 @@ export default function MovementForm() {
             }
             return;
         }
-        if (data.transactionType === "Sale") data = { ...data, isPaid: false };
+        data = {
+            ...data,
+            grandTotal,
+            items: data.items.map((item) => ({ ...item, total: lineTotalMinor(item) / 100 })),
+            isPaid: data.transactionType === "Sale" ? false : data.isPaid,
+        };
         const success = await createTransaction(data);
         if (success) navigate("/reports/transactions");
     };
@@ -96,12 +108,10 @@ export default function MovementForm() {
     }, [isStockIn]);
 
     useEffect(() => {
-        if (isStockIn) {
-            fetchSuppliers();
-        } else {
+        if (purpose !== "Adjustment") {
             fetchTransactions();
         }
-    }, [isStockIn, fetchTransactions, fetchSuppliers]);
+    }, [purpose, fetchTransactions]);
 
     const pastCustomers = useMemo(() => {
         const customers = transactions
@@ -112,286 +122,120 @@ export default function MovementForm() {
     }, [transactions]);
 
     useEffect(() => {
-        const list = isStockIn ? Suppliers : pastCustomers;
-        const match = list.find(entity => entity.name === watchedName);
+        const match = pastCustomers.find(entity => entity.name === watchedName);
         if (match) {
             setValue("partyDetails.phone", match.phone);
         }
-    }, [watchedName, isStockIn, Suppliers, pastCustomers, setValue]);
+    }, [watchedName, pastCustomers, setValue]);
 
-    const handleAddProduct = (newItem: Item) => {
-        const existingIndex = fields.findIndex(
-            (item) => item.productId === newItem.productId && item.unitId === newItem.unitId
-        );
+    function updateQuantity(index: number, qty: number) {
+        const item = getValues(`items.${index}`);
+        setValue(`items.${index}.qty`, qty, { shouldValidate: true });
+        setValue(`items.${index}.baseQuantity`, qty * item.multiplier, { shouldValidate: true });
+        setValue(`items.${index}.total`, Math.round(qty * item.rate * 100) / 100);
+    }
 
-        if (existingIndex > -1) {
-            const currentQty = Number(watchedItems[existingIndex].qty);
-            const newQty = currentQty + Number(newItem.qty);
-            const newTotal = newQty * Number(newItem.rate);
+    function add(item: Item) {
+        const currentItems = getValues("items");
+        const index = currentItems.findIndex((line) => line.productId === item.productId && line.unitId === item.unitId);
+        if (index === -1) append(item);
+        else updateQuantity(index, currentItems[index].qty + item.qty);
+    }
 
-            setValue(`items.${existingIndex}.qty`, newQty);
-            setValue(`items.${existingIndex}.total`, newTotal);
-        } else {
-            append(newItem);
-        }
-    };
-
-    const themeColor = isStockIn ? "text-blue-600" : "text-rose-600";
-    const themeBg = isStockIn ? "bg-blue-600 hover:bg-blue-700" : "bg-rose-700 hover:bg-rose-700";
+    const saving = isLoading || checkingOut;
+    const totalLabel = formatInvoiceMoney(Math.round(grandTotal * 100), "NPR");
+    const submitLabel = currentType === "Sale" && checkoutMethod === "cash" ? "Confirm cash sale"
+        : currentType === "Sale" && checkoutMethod === "gateway" ? "Continue to payment" : "Record transaction";
+    const field = "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm";
 
     return (
-        <form onSubmit={(event) => void handleSubmit(onFormSubmit)(event)} className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
-            {/* --- TOP BAR / HEADER --- */}
-            <div className="flex items-center justify-between border-b border-slate-300 pb-6">
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(-1)}
-                        className="text-slate-500 hover:text-blue-600 group"
-                    >
-                        <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                            <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-                        </div>
-                    </Button>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className={cn("text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest text-white", themeBg)}>
-                                {isStockIn ? "Inflow" : "Outflow"}
-                            </span>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Module</span>
-                        </div>
-                        <h1 className="text-3xl text-slate-900 tracking-tighter">
-                            {isStockIn ? "Stock Entry" : "Stock Release"}
-                        </h1>
+        <main className="flex min-h-dvh w-full min-w-0 flex-col bg-market-paper lg:h-dvh">
+            <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+                <div className="flex items-center gap-3">
+                    <Button type="button" variant="outline" size="icon" aria-label="Back to stock movements" onClick={() => navigate("/stock-movements")}><ArrowLeft size={18} /></Button>
+                    <h1 className="text-xl font-semibold tracking-tight">{titles[purpose]}</h1>
+                </div>
+                <a href="#register-cart" className="text-sm font-medium text-brand-700 lg:hidden">Transaction · {fields.length} {fields.length === 1 ? "line" : "lines"}</a>
+            </header>
+            <div className="grid min-h-0 min-w-0 flex-1 items-start gap-4 p-3 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:overflow-y-auto">
+                <RegisterCatalog inbound={isStockIn} usedStock={usedStock} onAdd={add} />
+                <form id="register-cart" onSubmit={(event) => void handleSubmit(onFormSubmit)(event)}
+                    className="min-w-0 scroll-mt-20 space-y-4 rounded-xl border border-slate-200 bg-white p-3 sm:p-5">
+                    <div className="flex items-center gap-2">
+                        <ShoppingCart size={18} className="text-brand-700" aria-hidden="true" />
+                        <h2 className="font-semibold">Current transaction</h2>
                     </div>
-                </div>
-
-                <div className="hidden md:flex flex-col items-end">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Timestamp</span>
-                    <span className="text-xs font-mono font-bold text-slate-600">{new Date().toLocaleDateString()}</span>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                {/* LEFT COLUMN: PRIMARY INPUTS */}
-                <div className="lg:col-span-8 space-y-6">
-                    {/* SECTION: CONFIGURATION */}
-                    <section className="bg-white border border-slate-300 rounded-xl p-5 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 p-2 opacity-[0.03]">
-                            {isStockIn ? <PackagePlus size={80} /> : <PackageMinus size={80} />}
+                    {purpose === "Adjustment" && <label className="grid gap-1 text-sm font-medium">Reason for stock removal
+                        <select {...register("transactionType")} className={field}>
+                            <option value="Adjustment">Stock adjustment (out)</option>
+                            <option value="Damage">Damage or waste</option>
+                        </select>
+                    </label>}
+                    {fields.length ? (
+                        <div role="region" aria-label="Transaction items" tabIndex={0} className="overflow-auto lg:max-h-[48dvh]">
+                        <table className="records-table w-full text-left text-sm">
+                            <thead className="sticky top-0 bg-slate-100 text-xs text-slate-700"><tr><th className="p-3">Item</th><th className="p-3">Quantity</th><th className="p-3">Unit price</th><th className="p-3 text-right">Total</th><th><span className="sr-only">Remove</span></th></tr></thead>
+                            <tbody>
+                            {fields.map((line, index) => {
+                                const item = watchedItems[index] ?? line;
+                                return (
+                                    <tr key={line.id} data-record>
+                                        <th scope="row" className="min-w-24 p-3 text-sm font-semibold">
+                                            {line.productName}<span className="block text-xs font-normal text-slate-600">{line.unitName}</span>
+                                        </th>
+                                        <td className="p-3">
+                                            <Input type="number" min={item.isFractionable ? "0.001" : "1"} step={item.isFractionable ? "any" : "1"} className="w-20" value={item.qty || ""}
+                                                aria-label={`Quantity for ${line.productName}`} onChange={(event) => updateQuantity(index, Number(event.target.value))} required />
+                                            {(errors.items?.[index]?.qty || errors.items?.[index]?.baseQuantity) && <p role="alert" className="text-xs text-red-700">Check quantity</p>}
+                                        </td>
+                                        <td className="whitespace-nowrap p-3 tabular-nums">
+                                            {canEditRate ? <Input type="number" min="0" step="0.01" aria-label={`Unit price for ${line.productName}`} className="w-24" value={item.rate}
+                                                onChange={(event) => setValue(`items.${index}.rate`, Number(event.target.value))} /> : formatInvoiceMoney(Math.round(lineRate(item) * 100), "NPR")}
+                                        </td>
+                                        <td className="whitespace-nowrap p-3 text-right font-semibold tabular-nums">{formatInvoiceMoney(lineTotalMinor(item), "NPR")}</td>
+                                        <td className="p-2"><Button type="button" size="icon-sm" variant="ghost" className="text-red-700" aria-label={`Remove ${line.productName}`} onClick={() => remove(index)}><Trash2 size={15} /></Button></td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-5 flex items-center gap-2">
-                            <Info size={14} /> Movement Parameters
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Transaction Category *</label>
-                                <select
-                                    {...register("transactionType")}
-                                    className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all"
-                                >
-                                    {isStockIn ? (
-                                        <>
-                                            <option value="Purchase">Purchase (Restock)</option>
-                                            <option value="Return">Sales Return</option>
-                                            <option value="Adjustment">Stock Adjustment (+)</option>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <option value="Sale">Sale (Direct)</option>
-                                            <option value="Damage">Wastage / Damage</option>
-                                            <option value="Adjustment">Stock Adjustment (-)</option>
-                                        </>
-                                    )}
-                                </select>
+                    ) : <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">Add products from the catalog to start.</p>}
+                    {showSettlement && (
+                        <div className="grid gap-3">
+                            {currentType === "Sale" ? (
+                                <label className="grid gap-1 text-sm font-medium">Payment
+                                    <select className={field} value={checkoutMethod} onChange={(event) => setCheckoutMethod(event.target.value)}>
+                                        <option value="cash">Cash</option>
+                                        {gatewayEnabled && <option value="gateway">Card or wallet via Khalti</option>}
+                                        <option value="credit">Invoice on credit</option>
+                                    </select>
+                                </label>
+                            ) : null}
+                            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                                <label className="grid gap-1 text-sm font-medium">Customer (optional)
+                                    <Input list="register-contacts" {...register("partyDetails.name")} />
+                                </label>
+                                <label className="grid gap-1 text-sm font-medium">Phone (optional)
+                                    <Input type="tel" {...register("partyDetails.phone")} />
+                                </label>
                             </div>
-                        </div>
-                    </section>
-
-                    {/* SECTION: ITEM LEDGER */}
-                    <section className="bg-white border border-slate-300 rounded-xl overflow-hidden">
-                        <div className="px-5 py-4 border-b border-slate-300 flex items-center justify-between bg-slate-50/30">
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                                <ShoppingCart size={14} /> Item Selection List
-                            </h3>
-                            <ProductItemModal isStockIn={isStockIn} onAdd={(newItem) => handleAddProduct(newItem)} />
-                        </div>
-
-                        <div className="divide-y divide-slate-100 min-h-30">
-                            {fields.length === 0 ? (
-                                <div className="py-12 text-center">
-                                    <Hash size={24} className="mx-auto text-slate-200 mb-2" />
-                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">Waiting for entries...</p>
-                                </div>
-                            ) : (
-                                fields.map((field, index) => (
-                                    <div key={field.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 bg-slate-100 border border-slate-300 rounded-lg flex items-center justify-center font-mono font-black text-slate-400">
-                                                {String(index + 1).padStart(2, '0')}
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{(field as Item).productName}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                    Rate: ₹{watchedItems[index]?.rate} <span className="mx-1">×</span> Qty: {watchedItems[index]?.qty} {field.unitName}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-6">
-                                            <p className="font-mono font-black text-xs text-slate-700">₹{watchedItems[index]?.total}</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => remove(index)}
-                                                className="text-slate-300 hover:text-rose-500 transition-colors"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        {/* SUB-TOTAL BAR */}
-                        <div className="p-5 border-t border-slate-200 bg-slate-50/30 flex justify-end">
-                            <div className="flex items-center gap-4">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aggregate Total</span>
-                                <span className={cn("text-xl font-mono font-black", themeColor)}>₹{grandTotal}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* SECTION: NOTES */}
-                    <section className="bg-white border border-slate-300 rounded-xl p-5">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                            <ReceiptText size={14} /> Internal Remarks (Optional)
-                        </h3>
-                        <textarea
-                            {...register("notes")}
-                            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-bold focus:bg-white outline-none transition-all h-20 resize-none"
-                            placeholder="Specify details for this movement..."
-                        />
-                    </section>
-                </div>
-
-                {/* RIGHT COLUMN: SETTLEMENT SIDEBAR */}
-                <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
-                    {showSettlement ? (
-                        <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-sm">
-                            <div className={cn("px-5 py-3 text-white flex items-center justify-between", themeBg)}>
-                                <h2 className="font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-                                    <CreditCard size={14} /> Party Info
-                                </h2>
-                                <ActivityIndicator />
-                            </div>
-
-                            <div className="p-5 space-y-5">
-                                {currentType === "Sale" ? (
-                                    <label className="grid gap-2 text-xs font-semibold">Payment method
-                                        <select className="rounded-lg border border-slate-300 bg-white px-3 py-2" value={checkoutMethod} onChange={(event) => setCheckoutMethod(event.target.value)}>
-                                            <option value="cash">Cash</option>
-                                            {gatewayEnabled && <option value="gateway">Card or wallet via Khalti</option>}
-                                            <option value="credit">Invoice on credit</option>
-                                        </select>
-                                        {checkoutMethod !== "credit" && <span className="font-normal text-slate-600">Checkout uses the catalog price for each unit.</span>}
-                                    </label>
-                                ) : <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment Status</label>
-                                    <div className="flex gap-1 p-1 bg-slate-100 rounded-lg border border-slate-200">
-                                        <button
-                                            type="button"
-                                            onClick={() => setValue("isPaid", true)}
-                                            className={cn(
-                                                "flex-1 py-2 rounded-md text-[10px] font-black tracking-widest transition-all",
-                                                isPaid ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                                            )}
-                                        >
-                                            PAID / SETTLED
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setValue("isPaid", false)}
-                                            className={cn(
-                                                "flex-1 py-2 rounded-md text-[10px] font-black tracking-widest transition-all",
-                                                !isPaid ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                                            )}
-                                        >
-                                            CREDIT / DEBT
-                                        </button>
-                                    </div>
-                                </div>}
-                                <div className="space-y-4 pt-2 border-t border-slate-100">
-                                    <div className="space-y-1.5 relative">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex justify-between">
-                                            <span>{isStockIn ? "Supplier" : "Customer"}</span>
-                                            {watchedName && <span className="text-emerald-500 animate-in zoom-in">Verified</span>}
-                                        </label>
-                                        <div className="relative group">
-                                            <Input
-                                                list="user-list"
-                                                {...register("partyDetails.name")}
-                                                className="h-10 text-xs rounded-lg border-slate-300 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 transition-all pl-9"
-                                                placeholder="Search or type name..."
-                                            />
-                                            <Info size={14} className="absolute left-3 top-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                                        </div>
-                                        <datalist id="user-list">
-                                            {(isStockIn ? Suppliers : pastCustomers).map((party, idx) => (
-                                                <option key={idx} value={party?.name}>
-                                                    {party?.phone}
-                                                </option>
-                                            ))}
-                                        </datalist>
-                                    </div>
-
-                                    {/* Contact Input */}
-                                    <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Number</label>
-                                        <div className="relative">
-                                            <Input
-                                                {...register("partyDetails.phone")}
-                                                className="h-10 text-xs rounded-lg border-slate-300 bg-slate-50/50 focus:bg-white transition-all pl-9"
-                                                placeholder="+977"
-                                            />
-                                            <span className="absolute left-3 top-2.5 text-slate-400 font-mono text-[10px] font-bold">#</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-slate-50 border border-slate-300 border-dashed rounded-xl p-8 text-center">
-                            <div className="w-10 h-10 bg-white border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <Info size={16} className="text-slate-300" />
-                            </div>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Internal Adj.</p>
-                            <p className="text-[10px] text-slate-400 font-bold mt-1 leading-tight">No external settlement required for this category.</p>
+                            <datalist id="register-contacts">{pastCustomers.map((party, index) => <option key={index} value={party?.name}>{party?.phone}</option>)}</datalist>
                         </div>
                     )}
-
-                    <Button
-                        type="submit"
-                        disabled={isLoading || checkingOut || fields.length === 0}
-                        className={cn(
-                            "w-full h-12 rounded-xl text-[12px] font-black uppercase shadow-none",
-                            themeBg, "hover:opacity-90 text-white"
-                        )}
-                    >
-                        {isLoading || checkingOut ? <Loader2 className="animate-spin mr-2" size={14} /> : currentType === "Sale" && checkoutMethod === "cash" ? "Cash collected · checkout" : currentType === "Sale" && checkoutMethod === "gateway" ? "Continue to payment" : "Finalize Transaction"}
+                    <details className="text-sm">
+                        <summary className="cursor-pointer text-brand-700">Add a note</summary>
+                        <textarea aria-label="Transaction note" {...register("notes")} rows={2} className="mt-2 w-full rounded-lg border border-slate-200 p-2" />
+                    </details>
+                    <div className="flex justify-between gap-2 border-t border-slate-200 pt-3 font-semibold">
+                        <span>Total</span><span className="tabular-nums">{totalLabel}</span>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={saving || !fields.length}>
+                        {saving && <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden="true" />}
+                        {saving ? "Recording…" : submitLabel}
                     </Button>
-                </div>
+                </form>
             </div>
-        </form>
-    );
-}
-
-function ActivityIndicator() {
-    return (
-        <div className="flex gap-1">
-            <div className="w-1 h-1 rounded-full bg-white/40 animate-pulse"></div>
-            <div className="w-1 h-1 rounded-full bg-white/60 animate-pulse [animation-delay:0.2s]"></div>
-            <div className="w-1 h-1 rounded-full bg-white animate-pulse [animation-delay:0.4s]"></div>
-        </div>
+        </main>
     );
 }

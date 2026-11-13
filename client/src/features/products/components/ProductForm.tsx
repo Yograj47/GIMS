@@ -44,7 +44,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
             borderRadius: '0.125rem',
             padding: '2px',
             fontSize: '13px',
-            border: state.isFocused ? '1px solid #2563eb' : '1px solid #e2e8f0',
+            border: state.isFocused ? '1px solid #047857' : '1px solid #e2e8f0',
             boxShadow: 'none',
             backgroundColor: 'white',
             '&:hover': { border: '1px solid #cbd5e1' }
@@ -72,9 +72,9 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const profit = sellPrice - buyPrice;
     const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(1) : 0;
 
-    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
+    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all font-medium placeholder:text-slate-300";
     const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
-    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-blue-600 mb-4 flex items-center gap-2";
+    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-brand-600 mb-4 flex items-center gap-2";
 
     return (
         <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => { }))} className="w-full space-y-8">
@@ -148,8 +148,8 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                     <div className="space-y-2">
                         <label className={labelStyle}>Market Price (Retail)</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 font-bold text-xs">Rs.</span>
-                            <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-10 border-blue-100`} />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-600 font-bold text-xs">Rs.</span>
+                            <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-10 border-brand-100`} />
                             {errors.sellingPrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.sellingPrice.message}</p>}
                         </div>
                     </div>

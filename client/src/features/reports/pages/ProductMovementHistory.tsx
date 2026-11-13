@@ -40,15 +40,15 @@ export default function ProductMovementHistory() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-blue-600 group"
+                            className="text-slate-500 hover:text-brand-600 group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
                         <div className="space-y-1">
                             <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase flex items-center gap-2">
-                                Audit Logs: <span className="text-blue-600">{productName}</span>
+                                Audit Logs: <span className="text-brand-600">{productName}</span>
                             </h1>
                             <div className="flex items-center gap-3">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">

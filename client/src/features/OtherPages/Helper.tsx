@@ -21,7 +21,7 @@ export default function HelpPage() {
         {
             title: "Inventory Setup",
             desc: "Learn how to categorize products and set up your initial stock levels.",
-            icon: <LayoutDashboard className="w-5 h-5 text-blue-400" />,
+            icon: <LayoutDashboard className="w-5 h-5 text-brand-400" />,
         },
         {
             title: "System Standards",
@@ -56,17 +56,17 @@ export default function HelpPage() {
             {/* Search Header - Keeping it for future Docs integration */}
             <div className="w-full mx-auto text-center mb-20">
                 <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
-                    How can we <span className="text-blue-500 font-black">Help?</span>
+                    How can we <span className="text-brand-500 font-black">Help?</span>
                 </h1>
                 <p className="text-slate-400 font-medium mb-10 text-lg">
                     Search the <span className="text-white">Han IT Hub</span> knowledge base or contact support.
                 </p>
 
                 <div className="relative max-w-4xl mx-auto group">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors" size={20} />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-brand-500 transition-colors" size={20} />
                     <Input
                         placeholder="Search for GIMS setup guides..."
-                        className="w-full py-8 pl-14 pr-6 bg-slate-950/40 border-white/5 backdrop-blur-xl rounded-2xl text-lg focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all placeholder:text-slate-600 shadow-2xl"
+                        className="w-full py-8 pl-14 pr-6 bg-slate-950/40 border-white/5 backdrop-blur-xl rounded-2xl text-lg focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500/50 transition-all placeholder:text-slate-600 shadow-2xl"
                     />
                 </div>
             </div>
@@ -76,13 +76,13 @@ export default function HelpPage() {
                 {commonIssues.map((issue, idx) => (
                     <div
                         key={idx}
-                        className="group p-8 bg-slate-900/40 border border-white/5 rounded-[2.5rem] hover:border-blue-500/30 transition-all cursor-pointer"
+                        className="group p-8 bg-slate-900/40 border border-white/5 rounded-[2.5rem] hover:border-brand-500/30 transition-all cursor-pointer"
                     >
                         <div className="flex items-center gap-4 mb-4">
                             <div className="p-3 bg-slate-950/50 rounded-xl border border-white/5">
                                 {issue.icon}
                             </div>
-                            <h3 className="font-bold text-white group-hover:text-blue-400 transition-colors">{issue.title}</h3>
+                            <h3 className="font-bold text-white group-hover:text-brand-400 transition-colors">{issue.title}</h3>
                         </div>
                         <p className="text-sm text-slate-400 leading-relaxed font-medium">
                             {issue.desc}
@@ -95,9 +95,9 @@ export default function HelpPage() {
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 {/* Contact Specialist Card */}
-                <div className="bg-blue-600/5 border border-blue-500/10 rounded-[2.5rem] p-10 flex flex-col justify-between items-start group">
+                <div className="bg-brand-600/5 border border-brand-500/10 rounded-[2.5rem] p-10 flex flex-col justify-between items-start group">
                     <div>
-                        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-900/40">
+                        <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-brand-900/40">
                             <MessageSquare className="text-white" size={28} />
                         </div>
                         <h2 className="text-2xl font-black text-white mb-2">Technical Specialist</h2>
@@ -107,7 +107,7 @@ export default function HelpPage() {
                     </div>
                     <button
                         onClick={handleEmailSupport}
-                        className="flex items-center gap-3 bg-white text-slate-950 px-8 py-4 rounded-2xl font-black text-sm hover:bg-blue-50 active:scale-95 transition-all shadow-lg"
+                        className="flex items-center gap-3 bg-white text-slate-950 px-8 py-4 rounded-2xl font-black text-sm hover:bg-brand-50 active:scale-95 transition-all shadow-lg"
                     >
                         Email Support <ArrowRight size={18} />
                     </button>

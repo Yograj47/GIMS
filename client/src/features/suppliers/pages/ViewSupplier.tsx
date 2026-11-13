@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Pencil, ArrowLeft, Package, SearchX, Trash2, Plus, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
@@ -15,6 +15,7 @@ import { useGlobalStore } from '@/store/globalStore';
 export default function SupplierView() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { hash } = useLocation();
     const user = useAuthStore((state) => state.user);
     const { settings, fetchSettings } = useGlobalStore();
     const { singleSupplier, productData, fetchSupplierById, removeSupplier, isLoading, removeProductFromSupplier, assignProducts } = useSuppliers();
@@ -29,6 +30,12 @@ export default function SupplierView() {
     }, [id, fetchSupplierById, fetchProducts]);
 
     useEffect(() => { void fetchSettings(); }, [fetchSettings]);
+
+    useEffect(() => {
+        if (hash === "#receiving" && singleSupplier && !isLoading && user?.isVerified) {
+            document.getElementById("receiving")?.scrollIntoView();
+        }
+    }, [hash, singleSupplier, isLoading, user?.isVerified]);
 
     const assignedProductIds = useMemo(() => productData?.map(p => p._id) || [], [productData]);
     const canWrite = user?.role === "admin" || user?.role === "owner";
@@ -60,7 +67,7 @@ export default function SupplierView() {
                 <div>
                     <button
                         onClick={() => navigate('/suppliers')}
-                        className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-indigo-600 flex items-center gap-2 mb-2 transition-colors"
+                        className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-brand-600 flex items-center gap-2 mb-2 transition-colors"
                     >
                         <ArrowLeft size={12} strokeWidth={3} /> Back to Directory
                     </button>
@@ -111,7 +118,7 @@ export default function SupplierView() {
                     </section>
 
                     {singleSupplier.notes && (
-                        <section className="border-l-2 border-indigo-500 pl-4 py-1">
+                        <section className="border-l-2 border-brand-500 pl-4 py-1">
                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Internal Brief</h3>
                             <p className="text-xs text-slate-600 leading-relaxed italic">"{singleSupplier.notes}"</p>
                         </section>
@@ -128,14 +135,14 @@ export default function SupplierView() {
                             </div>
                         {canWrite && <Button
                                 onClick={() => setIsAssigning(true)}
-                                className="h-8 text-[9px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 shadow-none rounded-lg"
+                                className="h-8 text-[9px] font-black uppercase tracking-widest bg-brand-600 hover:bg-brand-700 shadow-none rounded-lg"
                             >
                                 <Plus size={12} className="mr-1" strokeWidth={4} /> Assign
                         </Button>}
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                            <table className="records-table w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 border-b border-slate-300">
                                         <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">SKU/Item</th>
@@ -146,11 +153,11 @@ export default function SupplierView() {
                                 <tbody className="divide-y divide-slate-100">
                                     {catalogProducts.length ? (
                                         catalogProducts.map((product) => (
-                                            <tr key={product._id} className="hover:bg-slate-50/30 transition-colors group">
+                                            <tr key={product._id} data-record className="hover:bg-slate-50/30 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs font-bold text-slate-900 uppercase tracking-tight">{product.name}</span>
-                                                        <span className="text-[10px] text-slate-400 font-medium">Stock: {product.quantity} units</span>
+                                                        <span className="text-sm font-semibold text-slate-900">{product.name}</span>
+                                                        <span className="text-xs text-slate-600">Stock: {product.quantity} units</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
@@ -188,6 +195,7 @@ export default function SupplierView() {
                     key={singleSupplier._id}
                     supplierId={singleSupplier._id}
                     products={products}
+                    assignedProductIds={assignedProductIds}
                     canWrite={canWrite}
                     currency={settings?.currency ?? "NPR"}
                 />
@@ -207,7 +215,7 @@ export default function SupplierView() {
 const InfoRow = ({ label, value, isMono }: { label: string, value?: string, isMono?: boolean }) => (
     <div>
         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-        <p className={cn("text-xs font-bold text-slate-800", isMono && "font-mono text-indigo-600")}>{value || "N/A"}</p>
+        <p className={cn("text-xs font-bold text-slate-800", isMono && "font-mono text-brand-600")}>{value || "N/A"}</p>
     </div>
 );
 
@@ -215,6 +223,6 @@ const NotFoundState = ({ onBack }: { onBack: () => void }) => (
     <div className="h-[60vh] flex flex-col items-center justify-center text-center">
         <SearchX size={40} className="text-slate-200 mb-4" />
         <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Entry Not Found</h2>
-        <Button onClick={onBack} variant="link" className="text-indigo-600 text-[10px] font-bold uppercase mt-2">Return to Directory</Button>
+        <Button onClick={onBack} variant="link" className="text-brand-600 text-[10px] font-bold uppercase mt-2">Return to Directory</Button>
     </div>
 );

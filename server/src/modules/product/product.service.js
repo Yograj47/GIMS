@@ -102,9 +102,16 @@ export const find = async ({
     search = "",
     category,
     stockLevel,
+    sort = "recent",
     paginate = true,
 }) => {
     const query = {};
+    const sorts = new Map([
+        ["recent", { createdAt: -1 }],
+        ["name", { name: 1 }],
+        ["stock", { quantity: 1 }],
+    ]);
+    if (!sorts.has(sort)) throw AppError.badRequest("Invalid product sort");
 
     if (search) {
         query.name = {
@@ -137,6 +144,7 @@ export const find = async ({
             page,
             limit,
             paginate,
+            sort: sorts.get(sort),
         }
     );
 

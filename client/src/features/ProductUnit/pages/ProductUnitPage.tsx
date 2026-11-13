@@ -1,5 +1,6 @@
+import { SettingsPageHeader, SettingsSearch } from "@/features/settings/components/SettingsPageHeader";
 import { useEffect, useState } from "react";
-import { Trash2, Edit3, CheckCircle2, Search, Scale } from "lucide-react";
+import { Trash2, Edit3, CheckCircle2, Scale } from "lucide-react";
 import { useProductUnits } from "../hooks/useProductUnits";
 import { Button } from "@/components/ui/button";
 import { ProductUnitModal } from "../components/ProductUnitModal";
@@ -79,38 +80,14 @@ export default function ProductUnitPage() {
     }
 
     return (
-        <div className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-slate-300 pb-6">
-                <div className="flex items-center gap-4">
-                    <div className="p-2 bg-blue-600 rounded-md text-white shadow-sm">
-                        <Scale size={18} />
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Unit Conversions</h1>
-                        <p className="text-slate-500 text-xs mt-1">Manage product-specific measurement multipliers</p>
-                    </div>
-                </div>
-            </div>
+        <div className="min-w-0">
+            <SettingsPageHeader title="Product units" description="Set the units and conversion rates available for each product." icon={Scale} />
+            <SettingsSearch label="Search products" value={searchQuery} onChange={(value) => {
+                setSearchQuery(value);
+                setPagination((previous) => ({ ...previous, pageIndex: 0 }));
+            }} />
 
-            {/* Search */}
-            <div className="mb-4 group">
-                <div className="bg-white border border-slate-300 group-within:border-blue-600 rounded-md p-2 flex items-center gap-3 transition-all">
-                    <div className="pl-2 text-slate-400 group-within:text-blue-600">
-                        <Search size={16} strokeWidth={2.5} />
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Search by product name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-slate-600 text-slate-900 font-medium"
-                    />
-                </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-white border border-slate-300 rounded-md overflow-hidden">
+            <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <DataTable
                     columns={getProductUnitColumns((id, name) => {
                         setContext({ id, name });
@@ -126,27 +103,27 @@ export default function ProductUnitPage() {
                         <div className="p-4 bg-slate-50 border-t border-slate-100">
                             {row.original.conversions?.length > 0 ? (
                                 <div className="rounded-md border border-slate-200 bg-white overflow-hidden shadow-sm">
-                                    <div className="grid grid-cols-12 gap-4 px-6 py-2.5 bg-slate-50 text-[11px] font-bold text-slate-500 border-b">
+                                    <div className="hidden grid-cols-12 gap-3 px-4 py-2.5 md:grid bg-slate-50 text-[11px] font-bold text-slate-500 border-b">
                                         <div className="col-span-4">Unit Name</div>
                                         <div className="col-span-3 text-center">Multiplier</div>
-                                        <div className="col-span-3 text-center">Protocol</div>
+                                        <div className="col-span-3 text-center">Unit type</div>
                                         <AdminGate>
                                             <div className="col-span-2 text-right">Actions</div>
                                         </AdminGate>
                                     </div>
                                     <div className="divide-y divide-slate-100">
                                         {row.original.conversions.map((conv:ProductUnitConversion) => (
-                                            <div key={conv._id} className="grid grid-cols-12 gap-4 px-6 py-3 items-center hover:bg-blue-50/30 transition-colors">
-                                                <div className="col-span-4 flex items-center gap-2 font-semibold text-slate-700 text-sm">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                                            <div key={conv._id} className="grid grid-cols-2 gap-2 px-3 py-3 items-center md:grid-cols-12 md:gap-3 md:px-4 hover:bg-brand-50/30 transition-colors">
+                                                <div className="col-span-2 flex flex-wrap items-center md:col-span-4 gap-2 font-semibold text-slate-700 text-sm">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                                                     {conv.unitName} <span className="text-xs text-slate-400 font-normal">({conv.shortName})</span>
                                                 </div>
-                                                <div className="col-span-3 flex justify-center">
-                                                    <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100 tabular-nums">
+                                                <div className="flex md:col-span-3 md:justify-center">
+                                                    <span className="px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-[11px] font-bold border border-brand-100 tabular-nums">
                                                         × {conv.multiplier}
                                                     </span>
                                                 </div>
-                                                <div className="col-span-3 flex justify-center">
+                                                <div className="flex md:col-span-3 md:justify-center">
                                                     {conv.isDefault ? (
                                                         <span className="flex items-center gap-1 text-emerald-600 text-[11px] font-bold">
                                                             <CheckCircle2 size={12} /> Base Unit
@@ -158,9 +135,10 @@ export default function ProductUnitPage() {
                                                 <AdminGate>
                                                     <div className="col-span-2 flex justify-end gap-1">
                                                         <Button 
-                                                            size="icon" 
-                                                            variant="ghost" 
-                                                            className="h-7 w-7 text-slate-400 hover:text-blue-600" 
+                                                            size="icon"
+                                                            aria-label="Edit conversion"
+                                                            variant="ghost"
+                                                            className="size-9 text-slate-600 hover:text-brand-600"
                                                             onClick={() => {
                                                                 setContext({ id: row.original._id, name: row.original.productName, initialData: conv });
                                                                 setIsModalOpen(true);
@@ -169,9 +147,10 @@ export default function ProductUnitPage() {
                                                             <Edit3 size={14} />
                                                         </Button>
                                                         <Button 
-                                                            size="icon" 
-                                                            variant="ghost" 
-                                                            className="h-7 w-7 text-slate-400 hover:text-rose-600" 
+                                                            size="icon"
+                                                            aria-label="Delete conversion"
+                                                            variant="ghost"
+                                                            className="size-9 text-slate-600 hover:text-rose-600"
                                                             disabled={conv.isDefault} 
                                                             onClick={() => openDeleteDialog(conv._id, row.original._id, conv.unitName)}
                                                         >

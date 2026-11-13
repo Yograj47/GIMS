@@ -30,11 +30,11 @@ export function DataTablePagination<TData>({
     const paginationRange = generatePaginationRange(currentPage, totalPages)
 
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             {/* Context Stats */}
             <div className="text-[12px] font-bold text-slate-800 uppercase tracking-tighter">
                 {table.getFilteredSelectedRowModel().rows.length > 0 ? (
-                    <span className="text-blue-600">
+                    <span className="text-brand-600">
                         {table.getFilteredSelectedRowModel().rows.length} rows selected
                     </span>
                 ) : (
@@ -42,7 +42,7 @@ export function DataTablePagination<TData>({
                 )}
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
                     <p className="text-[11px] font-bold text-slate-800 uppercase">Size</p>
@@ -50,7 +50,7 @@ export function DataTablePagination<TData>({
                         value={`${meta.pageSize}`}
                         onValueChange={(value) => table.setPageSize(Number(value))}
                     >
-                        <SelectTrigger className="h-8 w-16 text-xs border-slate-300 rounded-sm">
+                        <SelectTrigger aria-label="Rows per page" className="h-8 w-16 text-xs border-slate-300 rounded-sm">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent side="top">
@@ -66,6 +66,7 @@ export function DataTablePagination<TData>({
                 {/* Navigation Buttons */}
                 <div className="flex items-center gap-1">
                     <Button
+                        aria-label="Previous page"
                         variant="ghost"
                         className="h-8 w-8 p-0 text-slate-600"
                         onClick={() => table.previousPage()}
@@ -74,7 +75,8 @@ export function DataTablePagination<TData>({
                         <ChevronLeft size={16} />
                     </Button>
 
-                    <div className="flex items-center gap-1">
+                    <span className="text-xs tabular-nums sm:hidden">{currentPage} / {Math.max(1, totalPages)}</span>
+                    <div className="hidden items-center gap-1 sm:flex">
                         {paginationRange?.map((page, i) => {
                             if (typeof page === "number" && page < 1) return null;
 
@@ -99,6 +101,7 @@ export function DataTablePagination<TData>({
                     </div>
 
                     <Button
+                        aria-label="Next page"
                         variant="ghost"
                         className="h-8 w-8 p-0 text-slate-400"
                         onClick={() => table.nextPage()}

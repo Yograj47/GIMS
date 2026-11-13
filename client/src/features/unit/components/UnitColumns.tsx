@@ -16,7 +16,7 @@ export const getUnitColumns = (
             ),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3 min-w-45">
-                    <div className="w-8 h-8 rounded-sm bg-blue-600 flex items-center justify-center text-white shrink-0 group-hover:bg-blue-600 transition-colors">
+                    <div className="w-8 h-8 rounded-sm bg-brand-600 flex items-center justify-center text-white shrink-0 group-hover:bg-brand-600 transition-colors">
                         <Scale size={14} strokeWidth={3} />
                     </div>
                     <div className="flex flex-col">
@@ -24,7 +24,7 @@ export const getUnitColumns = (
                             {row.original.name}
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-mono font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-1.5 rounded-sm border border-blue-100">
+                            <span className="text-[9px] font-mono font-black text-brand-600 uppercase tracking-widest bg-brand-50 px-1.5 rounded-sm border border-brand-100">
                                 {row.original.shortForm}
                             </span>
                             {row.original.baseUnit && (
@@ -82,12 +82,14 @@ export const getUnitColumns = (
                     <div className="flex justify-end gap-1 pr-2">
                         <button
                             onClick={() => onEdit(row.original)}
-                            className="h-8 w-8 flex items-center justify-center rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
+                            aria-label={`Edit ${row.original.name}`}
+                            className="h-8 w-8 flex items-center justify-center rounded-sm text-slate-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-100 transition-all"
                         >
                             <Edit3 size={14} strokeWidth={2.5} />
                         </button>
                         <button
                             onClick={() => onDelete(row.original)}
+                            aria-label={`Delete ${row.original.name}`}
                             className="h-8 w-8 flex items-center justify-center rounded-sm text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all"
                         >
                             <Trash2 size={14} strokeWidth={2.5} />

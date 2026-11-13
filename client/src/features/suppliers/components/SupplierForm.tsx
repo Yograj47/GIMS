@@ -27,9 +27,9 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
         if (initialData) reset(initialData);
     }, [initialData, reset]);
 
-    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all font-medium placeholder:text-slate-300";
+    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all font-medium placeholder:text-slate-300";
     const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
-    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-blue-600 mb-4 flex items-center gap-2";
+    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-brand-600 mb-4 flex items-center gap-2";
 
     return (
         <form id="supplier-form" onSubmit={handleSubmit(onSubmit)} className="w-full space-y-8">

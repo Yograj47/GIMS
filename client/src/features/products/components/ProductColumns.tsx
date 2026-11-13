@@ -1,4 +1,4 @@
-import { Edit3, AlertCircle } from "lucide-react";
+import { Edit3 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ProductData } from "@/types/product";
 import type { NavigateFunction } from "react-router-dom";
@@ -14,10 +14,10 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
     return [
         {
             accessorKey: "name",
-            header: "Product Details",
+            header: "Product",
             cell: ({ row }) => (
                 <div className="flex flex-col py-1">
-                    <span className="font-bold text-slate-900 text-[13px] leading-tight">
+                    <span className="max-w-52 whitespace-normal break-words font-semibold text-slate-900">
                         {row.original.name}
                     </span>
                     <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
@@ -37,21 +37,20 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
         },
         {
             accessorKey: "quantity",
-            header: "Inventory",
+            header: "Stock",
             cell: ({ row }) => {
-                const isLow = row.original.quantity <= row.original.threshold;
+                const { quantity, threshold, baseUnit, unit } = row.original;
+                const status = quantity <= 0 ? "Out of stock" : quantity <= threshold ? "Low stock" : "In stock";
                 return (
-                    <div className="flex items-center gap-2 tabular-nums">
+                    <div className="flex flex-col items-start gap-1 tabular-nums">
+                        <span className="font-medium text-slate-900">{quantity.toLocaleString()} {baseUnit?.shortForm ?? unit.shortForm}</span>
                         <span className={cn(
                             "text-[13px] font-bold px-2 py-0.5 rounded",
-                            isLow ? "text-red-700 bg-red-50" : "text-blue-700 bg-blue-50"
+                            status === "Out of stock" ? "text-red-700 bg-red-50" :
+                                status === "Low stock" ? "text-amber-800 bg-amber-50" : "text-brand-700 bg-brand-50"
                         )}>
-                            {row.original.quantity} {row.original.baseUnit?.shortForm}
+                            {status}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-medium uppercase">
-                            {(row.original.quantity / row.original.unit.multiplierToBase).toLocaleString()} {row.original.unit.shortForm} in stock
-                        </span>
-                        {isLow && <AlertCircle size={12} className="text-red-500 animate-pulse" />}
                     </div>
                 );
             },
@@ -66,7 +65,7 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                 const unitLabel = baseUnit?.shortForm ?? unit.shortForm;
                 return (
                     <div className="text-right tabular-nums">
-                        <div className="text-[13px] font-bold text-blue-600">
+                        <div className="text-[13px] font-bold text-brand-600">
                             {currency}{pricePerBase.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {unitLabel}
                         </div>
                         <div className="text-[10px] text-slate-400 font-medium uppercase">
@@ -103,9 +102,10 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                 <AdminGate allowedRoles={["owner"]}>
                     <div className="flex justify-end">
                         <Button
+                            aria-label={`Edit ${row.original.name}`}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                            className="h-8 w-8 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/products/edit/${row.original._id}`);

@@ -1,68 +1,54 @@
-import { Suspense, useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Suspense, useRef, useState } from "react";
+import { Box, Menu, X } from "lucide-react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
-import Sidebar from "../components/common/SideBar";
-import { cn } from "@/lib/utils";
+import { WorkspaceNavigation } from "@/components/common/SideBar";
 import AppHeader from "@/components/common/AppHeader";
 
-function AppLayout() {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [screen, setScreen] = useState<"desktop" | "tablet" | "mobile">("desktop");
-
-    useEffect(() => {
-        const update = () => {
-            const w = window.innerWidth;
-            if (w < 768) setScreen("mobile");
-            else if (w < 1024) setScreen("tablet");
-            else setScreen("desktop");
-        };
-
-        update();
-        window.addEventListener("resize", update);
-        return () => window.removeEventListener("resize", update);
-    }, []);
-
-    const collapsed = screen === "desktop" ? !sidebarOpen : true;
-    const { pathname } = useLocation();
+export default function AppLayout() {
+    const { pathname, key } = useLocation();
+    const [openAt, setOpenAt] = useState<string | null>(null);
+    const menuButton = useRef<HTMLButtonElement>(null);
+    const isOpen = openAt === key;
     const loadingLayout = pathname === "/dashboard" ? "dashboard" : /\/(add|edit|form)(\/|$)/.test(pathname) ? "form" : "table";
 
     return (
-
-        <div className="flex h-screen w-full overflow-hidden font-sans antialiased text-slate-900">
-
-            {/* 1. SIDEBAR WRAPPER */}
-            <div className="no-print relative z-60">
-                <Sidebar
-                    isOpen={sidebarOpen}
-                    onToggle={() => setSidebarOpen(!sidebarOpen)}
-                />
-            </div>
-
-            {/* 2. MAIN CONTENT AREA */}
-            <div
-                className={cn(
-                    "flex flex-col flex-1 min-w-0 transition-all duration-500 ease-in-out",
-                    collapsed ? "ml-20" : "ml-64",
-                    screen === "mobile" && "ml-0"
-                )}
-            >
-
-                    {/* Header */}
-                    <div className="no-print border-b border-slate-300 backdrop-blur-md sticky top-0 z-50"> 
-                        <AppHeader />
-                    </div>
-
-                    {/* Main */}
-                    <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[#f1f1f1]">
-                        <div className="max-w-350 mx-auto p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <Suspense key={pathname} fallback={<LoadingSkeleton layout={loadingLayout} />}>
-                                <Outlet />
-                            </Suspense>
-                        </div>
-                    </main>
+        <div className="min-h-dvh bg-market-paper text-slate-900 lg:grid lg:grid-cols-[4.5rem_minmax(0,1fr)] xl:grid-cols-[14rem_minmax(0,1fr)] print:block">
+            <aside className="no-print sticky top-0 hidden h-dvh self-start overflow-y-auto border-r border-slate-200 bg-white p-3 lg:block">
+                <Link to="/dashboard" aria-label="GroceryPro dashboard" className="mb-7 flex items-center gap-3 rounded-lg p-1.5 lg:max-xl:justify-center">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-market-yellow text-brand-700"><Box size={20} aria-hidden="true" /></span>
+                    <span className="hidden font-bold xl:inline">Grocery<span className="text-brand-600">Pro</span></span>
+                </Link>
+                <WorkspaceNavigation />
+            </aside>
+            <div className="min-w-0">
+                <div className="no-print sticky top-0 z-40 border-b border-slate-200 bg-white">
+                    <AppHeader navigationControl={
+                        <button ref={menuButton} type="button" aria-label={isOpen ? "Close navigation" : "Open navigation"}
+                            aria-expanded={isOpen} aria-controls="workspace-menu"
+                            onClick={() => setOpenAt(isOpen ? null : key)}
+                            className="grid size-11 shrink-0 place-items-center rounded-lg text-brand-700 hover:bg-brand-50 lg:hidden">
+                            {isOpen ? <X size={22} /> : <Menu size={22} />}
+                        </button>
+                    } />
                 </div>
+                <div id="workspace-menu" hidden={!isOpen} className="no-print border-b border-slate-200 bg-white p-2 sm:p-4 lg:hidden"
+                    onKeyDown={(event) => {
+                        if (event.key === "Escape") {
+                            setOpenAt(null);
+                            menuButton.current?.focus();
+                        }
+                    }}>
+                    <WorkspaceNavigation compact onNavigate={() => setOpenAt(null)} />
+                </div>
+                <main className="workspace-content min-w-0">
+                    <div className="mx-auto w-full max-w-[90rem] px-3 py-4 sm:px-6 sm:py-6 xl:px-8">
+                        <Suspense key={pathname} fallback={<LoadingSkeleton layout={loadingLayout} />}>
+                            <Outlet />
+                        </Suspense>
+                    </div>
+                </main>
             </div>
-            );
+        </div>
+    );
 }
-
-            export default AppLayout;

@@ -93,13 +93,13 @@ export default function StockMovementReport() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-blue-600 group"
+                            className="text-slate-500 hover:text-brand-600 group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
-                        <div className="p-2 bg-blue-600 rounded-sm text-white shadow-sm shadow-blue-100">
+                        <div className="p-2 bg-brand-600 rounded-sm text-white shadow-sm shadow-brand-100">
                             <History size={20} strokeWidth={2.5} />
                         </div>
                         <div>
@@ -107,7 +107,7 @@ export default function StockMovementReport() {
                                 Movement Ledger
                             </h1>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Audit Trail • <span className="text-blue-600 italic">Global Traffic</span>
+                                Audit Trail • <span className="text-brand-600 italic">Global Traffic</span>
                             </p>
                         </div>
                     </div>
@@ -115,7 +115,7 @@ export default function StockMovementReport() {
                     <Button
                         onClick={handleExport}
                         disabled={isExporting}
-                        className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                        className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                     >
                         {isExporting ? (
                             <><Loading className="mr-2" /> Extracting...</>
@@ -130,7 +130,7 @@ export default function StockMovementReport() {
                     {/* Search Field */}
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-blue-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-brand-600 transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
@@ -139,19 +139,19 @@ export default function StockMovementReport() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1
-                             focus-visible:ring-blue-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
+                             focus-visible:ring-brand-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
                         />
                     </div>
 
                     {/* Movement Type Filter */}
                     <div className="relative min-w-64">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <Filter size={12} className="text-blue-600" strokeWidth={3} />
+                            <Filter size={12} className="text-brand-600" strokeWidth={3} />
                         </div>
                         <select
                             value={movementType}
                             onChange={(e) => setMovementType(e.target.value)}
-                            className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-blue-500 appearance-none cursor-pointer transition-all"
+                            className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-brand-500 appearance-none cursor-pointer transition-all"
                         >
                             <option value="All Movements">All Transactions</option>
                             <option value="IN">Stock Inflow (+)</option>

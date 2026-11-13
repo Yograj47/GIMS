@@ -41,7 +41,7 @@ export default function VerifyAccount() {
       <div className="flex flex-col items-center text-center mb-10">
         <div className={`p-5 rounded-2xl mb-6 transition-all duration-700 shadow-lg ${otpSent
           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-emerald-500/5'
-          : 'bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-blue-500/5'
+          : 'bg-brand-500/10 text-brand-400 border border-brand-500/20 shadow-brand-500/5'
           }`}>
           {otpSent ? <ShieldCheck size={36} /> : <MailWarning size={36} />}
         </div>
@@ -59,7 +59,7 @@ export default function VerifyAccount() {
 
       {!otpSent ? (
         <Button
-          className="w-full h-14 text-base font-bold transition-all active:scale-[0.98] bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 rounded-xl group"
+          className="w-full h-14 text-base font-bold transition-all active:scale-[0.98] bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-900/20 rounded-xl group"
           onClick={handleSendOtp}
           disabled={isLoading}
         >
@@ -87,7 +87,7 @@ export default function VerifyAccount() {
                   <InputOTPSlot
                     key={index}
                     index={index}
-                    className="w-12 h-14 md:w-14 md:h-16 text-xl font-black border-white/5 bg-slate-950/40 text-blue-400 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                    className="w-12 h-14 md:w-14 md:h-16 text-xl font-black border-white/5 bg-slate-950/40 text-brand-400 rounded-xl focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500/50 transition-all"
                   />
                 ))}
               </InputOTPGroup>
@@ -109,7 +109,7 @@ export default function VerifyAccount() {
             <button
               type="button"
               onClick={handleSendOtp}
-              className="w-full flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors py-2"
+              className="w-full flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-400 transition-colors py-2"
               disabled={isLoading}
             >
               <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />

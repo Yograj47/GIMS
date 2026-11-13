@@ -28,7 +28,7 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
       return (
         <span className={cn(
           "text-[10px] font-black px-2 py-0.5 rounded-sm uppercase border",
-          isSale ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
+          isSale ? "bg-brand-50 text-brand-600 border-brand-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
         )}>
           {row.original.transactionType}{isSale && (row.original.channel === "online" ? " · Online" : " · In store")}
         </span>
@@ -59,7 +59,7 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
       <div className="flex justify-end">
         <Button
           variant="ghost"
-          className="h-8 px-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-indigo-100"
+          className="h-8 px-3 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
           onClick={() => navigate(`/reports/transaction/${row.original._id}`, { state: { transaction: row.original } })}
         >
           <Newspaper size={12} className="mr-2" /> View Bill

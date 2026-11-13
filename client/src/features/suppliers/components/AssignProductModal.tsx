@@ -36,7 +36,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-6 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-md rounded-xl border border-slate-300 shadow-2xl flex flex-col max-h-[70vh] overflow-hidden">
                 
                 {/* Header */}
@@ -52,7 +52,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                         <input
                             type="text"
                             placeholder="Filter items..."
-                            className="w-full bg-white border border-slate-300 rounded-lg py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-white border border-slate-300 rounded-lg py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-brand-500 transition-colors"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -69,14 +69,14 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                                 className={cn(
                                     "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border mb-1",
                                     selectedIds.includes(product._id)
-                                        ? "bg-indigo-50 border-indigo-200 shadow-sm"
+                                        ? "bg-brand-50 border-brand-200 shadow-sm"
                                         : "bg-white border-transparent hover:bg-slate-100"
                                 )}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
                                         "w-8 h-8 rounded-md flex items-center justify-center transition-colors",
-                                        selectedIds.includes(product._id) ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"
+                                        selectedIds.includes(product._id) ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-400"
                                     )}>
                                         <Package size={14} />
                                     </div>
@@ -85,7 +85,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                                         <p className="text-[9px] font-bold text-slate-400 mt-1 font-mono">₹{product.basePrice}</p>
                                     </div>
                                 </div>
-                                {selectedIds.includes(product._id) && <Check size={14} className="text-indigo-600" strokeWidth={4} />}
+                                {selectedIds.includes(product._id) && <Check size={14} className="text-brand-600" strokeWidth={4} />}
                             </div>
                         ))
                     ) : (
@@ -107,7 +107,7 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                             setIsSubmitting(false); 
                             handleClose(); 
                         }}
-                        className="flex-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest h-10 shadow-none rounded-lg"
+                        className="flex-2 bg-brand-600 hover:bg-brand-700 text-white text-[10px] font-black uppercase tracking-widest h-10 shadow-none rounded-lg"
                     >
                         {isSubmitting ? "Processing..." : `Link ${selectedIds.length} Items`}
                     </Button>

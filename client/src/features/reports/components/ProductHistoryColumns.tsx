@@ -63,7 +63,7 @@ export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
                     {row.original.oldQuantity}
                 </span>
                 <div className="flex items-center gap-1">
-                    <Hash size={10} className="text-blue-500 opacity-50" />
+                    <Hash size={10} className="text-brand-500 opacity-50" />
                     <span className="text-slate-900 font-black text-[13px]">{row.original.newQuantity}</span>
                 </div>
             </div>
@@ -86,7 +86,7 @@ export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">
                     {row.original.performedBy?.name}
                 </span>
-                <div className="w-6 h-6 rounded-sm bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                <div className="w-6 h-6 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm">
                     <User size={12} strokeWidth={2.5} />
                 </div>
             </div>

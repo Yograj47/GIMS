@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type { ReactNode } from "react";
 import {
     Bell,
     Check,
@@ -17,7 +18,7 @@ import { useAlerts } from "@/features/alerts/hooks/useAlerts";
 import type { AlertData } from "@/types/alert";
 dayjs.extend(relativeTime);
 
-function AppHeader() {
+function AppHeader({ navigationControl }: { navigationControl?: ReactNode }) {
     const navigate = useNavigate();
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -59,20 +60,22 @@ function AppHeader() {
         ).length;
 
     return (
-        <header className="w-full h-16 flex items-center justify-between px-8">
-            {/* Left: Branch Status Chip */}
-            <div className="flex items-center gap-3 bg-white border border-slate-400 py-1.5 px-4 rounded-full">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[12px] font-black text-slate-500 uppercase tracking-[0.15em]">
+        <header className="relative flex min-h-16 w-full items-center justify-between gap-2 px-3 sm:px-6 xl:px-8">
+            <div className="flex min-w-0 items-center gap-2">
+                {navigationControl}
+                <span className="truncate text-sm font-semibold text-slate-800 sm:text-base">
                     {settings?.storeName || "Main Hub"}
                 </span>
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
                 {/* Notifications */}
-                <div className="relative" ref={dropdownRef}>
+                <div className="sm:relative" ref={dropdownRef}>
                     <button
+                        type="button"
+                        aria-label="Notifications"
+                        aria-expanded={showNotifications}
                         onClick={() =>
                             setShowNotifications(
                                 (prev) => !prev
@@ -80,7 +83,7 @@ function AppHeader() {
                         }
                         className={cn(
                             "relative p-2.5 rounded-xl transition-all",
-                            showNotifications ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:bg-slate-100"
+                            showNotifications ? "bg-brand-50 text-brand-600" : "text-slate-400 hover:bg-slate-100"
                         )}
                     >
                         <Bell size={20} />
@@ -91,15 +94,15 @@ function AppHeader() {
 
                     {/* Dropdown Menu */}
                     {showNotifications && (
-                        <div className="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+                        <div className="absolute inset-x-3 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:inset-x-auto sm:right-0 sm:w-80">
                             {/* Header */}
                             <div className="p-4 border-b border-slate-300 flex justify-between items-center bg-slate-50/50">
                                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 font-mono">Alert Center</h3>
-                                {isLoading && <Loader2 size={12} className="animate-spin text-blue-500" />}
+                                {isLoading && <Loader2 size={12} className="animate-spin text-brand-500" />}
                             </div>
 
                             {/* List Body */}
-                            <div className="max-h-95 overflow-y-auto">
+                            <div className="max-h-[55dvh] overflow-y-auto">
                                 {activeAlerts.length > 0 ? (
                                     activeAlerts.map((alert : AlertData) => (
                                         <div
@@ -126,7 +129,7 @@ function AppHeader() {
                                                 </div>
                                                 <button
                                                     onClick={(e) => handleResolve(e, alert._id)}
-                                                    className="opacity-0 group-hover:opacity-100 p-1.5 bg-white shadow-sm border border-slate-100 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition-all transform hover:scale-110 h-fit"
+                                                    className="p-2 bg-white shadow-sm border border-slate-100 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white h-fit"
                                                     title="Resolve Now"
                                                 >
                                                     <Check size={14} strokeWidth={3} />
@@ -147,26 +150,35 @@ function AppHeader() {
                             </div>
 
                             {/* Footer */}
-                            <button
-                                onClick={() => { navigate('/alerts'); setShowNotifications(false); }}
-                                className="w-full p-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 border-t border-slate-100 group/footer"
-                            >
-                                Review All Logs
-                                <ExternalLink size={12} className="group-hover/footer:translate-x-0.5 group-hover/footer:-translate-y-0.5 transition-transform" />
-                            </button>
+                            <div className="grid grid-cols-2 divide-x divide-slate-100 border-t border-slate-100">
+                                {[
+                                    { level: "low", label: "Low Stock" },
+                                    { level: "out", label: "Out of Stock" },
+                                ].map(({ level, label }) => (
+                                    <button
+                                        key={level}
+                                        type="button"
+                                        onClick={() => { navigate(`/reports/stock?level=${level}`); setShowNotifications(false); }}
+                                        className="flex min-h-11 items-center justify-center gap-2 px-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-700"
+                                    >
+                                        {label}
+                                        <ExternalLink size={12} aria-hidden="true" />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
 
-                <div className="h-8 w-px bg-slate-300 mx-1" />
+                <div className="hidden h-8 w-px bg-slate-200 sm:block" />
 
                 {/* Profile Link */}
-                <Link to="/me" className="flex items-center gap-3 pl-2 group">
+                <Link to="/me" aria-label="Your profile" className="flex min-h-11 items-center gap-2 group">
                     <div className="text-right hidden sm:block">
                         <p className="text-xs font-black text-slate-900 leading-none">{user?.name}</p>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1 tracking-tighter">{user?.role}</p>
+                        <p className="text-[9px] font-bold text-brand-600 uppercase mt-1 tracking-tighter">{user?.role}</p>
                     </div>
-                    <div className="w-9 h-9 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                    <div className="w-9 h-9 rounded-xl bg-linear-to-br from-brand-600 to-brand-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
                         {user?.name?.[0] ?? "U"}
                     </div>
                 </Link>

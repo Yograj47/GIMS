@@ -43,7 +43,7 @@ export default function CheckoutStatus() {
     return (
         <main className="min-h-dvh bg-slate-50 p-5">
             <div className="mx-auto max-w-lg space-y-4 rounded-xl border bg-white p-6">
-                <Link to="/shop" className="text-sm text-blue-700">Back to shop</Link>
+                <Link to="/shop" className="text-sm text-brand-700">Back to shop</Link>
                 <h1 className="text-xl font-bold">Order status</h1>
                 {!token && <p className="text-sm text-slate-600">There is no saved checkout in this tab.</p>}
                 {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
@@ -61,7 +61,7 @@ export default function CheckoutStatus() {
                             {order.status === "payment_review" && "Payment received after the reservation ended. Contact the store with your order number."}
                         </p>
                         {order.status === "reserved" && order.expiresAt && <p className="text-sm text-slate-600">Reserved until {new Date(order.expiresAt).toLocaleString()}</p>}
-                        {order.channel === "in_store" && <Link to="/stock-movements/orders" className="inline-block text-sm text-blue-700">Back to checkout orders</Link>}
+                        {order.channel === "in_store" && <Link to="/stock-movements/orders" className="inline-block text-sm text-brand-700">Back to checkout orders</Link>}
                     </>
                 )}
                 {token && <div className="flex flex-wrap gap-2">

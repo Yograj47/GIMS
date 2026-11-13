@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const getTypeStyles = (type: string) => {
   switch (type.toUpperCase()) {
-    case 'FINANCE': return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'FINANCE': return 'bg-brand-50 text-brand-700 border-brand-200';
     case 'INVENTORY': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     case 'AUTH': return 'bg-purple-50 text-purple-700 border-purple-200';
     case 'SYSTEM': return 'bg-rose-50 text-rose-700 border-rose-200';
@@ -68,7 +68,7 @@ export const getActivityLogColumns = (): ColumnDef<ActivityLogData>[] => [
           <Calendar size={10} strokeWidth={3} className="text-slate-400" />
           {format(new Date(row.original.createdAt), "dd MMM, yyyy")}
         </div>
-        <span className="text-[10px] font-bold text-blue-600 uppercase mt-0.5 ml-4">
+        <span className="text-[10px] font-bold text-brand-600 uppercase mt-0.5 ml-4">
           {format(new Date(row.original.createdAt), "HH:mm:ss")}
         </span>
       </div>

@@ -237,6 +237,7 @@ export const findProducts = async (
         page = 1,
         limit = 10,
         paginate = true,
+        sort = { createdAt: -1 },
     } = {}
 ) => {
     const pipeline = [
@@ -426,9 +427,7 @@ export const findProducts = async (
         },
 
         {
-            $sort: {
-                createdAt: -1,
-            },
+            $sort: { ...sort, _id: 1 },
         },
     ];
 

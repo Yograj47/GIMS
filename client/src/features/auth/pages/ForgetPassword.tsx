@@ -118,12 +118,12 @@ export default function ForgotPassword() {
         }
     };
 
-    const midnightInput = "bg-slate-950/40 border-white/5 text-slate-200 placeholder:text-slate-600 focus:border-blue-500/50 focus:bg-slate-950/60 transition-all rounded-2xl py-7 pl-6 shadow-inner";
+    const midnightInput = "bg-slate-950/40 border-white/5 text-slate-200 placeholder:text-slate-600 focus:border-brand-500/50 focus:bg-slate-950/60 transition-all rounded-2xl py-7 pl-6 shadow-inner";
 
     return (
         <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl animate-in fade-in zoom-in duration-500">
             <div className="mb-10 flex flex-col items-center">
-                <div className="w-16 h-16 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-500 mb-6 shadow-[0_0_20px_rgba(37,99,235,0.1)]">
+                <div className="w-16 h-16 bg-brand-600/10 border border-brand-500/20 rounded-2xl flex items-center justify-center text-brand-500 mb-6 shadow-[0_0_20px_rgba(4,120,87,0.1)]">
                     {step === "email" && <Mail size={32} />}
                     {step === "otp" && <KeyRound size={32} />}
                     {step === "password" && <ShieldCheck size={32} />}
@@ -138,7 +138,7 @@ export default function ForgotPassword() {
                 <p className="text-slate-400 text-sm text-center mt-3 font-medium leading-relaxed">
                     {step === "email" && "Enter your email to receive a secure recovery code."}
                     {step === "otp" && (
-                        <span>Sent to <span className="text-blue-400 font-bold">{userEmail}</span></span>
+                        <span>Sent to <span className="text-brand-400 font-bold">{userEmail}</span></span>
                     )}
                     {step === "password" && "Choose a strong password for your GIMS account."}
                 </p>
@@ -151,7 +151,7 @@ export default function ForgotPassword() {
                         placeholder="admin@grocery.local"
                         className={midnightInput}
                     />
-                    <Button className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-lg shadow-blue-900/20" disabled={isLoading}>
+                    <Button className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 font-bold text-white shadow-lg shadow-brand-900/20" disabled={isLoading}>
                         {isLoading ? <Loader2 className="animate-spin" /> : "Request Security Code"}
                     </Button>
                 </form>
@@ -162,16 +162,16 @@ export default function ForgotPassword() {
                     <Input
                         {...resetForm.register("otp")}
                         placeholder="000000"
-                        className="py-10 rounded-2xl bg-slate-950/60 border-white/10 text-center text-3xl font-black tracking-[0.6em] text-blue-400 focus:border-blue-500"
+                        className="py-10 rounded-2xl bg-slate-950/60 border-white/10 text-center text-3xl font-black tracking-[0.6em] text-brand-400 focus:border-brand-500"
                         maxLength={6}
                     />
-                    <Button onClick={goToPasswordStep} className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-lg shadow-blue-900/20">
+                    <Button onClick={goToPasswordStep} className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 font-bold text-white shadow-lg shadow-brand-900/20">
                         Verify Identity
                     </Button>
                     <button
                         onClick={handleResend}
                         disabled={timer > 0}
-                        className="w-full text-[11px] font-black text-blue-500 uppercase tracking-[0.2em] disabled:opacity-30 transition-opacity"
+                        className="w-full text-[11px] font-black text-brand-500 uppercase tracking-[0.2em] disabled:opacity-30 transition-opacity"
                     >
                         {timer > 0 ? `Resend available in ${formatTime(timer)}` : "Request New Code"}
                     </button>
@@ -192,7 +192,7 @@ export default function ForgotPassword() {
                         placeholder="Repeat New Password"
                         className={midnightInput}
                     />
-                    <Button className="w-full py-7 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-xl shadow-blue-900/20" disabled={isLoading}>
+                    <Button className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 font-bold text-white shadow-xl shadow-brand-900/20" disabled={isLoading}>
                         {isLoading ? <Loader2 className="animate-spin" /> : "Update Credentials"}
                     </Button>
                     <button
@@ -206,7 +206,7 @@ export default function ForgotPassword() {
             )}
 
             <div className="mt-10 pt-6 border-t border-white/5 text-center">
-                <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2 group">
+                <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-brand-500 transition-colors flex items-center justify-center gap-2 group">
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Return to Login
                 </Link>

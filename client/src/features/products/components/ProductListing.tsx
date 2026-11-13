@@ -13,12 +13,12 @@ function ProductListing({ Product }: { Product: ProductData }) {
             {/* Product Details (Name & SKU) */}
             <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
-                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs ${isLowStock ? "bg-red-50 text-red-500" : "bg-blue-50 text-blue-500"
+                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs ${isLowStock ? "bg-red-50 text-red-500" : "bg-brand-50 text-brand-500"
                         }`}>
                         {Product.name.charAt(0)}
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                        <span className="font-bold text-slate-900 group-hover:text-brand-600 transition-colors">
                             {Product.name}
                         </span>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
@@ -49,7 +49,7 @@ function ProductListing({ Product }: { Product: ProductData }) {
                     </div>
                     <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                            className={`h-full ${isLowStock ? "bg-red-500" : "bg-blue-500"}`}
+                            className={`h-full ${isLowStock ? "bg-red-500" : "bg-brand-500"}`}
                             style={{ width: `${Math.min((Product.quantity / 100) * 100, 100)}%` }}
                         />
                     </div>
@@ -67,7 +67,7 @@ function ProductListing({ Product }: { Product: ProductData }) {
 
                     {/* Selling Price (What the customer pays) */}
                     <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Selling</span>
+                        <span className="text-[10px] font-bold text-brand-600 uppercase tracking-wider">Selling</span>
                         <span className="text-base font-black text-slate-900">₹{Product.sellingPrice}</span>
                     </div>
                 </div>
@@ -78,7 +78,7 @@ function ProductListing({ Product }: { Product: ProductData }) {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="rounded-lg hover:bg-blue-50 hover:text-blue-600"
+                    className="rounded-lg hover:bg-brand-50 hover:text-brand-600"
                     onClick={() => navigate(`/products/edit/${Product._id}`)}
                 >
                     <Edit3 size={16} />

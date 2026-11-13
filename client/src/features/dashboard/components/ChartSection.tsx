@@ -10,17 +10,17 @@ interface ChartSectionProps {
 export default function ChartSection({ data, options }: ChartSectionProps) {
     return (
         <Card className="xl:col-span-3 border-slate-200">
-            <CardHeader className="flex flex-row items-center justify-between px-8 pt-8 pb-4">
+            <CardHeader className="flex flex-wrap items-center justify-between gap-3 px-3 sm:px-6">
                 <div>
                     <CardTitle className="text-lg font-black text-slate-900 tracking-tight uppercase">Performance Analytics</CardTitle>
                     <p className="text-[10px] font-bold text-slate-600 mt-1 uppercase tracking-[0.2em]">7-Day Operational Window</p>
                 </div>
                 <div className="flex gap-6">
-                    <LegendItem color="bg-blue-600" label="STOCK IN" />
-                    <LegendItem color="bg-emerald-500" label="STOCK OUT" />
+                    <LegendItem color="bg-brand-600" label="STOCK IN" />
+                    <LegendItem color="bg-market-orange" label="STOCK OUT" />
                 </div>
             </CardHeader>
-            <CardContent className="px-6 pb-6 h-87.5">
+            <CardContent className="h-60 min-w-0 px-3 sm:h-80 sm:px-6">
                 <Line data={data} options={options} />
             </CardContent>
         </Card>

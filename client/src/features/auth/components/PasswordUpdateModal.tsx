@@ -25,7 +25,7 @@ export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onCl
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-4">
             <div
                 className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={onClose}
@@ -53,12 +53,12 @@ export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onCl
                         <div className="relative group">
                             <input
                                 type={showPass ? "text" : "password"}
-                                className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all"
+                                className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-50 focus:border-brand-400 outline-none transition-all"
                                 placeholder="••••••••"
                                 value={updatedPassword?.currentPassword}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpdatedPassword({ ...updatedPassword, currentPassword: e.target.value })}
                             />
-                            <Lock className="absolute left-4 top-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
+                            <Lock className="absolute left-4 top-4 text-slate-300 group-focus-within:text-brand-500 transition-colors" size={18} />
                         </div>
                     </div>
 
@@ -67,12 +67,12 @@ export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onCl
                         <div className="relative group">
                             <input
                                 type={showPass ? "text" : "password"}
-                                className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-400 outline-none transition-all"
+                                className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-50 focus:border-brand-400 outline-none transition-all"
                                 placeholder="Min. 8 characters"
                                 value={updatedPassword?.newPassword}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpdatedPassword({ ...updatedPassword, newPassword: e.target.value })}
                             />
-                            <Lock className="absolute left-4 top-4 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
+                            <Lock className="absolute left-4 top-4 text-slate-300 group-focus-within:text-brand-500 transition-colors" size={18} />
                             <button
                                 type="button"
                                 onClick={() => setShowPass(!showPass)}
@@ -83,7 +83,7 @@ export function PasswordUpdateModal({ isOpen, onClose }: { isOpen: boolean; onCl
                         </div>
                     </div>
 
-                    <button onClick={handlePasswordUpdate} className="w-full mt-4 py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95">
+                    <button onClick={handlePasswordUpdate} className="w-full mt-4 py-4 bg-brand-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-brand-700 transition-all shadow-xl shadow-brand-100 active:scale-95">
                         Confirm Changes
                     </button>
                 </form>

@@ -15,11 +15,19 @@ export async function postSaleCost(invoiceId, userId) {
         if (existing || invoice.costMinor !== undefined) return invoice;
 
         const movements = await Movement.find({ transactionId: invoice.transactionId, movementType: "OUT" }).session(session);
-        if (movements.length !== invoice.items.length || movements.some((movement) => {
+        if (movements.length !== invoice.items.length) {
+            throw AppError.conflict("Inventory cost could not be posted because the invoice and its stock movements do not match.");
+        }
+        const untracked = movements.filter((movement) => {
             const allocated = (movement.lotAllocations ?? []).reduce((total, entry) => total + entry.quantity, 0);
             return Math.abs(allocated - movement.quantity) > 1e-8;
-        })) {
-            throw AppError.conflict("Cost is unavailable for a sale with stock from an unknown source");
+        });
+        if (untracked.length) {
+            const productIds = new Set(untracked.map((movement) => movement.productId.toString()));
+            const names = [...new Set(invoice.items.filter((item) => productIds.has(item.productId.toString()))
+                .map((item) => item.productName))];
+            const products = names.length ? ` Affected products: ${names.join(", ")}.` : "";
+            throw AppError.conflict(`Inventory cost could not be posted because some sold stock has no supplier receipt lot recorded.${products}`);
         }
         const quantitiesByLot = new Map();
         for (const movement of movements) {

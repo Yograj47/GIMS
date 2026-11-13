@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
@@ -19,6 +20,7 @@ export function SaleBilling({ saleId, wasPaid, invoice, onInvoice }: {
     const [method, setMethod] = useState("cash");
     const [reference, setReference] = useState("");
     const [error, setError] = useState("");
+    const [costError, setCostError] = useState("");
     const pendingKey = useRef<{ signature: string; key: string } | null>(null);
     const url = `/billing/sales/${saleId}/invoice`;
 
@@ -76,12 +78,15 @@ export function SaleBilling({ saleId, wasPaid, invoice, onInvoice }: {
 
     async function postCost() {
         if (!invoice) return;
+        setCostError("");
         setSaving(true);
         try {
             const { data } = await api.post<ApiResponse<SalesInvoice>>(`/billing/invoices/${invoice._id}/cost`);
             onInvoice(data.data ?? invoice);
-        } catch {
-            // The API interceptor shows missing receipts or cost provenance.
+        } catch (error) {
+            setCostError(isAxiosError<{ message?: string }>(error)
+                ? error.response?.data?.message ?? "Inventory cost could not be posted."
+                : "Inventory cost could not be posted.");
         } finally {
             setSaving(false);
         }
@@ -109,6 +114,7 @@ export function SaleBilling({ saleId, wasPaid, invoice, onInvoice }: {
                         {invoice.costMinor === undefined ? (
                             <Button variant="outline" disabled={saving} onClick={() => void postCost()}>Post inventory cost</Button>
                         ) : <p className="text-sm">Inventory cost {formatInvoiceMoney(invoice.costMinor, invoice.currency)}</p>}
+                        {costError && <p role="alert" className="text-sm text-red-700">{costError}</p>}
                         {outstanding > 0 && (
                             <form onSubmit={pay} className="flex flex-wrap items-end gap-3">
                                 <label className="grid gap-1 text-sm">Amount (NPR)

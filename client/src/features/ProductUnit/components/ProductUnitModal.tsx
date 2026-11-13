@@ -42,10 +42,10 @@ const selectStyles: StylesConfig<SelectOption, false> = {
         ...base,
         minHeight: '36px',
         borderRadius: '6px',
-        borderColor: state.isFocused ? '#2563eb' : '#e2e8f0', // blue-600 : slate-200
-        boxShadow: state.isFocused ? '0 0 0 1px #2563eb' : 'none',
+        borderColor: state.isFocused ? '#047857' : '#e2e8f0', // brand-600 : slate-200
+        boxShadow: state.isFocused ? '0 0 0 1px #047857' : 'none',
         '&:hover': {
-            borderColor: state.isFocused ? '#2563eb' : '#cbd5e1',
+            borderColor: state.isFocused ? '#047857' : '#cbd5e1',
         },
         fontSize: '14px',
         fontWeight: '500',
@@ -54,10 +54,10 @@ const selectStyles: StylesConfig<SelectOption, false> = {
         ...base,
         fontSize: '13px',
         fontWeight: '500',
-        backgroundColor: state.isSelected ? '#2563eb' : state.isFocused ? '#eff6ff' : 'white',
-        color: state.isSelected ? 'white' : '#1e293b',
+        backgroundColor: state.isSelected ? '#047857' : state.isFocused ? '#ecfdf5' : 'white',
+        color: state.isSelected ? 'white' : '#20392e',
         '&:active': {
-            backgroundColor: '#dbeafe',
+            backgroundColor: '#d1fae5',
         }
     }),
 };
@@ -103,7 +103,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-105 rounded-md shadow-xl border border-slate-200 overflow-hidden">
                 
                 {/* Header */}
@@ -112,7 +112,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                         <h2 className="text-sm font-bold text-slate-900">
                             {initialData ? 'Update Conversion' : 'Link New Unit'}
                         </h2>
-                        <p className="text-[11px] text-blue-600 font-medium mt-0.5">{productName}</p>
+                        <p className="text-[11px] text-brand-600 font-medium mt-0.5">{productName}</p>
                     </div>
                     <button onClick={onClose} className="p-1 hover:bg-white rounded border border-transparent hover:border-slate-200 text-slate-400 transition-all">
                         <X size={18} />
@@ -151,7 +151,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                     <div className="space-y-1.5">
                         <div className="flex justify-between items-center px-0.5">
                             <label className="text-[11px] font-semibold text-slate-500">Multiplier Factor</label>
-                            <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-100 tabular-nums">
+                            <span className="text-[10px] text-brand-600 font-bold bg-brand-50 px-2 py-0.5 rounded border border-brand-100 tabular-nums">
                                 1 Unit = {currentMultiplier || 0} Base
                             </span>
                         </div>
@@ -161,7 +161,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                                 type="number" 
                                 step="any" 
                                 {...register("multiplier", { valueAsNumber: true })} 
-                                className="pl-10 h-9 rounded-md border-slate-200 text-sm font-bold tabular-nums focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500" 
+                                className="pl-10 h-9 rounded-md border-slate-200 text-sm font-bold tabular-nums focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500"
                             />
                         </div>
                     </div>
@@ -180,7 +180,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                                     <Switch 
                                         checked={field.value} 
                                         onCheckedChange={field.onChange} 
-                                        className="scale-75 data-[state=checked]:bg-blue-600"
+                                        className="scale-75 data-[state=checked]:bg-brand-600"
                                     />
                                 )}
                             />
@@ -197,7 +197,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                                     <Switch 
                                         checked={field.value} 
                                         onCheckedChange={field.onChange} 
-                                        className="scale-75 data-[state=checked]:bg-blue-600"
+                                        className="scale-75 data-[state=checked]:bg-brand-600"
                                     />
                                 )}
                             />
@@ -217,7 +217,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                         <Button 
                             type="submit" 
                             disabled={isSubmitting} 
-                            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm rounded-md transition-all active:scale-95"
+                            className="flex-1 h-10 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm rounded-md transition-all active:scale-95"
                         >
                             {isSubmitting ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />

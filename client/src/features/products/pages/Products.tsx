@@ -1,195 +1,127 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Plus, PackageSearch, Search, RotateCcw } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useProducts } from '../hooks/useProducts';
-import { DataTable } from '@/components/common/DataTable';
-import { getProductColumns } from '../components/ProductColumns';
-import { useDebounce } from '@/lib/debounce';
-import { useCategories } from '@/features/category/hooks/useCategories';
-import Select, { type StylesConfig } from "react-select";
-import { AdminGate } from '@/features/auth/components/AdminGate';
+import { useEffect, useMemo, useState } from "react";
+import { PackageSearch, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { DataTable } from "@/components/common/DataTable";
+import { useDebounce } from "@/lib/debounce";
+import { useCategories } from "@/features/category/hooks/useCategories";
+import { AdminGate } from "@/features/auth/components/AdminGate";
+import type { ApiResponse } from "@/types/api";
+import type { ProductData } from "@/types/product";
+import { getProductColumns } from "../components/ProductColumns";
+import { productService } from "../api/product.service";
 
-interface CategoryOption {
-    value: string;
-    label: string;
-}
+const selectStyle = "h-11 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-brand-600";
+const stockLabels = { healthy: "Healthy", low: "Low stock", out: "Out of stock" };
 
-const Products: React.FC = () => {
+export default function Products() {
     const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectCategory, setSelectCategory] = useState("");
-    const [stockLevel, setStockLevel] = useState<string>("All Levels");
-    const debouncedSearch = useDebounce(searchQuery, 400);
-
-    const { products, fetchProducts, isLoading, meta } = useProducts();
-    const { categories, fetchCategories } = useCategories();
+    const [search, setSearch] = useState("");
+    const [category, setCategory] = useState("");
+    const [stock, setStock] = useState("");
+    const [sort, setSort] = useState("recent");
+    const [showFilters, setShowFilters] = useState(false);
+    const [retry, setRetry] = useState(0);
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+    const [result, setResult] = useState<{ key: string; response?: ApiResponse<ProductData[]> }>();
+    const { categories, fetchCategories } = useCategories();
+    const query = useDebounce(search.trim(), 350);
+    const { pageIndex, pageSize } = pagination;
+    const key = JSON.stringify([pageIndex, pageSize, query, category, stock, sort, retry]);
 
+    useEffect(() => { void fetchCategories(undefined, undefined, undefined, true); }, [fetchCategories]);
     useEffect(() => {
-        const fetch = async () => {
-            await Promise.all([
-                fetchProducts(
-                    pagination.pageIndex + 1,
-                    pagination.pageSize,
-                    debouncedSearch,
-                    selectCategory,
-                    stockLevel === "All Levels" ? "" : stockLevel
-                ),
-                fetchCategories(undefined, undefined, undefined, true)
-            ])
-        }
-        fetch();
-    }, [fetchProducts, fetchCategories, pagination.pageIndex, pagination.pageSize, debouncedSearch, selectCategory, stockLevel]);
+        const controller = new AbortController();
+        productService.getAll(pageIndex + 1, pageSize, query, category, stock, false, sort, controller.signal).then(
+            (response) => { if (!controller.signal.aborted) setResult({ key, response: response.success ? response : undefined }); },
+            () => { if (!controller.signal.aborted) setResult({ key }); },
+        );
+        return () => controller.abort();
+    }, [pageIndex, pageSize, query, category, stock, sort, key]);
 
-    const categoryOptions = useMemo<CategoryOption[]>(() => {
-        return [
-            { value: "", label: "ALL CATEGORIES" },
-            ...(categories?.map(cat => ({
-                value: cat._id,
-                label: cat.name.toUpperCase()
-            })) || [])
-        ];
-    }, [categories]);
-
-    const customSelectStyles: StylesConfig<CategoryOption, false> = {
-        control: (base) => ({
-            ...base,
-            height: '40px',
-            minHeight: '40px',
-            borderRadius: '2px',
-            borderColor: '#cbd5e1',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            textTransform: 'uppercase',
-            boxShadow: 'none',
-            '&:hover': { borderColor: '#cbd5e1' }
-        }),
-        option: (base) => ({
-            ...base,
-            fontSize: '11px',
-            fontWeight: 'bold',
-            textTransform: 'uppercase',
-        })
-    };
-
+    const loading = search.trim() !== query || result?.key !== key;
+    const response = result?.response;
+    const failed = !loading && !response;
+    const total = response?.meta?.totalItems ?? 0;
+    const filterCount = Number(Boolean(category)) + Number(Boolean(stock));
+    const hasFilters = Boolean(search.trim() || filterCount);
     const columns = useMemo(() => getProductColumns(navigate), [navigate]);
 
+    function firstPage() {
+        setPagination((previous) => previous.pageIndex === 0 ? previous : { ...previous, pageIndex: 0 });
+    }
+
+    function clear() {
+        setSearch("");
+        setCategory("");
+        setStock("");
+        firstPage();
+    }
+
     return (
-        <div className="h-full animate-in fade-in duration-500">
-            <div className="max-w-400 mx-auto space-y-6">
-
-                {/* 1. Minimal Header */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-300 pb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
-                            <PackageSearch size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
-                                Products
-                            </h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                {meta?.totalItems || 0} Total Records • System Active
-                            </p>
-                        </div>
-                    </div>
-
-                    <AdminGate allowedRoles={["owner"]}>
-                        <Button
-                            onClick={() => navigate("/products/add")}
-                            className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
-                        >
-                            <Plus className="mr-2 h-4 w-4" strokeWidth={3} /> Add Product
-                        </Button>
-                    </AdminGate>
+        <div className="mx-auto min-w-0 max-w-[90rem] space-y-5">
+            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-5">
+                <div className="flex items-center gap-3">
+                    <span className="grid size-10 place-items-center rounded-lg bg-brand-100 text-brand-700"><PackageSearch size={19} aria-hidden="true" /></span>
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-950">Products</h1>
                 </div>
+                <AdminGate allowedRoles={["owner"]}>
+                    <Button asChild><Link to="/products/add"><Plus size={16} /> Add product</Link></Button>
+                </AdminGate>
+            </header>
 
-                {/* 2. Precision Toolbar */}
-                <div className="flex flex-col lg:flex-row gap-3">
-
-                    {/* Search Field */}
-                    <div className="relative flex-1 group">
-                        <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
-                            size={14}
-                            strokeWidth={2.5}
-                        />
-                        <Input
-                            placeholder="Search by product name..."
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                            }}
-                            className="w-full h-10 pl-10 bg-white border-slate-300 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-all shadow-none"
-                        />
+            <section aria-label="Product search and filters" className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative min-w-0 flex-1">
+                        <Search size={17} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-500" />
+                        <Input id="product-search" aria-label="Search by product name" placeholder="Search products" value={search}
+                            onChange={(event) => { setSearch(event.target.value); firstPage(); }}
+                            className="h-11 rounded-lg pr-10 pl-9" />
+                        {search && <button type="button" aria-label="Clear search" onClick={() => { setSearch(""); firstPage(); document.getElementById("product-search")?.focus(); }}
+                            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-slate-600 hover:text-brand-700"><X size={16} /></button>}
                     </div>
-
-                    {/* Stock Filter */}
-                    <div className="relative min-w-50">
-                        <select
-                            value={stockLevel}
-                            onChange={(e) => {
-                                setStockLevel(e.target.value);
-                                setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                            }}
-                            className="w-full h-10 bg-white border border-slate-300 rounded-sm px-3 text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-blue-500 appearance-none cursor-pointer transition-all"
-                        >
-                            <option>All Levels</option>
-                            <option value="healthy">Healthy</option>
-                            <option value="low">Low Stock Warning</option>
-                            <option value="out">Out of Stock</option>
-                        </select>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                            <svg width="8" height="8" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 1L5 5L9 1" /></svg>
-                        </div>
-                    </div>
-
-                    {/* Category Filter */}
-                    <div className="min-w-50">
-                        <Select<CategoryOption, false>
-                            placeholder="CATEGORY"
-                            options={categoryOptions}
-                            value={categoryOptions.find(opt => opt.value === selectCategory) || null}
-                            onChange={(newValue) => {
-                                setSelectCategory(newValue?.value || "");
-                                setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                            }}
-                            styles={customSelectStyles}
-                            isClearable
-                            className="react-select-container z-50"
-                            classNamePrefix="react-select"
-                        />
-                    </div>
-
-                    {/* Reset Action */}
-                    <Button
-                        variant="outline"
-                        disabled={!searchQuery && stockLevel === "All Levels"}
-                        onClick={() => { setSearchQuery(""); setStockLevel("All Levels"); setSelectCategory(""); }}
-                        className="h-10 border-slate-300 text-slate-500 hover:bg-slate-50 rounded-sm text-[11px] font-bold uppercase"
-                    >
-                        <RotateCcw className="mr-2 h-3 w-3" /> Reset
+                    <Button type="button" variant="outline" aria-expanded={showFilters} aria-controls="product-filters"
+                        className="h-11 lg:hidden" onClick={() => setShowFilters(!showFilters)}>
+                        <SlidersHorizontal size={16} /> Filters{filterCount > 0 && ` (${filterCount})`}
                     </Button>
                 </div>
-
-                {/* 3. The Data Table Wrapper */}
-                <div className="bg-white border border-slate-300 shadow-sm">
-                    <DataTable
-                        columns={columns}
-                        data={products || []}
-                        isLoading={isLoading}
-                        rowCount={meta?.totalItems || 0}
-                        pageCount={meta?.totalPages || 0}
-                        pagination={pagination}
-                        setPagination={setPagination}
-                    />
+                <div id="product-filters" className={`${showFilters ? "grid" : "hidden"} grid-cols-1 gap-3 sm:grid-cols-3 lg:grid`}>
+                    <label className="grid min-w-0 gap-1 text-sm font-medium text-slate-700">Category
+                        <select className={selectStyle} value={category} onChange={(event) => { setCategory(event.target.value); firstPage(); }}>
+                            <option value="">All categories</option>
+                            {categories?.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
+                        </select>
+                    </label>
+                    <label className="grid min-w-0 gap-1 text-sm font-medium text-slate-700">Stock status
+                        <select className={selectStyle} value={stock} onChange={(event) => { setStock(event.target.value); firstPage(); }}>
+                            <option value="">All stock levels</option>
+                            {Object.entries(stockLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                    </label>
+                    <label className="grid min-w-0 gap-1 text-sm font-medium text-slate-700">Sort by
+                        <select className={selectStyle} value={sort} onChange={(event) => { setSort(event.target.value); firstPage(); }}>
+                            <option value="recent">Newest first</option>
+                            <option value="name">Name A–Z</option>
+                            <option value="stock">Lowest stock first</option>
+                        </select>
+                    </label>
                 </div>
-            </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <p role="status" className="text-slate-600">{loading ? "Loading products…" : failed ? "Product results unavailable" : `${total.toLocaleString()} ${total === 1 ? "product" : "products"}`}</p>
+                    {(hasFilters || sort !== "recent") && <Button variant="ghost" size="sm" onClick={() => { clear(); setSort("recent"); }}>Reset search and filters</Button>}
+                </div>
+            </section>
+
+            <DataTable columns={columns} data={response?.data ?? []} isLoading={loading}
+                rowCount={total} pageCount={response?.meta?.totalPages ?? 0}
+                pagination={pagination} setPagination={setPagination}
+                emptyState={failed ? (
+                    <><p>Couldn’t load products.</p><Button variant="outline" size="sm" onClick={() => setRetry((value) => value + 1)}>Try again</Button></>
+                ) : hasFilters ? (
+                    <><p>No products match your search and filters.</p><Button variant="outline" size="sm" onClick={clear}>Clear search and filters</Button></>
+                ) : <p>No products have been added yet.</p>}
+            />
         </div>
     );
-};
-
-export default Products;
+}

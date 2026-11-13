@@ -85,7 +85,7 @@ export default function UnitFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200"><div className="bg-white w-full max-w-110 rounded-md shadow-xl border border-slate-200">
+    <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200"><div className="bg-white w-full max-w-110 rounded-md shadow-xl border border-slate-200">
 
       <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
         <div>
@@ -107,7 +107,7 @@ export default function UnitFormModal({
             <Input
               {...register("name")}
               placeholder="e.g. Kilogram"
-              className="h-9 rounded-md border-slate-200 text-sm focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500 transition-all"
+              className="h-9 rounded-md border-slate-200 text-sm focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500 transition-all"
             />
             {errors.name && (
               <p className="text-[10px] text-rose-500 mt-1 flex items-center gap-1">
@@ -133,7 +133,7 @@ export default function UnitFormModal({
               name="unitType"
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-9 rounded-md border-slate-200 text-sm focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500">
+                  <SelectTrigger className="h-9 rounded-md border-slate-200 text-sm focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent className="z-200 rounded-md border-slate-200 shadow-lg text-sm">
@@ -156,7 +156,7 @@ export default function UnitFormModal({
                 disabled={isBaseUnit}
                 className={cn(
                   "h-9 rounded-md text-sm tabular-nums text-right pr-3",
-                  isBaseUnit ? "bg-slate-50 text-slate-400 border-slate-100" : "bg-white border-slate-200 focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500"
+                  isBaseUnit ? "bg-slate-50 text-slate-400 border-slate-100" : "bg-white border-slate-200 focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500"
                 )}
               />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">×</span>
@@ -181,7 +181,7 @@ export default function UnitFormModal({
                   <Switch
                     checked={field.value as boolean}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-blue-600 scale-75"
+                    className="data-[state=checked]:bg-brand-600 scale-75"
                   />
                 )}
               />
@@ -196,7 +196,7 @@ export default function UnitFormModal({
           <Button
             type="submit"
             disabled={isLoading || isSubmitting}
-            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all active:scale-95 shadow-sm rounded-md"
+            className="flex-1 h-10 bg-brand-600 hover:bg-brand-700 text-white font-semibold transition-all active:scale-95 shadow-sm rounded-md"
           >
             {isLoading || isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

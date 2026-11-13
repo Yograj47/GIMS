@@ -16,7 +16,7 @@ export function InputGroup({ label, disabled, value, onChange }: InputGroupProps
                 disabled={disabled}
                 value={value}
                 onChange={onChange}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-4 focus:ring-blue-100/50 focus:border-blue-500 outline-none transition-all disabled:opacity-60"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-4 focus:ring-brand-100/50 focus:border-brand-500 outline-none transition-all disabled:opacity-60"
             />
         </div>
     );

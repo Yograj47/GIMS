@@ -35,22 +35,29 @@ export default function AccountingReport() {
 
     return (
         <section className="mx-auto max-w-4xl space-y-5">
-            <Link to="/reports" className="text-sm text-blue-700">Back to reports</Link>
+            <Link to="/reports" className="text-sm text-brand-700">Back to reports</Link>
             <h1 className="text-xl font-bold">Accounting report</h1>
             <p className="text-sm text-slate-600">Posted balances in {report.currency}. {report.invoicesWithoutCost} invoices awaiting inventory cost.</p>
             {debits !== credits && <p role="alert" className="text-sm text-red-700">Posted debits and credits do not balance.</p>}
             <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-                <table className="w-full text-left text-sm">
+                <table className="records-table w-full text-left text-sm">
                     <thead className="bg-slate-50">
                         <tr><th className="p-3">Account</th><th className="p-3 text-right">Debits</th><th className="p-3 text-right">Credits</th><th className="p-3 text-right">Net debit</th></tr>
                     </thead>
                     <tbody className="divide-y">
+                        {report.accounts.length === 0 && (
+                            <tr>
+                                <td colSpan={4} className="p-5 text-slate-600">
+                                    No accounting entries have been posted yet. Issue a sales invoice from the transaction details or post a supplier bill from Supplier Billing. Completed checkouts post automatically.
+                                </td>
+                            </tr>
+                        )}
                         {report.accounts.map((account) => (
-                            <tr key={account.account}>
+                            <tr key={account.account} data-record>
                                 <th scope="row" className="p-3 font-medium capitalize">{account.account.replaceAll("_", " ")}</th>
-                                <td className="p-3 text-right tabular-nums">{money(account.debitMinor)}</td>
-                                <td className="p-3 text-right tabular-nums">{money(account.creditMinor)}</td>
-                                <td className="p-3 text-right tabular-nums">{money(String(BigInt(account.debitMinor) - BigInt(account.creditMinor)))}</td>
+                                <td className="p-3 whitespace-nowrap text-right tabular-nums">{money(account.debitMinor)}</td>
+                                <td className="p-3 whitespace-nowrap text-right tabular-nums">{money(account.creditMinor)}</td>
+                                <td className="p-3 whitespace-nowrap text-right tabular-nums">{money(String(BigInt(account.debitMinor) - BigInt(account.creditMinor)))}</td>
                             </tr>
                         ))}
                     </tbody>

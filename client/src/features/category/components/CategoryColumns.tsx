@@ -18,7 +18,7 @@ export const getCategoryColumns = (
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-sm bg-blue-600 flex items-center justify-center text-white shrink-0 group-hover:bg-blue-600 transition-colors">
+          <div className="w-8 h-8 rounded-sm bg-brand-600 flex items-center justify-center text-white shrink-0 group-hover:bg-brand-600 transition-colors">
             <span className="font-black text-[10px] uppercase">{row.original.name.charAt(0)}</span>
           </div>
           <div className="flex flex-col">
@@ -81,7 +81,8 @@ export const getCategoryColumns = (
               variant="ghost"
               size="sm"
               onClick={() => onEdit(row.original)}
-              className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
+              aria-label={`Edit ${row.original.name}`}
+              className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-100 transition-all"
             >
               <Edit3 size={14} strokeWidth={2.5} />
             </Button>
@@ -89,6 +90,7 @@ export const getCategoryColumns = (
               variant="ghost"
               size="sm"
               onClick={() => onDelete(row.original)}
+              aria-label={`Delete ${row.original.name}`}
               className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-rose-600..."
             >
               <Trash2 size={14} strokeWidth={2.5} />

@@ -51,13 +51,13 @@ export default function CategoryFormModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-105 rounded-sm shadow-2xl overflow-hidden border border-slate-200 shadow-slate-900/20">
                 
                 {/* 1. HEADER - Sharp & Minimal */}
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
                     <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-blue-600 rounded-sm text-white">
+                        <div className="p-1.5 bg-brand-600 rounded-sm text-white">
                             <LayoutGrid size={14} />
                         </div>
                         <h2 className="text-[11px] font-black text-slate-600 uppercase tracking-widest">
@@ -77,7 +77,7 @@ export default function CategoryFormModal({
                         <Input
                             {...register("name")}
                             placeholder="e.g. Raw materials"
-                            className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500 transition-all placeholder:text-slate-300"
+                            className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500 transition-all placeholder:text-slate-300"
                         />
                         {errors.name && (
                             <div className="flex items-center gap-1 mt-1 ml-0.5 text-rose-500">
@@ -93,7 +93,7 @@ export default function CategoryFormModal({
                         <Textarea
                             {...register("description")}
                             placeholder="Provide brief specs..."
-                            className="min-h-25 rounded-sm border-slate-200 bg-white font-bold text-xs focus-visible:ring-blue-600 focus-visible:ring-1 focus-visible:border-blue-500 transition-all resize-none placeholder:text-slate-300 tabular-nums"
+                            className="min-h-25 rounded-sm border-slate-200 bg-white font-bold text-xs focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500 transition-all resize-none placeholder:text-slate-300 tabular-nums"
                         />
                     </div>
 
@@ -110,7 +110,7 @@ export default function CategoryFormModal({
                                 <Switch 
                                     checked={field.value} 
                                     onCheckedChange={field.onChange} 
-                                    className="data-[state=checked]:bg-blue-600 scale-90"
+                                    className="data-[state=checked]:bg-brand-600 scale-90"
                                 />
                             )}
                         />
@@ -129,7 +129,7 @@ export default function CategoryFormModal({
                         <Button 
                             type="submit" 
                             disabled={isLoading || isSubmitting} 
-                            className="flex-1 h-10 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-sm hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                            className="flex-1 h-10 bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest rounded-sm hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50"
                         >
                             {isLoading || isSubmitting ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />

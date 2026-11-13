@@ -29,7 +29,7 @@ const Suppliers: React.FC = () => {
                 {/* 1. Minimal Header */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-300 pb-6">
                     <div className="flex items-center gap-4">
-                        <div className="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-100">
+                        <div className="p-2 bg-brand-600 rounded-lg text-white shadow-lg shadow-brand-100">
                             <Truck size={20} />
                         </div>
                         <div>
@@ -44,7 +44,7 @@ const Suppliers: React.FC = () => {
 
                     <Button
                         onClick={() => navigate("/suppliers/add")}
-                        className="h-9 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
+                        className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                     >
                         <Plus className="mr-2 h-4 w-4" strokeWidth={3} /> Add Supplier
                     </Button>
@@ -54,7 +54,7 @@ const Suppliers: React.FC = () => {
                 <div className="flex flex-col lg:flex-row gap-3">
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
@@ -65,7 +65,7 @@ const Suppliers: React.FC = () => {
                                 setSearchQuery(e.target.value);
                                 setPagination(prev => ({ ...prev, pageIndex: 0 }));
                             }}
-                            className="w-full h-10 pl-10 bg-white border-slate-300 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-blue-500 shadow-none"
+                            className="w-full h-10 pl-10 bg-white border-slate-300 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-brand-500 shadow-none"
                         />
                     </div>
 
