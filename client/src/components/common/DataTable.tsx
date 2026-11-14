@@ -20,6 +20,7 @@ import {
 
 import { DataTablePagination } from "./DataTablePagination"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 import React from "react"
 
 interface DataTableProps<TData> {
@@ -31,6 +32,7 @@ interface DataTableProps<TData> {
     setPagination: OnChangeFn<PaginationState>
     isLoading: boolean
     emptyState?: React.ReactNode
+    embedded?: boolean
     renderExpandedRow?: (row: Row<TData>) => React.ReactNode
 }
 
@@ -43,6 +45,7 @@ export function DataTable<TData>({
     setPagination,
     isLoading,
     emptyState,
+    embedded = false,
     renderExpandedRow
 }: DataTableProps<TData>) {
     const [expanded, setExpanded] = React.useState({})
@@ -66,17 +69,17 @@ export function DataTable<TData>({
     })
 
     return (
-        <div className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className={cn("flex min-w-0 flex-col bg-card", !embedded && "overflow-hidden rounded-xl border border-border")}>
             {isLoading && <span role="status" className="sr-only">Loading records</span>}
-            <div aria-busy={isLoading} role="region" aria-label="Table results" tabIndex={0} className="min-w-0 flex-1 overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-600">
+            <div aria-busy={isLoading} role="region" aria-label="Table results" tabIndex={0} className="max-h-[min(32rem,60dvh)] min-w-0 overflow-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring">
                 <Table noWrapper className="records-table w-full border-separate border-spacing-0">
-                    <TableHeader className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-sm">
+                    <TableHeader className="sticky top-0 z-20 bg-muted">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="hover:bg-transparent">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className="h-11 border-b border-slate-200 px-3 text-xs font-semibold text-slate-600 sm:px-5"
+                                        className="h-12 border-b border-border px-4 text-xs font-semibold text-muted-foreground sm:px-6"
                                     >
                                         {flexRender(header.column.columnDef.header, header.getContext())}
                                     </TableHead>
@@ -103,14 +106,14 @@ export function DataTable<TData>({
                                         data-expanded={row.getIsExpanded() || undefined}
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className="px-3 py-3 text-sm text-slate-700 sm:px-5">
+                                            <TableCell key={cell.id} className="px-4 py-4 text-sm text-foreground sm:px-6">
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </TableCell>
                                         ))}
                                     </TableRow>
                                     {row.getIsExpanded() && renderExpandedRow && (
                                         <TableRow className="bg-brand-50/50 hover:bg-brand-50/50">
-                                            <TableCell colSpan={columns.length} className="p-0 border-b border-slate-200">
+                                            <TableCell colSpan={columns.length} className="p-0 border-b border-border">
                                                 {renderExpandedRow(row)}
                                             </TableCell>
                                         </TableRow>
@@ -119,7 +122,7 @@ export function DataTable<TData>({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-36 whitespace-normal text-center text-sm text-slate-600">
+                                <TableCell colSpan={columns.length} className="h-36 whitespace-normal text-center text-sm text-muted-foreground">
                                     <div className="flex flex-col items-center gap-3 p-4">
                                         {emptyState ?? "No records found."}
                                     </div>
@@ -130,7 +133,7 @@ export function DataTable<TData>({
                 </Table>
             </div>
 
-            <div className="border-t border-slate-200 bg-white px-3 py-3 sm:px-4">
+            <div className="border-t border-border bg-card px-4 py-4 sm:px-6">
                 <DataTablePagination table={table} totalItems={rowCount} />
             </div>
         </div>

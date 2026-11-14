@@ -1,5 +1,6 @@
+import { BackButton } from "@/components/common/BackButton";
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatInvoiceMoney } from "@/types/billing";
@@ -41,16 +42,16 @@ export default function CheckoutStatus() {
     }
 
     return (
-        <main className="min-h-dvh bg-slate-50 p-5">
-            <div className="mx-auto max-w-lg space-y-4 rounded-xl border bg-white p-6">
-                <Link to="/shop" className="text-sm text-brand-700">Back to shop</Link>
+        <main className="min-h-dvh bg-muted p-5">
+            <div className="mx-auto max-w-lg space-y-4 rounded-xl border bg-card p-6">
+                <BackButton className="text-sm text-link hover:underline" />
                 <h1 className="text-xl font-bold">Order status</h1>
-                {!token && <p className="text-sm text-slate-600">There is no saved checkout in this tab.</p>}
+                {!token && <p className="text-sm text-muted-foreground">There is no saved checkout in this tab.</p>}
                 {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
                 {!order && busy && <Skeleton role="status" aria-label="Loading order" className="h-16 w-full" />}
                 {order && (
                     <>
-                        <p className="text-sm text-slate-600">Order {order.id.slice(-8).toUpperCase()} · {order.fulfillment}</p>
+                        <p className="text-sm text-muted-foreground">Order {order.id.slice(-8).toUpperCase()} · {order.fulfillment}</p>
                         <p className="font-semibold">{formatInvoiceMoney(order.totalMinor, "NPR")}</p>
                         <p role="status" className="text-sm">
                             {order.status === "reserved" && (order.paymentMethod === "cash" ? `Reserved. Pay cash at ${order.fulfillment === "delivery" ? "delivery" : "pickup"}.` : "Reserved. Waiting for verified payment.")}
@@ -60,8 +61,7 @@ export default function CheckoutStatus() {
                             {order.status === "expired" && "Reservation expired."}
                             {order.status === "payment_review" && "Payment received after the reservation ended. Contact the store with your order number."}
                         </p>
-                        {order.status === "reserved" && order.expiresAt && <p className="text-sm text-slate-600">Reserved until {new Date(order.expiresAt).toLocaleString()}</p>}
-                        {order.channel === "in_store" && <Link to="/stock-movements/orders" className="inline-block text-sm text-brand-700">Back to checkout orders</Link>}
+                        {order.status === "reserved" && order.expiresAt && <p className="text-sm text-muted-foreground">Reserved until {new Date(order.expiresAt).toLocaleString()}</p>}
                     </>
                 )}
                 {token && <div className="flex flex-wrap gap-2">

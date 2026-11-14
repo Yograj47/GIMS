@@ -14,7 +14,7 @@ interface StockBalance {
     excessTracked: number;
 }
 
-const field = "rounded-md border border-slate-300 px-3 py-2 text-sm";
+const field = "rounded-md border border-input px-3 py-2 text-sm";
 
 export function StockReconciliation({ products, canWrite, onCount }: {
     products: ProductData[];
@@ -76,7 +76,7 @@ export function StockReconciliation({ products, canWrite, onCount }: {
     }
 
     return (
-        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+        <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <h2 className="text-lg font-semibold">Stock reconciliation</h2>
             <div className="flex flex-wrap items-end gap-3">
                 <label className="grid gap-1 text-sm">Product
@@ -97,8 +97,8 @@ export function StockReconciliation({ products, canWrite, onCount }: {
                             ["Sellable without a known lot", balance.unattributedSellable],
                             ["Quarantined", balance.quarantined],
                         ] as const).map(([label, value]) => (
-                            <div key={label} className="rounded-md bg-slate-50 p-3">
-                                <dt className="text-slate-600">{label}</dt>
+                            <div key={label} className="rounded-md bg-muted p-3">
+                                <dt className="text-muted-foreground">{label}</dt>
                                 <dd className="font-semibold tabular-nums">{value}</dd>
                             </div>
                         ))}

@@ -14,17 +14,17 @@ interface UserListingProps {
 
 export default function UserListing({ user, isSelf, isProtected, handleRoleChange, openDeleteDialog }: UserListingProps) {
   return (
-    <tr data-record className="group hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+    <tr data-record className="group hover:bg-muted transition-colors border-b border-slate-50 last:border-0">
       <td className="px-3 py-3 sm:px-5">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm transition-colors shrink-0">
             <span className="font-black text-[10px] uppercase">{user.name.charAt(0)}</span>
           </div>
           <div className="flex flex-col">
-            <p className="text-sm font-semibold text-slate-900">
-              {user.name} {isSelf && <span className="text-brand-600 ml-1 text-[8px] italic tracking-normal">(Self)</span>}
+            <p className="text-sm font-semibold text-foreground">
+              {user.name} {isSelf && <span className="text-link ml-1 text-[8px] italic tracking-normal">(Self)</span>}
             </p>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-muted-foreground">
               {user.email}
             </p>
           </div>
@@ -37,13 +37,14 @@ export default function UserListing({ user, isSelf, isProtected, handleRoleChang
           onValueChange={(value) => handleRoleChange(user._id, value)}
           disabled={isProtected || isSelf}
         >
-          <SelectTrigger aria-label={`Role for ${user.name}`} className="h-8 w-32 rounded-sm border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-600 focus:ring-1 focus:ring-brand-500 shadow-none transition-all">
+          <SelectTrigger aria-label={`Role for ${user.name}`} className="h-8 w-32 rounded-sm border-border bg-card text-[10px] font-black uppercase tracking-widest text-muted-foreground focus:ring-1 focus:ring-brand-500 shadow-none transition-all">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-sm border-slate-200">
+          <SelectContent className="rounded-sm border-border">
             <SelectItem value="admin" className="text-[10px] font-black uppercase tracking-widest">Admin</SelectItem>
-            <SelectItem value="owner" className="text-[10px] font-black uppercase tracking-widest">Owner</SelectItem>
+            <SelectItem value="owner" className="text-[10px] font-black uppercase tracking-widest">Owner / Manager</SelectItem>
             <SelectItem value="staff" className="text-[10px] font-black uppercase tracking-widest">Staff</SelectItem>
+            <SelectItem value="accountant">Accountant</SelectItem>
             <SelectItem value="customer">Customer</SelectItem>
           </SelectContent>
         </Select>

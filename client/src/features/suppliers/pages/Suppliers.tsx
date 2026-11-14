@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Search, RotateCcw, Truck } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { Plus, Search, Truck } from "lucide-react";
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
 import { useSuppliers } from '../hooks/useSuppliers';
 import { getSupplierColumns } from '../components/SupplierColumns';
 import { Input } from '@/components/ui/input';
+import { useAuthStore } from "@/store/authStore";
 import { useDebounce } from '@/lib/debounce';
 
 const Suppliers: React.FC = () => {
-    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const debouncedSearch = useDebounce(searchQuery, 400);
 
@@ -20,79 +20,53 @@ const Suppliers: React.FC = () => {
         fetchSuppliers(pagination.pageIndex + 1, pagination.pageSize, debouncedSearch);
     }, [fetchSuppliers, pagination.pageIndex, pagination.pageSize, debouncedSearch]);
 
-    const columns = useMemo(() => getSupplierColumns(navigate), [navigate]);
+    const billing = useAuthStore((state) => state.user?.role === "accountant");
+    const columns = useMemo(() => getSupplierColumns(billing), [billing]);
+
+    const updateSearch = (value: string) => {
+        setSearchQuery(value);
+        setPagination((previous) => ({ ...previous, pageIndex: 0 }));
+    };
 
     return (
-        <div className="h-full animate-in fade-in duration-500 pb-10">
-            <div className="max-w-350 mx-auto space-y-6">
+        <section className="mx-auto w-full max-w-6xl space-y-7 px-4 py-7 sm:px-6 sm:py-10">
+            <header className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-semibold tracking-tight">{billing ? "Supplier billing" : "Suppliers"}</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {billing ? "Choose a supplier to post bills or review payments and credits." : "Find suppliers and open their profiles."}
+                    </p>
+                </div>
+                {!billing && <Button asChild><Link to="/suppliers/add"><Plus aria-hidden="true" /> Add supplier</Link></Button>}
+            </header>
 
-                {/* 1. Minimal Header */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-300 pb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="p-2 bg-brand-600 rounded-lg text-white shadow-lg shadow-brand-100">
-                            <Truck size={20} />
+            <section aria-labelledby="supplier-directory" className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
+                <div className="space-y-3 border-b border-border p-5 sm:p-6">
+                    <h2 id="supplier-directory" className="font-semibold">Supplier directory</h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative w-full sm:max-w-md">
+                            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input aria-label="Search suppliers" placeholder="Search by name, contact, or address" value={searchQuery} onChange={(event) => updateSearch(event.target.value)} className="pl-9" />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
-                                Suppliers
-                            </h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                {meta?.totalItems || 0} Total Records • System Active
-                            </p>
-                        </div>
+                        {searchQuery && <Button variant="ghost" onClick={() => updateSearch("")}>Clear search</Button>}
                     </div>
-
-                    <Button
-                        onClick={() => navigate("/suppliers/add")}
-                        className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
-                    >
-                        <Plus className="mr-2 h-4 w-4" strokeWidth={3} /> Add Supplier
-                    </Button>
                 </div>
-
-                {/* 2. Precision Toolbar */}
-                <div className="flex flex-col lg:flex-row gap-3">
-                    <div className="relative flex-1 group">
-                        <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors"
-                            size={14}
-                            strokeWidth={2.5}
-                        />
-                        <Input
-                            placeholder="Search by name, contact or location..."
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setPagination(prev => ({ ...prev, pageIndex: 0 }));
-                            }}
-                            className="w-full h-10 pl-10 bg-white border-slate-300 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-brand-500 shadow-none"
-                        />
-                    </div>
-
-                    <Button
-                        variant="outline"
-                        disabled={!searchQuery}
-                        onClick={() => setSearchQuery("")}
-                        className="h-10 border-slate-200 text-slate-500 hover:bg-slate-50 rounded-sm text-[11px] font-bold uppercase"
-                    >
-                        <RotateCcw className="mr-2 h-3 w-3" /> Reset
-                    </Button>
-                </div>
-
-                {/* 3. The Data Table Wrapper */}
-                <div className="bg-white border border-slate-300 shadow-sm">
-                    <DataTable
-                        columns={columns}
-                        data={Suppliers || []}
-                        isLoading={isLoading}
-                        rowCount={meta?.totalItems || 0}
-                        pageCount={meta?.totalPages || 0}
-                        pagination={pagination}
-                        setPagination={setPagination}
-                    />
-                </div>
-            </div>
-        </div>
+                <DataTable embedded
+                    columns={columns}
+                    data={Suppliers || []}
+                    isLoading={isLoading}
+                    rowCount={meta?.totalItems || 0}
+                    pageCount={meta?.totalPages || 0}
+                    pagination={pagination}
+                    setPagination={setPagination}
+                    emptyState={<div className="grid justify-items-center gap-2 whitespace-normal">
+                        <Truck aria-hidden="true" className="size-6 text-link" />
+                        <p className="font-medium text-foreground">{searchQuery ? "No matching suppliers" : "No suppliers yet"}</p>
+                        <p>{searchQuery ? "Try another name, contact, or address." : billing ? "Suppliers will appear when a manager adds them." : "Add a supplier to start tracking deliveries and bills."}</p>
+                    </div>}
+                />
+            </section>
+        </section>
     );
 };
 

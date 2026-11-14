@@ -30,31 +30,31 @@ export default function SystemAlerts() {
     return (
         <section id="system-alerts" aria-labelledby="system-alerts-heading" className="scroll-mt-28 space-y-4">
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
                 <div className="flex items-center gap-4">
                     <div className="p-2 bg-red-600 rounded-lg text-white shadow-lg shadow-brand-100">
                         <ShieldAlert size={20} />
                     </div>
                     <div>
-                        <h2 id="system-alerts-heading" className="text-lg font-semibold text-slate-900">
+                        <h2 id="system-alerts-heading" className="text-lg font-semibold text-foreground">
                             System Alerts
                         </h2>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">
                             {meta?.totalItems || 0} alerts
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-white border border-slate-300 px-4 py-2 rounded-sm shadow-sm">
+                <div className="flex items-center gap-3 bg-card border border-input px-4 py-2 rounded-sm shadow-sm">
                     <Activity size={14} className="text-rose-600 animate-pulse" />
-                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-600">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
                         {activeCount} pending on this page
                     </span>
                 </div>
             </div>
 
 
-            <div className="bg-white border border-slate-300">
+            <div className="bg-card border border-input">
                 <DataTable
                     columns={getAlertColumns(acknowledgeAlert)}
                     data={alerts}

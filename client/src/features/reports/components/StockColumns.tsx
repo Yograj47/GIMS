@@ -15,10 +15,10 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
                     <Package size={14} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-bold text-slate-900 text-[13px] leading-tight">
+                    <span className="font-bold text-foreground text-[13px] leading-tight">
                         {row.getValue("name")}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                    <span className="text-[10px] text-subtle-foreground font-medium uppercase tracking-tight">
                         SKU · {row.original._id.slice(-6).toUpperCase()}
                     </span>
                 </div>
@@ -29,7 +29,7 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
         accessorKey: "category.name",
         header: "Category",
         cell: ({ row }) => (
-            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm uppercase tracking-tighter">
+            <span className="text-[11px] font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-sm uppercase tracking-tighter">
                 {row.original.category?.name || "General"}
             </span>
         )
@@ -51,11 +51,11 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
                     )}>
                         {qty} <span className="text-[9px] uppercase font-black opacity-60 ml-1">{row.original.baseUnit?.shortForm ?? row.original.unit?.shortForm}</span>
                     </span>
-                    <div className="flex flex-col border-l border-slate-100 pl-3">
-                        <span className="text-xs font-medium text-slate-700">
+                    <div className="flex flex-col border-l border-border pl-3">
+                        <span className="text-xs font-medium text-foreground">
                             {isOut ? "Out of stock" : isLow ? "Low stock" : "Healthy"}
                         </span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                        <span className="text-[9px] font-bold text-subtle-foreground uppercase tracking-tighter">
                             Threshold: {threshold}
                         </span>
                     </div>
@@ -70,7 +70,7 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
             <div className="flex justify-end">
                 <Button 
                     variant="ghost" 
-                    className="h-8 px-3 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
+                    className="h-8 px-3 text-subtle-foreground hover:text-link hover:bg-brand-50 transition-all rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
                     onClick={() => navigate(`/reports/stock/product-history/${row.original._id}`)}
                 >
                     <History size={12} strokeWidth={3} />

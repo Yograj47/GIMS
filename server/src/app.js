@@ -6,6 +6,7 @@ import { API, ROUTES } from "./shared/constants/index.js";
 import { errorHandler } from "./shared/middleware/index.js";
 
 import authRoutes from "./modules/auth/auth.route.js";
+import customerRoutes from "./modules/user/customer.route.js";
 import userRoutes from "./modules/user/user.route.js";
 import categoryRoutes from "./modules/category/category.route.js";
 import supplierRoutes from "./modules/supplier/supplier.route.js";
@@ -63,6 +64,7 @@ app.use(`${API}${ROUTES.SETTINGS}`, settingRoute);
 app.use(`${API}${ROUTES.ACTIVITY_LOGS}`, activityLogRoute);
 app.use(`${API}${ROUTES.ANALYTICS}`, analyticsRoute);
 app.use(`${API}/receiving`, receivingRoute);
+app.use(`${API}/customers`, customerRoutes);
 app.use(`${API}/billing`, billingRoute);
 app.use(`${API}/checkout`, checkoutRoute);
 

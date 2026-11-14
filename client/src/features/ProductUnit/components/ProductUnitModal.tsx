@@ -104,17 +104,17 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-105 rounded-md shadow-xl border border-slate-200 overflow-hidden">
+            <div className="bg-card w-full max-w-105 rounded-md shadow-xl border border-border overflow-hidden">
                 
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/50">
                     <div>
-                        <h2 className="text-sm font-bold text-slate-900">
+                        <h2 className="text-sm font-bold text-foreground">
                             {initialData ? 'Update Conversion' : 'Link New Unit'}
                         </h2>
-                        <p className="text-[11px] text-brand-600 font-medium mt-0.5">{productName}</p>
+                        <p className="text-[11px] text-link font-medium mt-0.5">{productName}</p>
                     </div>
-                    <button onClick={onClose} className="p-1 hover:bg-white rounded border border-transparent hover:border-slate-200 text-slate-400 transition-all">
+                    <button onClick={onClose} className="p-1 hover:bg-card rounded border border-transparent hover:border-border text-subtle-foreground transition-all">
                         <X size={18} />
                     </button>
                 </div>
@@ -123,7 +123,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                     
                     {/* Unit Selection with React-Select */}
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-slate-500 ml-0.5">Measurement Unit</label>
+                        <label className="text-[11px] font-semibold text-muted-foreground ml-0.5">Measurement Unit</label>
                         <Controller
                             control={control}
                             name="unitId"
@@ -150,28 +150,28 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                     {/* Multiplier */}
                     <div className="space-y-1.5">
                         <div className="flex justify-between items-center px-0.5">
-                            <label className="text-[11px] font-semibold text-slate-500">Multiplier Factor</label>
-                            <span className="text-[10px] text-brand-600 font-bold bg-brand-50 px-2 py-0.5 rounded border border-brand-100 tabular-nums">
+                            <label className="text-[11px] font-semibold text-muted-foreground">Multiplier Factor</label>
+                            <span className="text-[10px] text-link font-bold bg-brand-50 px-2 py-0.5 rounded border border-brand-100 tabular-nums">
                                 1 Unit = {currentMultiplier || 0} Base
                             </span>
                         </div>
                         <div className="relative">
-                            <Scale className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <Scale className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground" size={16} />
                             <Input 
                                 type="number" 
                                 step="any" 
                                 {...register("multiplier", { valueAsNumber: true })} 
-                                className="pl-10 h-9 rounded-md border-slate-200 text-sm font-bold tabular-nums focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500"
+                                className="pl-10 h-9 rounded-md border-border text-sm font-bold tabular-nums focus-visible:ring-ring focus-visible:ring-1 focus-visible:border-brand-500"
                             />
                         </div>
                     </div>
 
                     {/* Toggles */}
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center justify-between p-3 rounded-md border border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between p-3 rounded-md border border-border bg-muted/50">
                             <div className="flex flex-col">
-                                <span className="text-[11px] font-bold text-slate-700">Set as Base</span>
-                                <span className="text-[9px] text-slate-400">Primary unit</span>
+                                <span className="text-[11px] font-bold text-foreground">Set as Base</span>
+                                <span className="text-[9px] text-subtle-foreground">Primary unit</span>
                             </div>
                             <Controller
                                 control={control}
@@ -185,10 +185,10 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                                 )}
                             />
                         </div>
-                        <div className="flex items-center justify-between p-3 rounded-md border border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between p-3 rounded-md border border-border bg-muted/50">
                             <div className="flex flex-col">
-                                <span className="text-[11px] font-bold text-slate-700">Allow Decimals</span>
-                                <span className="text-[9px] text-slate-400">Partial sales</span>
+                                <span className="text-[11px] font-bold text-foreground">Allow Decimals</span>
+                                <span className="text-[9px] text-subtle-foreground">Partial sales</span>
                             </div>
                             <Controller
                                 control={control}
@@ -210,7 +210,7 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
                             type="button" 
                             onClick={onClose} 
                             variant="ghost" 
-                            className="flex-1 h-10 text-slate-500 font-semibold text-xs hover:bg-slate-50"
+                            className="flex-1 h-10 text-muted-foreground font-semibold text-xs hover:bg-muted"
                         >
                             Discard
                         </Button>

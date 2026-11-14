@@ -9,10 +9,10 @@ export const getMovementColumns: ColumnDef<MovementData>[] = [
         header: "Timestamp",
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="font-mono text-[11px] font-bold text-slate-900 leading-none">
+                <span className="font-mono text-[11px] font-bold text-foreground leading-none">
                     {new Date(row.getValue("createdAt")).toLocaleDateString()}
                 </span>
-                <span className="font-mono text-[9px] font-bold text-slate-400 mt-1">
+                <span className="font-mono text-[9px] font-bold text-subtle-foreground mt-1">
                     {new Date(row.getValue("createdAt")).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
             </div>
@@ -27,10 +27,10 @@ export const getMovementColumns: ColumnDef<MovementData>[] = [
                     <Package size={14} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-black text-slate-900 text-[12px] uppercase tracking-tight leading-tight">
+                    <span className="font-black text-foreground text-[12px] uppercase tracking-tight leading-tight">
                         {row.original.product?.name || "Unspecified"}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400 italic lowercase truncate max-w-45">
+                    <span className="text-[10px] font-bold text-subtle-foreground italic lowercase truncate max-w-45">
                         {row.original.reason || "No remark provided"}
                     </span>
                 </div>
@@ -58,9 +58,9 @@ export const getMovementColumns: ColumnDef<MovementData>[] = [
         accessorKey: "quantity",
         header: "Quantity",
         cell: ({ row }) => (
-            <div className="font-black text-slate-900 text-[13px] tabular-nums">
+            <div className="font-black text-foreground text-[13px] tabular-nums">
                 {row.getValue("quantity")} 
-                <span className="text-[9px] text-slate-400 uppercase font-black ml-1">
+                <span className="text-[9px] text-subtle-foreground uppercase font-black ml-1">
                     {row.original?.unit?.name || "PCS"}
                 </span>
             </div>
@@ -71,7 +71,7 @@ export const getMovementColumns: ColumnDef<MovementData>[] = [
         header: () => <div className="text-right">Authorized By</div>,
         cell: ({ row }) => (
             <div className="flex items-center justify-end gap-2">
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
                     {row.original.performedBy?.name || "System"}
                 </span>
                 <div className="w-6 h-6 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm">

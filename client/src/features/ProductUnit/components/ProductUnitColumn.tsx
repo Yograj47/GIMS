@@ -19,11 +19,11 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
                         e.stopPropagation();
                         row.toggleExpanded();
                     }}
-                    className="grid size-9 place-items-center rounded-md text-slate-600 hover:bg-brand-100 focus-visible:outline-2 focus-visible:outline-brand-600"
+                    className="grid size-9 place-items-center rounded-md text-muted-foreground hover:bg-brand-100 focus-visible:outline-2 focus-visible:outline-ring"
                     type="button"
                 >
                     {row.getIsExpanded() ? (
-                        <ChevronDown size={18} className="text-brand-600" />
+                        <ChevronDown size={18} className="text-link" />
                     ) : (
                         <ChevronRight size={18} />
                     )}
@@ -34,20 +34,20 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
     {
         accessorKey: "productName",
         header: () => (
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
                 Product Info
             </span>
         ),
         cell: ({ row }) => (
             <div className="flex items-center gap-3 py-2">
-                <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+                <div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center text-muted-foreground shrink-0">
                     <Package size={14} />
                 </div>
                 <div>
-                    <div className="font-bold text-slate-900 text-sm">
+                    <div className="font-bold text-foreground text-sm">
                         {row.original.productName}
                     </div>
-                    <div className="text-[10px] font-medium text-slate-400">
+                    <div className="text-[10px] font-medium text-subtle-foreground">
                         REF: {row.original._id.slice(-6).toUpperCase()}
                     </div>
                 </div>
@@ -57,14 +57,14 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
     {
         accessorKey: "conversions",
         header: () => (
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
                 Conversion Count
             </span>
         ),
         cell: ({ row }) => (
             <div className="flex items-center gap-2">
                 <Box size={14} className="text-slate-300" />
-                <span className="text-[12px] font-semibold text-slate-700">
+                <span className="text-[12px] font-semibold text-foreground">
                     {row.original.conversions?.length || 0} Units
                 </span>
             </div>
@@ -74,7 +74,7 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
         id: "actions",
         header: () => (
             <AdminGate>
-            <div className="text-right text-[11px] font-bold text-slate-500 uppercase tracking-tight pr-4">
+            <div className="text-right text-[11px] font-bold text-muted-foreground uppercase tracking-tight pr-4">
                 Operations
             </div>
             </AdminGate>

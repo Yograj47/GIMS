@@ -12,7 +12,7 @@ export const getCategoryColumns = (
     {
       accessorKey: "name",
       header: () => (
-        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
           Category Name
         </span>
       ),
@@ -22,10 +22,10 @@ export const getCategoryColumns = (
             <span className="font-black text-[10px] uppercase">{row.original.name.charAt(0)}</span>
           </div>
           <div className="flex flex-col">
-            <div className="font-black text-slate-600 uppercase text-[12px] tracking-tight leading-none mb-1">
+            <div className="font-black text-muted-foreground uppercase text-[12px] tracking-tight leading-none mb-1">
               {row.original.name}
             </div>
-            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+            <div className="text-[9px] font-bold text-subtle-foreground uppercase tracking-tighter">
               ID · {row.original._id.slice(-6).toUpperCase()}
             </div>
           </div>
@@ -35,13 +35,13 @@ export const getCategoryColumns = (
     {
       accessorKey: "description",
       header: () => (
-        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
           Definition / Specs
         </span>
       ),
       cell: ({ row }) => (
         <div className="max-w-75">
-          <p className="text-[11px] font-bold text-slate-500 line-clamp-1 uppercase tracking-tight">
+          <p className="text-[11px] font-bold text-muted-foreground line-clamp-1 uppercase tracking-tight">
             {row.original.description || "NO SPECIFICATION PROVIDED"}
           </p>
         </div>
@@ -51,13 +51,13 @@ export const getCategoryColumns = (
       accessorKey: "createdAt",
       header: () => (
         <div className="text-center">
-          <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+          <span className="text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
             Initialized
           </span>
         </div>
       ),
       cell: ({ row }) => (
-        <div className="flex items-center justify-center gap-2 text-slate-400 tabular-nums">
+        <div className="flex items-center justify-center gap-2 text-subtle-foreground tabular-nums">
           <Calendar size={10} strokeWidth={3} />
           <span className="text-[10px] font-black uppercase tracking-tight">
             {format(new Date(row.original.createdAt), "dd MMM yyyy")}
@@ -69,7 +69,7 @@ export const getCategoryColumns = (
       id: "actions",
       header: () => (
         <AdminGate>
-          <div className="text-right pr-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+          <div className="text-right pr-4 text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
             Control
           </div>
         </AdminGate>
@@ -82,7 +82,7 @@ export const getCategoryColumns = (
               size="sm"
               onClick={() => onEdit(row.original)}
               aria-label={`Edit ${row.original.name}`}
-              className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-100 transition-all"
+              className="h-8 w-8 p-0 rounded-sm text-subtle-foreground hover:text-link hover:bg-brand-50 border border-transparent hover:border-brand-100 transition-all"
             >
               <Edit3 size={14} strokeWidth={2.5} />
             </Button>
@@ -91,7 +91,7 @@ export const getCategoryColumns = (
               size="sm"
               onClick={() => onDelete(row.original)}
               aria-label={`Delete ${row.original.name}`}
-              className="h-8 w-8 p-0 rounded-sm text-slate-400 hover:text-rose-600..."
+              className="h-8 w-8 p-0 rounded-sm text-subtle-foreground hover:text-rose-600..."
             >
               <Trash2 size={14} strokeWidth={2.5} />
             </Button>

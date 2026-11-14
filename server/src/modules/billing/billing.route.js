@@ -5,6 +5,7 @@ import { authenticate, authorize } from "../../shared/middleware/index.js";
 import { InvoicePayment, JournalEntry, SalesInvoice, SupplierBill, SupplierCredit, SupplierPayment } from "./billing.model.js";
 import { issueInvoice, recordPayment } from "./billing.service.js";
 import { createSupplierBill, createSupplierCredit, recordSupplierPayment } from "./payables.service.js";
+import { GoodsReceipt } from "../receiving/receiving.model.js";
 import { accountingSummary, postSaleCost } from "./accounting.service.js";
 
 const objectId = z.string().regex(/^[a-f0-9]{24}$/i);
@@ -59,7 +60,8 @@ const reference = z.string().trim().min(1).max(120);
 router.get("/suppliers/:id/bills", async (req, res) => {
     const supplierId = objectId.parse(req.params.id);
     const page = z.coerce.number().int().min(1).max(10000).default(1).parse(req.query.page);
-    const filter = { supplierId };
+    const billId = objectId.optional().parse(req.query.billId);
+    const filter = billId ? { supplierId, _id: billId } : { supplierId };
     const [data, totalItems] = await Promise.all([
         SupplierBill.find(filter).sort({ createdAt: -1, _id: -1 }).skip((page - 1) * 25).limit(25).lean(),
         SupplierBill.countDocuments(filter),
@@ -94,6 +96,25 @@ router.get("/supplier-bills/:id/ledger", async (req, res) => {
         JournalEntry.find({ supplierBillId: billId }).sort({ createdAt: 1, _id: 1 }).lean(),
     ]);
     res.json({ success: true, data: { credits, payments, entries } });
+});
+
+router.get("/work-queue", async (_req, res) => {
+    const [receipts, unpaidInvoices, uncostedInvoices, openBills] = await Promise.all([
+        GoodsReceipt.aggregate([
+            { $lookup: { from: SupplierBill.collection.name, localField: "_id", foreignField: "receiptId", as: "bills" } },
+            { $match: { "bills.0": { $exists: false } } },
+            { $sort: { createdAt: -1, _id: -1 } },
+            { $limit: 10 },
+            { $project: { supplierId: 1, supplierName: 1, deliveryReference: 1 } },
+        ]),
+        SalesInvoice.find({ $expr: { $lt: ["$paidMinor", "$totalMinor"] } })
+            .sort({ createdAt: -1, _id: -1 }).limit(10).select("number transactionId").lean(),
+        SalesInvoice.find({ costMinor: { $exists: false } })
+            .sort({ createdAt: -1, _id: -1 }).limit(10).select("number transactionId").lean(),
+        SupplierBill.find({ $expr: { $lt: [{ $add: ["$paidMinor", "$creditedMinor"] }, "$totalMinor"] } })
+            .sort({ createdAt: -1, _id: -1 }).limit(10).select("number supplierId").lean(),
+    ]);
+    res.json({ data: { receipts, unpaidInvoices, uncostedInvoices, openBills } });
 });
 
 router.get("/accounts", async (_req, res) => {

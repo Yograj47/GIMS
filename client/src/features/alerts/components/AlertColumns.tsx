@@ -22,12 +22,12 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
                         <Bell size={14} strokeWidth={3} />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 text-[13px] leading-tight">
+                        <span className="font-bold text-foreground text-[13px] leading-tight">
                             {row.original.productId?.name || "SYSTEM CORE"}
                         </span>
                         <span className={cn(
                             "text-[9px] font-bold uppercase tracking-tight",
-                            isCritical ? "text-rose-600" : "text-brand-600"
+                            isCritical ? "text-rose-600" : "text-link"
                         )}>
                             VAL: {row.original.snapshotValue}
                         </span>
@@ -40,7 +40,7 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
         accessorKey: "message",
         header: "Log Message",
         cell: ({ row }) => (
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter italic">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-tighter italic">
                 {row.original.message}
             </span>
         ),
@@ -49,7 +49,7 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
         accessorKey: "createdAt",
         header: "Logged At",
         cell: ({ row }) => (
-            <div className="flex items-center gap-2 text-slate-400 tabular-nums">
+            <div className="flex items-center gap-2 text-subtle-foreground tabular-nums">
                 <Calendar size={12} strokeWidth={3} />
                 <span className="text-[10px] font-bold uppercase">
                     {format(new Date(row.original.createdAt), "dd MMM · HH:mm")}
@@ -79,7 +79,7 @@ export const getAlertColumns = (onResolve: (id: string) => void): ColumnDef<Aler
                             variant="ghost"
                             size="sm"
                             onClick={() => onResolve(row.original._id)}
-                            className="h-8 px-4 border border-slate-200 hover:border-slate-900 hover:bg-slate-900 text-slate-500 hover:text-white rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all"
+                            className="h-8 px-4 border border-border hover:border-slate-900 hover:bg-slate-900 text-muted-foreground hover:text-white rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all"
                         >
                             Acknowledge
                         </Button>

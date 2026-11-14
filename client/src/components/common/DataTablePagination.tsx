@@ -32,9 +32,9 @@ export function DataTablePagination<TData>({
     return (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             {/* Context Stats */}
-            <div className="text-[12px] font-bold text-slate-800 uppercase tracking-tighter">
+            <div className="text-[12px] font-bold text-foreground uppercase tracking-tighter">
                 {table.getFilteredSelectedRowModel().rows.length > 0 ? (
-                    <span className="text-brand-600">
+                    <span className="text-link">
                         {table.getFilteredSelectedRowModel().rows.length} rows selected
                     </span>
                 ) : (
@@ -45,12 +45,12 @@ export function DataTablePagination<TData>({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                    <p className="text-[11px] font-bold text-slate-800 uppercase">Size</p>
+                    <p className="text-[11px] font-bold text-foreground uppercase">Size</p>
                     <Select
                         value={`${meta.pageSize}`}
                         onValueChange={(value) => table.setPageSize(Number(value))}
                     >
-                        <SelectTrigger aria-label="Rows per page" className="h-8 w-16 text-xs border-slate-300 rounded-sm">
+                        <SelectTrigger aria-label="Rows per page" className="h-8 w-16 text-xs border-input rounded-sm">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent side="top">
@@ -68,7 +68,7 @@ export function DataTablePagination<TData>({
                     <Button
                         aria-label="Previous page"
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-slate-600"
+                        className="h-8 w-8 p-0 text-muted-foreground"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                     >
@@ -88,7 +88,7 @@ export function DataTablePagination<TData>({
                                         "h-8 min-w-8 px-2 text-[11px] font-bold rounded-sm",
                                         currentPage === page
                                             ? "bg-black text-white hover:bg-slate-800"
-                                            : "text-slate-500"
+                                            : "text-muted-foreground"
                                     )}
                                     disabled={page === "..."}
                                     onClick={() => typeof page === "number" && table.setPageIndex(page - 1)}
@@ -103,7 +103,7 @@ export function DataTablePagination<TData>({
                     <Button
                         aria-label="Next page"
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-slate-400"
+                        className="h-8 w-8 p-0 text-subtle-foreground"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >

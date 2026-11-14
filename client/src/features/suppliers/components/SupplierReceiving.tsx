@@ -24,16 +24,16 @@ type SupplierReturn = {
     createdAt: string;
 };
 
-const field = "min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm";
-const hint = "text-xs font-normal leading-relaxed text-slate-600";
+const field = "min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm";
+const hint = "text-xs font-normal leading-relaxed text-muted-foreground";
 
-export function SupplierReceiving({ supplierId, products, assignedProductIds, canWrite, currency, mode = "both" }: {
+export function SupplierReceiving({ supplierId, products, assignedProductIds, canWrite, currency, mode }: {
     supplierId: string;
     products: ProductData[];
     assignedProductIds: string[];
     canWrite: boolean;
     currency: string;
-    mode?: "both" | "purchase" | "return";
+    mode: "purchase" | "return" | "lots";
 }) {
     const [lots, setLots] = useState<Lot[]>([]);
     const [returns, setReturns] = useState<SupplierReturn[]>([]);
@@ -65,25 +65,26 @@ export function SupplierReceiving({ supplierId, products, assignedProductIds, ca
     const pageSize = 10;
 
     const refresh = useCallback(async () => {
+        if (mode === "purchase") return;
         try {
             const [lotResponse, returnResponse] = await Promise.all([
                 api.get<{ data: Lot[]; meta: { totalItems: number } }>("/receiving/lots", {
                     params: { supplierId, page, limit: pageSize },
                 }),
-                api.get<{ data: SupplierReturn[] }>("/receiving/returns", {
+                mode === "return" ? api.get<{ data: SupplierReturn[] }>("/receiving/returns", {
                     params: { supplierId, limit: 10 },
-                }),
+                }) : null,
             ]);
             setLots(lotResponse.data.data);
             setTotal(lotResponse.data.meta.totalItems);
-            setReturns(returnResponse.data.data);
+            setReturns(returnResponse?.data.data ?? []);
             setFailed(false);
         } catch {
             setFailed(true);
         } finally {
             setLoading(false);
         }
-    }, [supplierId, page]);
+    }, [mode, supplierId, page]);
 
     useEffect(() => {
         void Promise.resolve().then(refresh);
@@ -156,12 +157,12 @@ export function SupplierReceiving({ supplierId, products, assignedProductIds, ca
     }
 
     return (
-        <section id="receiving" className="scroll-mt-20 space-y-5 rounded-xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-semibold">{mode === "purchase" ? "Receive delivery" : mode === "return" ? "Choose a lot to return" : "Receiving and returns"}</h2>
-            {canWrite && mode !== "return" && deliveryProducts.length === 0 && (
-                <p className="text-sm text-slate-600">This supplier has no active products assigned. Link a product from the supplier’s catalog before recording a delivery.</p>
+        <section id="receiving" className="scroll-mt-20 space-y-5 rounded-xl border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">{mode === "purchase" ? "Receive delivery" : mode === "return" ? "Choose a lot to return" : "Stock lots"}</h2>
+            {canWrite && mode === "purchase" && deliveryProducts.length === 0 && (
+                <p className="text-sm text-muted-foreground">This supplier has no active products assigned. Link a product from the supplier’s catalog before recording a delivery.</p>
             )}
-            {canWrite && mode !== "return" && deliveryProducts.length > 0 && (
+            {canWrite && mode === "purchase" && deliveryProducts.length > 0 && (
                 <form onSubmit={receive} className="space-y-3">
                     <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
                         <label className="grid gap-1.5 text-sm font-medium">Product received
@@ -211,7 +212,7 @@ export function SupplierReceiving({ supplierId, products, assignedProductIds, ca
                         </label>
                     </div>
                     {deliveryUnit && received > 0 && (
-                        <p role="status" className="rounded-lg bg-brand-50 p-3 text-sm text-brand-700">
+                        <p role="status" className="rounded-lg bg-brand-50 p-3 text-sm text-link">
                             {displayQuantity(received)} {baseUnit} received · {displayQuantity(Math.max(0, received - held))} sellable · {displayQuantity(held)} on hold
                         </p>
                     )}
@@ -221,20 +222,19 @@ export function SupplierReceiving({ supplierId, products, assignedProductIds, ca
                 </form>
             )}
             {message && <p role="status" className="text-sm text-emerald-700">{message}</p>}
-            {loading ? <Skeleton role="status" aria-label="Loading stock lots" className="h-24 w-full" /> : failed ? (
+            {mode !== "purchase" && (loading ? <Skeleton role="status" aria-label="Loading stock lots" className="h-24 w-full" /> : failed ? (
                 <Button variant="outline" onClick={() => { setLoading(true); void refresh(); }}>Retry loading history</Button>
             ) : (
                 <>
-                    <h3 className="font-semibold">Stock lots</h3>
-                    {lots.length === 0 && <p className="text-sm text-slate-600">No deliveries recorded.</p>}
+                    {lots.length === 0 && <p className="text-sm text-muted-foreground">No deliveries recorded.</p>}
                     <ul className="divide-y">
                         {lots.map((lot) => (
                             <li key={lot._id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
                                 <div>
                                     <p className="font-medium">{products.find((product) => product._id === lot.productId)?.name ?? lot.productId}</p>
-                                    <p className="text-slate-600">Receipt {lot.receiptId.slice(-8)} · {lot.sellableQuantity} sellable · {lot.quarantinedQuantity} quarantined{lot.batchNumber && ` · Batch ${lot.batchNumber}`}{lot.expiresOn && ` · Expires ${lot.expiresOn}`}</p>
+                                    <p className="text-muted-foreground">Receipt {lot.receiptId.slice(-8)} · {lot.sellableQuantity} sellable · {lot.quarantinedQuantity} quarantined{lot.batchNumber && ` · Batch ${lot.batchNumber}`}{lot.expiresOn && ` · Expires ${lot.expiresOn}`}</p>
                                 </div>
-                                {canWrite && mode !== "purchase" && lot.sellableQuantity + lot.quarantinedQuantity > 0 && (
+                                {canWrite && mode === "return" && lot.sellableQuantity + lot.quarantinedQuantity > 0 && (
                                     <Button variant="outline" onClick={() => setReturnLot(lot)} disabled={saving}>Return stock</Button>
                                 )}
                             </li>
@@ -245,16 +245,16 @@ export function SupplierReceiving({ supplierId, products, assignedProductIds, ca
                         <span className="text-sm">Page {page} of {Math.ceil(total / pageSize)}</span>
                         <Button variant="outline" disabled={page * pageSize >= total} onClick={() => changePage(page + 1)}>Next</Button>
                     </div>}
-                    {returns.length > 0 && <div>
+                    {mode === "return" && returns.length > 0 && <div>
                         <h3 className="font-semibold">Recent returns</h3>
-                        <ul className="mt-2 space-y-2 text-sm text-slate-600">
+                        <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                             {returns.map((entry) => <li key={entry._id}>{new Date(entry.createdAt).toLocaleDateString()} · Receipt {entry.receiptId.slice(-8)} · {entry.baseQuantity} base units · {entry.reason}</li>)}
                         </ul>
                     </div>}
                 </>
-            )}
-            {returnLot && (
-                <form key={returnLot._id} onSubmit={returnStock} className="space-y-3 rounded-lg border border-slate-200 p-4">
+            ))}
+            {mode === "return" && returnLot && (
+                <form key={returnLot._id} onSubmit={returnStock} className="space-y-3 rounded-lg border border-border p-4">
                     <h3 className="font-semibold">Return from receipt {returnLot.receiptId.slice(-8)}</h3>
                     <div className="grid gap-3 sm:grid-cols-3">
                         <label className="grid gap-1 text-sm">Stock condition

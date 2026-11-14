@@ -8,8 +8,4 @@ export interface UserData {
     isVerified: boolean;
 }
 
-export type UserRole =
-    | "admin"
-    | "owner"
-    | "staff"
-    | "customer";
+export type UserRole = Role;

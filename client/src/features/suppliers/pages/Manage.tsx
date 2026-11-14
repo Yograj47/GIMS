@@ -35,8 +35,6 @@ function SupplierEditor({ id }: { id?: string }) {
         <EntityFormPage
             title={id ? "Edit supplier" : "Add supplier"}
             description={singleSupplier?.name}
-            backTo="/suppliers"
-            backLabel="Back to suppliers"
             formId="supplier-form"
             submitLabel={id ? "Save changes" : "Add supplier"}
             saving={isLoading}

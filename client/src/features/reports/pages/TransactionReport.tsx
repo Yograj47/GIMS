@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/common/DataTable";
 import { getTransactionColumns } from "../components/TransactionColumns";
 import { Button } from "@/components/ui/button";
-import { Download, Search, History, ArrowLeft } from "lucide-react";
+import { Download, Search, Receipt } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Loading } from "@/lib/loader";
@@ -63,91 +63,82 @@ export default function Transaction() {
 
     const columns = useMemo(() => getTransactionColumns(navigate), [navigate]);
 
+    const filtered = Boolean(searchQuery || dateRange.start || dateRange.end || transactionType !== "All Types");
+    const firstPage = () => setPagination((previous) => ({ ...previous, pageIndex: 0 }));
+    const clearFilters = () => {
+        setSearchQuery("");
+        setDateRange({ start: "", end: "" });
+        setTransactionType("All Types");
+        firstPage();
+    };
+    const fieldStyle = "h-10 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-sm";
+
     return (
-        <div className="h-full animate-in fade-in duration-500">
-            <div className="max-w-400 mx-auto space-y-6">
-
-                {/* PRECISION HEADER (Stock Style) */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-brand-600 group"
-                        >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
-                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-                            </div>
-                        </Button>
-                        <div className="p-2 bg-brand-600 rounded-sm text-white">
-                            <History size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
-                                Transaction List
-                            </h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Financial History • <span className="text-brand-600 italic">Audit Mode</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <AdminGate allowedRoles={["owner"]}>
-                        <Button
-                            onClick={handleExport}
-                            disabled={IsExporting}
-                            className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
-                        >
-                            {IsExporting ? <><Loading className="mr-2" /> Processing...</> : <><Download size={14} className="mr-2" /> Export CSV</>}
-                        </Button>
-                    </AdminGate>
+        <section className="mx-auto w-full max-w-6xl space-y-7 px-4 py-7 sm:px-6 sm:py-10">
+            <header className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-semibold tracking-tight">Sales and invoices</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">Find transactions, open receipts, and review sales by channel.</p>
                 </div>
+                <AdminGate allowedRoles={["admin", "owner", "accountant"]}>
+                    <Button variant="outline" onClick={handleExport} disabled={IsExporting || isLoading || !meta?.totalItems}>
+                        {IsExporting ? <><Loading /> Exporting…</> : <><Download aria-hidden="true" /> Export CSV</>}
+                    </Button>
+                </AdminGate>
+            </header>
 
-                {/* PRECISION TOOLBAR */}
-                <div className="flex flex-col lg:flex-row gap-3">
-                    <div className="relative flex-1 group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} strokeWidth={2.5} />
-                        <Input
-                            placeholder="Search by Party, Notes..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-brand-500 shadow-none"
-                        />
+            <SalesChannels />
+
+            <section aria-labelledby="transaction-list" className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
+                <div className="space-y-4 border-b border-border p-5 sm:p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h2 id="transaction-list" className="font-semibold">Transactions</h2>
+                        {filtered && <Button variant="ghost" size="sm" onClick={clearFilters}>Clear filters</Button>}
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <input type="date" className="h-10 text-[10px] font-bold text-slate-600 bg-white p-2 rounded-sm border border-slate-200 outline-none" onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))} />
-                        <input type="date" className="h-10 text-[10px] font-bold text-slate-600 bg-white p-2 rounded-sm border border-slate-200 outline-none" onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))} />
-                    </div>
-
-                    <div className="relative min-w-40">
-                        <select
-                            value={transactionType}
-                            onChange={(e) => setTransactionType(e.target.value)}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase text-slate-600 outline-none appearance-none cursor-pointer"
-                        >
-                            <option>All Types</option>
-                            <option value="Sale">Sale</option>
-                            <option value="Purchase">Purchase</option>
-                            <option value="Return">Return</option>
-                        </select>
+                    <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+                        <label className="grid min-w-0 gap-1.5 text-sm font-medium sm:col-span-3 lg:col-span-1">
+                            Search transactions
+                            <span className="relative">
+                                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input placeholder="Party name or notes" className="pl-9" value={searchQuery} onChange={(event) => { setSearchQuery(event.target.value); firstPage(); }} />
+                            </span>
+                        </label>
+                        <label className="grid min-w-0 gap-1.5 text-sm font-medium">
+                            From
+                            <input type="date" className={fieldStyle} value={dateRange.start} max={dateRange.end || undefined} onChange={(event) => { setDateRange({ ...dateRange, start: event.target.value }); firstPage(); }} />
+                        </label>
+                        <label className="grid min-w-0 gap-1.5 text-sm font-medium">
+                            To
+                            <input type="date" className={fieldStyle} value={dateRange.end} min={dateRange.start || undefined} onChange={(event) => { setDateRange({ ...dateRange, end: event.target.value }); firstPage(); }} />
+                        </label>
+                        <label className="grid min-w-0 gap-1.5 text-sm font-medium">
+                            Type
+                            <select className={fieldStyle} value={transactionType} onChange={(event) => { setTransactionType(event.target.value); firstPage(); }}>
+                                <option>All Types</option>
+                                <option>Sale</option>
+                                <option>Purchase</option>
+                                <option>Return</option>
+                                <option>Damage</option>
+                                <option>Adjustment</option>
+                            </select>
+                        </label>
                     </div>
                 </div>
-
-                <SalesChannels />
-                <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-hidden">
-                    <DataTable
-                        columns={columns}
-                        data={transactions || []}
-                        rowCount={meta?.totalItems || 0}
-                        pageCount={meta?.totalPages || 0}
-                        pagination={pagination}
-                        setPagination={setPagination}
-                        isLoading={isLoading}
-                    />
-                </div>
-            </div>
-        </div>
+                <DataTable embedded
+                    columns={columns}
+                    data={transactions || []}
+                    rowCount={meta?.totalItems || 0}
+                    pageCount={meta?.totalPages || 0}
+                    pagination={pagination}
+                    setPagination={setPagination}
+                    isLoading={isLoading}
+                    emptyState={<div className="grid justify-items-center gap-2 whitespace-normal">
+                        <Receipt aria-hidden="true" className="size-6 text-link" />
+                        <p className="font-medium text-foreground">{filtered ? "No matching transactions" : "No transactions yet"}</p>
+                        <p>{filtered ? "Try a different search or date range." : "Recorded sales and returns will appear here."}</p>
+                    </div>}
+                />
+            </section>
+        </section>
     );
 }

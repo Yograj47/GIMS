@@ -34,28 +34,28 @@ export default function ProductMovementHistory() {
             <div className="max-w-400 mx-auto space-y-6">
 
                 {/* 1. COMPACT NAVIGATION HEADER */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 pb-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
                     <div className="flex items-start gap-4">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-brand-600 group"
+                            className="text-muted-foreground hover:text-link group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-secondary flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
                         <div className="space-y-1">
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase flex items-center gap-2">
-                                Audit Logs: <span className="text-brand-600">{productName}</span>
+                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase flex items-center gap-2">
+                                Audit Logs: <span className="text-link">{productName}</span>
                             </h1>
                             <div className="flex items-center gap-3">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    Product ID: <span className="font-mono text-slate-600">{productId?.slice(-8).toUpperCase()}</span>
+                                <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                    Product ID: <span className="font-mono text-muted-foreground">{productId?.slice(-8).toUpperCase()}</span>
                                 </p>
                                 <div className="h-1 w-1 rounded-full bg-slate-300" />
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">
                                     Mode: <span className="text-emerald-600 italic">Live Ledger</span>
                                 </p>
                             </div>
@@ -63,20 +63,20 @@ export default function ProductMovementHistory() {
                     </div>
 
                     {/* 2. PRECISION STATS (The "Status Bar") */}
-                    <div className="flex items-center bg-white border border-slate-200 rounded-sm p-1 shadow-sm">
-                        <div className="px-4 py-1.5 border-r border-slate-100 flex flex-col">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Gross Inflow</span>
+                    <div className="flex items-center bg-card border border-border rounded-sm p-1 shadow-sm">
+                        <div className="px-4 py-1.5 border-r border-border flex flex-col">
+                            <span className="text-[9px] font-black text-subtle-foreground uppercase tracking-tighter">Gross Inflow</span>
                             <span className="text-sm font-black text-emerald-600 tabular-nums">+{totalIn}</span>
                         </div>
                         <div className="px-4 py-1.5 flex flex-col">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Gross Outflow</span>
+                            <span className="text-[9px] font-black text-subtle-foreground uppercase tracking-tighter">Gross Outflow</span>
                             <span className="text-sm font-black text-rose-600 tabular-nums">-{totalOut}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* 3. TABLE AREA */}
-                <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
+                <div className="bg-card border border-border rounded-sm overflow-hidden shadow-sm">
                     <DataTable
                         columns={columns}
                         data={productMovements || []}
@@ -90,8 +90,8 @@ export default function ProductMovementHistory() {
 
                 {/* 4. SYSTEM FOOTER */}
                 <div className="flex justify-between items-center opacity-50 px-2">
-                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em]">Secure_Audit_Trail</p>
-                    <p className="text-[9px] font-mono font-bold text-slate-600">P_LOG_REF: {new Date().getTime()}</p>
+                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em]">Secure_Audit_Trail</p>
+                    <p className="text-[9px] font-mono font-bold text-muted-foreground">P_LOG_REF: {new Date().getTime()}</p>
                 </div>
             </div>
         </div>

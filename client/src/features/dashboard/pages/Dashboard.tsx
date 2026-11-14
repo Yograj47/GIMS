@@ -1,3 +1,4 @@
+import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { Package, AlertCircle, Activity, Plus, ArrowUpRight, Truck, CheckCircle2 } from "lucide-react";
@@ -17,6 +18,7 @@ import { useAnalytics } from "../hooks/useAnalystics";
 import { useAuthStore } from "@/store/authStore";
 
 export default function Dashboard() {
+    const { resolvedTheme } = useTheme();
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const { logs, fetchRecentLogs } = useActivityLogs();
@@ -52,7 +54,7 @@ export default function Dashboard() {
         const stockIn = labels.map(day => weeklyStats.find(s => s._id.day === day && s._id.type === 'IN')?.totalQty || 0);
         const stockOut = labels.map(day => weeklyStats.find(s => s._id.day === day && s._id.type === 'OUT')?.totalQty || 0);
         return chartData(stockIn, stockOut, labels);
-    }, [weeklyStats]);
+    }, [weeklyStats, resolvedTheme]);
 
     const criticalAlert = useMemo(
         () =>
@@ -77,7 +79,7 @@ export default function Dashboard() {
                     title="Stock Value"
                     value={summary ? `Rs ${summary.stockValue.toLocaleString()}` : 'Rs 0'}
                     icon={<Package size={20} />}
-                    color="text-brand-600"
+                    color="text-link"
                     bgColor="bg-brand-50"
                     desc="Total inventory valuation"
                 />
@@ -105,8 +107,8 @@ export default function Dashboard() {
             <div className="grid min-w-0 gap-5 pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(12rem,17rem)]">
                 {/* Primary Analytics Surface */}
                 <div className="min-w-0 space-y-5">
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-6">
-                        <ChartSection data={dynamicData} options={chartOptions} />
+                    <div className="rounded-xl border border-border bg-card p-3 sm:p-6">
+                        <ChartSection data={dynamicData} options={chartOptions()} />
                     </div>
 
                     {/* Secondary Data Surface */}
@@ -120,9 +122,9 @@ export default function Dashboard() {
                                     onAction={() => acknowledgeAlert(criticalAlert._id)}
                             />
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center border border-slate-200 rounded-sm bg-slate-50/30 p-8 text-center">
+                            <div className="h-full flex flex-col items-center justify-center border border-border rounded-sm bg-muted/30 p-8 text-center">
                                 <CheckCircle2 size={32} className="text-emerald-500/30 mb-4" />
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Systems Nominal</p>
+                                <p className="text-[10px] font-black text-subtle-foreground uppercase tracking-[0.2em]">Systems Nominal</p>
                                 <p className="text-[9px] font-bold text-slate-300 uppercase mt-2">No critical stock alerts</p>
                             </div>
                         )}

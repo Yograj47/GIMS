@@ -1,3 +1,4 @@
+import { useDebounce } from "@/lib/debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Trash2, Loader2, ShoppingCart } from "lucide-react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
@@ -49,6 +50,18 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
     const currentType = useWatch({ control, name: "transactionType" });
     const watchedItems = useWatch({ control, name: "items" });
     const watchedName = useWatch({ control, name: "partyDetails.name" });
+    const contactSearch = useDebounce(watchedName ?? "", 300);
+    const [savedContacts, setSavedContacts] = useState<{ name: string; phone: string }[]>([]);
+    useEffect(() => {
+        if (purpose === "Adjustment") return;
+        const request = new AbortController();
+        api.get<{ data: { name: string; phone: string }[] }>("/customers", {
+            params: { search: contactSearch.slice(0, 120) }, signal: request.signal,
+        }).then(({ data }) => {
+            if (!request.signal.aborted) setSavedContacts(data.data);
+        }).catch(() => {});
+        return () => request.abort();
+    }, [contactSearch, purpose]);
 
     const showSettlement = currentType === "Return" || currentType === "Sale";
     
@@ -94,7 +107,7 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
             isPaid: data.transactionType === "Sale" ? false : data.isPaid,
         };
         const success = await createTransaction(data);
-        if (success) navigate("/reports/transactions");
+        if (success) navigate(-1);
     };
 
     useEffect(() => {
@@ -118,8 +131,8 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
             .filter(t => t.transactionType === "Sale")
             .map(t => t.partyDetails);
 
-        return Array.from(new Map(customers.map(c => [c.name, c])).values());
-    }, [transactions]);
+        return Array.from(new Map([...customers, ...savedContacts].map(c => [c.name, c])).values());
+    }, [transactions, savedContacts]);
 
     useEffect(() => {
         const match = pastCustomers.find(entity => entity.name === watchedName);
@@ -146,23 +159,23 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
     const totalLabel = formatInvoiceMoney(Math.round(grandTotal * 100), "NPR");
     const submitLabel = currentType === "Sale" && checkoutMethod === "cash" ? "Confirm cash sale"
         : currentType === "Sale" && checkoutMethod === "gateway" ? "Continue to payment" : "Record transaction";
-    const field = "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm";
+    const field = "h-10 w-full rounded-lg border border-border bg-card px-3 text-sm";
 
     return (
-        <main className="flex min-h-dvh w-full min-w-0 flex-col bg-market-paper lg:h-dvh">
-            <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+        <main className="flex min-h-dvh w-full min-w-0 flex-col bg-background lg:h-dvh">
+            <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
                 <div className="flex items-center gap-3">
-                    <Button type="button" variant="outline" size="icon" aria-label="Back to stock movements" onClick={() => navigate("/stock-movements")}><ArrowLeft size={18} /></Button>
+                    <Button type="button" variant="outline" size="icon" aria-label="Back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></Button>
                     <h1 className="text-xl font-semibold tracking-tight">{titles[purpose]}</h1>
                 </div>
-                <a href="#register-cart" className="text-sm font-medium text-brand-700 lg:hidden">Transaction · {fields.length} {fields.length === 1 ? "line" : "lines"}</a>
+                <a href="#register-cart" className="text-sm font-medium text-link lg:hidden">Transaction · {fields.length} {fields.length === 1 ? "line" : "lines"}</a>
             </header>
             <div className="grid min-h-0 min-w-0 flex-1 items-start gap-4 p-3 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:overflow-y-auto">
                 <RegisterCatalog inbound={isStockIn} usedStock={usedStock} onAdd={add} />
                 <form id="register-cart" onSubmit={(event) => void handleSubmit(onFormSubmit)(event)}
-                    className="min-w-0 scroll-mt-20 space-y-4 rounded-xl border border-slate-200 bg-white p-3 sm:p-5">
+                    className="min-w-0 scroll-mt-20 space-y-4 rounded-xl border border-border bg-card p-3 sm:p-5">
                     <div className="flex items-center gap-2">
-                        <ShoppingCart size={18} className="text-brand-700" aria-hidden="true" />
+                        <ShoppingCart size={18} className="text-link" aria-hidden="true" />
                         <h2 className="font-semibold">Current transaction</h2>
                     </div>
                     {purpose === "Adjustment" && <label className="grid gap-1 text-sm font-medium">Reason for stock removal
@@ -174,14 +187,14 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
                     {fields.length ? (
                         <div role="region" aria-label="Transaction items" tabIndex={0} className="overflow-auto lg:max-h-[48dvh]">
                         <table className="records-table w-full text-left text-sm">
-                            <thead className="sticky top-0 bg-slate-100 text-xs text-slate-700"><tr><th className="p-3">Item</th><th className="p-3">Quantity</th><th className="p-3">Unit price</th><th className="p-3 text-right">Total</th><th><span className="sr-only">Remove</span></th></tr></thead>
+                            <thead className="sticky top-0 bg-secondary text-xs text-foreground"><tr><th className="p-3">Item</th><th className="p-3">Quantity</th><th className="p-3">Unit price</th><th className="p-3 text-right">Total</th><th><span className="sr-only">Remove</span></th></tr></thead>
                             <tbody>
                             {fields.map((line, index) => {
                                 const item = watchedItems[index] ?? line;
                                 return (
                                     <tr key={line.id} data-record>
                                         <th scope="row" className="min-w-24 p-3 text-sm font-semibold">
-                                            {line.productName}<span className="block text-xs font-normal text-slate-600">{line.unitName}</span>
+                                            {line.productName}<span className="block text-xs font-normal text-muted-foreground">{line.unitName}</span>
                                         </th>
                                         <td className="p-3">
                                             <Input type="number" min={item.isFractionable ? "0.001" : "1"} step={item.isFractionable ? "any" : "1"} className="w-20" value={item.qty || ""}
@@ -200,7 +213,7 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
                             </tbody>
                         </table>
                         </div>
-                    ) : <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">Add products from the catalog to start.</p>}
+                    ) : <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">Add products from the catalog to start.</p>}
                     {showSettlement && (
                         <div className="grid gap-3">
                             {currentType === "Sale" ? (
@@ -224,10 +237,10 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
                         </div>
                     )}
                     <details className="text-sm">
-                        <summary className="cursor-pointer text-brand-700">Add a note</summary>
-                        <textarea aria-label="Transaction note" {...register("notes")} rows={2} className="mt-2 w-full rounded-lg border border-slate-200 p-2" />
+                        <summary className="cursor-pointer text-link">Add a note</summary>
+                        <textarea aria-label="Transaction note" {...register("notes")} rows={2} className="mt-2 w-full rounded-lg border border-border p-2" />
                     </details>
-                    <div className="flex justify-between gap-2 border-t border-slate-200 pt-3 font-semibold">
+                    <div className="flex justify-between gap-2 border-t border-border pt-3 font-semibold">
                         <span>Total</span><span className="tabular-nums">{totalLabel}</span>
                     </div>
                     <Button type="submit" className="w-full" disabled={saving || !fields.length}>

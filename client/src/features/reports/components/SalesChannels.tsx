@@ -22,14 +22,14 @@ export function SalesChannels() {
         return () => { active = false; };
     }, []);
     return (
-        <section className="space-y-4 rounded-lg border bg-white p-4">
+        <section className="space-y-4 rounded-lg border bg-card p-4">
             <h2 className="font-semibold">Sales by channel · all time</h2>
-            {failed ? <p className="text-sm text-slate-600">Channel totals could not be loaded.</p> : !data ? <Skeleton role="status" aria-label="Loading sales totals" className="h-20" /> : (
+            {failed ? <p className="text-sm text-muted-foreground">Channel totals could not be loaded.</p> : !data ? <Skeleton role="status" aria-label="Loading sales totals" className="h-20" /> : (
                 <>
                     <div className="grid gap-3 sm:grid-cols-2">
                         {(["in_store", "online"] as const).map((channel) => {
                             const total = data.channels.find((row) => row._id === channel);
-                            return <div key={channel} className="rounded-md bg-slate-50 p-3 text-sm"><p>{label[channel]}</p><p className="font-semibold">{money.format(total?.revenue ?? 0)} · {total?.sales ?? 0} sales</p></div>;
+                            return <div key={channel} className="rounded-md bg-muted p-3 text-sm"><p>{label[channel]}</p><p className="font-semibold">{money.format(total?.revenue ?? 0)} · {total?.sales ?? 0} sales</p></div>;
                         })}
                     </div>
                     {data.products.length > 0 && <details>

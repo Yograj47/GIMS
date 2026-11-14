@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import axios from "axios";
 
 // Shadcn UI Components
-import { Toaster } from "sonner";
+import { Toaster } from "./components/ui/sonner";
 
 // Auth Guard & Store
 import { useAuthStore } from "./store/authStore";
@@ -11,6 +11,8 @@ import { useAuthStore } from "./store/authStore";
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
 import AppLayout from "./layout/AppLayout";
+import FocusedWorkspace from "./features/workspaces/FocusedWorkspace";
+import { workspaceHome } from "./shared/constants/roles";
 import SettingsLayout from "./layout/SettingLayout";
 
 // Guards & Providers
@@ -54,9 +56,23 @@ const Unauthorized = lazy(() => import("./features/OtherPages/Unauthorized"));
 const HelpPage = lazy(() => import("./features/OtherPages/Helper"));
 const Shop = lazy(() => import("./features/checkout/Shop"));
 const CheckoutStatus = lazy(() => import("./features/checkout/CheckoutStatus"));
+const StaffWorkspace = lazy(() => import("./features/workspaces/StaffWorkspace"));
+const AccountingWorkspace = lazy(() => import("./features/workspaces/AccountingWorkspace"));
+const Customers = lazy(() => import("./features/workspaces/Customers"));
 const StaffOrders = lazy(() => import("./features/checkout/StaffOrders"));
 
 axios.defaults.withCredentials = true;
+
+function WorkspaceLayout() {
+  const role = useAuthStore((state) => state.user?.role);
+  return role === "staff" || role === "accountant" ? <FocusedWorkspace /> : <AppLayout />;
+}
+
+function WorkspaceDashboard() {
+  const role = useAuthStore((state) => state.user?.role);
+  const home = workspaceHome(role);
+  return home === "/dashboard" ? <Dashboard /> : <Navigate replace to={home} />;
+}
 
 function App() {
   useEffect(() => {
@@ -66,7 +82,7 @@ function App() {
   return (
     <SocketProvider>
       <BrowserRouter>
-        <div className="antialiased selection:bg-brand-100 selection:text-brand-700">
+        <div className="antialiased selection:bg-brand-100 selection:text-link">
           <Suspense fallback={<StartupSkeleton />}>
             <Routes>
               {/* --- Public / Auth Routes --- */}
@@ -85,63 +101,46 @@ function App() {
 
               {/* --- Protected Inventory/Admin Routes --- */}
               <Route element={<ProtectedRoute />}>
-                <Route element={<AppLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
+                <Route element={<WorkspaceLayout />}>
+                  <Route path="/dashboard" element={<WorkspaceDashboard />} />
                   <Route path="/me" element={<ProfilePage />} />
-                  <Route path="/alerts" element={<Navigate replace to="/reports/stock?level=low" />} />
 
-                  {/* 1. Admin/Owner Only: User Management */}
-                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                  <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                     <Route path="/users" element={<UserManagement />} />
+                    <Route path="/reports/activity" element={<ActivityLogs />} />
                   </Route>
 
-                  {/* 2. Admin/Owner/Staff: Products & Suppliers */}
-                  <Route path="/products">
-                    <Route index element={<Products />} />
-                    <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
-                      <Route path="add" element={<ManageProduct />} />
-                      <Route path="edit/:productId" element={<ManageProduct />} />
-                    </Route>
+                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                    <Route path="/alerts" element={<Navigate replace to="/reports/stock?level=low" />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/products/add" element={<ManageProduct />} />
+                    <Route path="/products/edit/:productId" element={<ManageProduct />} />
+                    <Route path="/suppliers/add" element={<ManageSupplier />} />
+                    <Route path="/suppliers/edit/:id" element={<ManageSupplier />} />
+                    <Route path="/suppliers/v/:id" element={<SupplierView />} />
+                    <Route path="/suppliers/v/:id/catalog" element={<SupplierView section="catalog" />} />
+                    <Route path="/stock-movements" element={<StockManagement />} />
+                    <Route path="/reports/movement" element={<StockMovementReport />} />
+                    <Route path="/reports/stock" element={<StockReport />} />
+                    <Route path="/reports/stock/product-history/:productId" element={<ProductMovementHistory />} />
                   </Route>
 
-                  <Route path="/suppliers">
-                    <Route index element={<Suppliers />} />
-                    <Route path="v/:id" element={<SupplierView />} />
-                    <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
-                      <Route path="v/:id/billing" element={<SupplierBilling />} />
-                    </Route>
-                    <Route path="add" element={<ManageSupplier />} />
-                    <Route path="edit/:id" element={<ManageSupplier />} />
+                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "accountant"]} />}>
+                    <Route path="/suppliers" element={<Suppliers />} />
+                    <Route path="/suppliers/v/:id/billing" element={<SupplierBilling />} />
+                    <Route path="/reports" element={<ReportsHub />} />
+                    <Route path="/reports/accounting" element={<AccountingReport />} />
+                    <Route path="/reports/transactions" element={<Transaction />} />
                   </Route>
 
-                  {/* 3. Admin/Staff Only: Stock Movements */}
-                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "staff"]} />}>
-                    <Route path="/stock-movements">
-                      <Route index element={<StockManagement />} />
-                      <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
-                        <Route path="orders" element={<StaffOrders />} />
-                      </Route>
-                    </Route>
+                  <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
+                    <Route path="/staff" element={<StaffWorkspace />} />
+                    <Route path="/staff/customers" element={<Customers />} />
+                    <Route path="/stock-movements/orders" element={<StaffOrders />} />
                   </Route>
-
-                  {/* 4. Reports routes */}
-                  <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin"]} />}>
-                    <Route path="activity" element={<ActivityLogs />} />
-                  </Route>
-
-                  <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
-                    <Route path="movement" element={<StockMovementReport />} />
-                    <Route path="accounting" element={<AccountingReport />} />
-                  </Route>
-
-                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "staff"]} />}>
-                    <Route path="/reports">
-                      <Route index element={<ReportsHub />} />
-                      <Route path="transactions" element={<Transaction />} />
-                      <Route path="transaction/:id" element={<TransactionViewPage />} />
-                      <Route path="stock" element={<StockReport />} />
-                      <Route path="stock/product-history/:productId" element={<ProductMovementHistory />} />
-                    </Route>
+                  <Route path="/reports/transaction/:id" element={<TransactionViewPage />} />
+                  <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "accountant"]} />}>
+                    <Route path="/accounting" element={<AccountingWorkspace />} />
                   </Route>
                 </Route>
                 <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
@@ -160,10 +159,11 @@ function App() {
                 <Route path="/stock-movements/form" element={<StockMovementForm />} />
                 <Route path="/stock-movements/sale" element={<StockMovementForm purpose="Sale" />} />
                 <Route path="/stock-movements/customer-return" element={<StockMovementForm purpose="Return" />} />
-                <Route path="/stock-movements/adjustment" element={<StockMovementForm purpose="Adjustment" />} />
               </Route>
               <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route path="/stock-movements/adjustment" element={<StockMovementForm purpose="Adjustment" />} />
                 <Route path="/stock-movements/purchase" element={<SupplierMovement mode="purchase" />} />
+                <Route path="/stock-movements/supplier-lots" element={<SupplierMovement mode="lots" />} />
                 <Route path="/stock-movements/supplier-return" element={<SupplierMovement mode="return" />} />
               </Route>
 
@@ -175,7 +175,7 @@ function App() {
             </Routes>
           </Suspense>
 
-          <Toaster position="top-right" theme="light" closeButton richColors />
+          <Toaster position="top-right" closeButton richColors />
         </div>
       </BrowserRouter>
     </SocketProvider>

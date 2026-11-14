@@ -1,3 +1,4 @@
+import { workspaceHome } from "@/shared/constants/roles";
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuthStore } from "@/store/authStore";
@@ -18,7 +19,7 @@ export const PublicRoute = () => {
     if (isAuthenticated) {
         return (
             <Navigate
-                to={user?.role === "customer" ? "/shop" : "/dashboard"}
+                to={workspaceHome(user?.role)}
                 replace
             />
         );

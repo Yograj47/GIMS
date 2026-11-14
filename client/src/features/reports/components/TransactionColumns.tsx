@@ -11,10 +11,10 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
     header: "Party / Invoice",
     cell: ({ row }) => (
       <div className="flex flex-col py-1">
-        <span className="font-bold text-slate-900 text-[13px] leading-tight">
+        <span className="font-bold text-foreground text-[13px] leading-tight">
           {row.original.partyDetails?.name || "Cash Customer"}
         </span>
-        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+        <span className="text-[10px] text-subtle-foreground font-medium uppercase tracking-tight">
           #{row.original._id.slice(-6).toUpperCase()} • {new Date(row.original.createdAt).toLocaleDateString()}
         </span>
       </div>
@@ -28,7 +28,7 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
       return (
         <span className={cn(
           "text-[10px] font-black px-2 py-0.5 rounded-sm uppercase border",
-          isSale ? "bg-brand-50 text-brand-600 border-brand-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
+          isSale ? "bg-brand-50 text-link border-brand-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
         )}>
           {row.original.transactionType}{isSale && (row.original.channel === "online" ? " · Online" : " · In store")}
         </span>
@@ -40,7 +40,7 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => (
       <div className="text-right tabular-nums">
-        <div className="text-sm font-black text-slate-900">
+        <div className="text-sm font-black text-foreground">
           Rs {row.original.grandTotal.toLocaleString()}
         </div>
         <div className={cn(
@@ -59,7 +59,7 @@ export const getTransactionColumns = (navigate: NavigateFunction): ColumnDef<Tra
       <div className="flex justify-end">
         <Button
           variant="ghost"
-          className="h-8 px-3 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
+          className="h-8 px-3 text-subtle-foreground hover:text-link hover:bg-brand-50 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
           onClick={() => navigate(`/reports/transaction/${row.original._id}`, { state: { transaction: row.original } })}
         >
           <Newspaper size={12} className="mr-2" /> View Bill

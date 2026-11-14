@@ -23,6 +23,8 @@ ChartJS.register(
     Filler
 );
 
+const themeColor = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export const chartData = (stockIn: number[], stockOut: number[], labels: string[]): ChartData<'line'> => ({
     labels: labels,
     datasets: [
@@ -30,8 +32,8 @@ export const chartData = (stockIn: number[], stockOut: number[], labels: string[
             fill: true,
             label: 'Stock In',
             data: stockIn,
-            borderColor: '#186049',
-            backgroundColor: 'rgba(24, 96, 73, 0.08)',
+            borderColor: themeColor("--chart-1"),
+            backgroundColor: themeColor("--chart-1") + "1f",
             tension: 0.4,
             borderWidth: 3,
             pointRadius: 2,
@@ -41,8 +43,8 @@ export const chartData = (stockIn: number[], stockOut: number[], labels: string[
             fill: true,
             label: 'Stock Out',
             data: stockOut,
-            borderColor: '#d98327',
-            backgroundColor: 'rgba(217, 131, 39, 0.08)',
+            borderColor: themeColor("--chart-2"),
+            backgroundColor: themeColor("--chart-2") + "1f",
             tension: 0.4,
             borderWidth: 3,
             pointRadius: 2,
@@ -51,13 +53,13 @@ export const chartData = (stockIn: number[], stockOut: number[], labels: string[
     ],
 });
 
-export const chartOptions: ChartOptions<'line'> = {
+export const chartOptions = (): ChartOptions<'line'> => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: { display: false },
         tooltip: {
-            backgroundColor: '#20392e',
+            backgroundColor: themeColor("--palette-navy"),
             padding: 12,
             cornerRadius: 8,
             titleFont: { weight: 'bold' },
@@ -67,12 +69,12 @@ export const chartOptions: ChartOptions<'line'> = {
     scales: {
         x: {
             grid: { display: false },
-            ticks: { color: '#94a3b8', font: { weight: 'bold', size: 10 } }
+            ticks: { color: themeColor("--muted-foreground"), font: { weight: 'bold', size: 10 } }
         },
         y: {
-            grid: { color: '#f1f5f9' },
-            ticks: { color: '#94a3b8', font: { size: 10 } },
+            grid: { color: themeColor("--border") },
+            ticks: { color: themeColor("--muted-foreground"), font: { size: 10 } },
             border: { display: false }
         }
     }
-};
+});

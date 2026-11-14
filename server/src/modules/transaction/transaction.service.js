@@ -222,13 +222,29 @@ export const find = async ({
     page = 1,
     limit = 100,
     paginate = true,
+    search,
+    transactionType,
+    startDate,
+    endDate,
 }) => {
+    const query = {};
+    if (transactionType) query.transactionType = transactionType;
+    if (search) {
+        const pattern = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const match = { $regex: pattern, $options: "i" };
+        query.$or = [{ "partyDetails.name": match }, { notes: match }];
+    }
+    if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) query.createdAt.$gte = new Date(startDate);
+        if (endDate) query.createdAt.$lte = new Date(endDate + "T23:59:59.999Z");
+    }
     const {
         items,
         totalItems,
     } =
         await findTransactions(
-            {},
+            query,
             {
                 page,
                 limit,

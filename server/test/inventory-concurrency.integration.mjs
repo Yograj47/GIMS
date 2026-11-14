@@ -31,15 +31,30 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     logger.silent = true;
     await mongoose.connect(db.getUri());
 
-    const [admin, firstStaff, secondStaff] = await User.create([
+    const [admin, firstStaff, secondStaff, owner, accountant] = await User.create([
         { name: "Inventory admin", email: "admin@example.test", password: "test", role: "admin", isVerified: true },
         { name: "First staff", email: "first@example.test", password: "test", role: "staff", isVerified: true },
         { name: "Second staff", email: "second@example.test", password: "test", role: "staff", isVerified: true },
+        { name: "Store manager", email: "owner@example.test", password: "test", role: "owner", isVerified: true },
+        { name: "Accountant", email: "accountant@example.test", password: "test", role: "accountant", isVerified: true },
     ]);
     const api = (method, path, actor) => {
         const token = jwt.sign({ id: actor.id, role: actor.role }, process.env.JWT_SECRET);
         return request(app)[method](`/api/v1${path}`).set("Cookie", `token=${token}`);
     };
+    await api("get", "/users", admin).expect(200);
+    await api("get", "/users", owner).expect(403);
+    await api("get", "/settings/", accountant).expect(200);
+    await api("put", "/settings/", accountant).send({ storeName: "Unauthorized change" }).expect(403);
+    await api("get", "/billing/work-queue", firstStaff).expect(403);
+    await api("post", "/transactions", firstStaff).send({ transactionType: "Adjustment" }).expect(403);
+    await api("post", "/transactions", accountant).send({ transactionType: "Sale" }).expect(403);
+    await api("post", "/receiving/receipts", accountant).send({}).expect(403);
+    const contact = { name: "Example customer", phone: "9800000001" };
+    await api("post", "/customers", firstStaff).send(contact).expect(201);
+    await api("post", "/customers", secondStaff).send(contact).expect(409);
+    assert.equal((await api("get", "/customers?search=9800000001", secondStaff).expect(200)).body.data[0].name, contact.name);
+    await api("get", "/customers", accountant).expect(403);
     const [category, unit, supplier] = await Promise.all([
         Category.create({ name: "Pantry" }),
         Unit.create({ name: "Each", shortForm: "ea", unitType: "count" }),
@@ -49,12 +64,14 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         name: "Rice", categoryId: category.id, unitId: unit.id, basePrice: 1, sellingPrice: 2,
     });
     await ProductUnit.create({ productId: product.id, unitId: unit.id, multiplier: 1 });
-    const receipt = (await api("post", "/receiving/receipts", admin).send({
+    const receipt = (await api("post", "/receiving/receipts", owner).send({
         requestKey: randomUUID(),
         supplierId: supplier.id,
         currency: "NPR",
         items: [{ productId: product.id, unitId: unit.id, quantity: 1, unitCost: "1.00" }],
     }).expect(201)).body.data;
+    const queuePath = "/billing/work-queue";
+    assert.equal((await api("get", queuePath, accountant).expect(200)).body.data.receipts[0]._id, receipt._id);
 
     const sell = (actor) => api("post", "/transactions", actor).send({
         transactionType: "Sale",
@@ -73,11 +90,20 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.deepEqual(await readAccounts(), { currency: "NPR", accounts: [], invoicesWithoutCost: 0 });
 
     const sale = await Transaction.findOne({ transactionType: "Sale" });
-    const postedBill = (await api("post", "/billing/supplier-bills", admin)
+    const saleDay = sale.createdAt.toISOString().slice(0, 10);
+    const listPath = `/transactions?transactionType=Sale&startDate=${saleDay}&endDate=${saleDay}`;
+    assert.equal((await api("get", listPath, accountant).expect(200)).body.data[0]._id, sale.id);
+    assert.deepEqual((await api("get", `${listPath}&search=missing%5Bparty%5D`, accountant).expect(200)).body.data, []);
+    const postedBill = (await api("post", "/billing/supplier-bills", accountant)
         .send({ receiptId: receipt._id, number: "TEST-BILL-1" }).expect(201)).body.data;
     assert.equal(postedBill.totalMinor, 100);
-    const postedInvoice = (await api("post", `/billing/sales/${sale.id}/invoice`, admin).expect(201)).body.data;
+    const postedInvoice = (await api("post", `/billing/sales/${sale.id}/invoice`, accountant).expect(201)).body.data;
     assert.equal(postedInvoice.totalMinor, 200);
+    const queue = (await api("get", queuePath, accountant).expect(200)).body.data;
+    assert.equal(queue.receipts.length, 0);
+    assert.equal(queue.openBills[0]._id, postedBill._id);
+    assert.equal(queue.unpaidInvoices[0]._id, postedInvoice._id);
+    assert.equal(queue.uncostedInvoices[0]._id, postedInvoice._id);
     assert.equal((await readAccounts()).invoicesWithoutCost, 1);
     const costPath = `/billing/invoices/${postedInvoice._id}/cost`;
     assert.equal((await api("post", costPath, admin).expect(200)).body.data.costMinor, 100);

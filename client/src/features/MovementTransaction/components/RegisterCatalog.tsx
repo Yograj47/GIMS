@@ -34,10 +34,10 @@ export function RegisterCatalog({ inbound, onAdd, usedStock }: {
 
     const loading = key !== result?.key || query !== search.trim();
     return (
-        <section aria-label="Product catalog" className="min-w-0 space-y-4 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+        <section aria-label="Product catalog" className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4 sm:p-5">
             <h2 className="text-base font-semibold">Products</h2>
             <div className="relative">
-                <Search size={18} aria-hidden="true" className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-500" />
+                <Search size={18} aria-hidden="true" className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
                 <Input aria-label="Search products" placeholder="Search products by name" value={search}
                     onChange={(event) => { setSearch(event.target.value); setPage(1); }} className="h-11 pl-10" />
             </div>
@@ -46,14 +46,14 @@ export function RegisterCatalog({ inbound, onAdd, usedStock }: {
             ) : result?.items.length ? (
                 <div className="overflow-auto lg:max-h-[65dvh]" tabIndex={0} role="region" aria-label="Available products">
                     <table className="records-table w-full text-left text-sm">
-                        <thead className="sticky top-0 bg-slate-100 text-xs text-slate-700">
+                        <thead className="sticky top-0 bg-secondary text-xs text-foreground">
                             <tr><th className="p-3">Product</th><th className="p-3">Unit</th><th className="p-3 text-right">Price</th><th className="p-3"><span className="sr-only">Add product</span></th></tr>
                         </thead>
                         <tbody>{result.items.map((product) => <RegisterProduct key={product._id} product={product} inbound={inbound}
                             used={usedStock.get(product._id) ?? 0} onAdd={onAdd} />)}</tbody>
                     </table>
                 </div>
-            ) : <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">No products found.</p>}
+            ) : <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">No products found.</p>}
             {!loading && (page > 1 || (result?.pages ?? 0) > 1) && (
                 <div className="flex items-center justify-between gap-2 text-sm">
                     <Button type="button" variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
@@ -81,14 +81,14 @@ function RegisterProduct({ product, inbound, used, onAdd }: {
         <tr data-record>
             <th scope="row" className="min-w-24 p-3 font-normal">
                     <p className="break-words text-sm font-semibold">{product.name}</p>
-                    <p className="text-xs text-slate-600">{available.toLocaleString()} {product.baseUnit?.shortForm ?? product.unit.shortForm} in stock</p>
+                    <p className="text-xs text-muted-foreground">{available.toLocaleString()} {product.baseUnit?.shortForm ?? product.unit.shortForm} in stock</p>
             </th>
             <td className="min-w-24 p-3">
                 {unit ?
                     <select aria-label={`Unit for ${product.name}`} value={unit.unitId._id} onChange={(event) => setUnitId(event.target.value)}
-                        className="h-9 w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 text-sm">
+                        className="h-9 w-full min-w-0 rounded-md border border-border bg-card px-2 text-sm">
                         {units.map((option) => <option key={option._id} value={option.unitId._id}>{option.unitId.name}</option>)}
-                    </select> : <span className="text-xs text-slate-600">No unit</span>}
+                    </select> : <span className="text-xs text-muted-foreground">No unit</span>}
             </td>
             <td className="whitespace-nowrap p-3 text-right tabular-nums">{unit ? formatInvoiceMoney(Math.round(rate * 100), "NPR") : "—"}</td>
             <td className="p-3 text-right">

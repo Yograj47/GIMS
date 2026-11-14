@@ -1,3 +1,5 @@
+import { workspaceHome } from "@/shared/constants/roles";
+import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +32,7 @@ export default function VerifyAccount() {
       await verifyEmail({ otp });
 
     if (success) {
-      navigate("/dashboard");
+      navigate(workspaceHome(useAuthStore.getState().user?.role), { replace: true });
     }
   };
 

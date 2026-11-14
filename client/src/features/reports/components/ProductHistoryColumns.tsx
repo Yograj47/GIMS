@@ -9,7 +9,7 @@ export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
         accessorKey: "createdAt",
         header: "Timestamp",
         cell: ({ row }) => (
-            <div className="flex items-center gap-2 text-slate-500">
+            <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock size={12} className="text-slate-300" />
                 <span className="text-[11px] font-mono font-bold tracking-tight uppercase">
                     {new Date(row.getValue("createdAt")).toLocaleString([], { 
@@ -64,7 +64,7 @@ export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
                 </span>
                 <div className="flex items-center gap-1">
                     <Hash size={10} className="text-brand-500 opacity-50" />
-                    <span className="text-slate-900 font-black text-[13px]">{row.original.newQuantity}</span>
+                    <span className="text-foreground font-black text-[13px]">{row.original.newQuantity}</span>
                 </div>
             </div>
         ),
@@ -73,7 +73,7 @@ export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
         accessorKey: "reason",
         header: "Notes",
         cell: ({ row }) => (
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight truncate max-w-50 block">
+            <span className="text-[11px] font-bold text-subtle-foreground uppercase tracking-tight truncate max-w-50 block">
                 {row.getValue("reason") || "— NO REMARK —"}
             </span>
         ),
@@ -83,7 +83,7 @@ export const getProductHistoryColumns: ColumnDef<MovementData>[] = [
         header: () => <div className="text-right">Auth. User</div>,
         cell: ({ row }) => (
             <div className="flex items-center justify-end gap-2 py-1">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
                     {row.original.performedBy?.name}
                 </span>
                 <div className="w-6 h-6 rounded-sm bg-brand-600 text-white flex items-center justify-center shadow-sm">

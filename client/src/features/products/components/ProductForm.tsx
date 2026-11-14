@@ -72,9 +72,9 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const profit = sellPrice - buyPrice;
     const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(1) : 0;
 
-    const inputStyle = "w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all font-medium placeholder:text-slate-300";
-    const labelStyle = "text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2";
-    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-brand-600 mb-4 flex items-center gap-2";
+    const inputStyle = "w-full rounded-sm border border-input bg-card px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all font-medium placeholder:text-slate-300";
+    const labelStyle = "text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2";
+    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-link mb-4 flex items-center gap-2";
 
     return (
         <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => { }))} className="w-full space-y-8">
@@ -131,7 +131,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
             </div>
 
             {/* Section 2: Pricing Logic */}
-            <div className="bg-slate-50 border border-slate-200 p-5 rounded-sm">
+            <div className="bg-muted border border-border p-5 rounded-sm">
                 <div className={sectionTitle}>
                     <BadgeIndianRupee size={14} strokeWidth={3} /> Valuation Logic
                 </div>
@@ -139,7 +139,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                     <div className="space-y-2">
                         <label className={labelStyle}>Base Cost (Unit)</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground font-bold text-xs">Rs.</span>
                             <input type="number" {...register("basePrice", { valueAsNumber: true })} className={`${inputStyle} pl-10`} />
                             {errors.basePrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.basePrice.message}</p>}
                         </div>
@@ -148,17 +148,17 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                     <div className="space-y-2">
                         <label className={labelStyle}>Market Price (Retail)</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-600 font-bold text-xs">Rs.</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-link font-bold text-xs">Rs.</span>
                             <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-10 border-brand-100`} />
                             {errors.sellingPrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.sellingPrice.message}</p>}
                         </div>
                     </div>
 
-                    <div className={`md:col-span-2 flex items-center justify-between p-4 bg-white border ${profit >= 0 ? "border-emerald-100" : "border-red-100"}`}>
+                    <div className={`md:col-span-2 flex items-center justify-between p-4 bg-card border ${profit >= 0 ? "border-emerald-100" : "border-red-100"}`}>
                         <div className="flex items-center gap-3">
                             <TrendingUp size={18} className={profit >= 0 ? "text-emerald-500" : "text-red-500"} />
                             <div>
-                                <p className="text-[9px] font-bold uppercase text-slate-400 leading-none mb-1">Projected Net Margin</p>
+                                <p className="text-[9px] font-bold uppercase text-subtle-foreground leading-none mb-1">Projected Net Margin</p>
                                 <p className={`text-lg font-black ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                                     Rs.{profit.toLocaleString()}
                                 </p>

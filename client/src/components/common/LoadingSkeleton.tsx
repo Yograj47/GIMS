@@ -14,7 +14,7 @@ export function LoadingSkeleton({
         <section role="status" className="space-y-6">
             <span className="sr-only">{label}</span>
             <div aria-hidden="true" className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-slate-200 pb-5">
+                <div className="flex items-center gap-3 border-b border-border pb-5">
                     <Skeleton className="size-10 shrink-0 rounded-lg bg-brand-100" />
                     <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-36 max-w-full" />
@@ -26,7 +26,7 @@ export function LoadingSkeleton({
                 {layout === "dashboard" && (
                     <div className="grid gap-4 sm:grid-cols-3">
                         {rowWidths.slice(0, 3).map((width) => (
-                            <div key={width} className="space-y-3 rounded-xl border border-slate-200 bg-white p-5">
+                            <div key={width} className="space-y-3 rounded-xl border border-border bg-card p-5">
                                 <Skeleton className="h-3 w-20" />
                                 <Skeleton className="h-7 w-24" />
                                 <Skeleton className={`h-2.5 ${width}`} />
@@ -35,7 +35,7 @@ export function LoadingSkeleton({
                     </div>
                 )}
 
-                <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
                     {layout === "form" ? (
                         <div className="grid gap-5 sm:grid-cols-2">
                             {rowWidths.map((width) => (
@@ -48,7 +48,7 @@ export function LoadingSkeleton({
                     ) : layout === "dashboard" ? (
                         <Skeleton className="h-40 w-full sm:h-56" />
                     ) : (
-                        <div className="divide-y divide-slate-100">
+                        <div className="divide-y divide-border">
                             {rowWidths.map((width) => (
                                 <div key={width} className="grid grid-cols-3 items-center gap-4 py-4">
                                     <Skeleton className={`h-3 ${width}`} />

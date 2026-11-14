@@ -49,8 +49,6 @@ function ProductEditor({ id }: { id?: string }) {
         <EntityFormPage
             title={id ? "Edit product" : "Add product"}
             description={singleProduct?.name}
-            backTo="/products"
-            backLabel="Back to products"
             formId="product-form"
             submitLabel={id ? "Save changes" : "Add product"}
             saving={isLoading}

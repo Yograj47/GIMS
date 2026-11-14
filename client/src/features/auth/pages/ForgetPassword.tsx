@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/common/BackButton";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { forgotPasswordSchema, resetPasswordSchema, type ForgotPasswordFormData, type ResetPasswordFormData } from "@/types/auth";
 import { Loader2, Mail, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { notify } from "@/lib/toast";
 import { useAuth } from "../hooks/useAuth";
 
@@ -206,10 +207,10 @@ export default function ForgotPassword() {
             )}
 
             <div className="mt-10 pt-6 border-t border-white/5 text-center">
-                <Link to="/login" className="text-sm font-bold text-slate-500 hover:text-brand-500 transition-colors flex items-center justify-center gap-2 group">
+                <BackButton className="text-sm font-bold text-slate-500 hover:text-brand-500 transition-colors flex items-center justify-center gap-2 group">
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                    Return to Login
-                </Link>
+                    Back
+                </BackButton>
             </div>
         </div>
     );

@@ -11,33 +11,33 @@ interface LiveFeedProps {
 
 export default function LiveFeedCard({ logs, onViewAll }: LiveFeedProps) {
     return (
-        <Card className="border-slate-300 rounded-xl shadow-sm overflow-hidden bg-white">
-            <div className="px-8 py-5 border-b border-slate-300 flex justify-between items-center bg-slate-50/30">
-                <span className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Activity Stream</span>
+        <Card className="border-input rounded-xl shadow-sm overflow-hidden bg-card">
+            <div className="px-8 py-5 border-b border-input flex justify-between items-center bg-muted/30">
+                <span className="text-[12px] font-black text-foreground uppercase tracking-[0.2em]">Activity Stream</span>
                 <Button
                     onClick={onViewAll}
                     variant="ghost"
-                    className="h-7 text-[9px] font-black text-brand-600 hover:bg-brand-50 px-3 uppercase tracking-widest border border-brand-300"
+                    className="h-7 text-[9px] font-black text-link hover:bg-brand-50 px-3 uppercase tracking-widest border border-brand-300"
                 >
                     View Logs
                 </Button>
             </div>
-            <div className="divide-y divide-slate-50">
+            <div className="divide-y divide-border">
                 {logs.length > 0 ? (
                     logs.map((log) => {
                         const type = log.type === "INVENTORY" ? "IN" : "OUT";
                         return (
-                            <div key={log._id} className="px-8 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-all cursor-pointer group">
+                            <div key={log._id} className="px-8 py-4 flex items-center justify-between hover:bg-muted/50 transition-all cursor-pointer group">
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
                                         "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
-                                        type === 'IN' ? "bg-brand-50 text-brand-600" : "bg-emerald-50 text-emerald-600"
+                                        type === 'IN' ? "bg-brand-50 text-link" : "bg-emerald-50 text-emerald-600"
                                     )}>
                                         {type === 'IN' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-slate-900 tracking-tight">{log.message}</p>
-                                        <p className="text-[9px] font-semibold text-slate-600 uppercase tracking-tighter mt-0.5">
+                                        <p className="text-xs font-bold text-foreground tracking-tight">{log.message}</p>
+                                        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-tighter mt-0.5">
                                             {log.performedBy?.name} • {new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                         </p>
                                     </div>
@@ -46,7 +46,7 @@ export default function LiveFeedCard({ logs, onViewAll }: LiveFeedProps) {
                         );
                     })
                 ) : (
-                    <p className="p-8 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Logs</p>
+                    <p className="p-8 text-center text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">No Logs</p>
                 )}
             </div>
         </Card>

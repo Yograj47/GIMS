@@ -52,19 +52,19 @@ export default function CategoryFormModal({
 
     return (
         <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-105 rounded-sm shadow-2xl overflow-hidden border border-slate-200 shadow-slate-900/20">
+            <div className="bg-card w-full max-w-105 rounded-sm shadow-2xl overflow-hidden border border-border shadow-slate-900/20">
                 
                 {/* 1. HEADER - Sharp & Minimal */}
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
+                <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/80">
                     <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-brand-600 rounded-sm text-white">
                             <LayoutGrid size={14} />
                         </div>
-                        <h2 className="text-[11px] font-black text-slate-600 uppercase tracking-widest">
+                        <h2 className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">
                             {initialData ? "Edit Classification" : "New Category Registry"}
                         </h2>
                     </div>
-                    <button onClick={onClose} className="p-1 hover:bg-white border border-transparent hover:border-slate-200 rounded-sm text-slate-400 transition-all">
+                    <button onClick={onClose} className="p-1 hover:bg-card border border-transparent hover:border-border rounded-sm text-subtle-foreground transition-all">
                         <X size={16} />
                     </button>
                 </div>
@@ -73,11 +73,11 @@ export default function CategoryFormModal({
                     
                     {/* Identifier Name */}
                     <div className="space-y-1.5">
-                        <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-0.5">Classification Name</Label>
+                        <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-0.5">Classification Name</Label>
                         <Input
                             {...register("name")}
                             placeholder="e.g. Raw materials"
-                            className="h-10 rounded-sm border-slate-200 bg-white font-bold text-xs focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500 transition-all placeholder:text-slate-300"
+                            className="h-10 rounded-sm border-border bg-card font-bold text-xs focus-visible:ring-ring focus-visible:ring-1 focus-visible:border-brand-500 transition-all placeholder:text-slate-300"
                         />
                         {errors.name && (
                             <div className="flex items-center gap-1 mt-1 ml-0.5 text-rose-500">
@@ -89,19 +89,19 @@ export default function CategoryFormModal({
 
                     {/* Technical Definition */}
                     <div className="space-y-1.5">
-                        <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-0.5">Technical Definition</Label>
+                        <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-0.5">Technical Definition</Label>
                         <Textarea
                             {...register("description")}
                             placeholder="Provide brief specs..."
-                            className="min-h-25 rounded-sm border-slate-200 bg-white font-bold text-xs focus-visible:ring-brand-600 focus-visible:ring-1 focus-visible:border-brand-500 transition-all resize-none placeholder:text-slate-300 tabular-nums"
+                            className="min-h-25 rounded-sm border-border bg-card font-bold text-xs focus-visible:ring-ring focus-visible:ring-1 focus-visible:border-brand-500 transition-all resize-none placeholder:text-slate-300 tabular-nums"
                         />
                     </div>
 
                     {/* Availability Switch - Industrial Card Style */}
-                    <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-sm">
+                    <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-sm">
                         <div className="flex flex-col">
-                            <Label className="text-[10px] font-black text-slate-900 uppercase tracking-tight">System Status</Label>
-                            <span className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter italic">Live in Registry</span>
+                            <Label className="text-[10px] font-black text-foreground uppercase tracking-tight">System Status</Label>
+                            <span className="text-[8px] text-subtle-foreground font-bold uppercase tracking-tighter italic">Live in Registry</span>
                         </div>
                         <Controller
                             control={control}
@@ -122,7 +122,7 @@ export default function CategoryFormModal({
                             type="button" 
                             onClick={onClose} 
                             variant="outline" 
-                            className="flex-1 h-10 rounded-sm border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all text-slate-500"
+                            className="flex-1 h-10 rounded-sm border-border text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all text-muted-foreground"
                         >
                             Discard
                         </Button>

@@ -54,7 +54,7 @@ const settingSchema = new mongoose.Schema(
 
 settingSchema.pre("save", async function () {
     const count =
-        await mongoose.models.Setting.countDocuments();
+        await this.constructor.countDocuments();
 
     if (count > 0 && this.isNew) {
         throw new Error(

@@ -48,42 +48,42 @@ export default function UserManagement() {
             <div className="max-w-400 mx-auto space-y-6">
 
                 {/* 1. PRECISION HEADER (Stock Report Style) */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-brand-600 rounded-sm text-white shadow-sm">
                             <ShieldCheck size={20} />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase">
                                 Access Control
                             </h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Personnel Authorization • <span className="text-brand-600 italic">Audit Mode</span>
+                            <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-1">
+                                Personnel Authorization • <span className="text-link italic">Audit Mode</span>
                             </p>
                         </div>
                     </div>
 
                     <div className="text-right hidden md:block">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Accounts</p>
-                        <p className="text-xl font-black text-slate-900 tabular-nums leading-none">
+                        <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">Active Accounts</p>
+                        <p className="text-xl font-black text-foreground tabular-nums leading-none">
                             {users?.length || 0}
                         </p>
                     </div>
                 </div>
 
                 {/* 2. PRECISION TABLE CONTAINER */}
-                <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-x-auto min-h-100">
+                <div className="bg-card border border-border shadow-sm rounded-sm overflow-x-auto min-h-100">
                     {isLoading && <span role="status" className="sr-only">Loading users</span>}
                     <table aria-label="Users" aria-busy={isLoading} className="records-table w-full text-left border-collapse">
-                        <thead className="bg-slate-50/50 border-b border-slate-200">
-                            <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <thead className="bg-muted/50 border-b border-border">
+                            <tr className="text-[10px] font-black uppercase tracking-widest text-subtle-foreground">
                                 <th className="px-6 py-4">Personnel / Identifier</th>
                                 <th className="px-6 py-4">Clearance Level</th>
                                 <th className="px-6 py-4 text-center">Status</th>
                                 <th className="px-6 py-4 text-right pr-8">Audit Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-border">
                             {isLoading ? (
                                 Array.from({ length: 5 }, (_, index) => (
                                     <tr key={index} aria-hidden="true">
@@ -98,7 +98,7 @@ export default function UserManagement() {
                                     <td colSpan={4} className="py-24 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <SearchX className="text-slate-200" size={32} />
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Registered Personnel Identified</p>
+                                            <p className="text-[10px] font-black text-subtle-foreground uppercase tracking-widest">No Registered Personnel Identified</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -122,7 +122,7 @@ export default function UserManagement() {
                 <div className="flex justify-between items-center px-1">
                     <div className="flex items-center gap-3">
                         <div className={cn("h-2 w-2 rounded-full", isLoading ? "bg-amber-500 animate-pulse" : "bg-emerald-500")} />
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        <span className="text-[9px] font-black text-subtle-foreground uppercase tracking-[0.2em]">
                             Registry Integrity: {isLoading ? "Scanning" : "Verified"}
                         </span>
                     </div>

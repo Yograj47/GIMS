@@ -53,15 +53,15 @@ export default function ActivityLogsPage() {
             <div className="max-w-400 mx-auto space-y-6">
 
                 {/* 1. PRECISION HEADER */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-brand-600 group"
+                            className="text-muted-foreground hover:text-link group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-secondary flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
@@ -69,18 +69,18 @@ export default function ActivityLogsPage() {
                             <Info size={20} />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase">
                                 Activity Logs
                             </h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                System Audit Trail • <span className="text-brand-600 italic">Audit Mode</span>
+                            <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-1">
+                                System Audit Trail • <span className="text-link italic">Audit Mode</span>
                             </p>
                         </div>
                     </div>
 
                     <div className="text-right hidden md:block">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Events</p>
-                        <p className="text-xl font-black text-slate-900 tabular-nums">{meta?.totalItems || 0}</p>
+                        <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">Total Events</p>
+                        <p className="text-xl font-black text-foreground tabular-nums">{meta?.totalItems || 0}</p>
                     </div>
                 </div>
 
@@ -89,7 +89,7 @@ export default function ActivityLogsPage() {
                     {/* Search Field */}
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-brand-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground group-focus-within:text-link transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
@@ -97,26 +97,26 @@ export default function ActivityLogsPage() {
                             placeholder="Search by message or operator..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1
+                            className="w-full h-10 pl-10 bg-card border-border rounded-sm text-sm focus-visible:ring-1
                             focus-visible:ring-brand-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
                         />
                     </div>
 
                     {/* Date Range Group */}
-                    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-sm px-2">
-                        <Calendar size={12} className="text-slate-400" />
+                    <div className="flex items-center gap-2 bg-card border border-border rounded-sm px-2">
+                        <Calendar size={12} className="text-subtle-foreground" />
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="bg-transparent border-none p-1 text-[10px] font-black outline-none text-slate-600"
+                            className="bg-transparent border-none p-1 text-[10px] font-black outline-none text-muted-foreground"
                         />
                         <span className="text-slate-300 text-[10px]">to</span>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="bg-transparent border-none p-1 text-[10px] font-black outline-none text-slate-600"
+                            className="bg-transparent border-none p-1 text-[10px] font-black outline-none text-muted-foreground"
                         />
                     </div>
 
@@ -125,7 +125,7 @@ export default function ActivityLogsPage() {
                         <select
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="w-full h-10 px-4 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-brand-500 appearance-none cursor-pointer transition-all"
+                            className="w-full h-10 px-4 bg-card border border-border rounded-sm text-[11px] font-bold uppercase tracking-tight text-muted-foreground outline-none hover:border-input focus:border-brand-500 appearance-none cursor-pointer transition-all"
                         >
                             <option value="">All Modules</option>
                             <option value="INVENTORY">Inventory</option>
@@ -136,7 +136,7 @@ export default function ActivityLogsPage() {
                 </div>
 
                 {/* 3. DATA TABLE WRAPPER */}
-                <div className="bg-white border border-slate-200 shadow-sm rounded-sm overflow-hidden">
+                <div className="bg-card border border-border shadow-sm rounded-sm overflow-hidden">
                     <DataTable
                         columns={getActivityLogColumns()}
                         data={logs}

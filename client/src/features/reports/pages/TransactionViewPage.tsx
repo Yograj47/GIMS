@@ -44,11 +44,11 @@ function TransactionDetailsRoute({ id }: { id?: string }) {
     if (!transaction) {
         return (
             <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
-                <div className="p-4 bg-slate-50 rounded-full text-slate-300">
+                <div className="p-4 bg-muted rounded-full text-slate-300">
                     <XCircle size={48} strokeWidth={1} />
                 </div>
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Transaction Data Missing</p>
-                <Button variant="outline" onClick={() => navigate("/reports/transactions")} className="rounded-xl border-slate-200">Return to List</Button>
+                <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Transaction Data Missing</p>
+                <Button variant="outline" onClick={() => navigate(-1)} className="rounded-xl border-border">Back</Button>
             </div>
         );
     }
@@ -64,7 +64,7 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
     const [invoice, setInvoice] = useState<SalesInvoice | null>(null);
     const user = useAuthStore((state) => state.user);
     const manageBilling = txn.transactionType === "Sale" && user?.isVerified &&
-        (user.role === "owner" || user.role === "admin");
+        (user.role === "owner" || user.role === "admin" || user.role === "accountant");
     const paymentCleared = invoice ? invoice.paidMinor === invoice.totalMinor : isPaid;
     const { updateCreditStatus } = useMovementTransactions();
 
@@ -82,28 +82,28 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
     };
 
     return (
-        <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500 text-slate-900">
+        <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500 text-foreground">
             {/* 1. COMMAND STRIP HEADER */}
             <div className="no-print space-y-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:px-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-3 sm:px-4">
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"
                             onClick={() => navigate(-1)}
-                            className="h-9 px-0 hover:bg-transparent text-slate-400 hover:text-brand-600 transition-colors"
+                            className="h-9 px-0 hover:bg-transparent text-subtle-foreground hover:text-link transition-colors"
                         >
                             <ArrowLeft size={18} aria-hidden="true" />
                         </Button>
-                        <div className="h-6 w-px bg-slate-100" />
+                        <div className="h-6 w-px bg-secondary" />
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">Record</span>
-                            <span className="text-sm font-black text-slate-900 uppercase">{invoice?.number ?? `TXN-${id?.slice(-6).toUpperCase()}`}</span>
+                            <span className="text-[10px] font-black text-subtle-foreground uppercase tracking-[0.2em] leading-none">Record</span>
+                            <span className="text-sm font-black text-foreground uppercase">{invoice?.number ?? `TXN-${id?.slice(-6).toUpperCase()}`}</span>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button variant="outline" onClick={() => window.print()} className="h-9 rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider border-slate-300 text-slate-600 hover:bg-slate-50 transition-all">
-                            <Printer size={14} className="text-brand-600" /> {invoice ? "Print invoice" : "Print receipt"}
+                        <Button variant="outline" onClick={() => window.print()} className="h-9 rounded-xl gap-2 font-bold text-[11px] uppercase tracking-wider border-input text-muted-foreground hover:bg-muted transition-all">
+                            <Printer size={14} className="text-link" /> {invoice ? "Print invoice" : "Print receipt"}
                         </Button>
 
                         {txn.transactionType !== "Sale" && (!isEditing ? (
@@ -128,9 +128,9 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                 )}
 
                 {/* 2. THE AUDIT CARD */}
-                <div className="bg-white border border-slate-300 rounded-lg shadow-sm overflow-hidden">
+                <div className="bg-card border border-input rounded-lg shadow-sm overflow-hidden">
                     {/* Brand Header */}
-                    <div className="p-8 bg-slate-50/40 border-b border-slate-100 flex justify-between items-end">
+                    <div className="p-8 bg-muted/40 border-b border-border flex justify-between items-end">
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-100">
@@ -138,29 +138,29 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Transaction Voucher</h2>
+                                        <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase">Transaction Voucher</h2>
                                         <Badge className={cn("px-2 py-0.5 rounded-lg border-none font-black text-[9px] uppercase tracking-widest",
-                                            txn.transactionType === 'Sale' ? "bg-brand-100 text-brand-700" : "bg-emerald-100 text-emerald-700")}>
+                                            txn.transactionType === 'Sale' ? "bg-brand-100 text-link" : "bg-emerald-100 text-emerald-700")}>
                                             {txn.transactionType}
                                         </Badge>
                                     </div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Audit-Ready Digital Record</p>
+                                    <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-0.5">Audit-Ready Digital Record</p>
                                 </div>
                             </div>
 
                             <div className="flex gap-8">
                                 <div className="space-y-1">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Issuance Date</p>
-                                    <p className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase">
-                                        <Calendar size={12} className="text-brand-600" />
+                                    <p className="text-[9px] font-black text-subtle-foreground uppercase tracking-widest">Issuance Date</p>
+                                    <p className="text-xs font-bold text-foreground flex items-center gap-2 uppercase">
+                                        <Calendar size={12} className="text-link" />
                                         {new Date(txn.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     </p>
                                 </div>
-                                <div className="h-8 w-px bg-slate-200" />
+                                <div className="h-8 w-px bg-secondary" />
                                 <div className="space-y-1">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Party / Entity</p>
-                                    <p className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase">
-                                        <User size={12} className="text-brand-600" />
+                                    <p className="text-[9px] font-black text-subtle-foreground uppercase tracking-widest">Party / Entity</p>
+                                    <p className="text-xs font-bold text-foreground flex items-center gap-2 uppercase">
+                                        <User size={12} className="text-link" />
                                         {txn.partyDetails?.name || "Walking Customer"}
                                     </p>
                                 </div>
@@ -168,9 +168,9 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                         </div>
 
                         <div className="text-right">
-                            <div className="bg-white p-4 px-6 rounded-2xl border border-slate-300 inline-block">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Valuation</p>
-                                <p className="text-3xl font-black text-slate-900 tabular-nums">
+                            <div className="bg-card p-4 px-6 rounded-2xl border border-input inline-block">
+                                <p className="text-[9px] font-black text-subtle-foreground uppercase tracking-widest mb-1">Total Valuation</p>
+                                <p className="text-3xl font-black text-foreground tabular-nums">
                                     {invoice ? formatInvoiceMoney(invoice.totalMinor, invoice.currency) : `Rs. ${txn.grandTotal?.toLocaleString()}`}
                                 </p>
                             </div>
@@ -180,20 +180,20 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                     {/* 3. METADATA SECTION */}
                     <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-3">
-                            <h3 className="text-[11px] font-bold text-slate-900 uppercase flex items-center gap-2">
+                            <h3 className="text-[11px] font-bold text-foreground uppercase flex items-center gap-2">
                                 Settlement Status
                             </h3>
                             {isEditing ? (
-                                <div className="flex gap-1 p-1.5 bg-slate-100 rounded-lg w-fit border border-slate-300/50">
+                                <div className="flex gap-1 p-1.5 bg-secondary rounded-lg w-fit border border-input/50">
                                     <Button
                                         onClick={() => setIsPaid(true)}
-                                        className={cn("h-8 rounded-xl font-black text-[11px] uppercase tracking-wider px-6 transition-all", isPaid ? "bg-white text-emerald-600 shadow-sm" : "bg-transparent text-slate-400 hover:text-slate-600")}
+                                        className={cn("h-8 rounded-xl font-black text-[11px] uppercase tracking-wider px-6 transition-all", isPaid ? "bg-card text-emerald-600 shadow-sm" : "bg-transparent text-subtle-foreground hover:text-muted-foreground")}
                                     >
                                         Paid
                                     </Button>
                                     <Button
                                         onClick={() => setIsPaid(false)}
-                                        className={cn("h-8 rounded-xl font-black text-[11px] uppercase tracking-wider px-6 transition-all", !isPaid ? "bg-white text-rose-600 shadow-sm" : "bg-transparent text-slate-400 hover:text-slate-600")}
+                                        className={cn("h-8 rounded-xl font-black text-[11px] uppercase tracking-wider px-6 transition-all", !isPaid ? "bg-card text-rose-600 shadow-sm" : "bg-transparent text-subtle-foreground hover:text-muted-foreground")}
                                     >
                                         Unpaid
                                     </Button>
@@ -208,18 +208,18 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
                         </div>
 
                         <div className="space-y-3">
-                            <h3 className="text-[11px] font-bold text-slate-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h3 className="text-[11px] font-bold text-foreground uppercase tracking-[0.2em] flex items-center gap-2">
                                 Remarks / Notes
                             </h3>
                             {isEditing ? (
                                 <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
-                                    className="w-full h-20 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-medium focus:ring-1 focus:ring-brand-500 outline-none transition-all placeholder:text-slate-300"
+                                    className="w-full h-20 p-4 rounded-2xl bg-muted border border-border text-sm font-medium focus:ring-1 focus:ring-brand-500 outline-none transition-all placeholder:text-slate-300"
                                     placeholder="Internal auditing notes..."
                                 />
                             ) : (
-                                <p className="text-xs font-bold text-slate-500 leading-relaxed italic opacity-80 uppercase tracking-tight">
+                                <p className="text-xs font-bold text-muted-foreground leading-relaxed italic opacity-80 uppercase tracking-tight">
                                     {notes || "No remarks on file."}
                                 </p>
                             )}
@@ -228,37 +228,37 @@ function TransactionDetails({ txn }: { txn: TransactionData }) {
 
                     {/* 4. ITEMIZATION TABLE */}
                     <div className="px-3 pb-6 sm:px-8 sm:pb-10">
-                        <div className="overflow-x-auto rounded-lg border border-slate-200">
+                        <div className="overflow-x-auto rounded-lg border border-border">
                             <table aria-label="Transaction items" className="records-table w-full text-sm">
                                 <thead>
-                                    <tr className="bg-slate-50 text-xs font-semibold text-slate-700">
+                                    <tr className="bg-muted text-xs font-semibold text-foreground">
                                         <th className="px-3 py-3 sm:px-5 text-left">Description</th>
                                         <th className="px-3 py-3 sm:px-5 text-center">Qty / Unit</th>
                                         <th className="px-3 py-3 sm:px-5 text-center">Price</th>
                                         <th className="px-3 py-3 sm:px-5 text-right">Line Total</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-border">
                                     {txn.items?.map((item: Item, idx: number) => (
-                                        <tr key={idx} data-record className="hover:bg-slate-50/30 transition-colors">
+                                        <tr key={idx} data-record className="hover:bg-muted/30 transition-colors">
                                             <td className="px-3 py-3 sm:px-5">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100">
-                                                        <Package size={14} className="text-brand-600" />
+                                                    <div className="w-8 h-8 rounded-lg bg-muted text-slate-300 flex items-center justify-center border border-border">
+                                                        <Package size={14} className="text-link" />
                                                     </div>
-                                                    <span className="text-sm font-semibold text-slate-900">{item.productName}</span>
+                                                    <span className="text-sm font-semibold text-foreground">{item.productName}</span>
                                                 </div>
                                             </td>
                                             <td className="px-3 py-3 sm:px-5 text-center">
-                                                <span className="text-[11px] font-black text-slate-700">
-                                                    {item.qty} <span className="text-[9px] text-slate-400 ml-0.5 uppercase">{item.unitName?.slice(0,2) || item.unitName}</span>
+                                                <span className="text-[11px] font-black text-foreground">
+                                                    {item.qty} <span className="text-[9px] text-subtle-foreground ml-0.5 uppercase">{item.unitName?.slice(0,2) || item.unitName}</span>
                                                 </span>
                                             </td>
                                             <td className="px-3 py-3 sm:px-5 text-center">
-                                                <span className="text-[11px] font-bold text-slate-400 italic">Rs. {item.rate?.toLocaleString()}</span>
+                                                <span className="text-[11px] font-bold text-subtle-foreground italic">Rs. {item.rate?.toLocaleString()}</span>
                                             </td>
                                             <td className="px-3 py-3 sm:px-5 text-right">
-                                                <span className="text-xs font-black text-slate-900 tabular-nums uppercase">
+                                                <span className="text-xs font-black text-foreground tabular-nums uppercase">
                                                     {invoice?.items[idx] ? formatInvoiceMoney(invoice.items[idx].totalMinor, invoice.currency) : `Rs. ${item.total?.toLocaleString()}`}
                                                 </span>
                                             </td>

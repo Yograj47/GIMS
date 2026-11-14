@@ -15,7 +15,7 @@ interface StatCardProps {
 
 export default function StatCard({ title, value, desc, trend, trendUp, icon, color, bgColor }: StatCardProps) {
     return (
-        <Card className="min-w-0 border-slate-200 bg-white py-0 shadow-none">
+        <Card className="min-w-0 border-border bg-card py-0 shadow-none">
             <CardContent className="p-4 sm:p-5">
                 <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                     <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shadow-sm", bgColor, color)}>
@@ -26,9 +26,9 @@ export default function StatCard({ title, value, desc, trend, trendUp, icon, col
                         {trend}
                     </div>}
                 </div>
-                <h2 className="text-sm font-medium text-slate-600">{title}</h2>
-                <p className="mt-1 break-words text-2xl font-semibold tracking-tight text-slate-950 tabular-nums">{value}</p>
-                <p className="mt-2 text-xs text-slate-600">{desc}</p>
+                <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
+                <p className="mt-1 break-words text-2xl font-semibold tracking-tight text-foreground tabular-nums">{value}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{desc}</p>
             </CardContent>
         </Card>
     );

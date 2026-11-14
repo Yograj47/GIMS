@@ -1,6 +1,7 @@
+import { BackButton } from "@/components/common/BackButton";
 import { useEffect, useState, useMemo } from 'react';
-import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
-import { Pencil, ArrowLeft, Package, SearchX, Trash2, Plus, ShieldCheck } from 'lucide-react';
+import { NavLink, Navigate, useLocation, useParams, useNavigate } from 'react-router-dom';
+import { Pencil, ArrowLeft, Package, SearchX, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { useSuppliers } from '../hooks/useSuppliers';
@@ -8,34 +9,26 @@ import { cn } from "@/lib/utils";
 import { AssignProductModal } from '../components/AssignProductModal';
 import { useProducts } from '@/features/products/hooks/useProducts';
 import { DeleteConfirmDialog } from '@/lib/deleteAlert';
-import { SupplierReceiving } from '../components/SupplierReceiving';
 import { useAuthStore } from '@/store/authStore';
-import { useGlobalStore } from '@/store/globalStore';
 
-export default function SupplierView() {
+export default function SupplierView({ section = "overview" }: { section?: "overview" | "catalog" }) {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { hash } = useLocation();
     const user = useAuthStore((state) => state.user);
-    const { settings, fetchSettings } = useGlobalStore();
     const { singleSupplier, productData, fetchSupplierById, removeSupplier, isLoading, removeProductFromSupplier, assignProducts } = useSuppliers();
-    const { products, fetchProducts } = useProducts();
+    const { products, fetchProducts, isLoading: productsLoading } = useProducts();
     const [isAssigning, setIsAssigning] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
 
     useEffect(() => {
-        if (id) fetchSupplierById(id);
-        fetchProducts(undefined, undefined, undefined, undefined, undefined, true);
-    }, [id, fetchSupplierById, fetchProducts]);
-
-    useEffect(() => { void fetchSettings(); }, [fetchSettings]);
+        if (id) void fetchSupplierById(id).catch(() => {});
+    }, [id, fetchSupplierById]);
 
     useEffect(() => {
-        if (hash === "#receiving" && singleSupplier && !isLoading && user?.isVerified) {
-            document.getElementById("receiving")?.scrollIntoView();
-        }
-    }, [hash, singleSupplier, isLoading, user?.isVerified]);
+        if (section !== "overview") void fetchProducts(undefined, undefined, undefined, undefined, undefined, true);
+    }, [section, fetchProducts]);
 
     const assignedProductIds = useMemo(() => productData?.map(p => p._id) || [], [productData]);
     const canWrite = user?.role === "admin" || user?.role === "owner";
@@ -52,38 +45,47 @@ export default function SupplierView() {
 
     const confirmDelete = async () => {
         if (!id) return;
-        await removeSupplier(id);
+        if (!await removeSupplier(id)) return;
         setIsDeleteDialogOpen(false);
         navigate("/suppliers");
     }
 
+    const profilePath = `/suppliers/v/${id}`;
+    if (section === "overview" && hash === "#receiving") {
+        return <Navigate replace to={`/stock-movements/${canWrite ? "purchase" : "supplier-return"}?supplierId=${id}`} />;
+    }
+
     if (isLoading) return <LoadingSkeleton layout="dashboard" label="Loading supplier" />;
-    if (!singleSupplier) return <NotFoundState onBack={() => navigate('/suppliers')} />;
+    if (!singleSupplier) return <NotFoundState onBack={() => navigate(-1)} />;
+
+    const sections = [
+        { label: "Overview", to: profilePath },
+        { label: "Product catalog", to: `${profilePath}/catalog` },
+        ...(canWrite && singleSupplier.isActive ? [{ label: "Receive delivery", to: `/stock-movements/purchase?supplierId=${id}` }] : []),
+        { label: "Stock lots", to: `/stock-movements/supplier-lots?supplierId=${id}` },
+        { label: "Supplier returns", to: `/stock-movements/supplier-return?supplierId=${id}` },
+        ...(user?.isVerified && canWrite ? [{ label: "Supplier billing", to: `${profilePath}/billing` }] : []),
+    ];
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
             {/* Header / Actions */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-300 pb-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-input pb-6">
                 <div>
-                    <button
-                        onClick={() => navigate('/suppliers')}
-                        className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-brand-600 flex items-center gap-2 mb-2 transition-colors"
-                    >
-                        <ArrowLeft size={12} strokeWidth={3} /> Back to Directory
-                    </button>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">{singleSupplier.name}</h1>
-                    <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-2">
-                        <ShieldCheck size={14} className="text-emerald-500" /> Authorized Supplier Partner
-                    </p>
+                    <BackButton
+                        className="text-[10px] font-bold uppercase tracking-widest text-subtle-foreground hover:text-link flex items-center gap-2 mb-2 transition-colors"
+                    ><ArrowLeft size={12} aria-hidden="true" /> Back</BackButton>
+                    <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase">{singleSupplier.name}</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">{singleSupplier.isActive ? "Active" : "Inactive"}</p>
                 </div>
 
-                <div className="flex gap-2">
+                {section === "overview" && canWrite && <div className="flex flex-wrap gap-2">
                     <Button
                         variant="outline"
                         onClick={() => navigate(`/suppliers/edit/${id}`)}
-                        className="h-9 text-[10px] font-bold uppercase tracking-widest border-slate-300 hover:bg-slate-50"
+                        className="h-9 text-[10px] font-bold uppercase tracking-widest border-input hover:bg-muted"
                     >
-                        <Pencil size={14} className="mr-2" /> Edit Record
+                        <Pencil size={14} className="mr-2" /> Edit supplier
                     </Button>
                     <Button
                         type="button"
@@ -91,7 +93,7 @@ export default function SupplierView() {
                         onClick={() => setIsDeleteDialogOpen(true)}
                         className="text-red-600 hover:bg-red-50 hover:text-red-500 text-[11px] font-bold uppercase gap-2 transition-colors"
                     >
-                        <Trash2 size={14} className="mr-2" /> Terminate
+                        <Trash2 size={14} className="mr-2" /> Delete supplier
                     </Button>
 
                     <DeleteConfirmDialog
@@ -102,36 +104,46 @@ export default function SupplierView() {
                         itemName={singleSupplier?.name || "Supplier"}
                         isLoading={isLoading}
                     />
-                </div>
+                </div>}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Sidebar: Profile Info */}
-                <div className="space-y-6">
-                    <section className="bg-slate-50/50 border border-slate-300 rounded-xl p-5">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Contact Intelligence</h3>
+            <nav aria-label="Supplier sections" className="flex flex-wrap gap-2 border-b border-border pb-3">
+                {sections.map(({ label, to }) => (
+                    <NavLink key={to} to={to} end className={({ isActive }) => cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive ? "bg-brand-100 text-link" : "text-muted-foreground hover:bg-secondary",
+                    )}>{label}</NavLink>
+                ))}
+            </nav>
+
+            {section === "overview" && (
+                <div className="grid gap-4 md:grid-cols-2">
+                    <section className="bg-muted/50 border border-input rounded-xl p-5">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-subtle-foreground mb-4">Contact details</h3>
                         <div className="space-y-4">
-                            <InfoRow label="Direct Phone" value={singleSupplier.phone} isMono />
-                            <InfoRow label="Email Channel" value={singleSupplier.email} />
-                            <InfoRow label="Base Location" value={singleSupplier.address} />
+                            <InfoRow label="Phone" value={singleSupplier.phone} isMono />
+                            <InfoRow label="Email" value={singleSupplier.email} />
+                            <InfoRow label="Address" value={singleSupplier.address} />
                         </div>
                     </section>
 
                     {singleSupplier.notes && (
                         <section className="border-l-2 border-brand-500 pl-4 py-1">
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Internal Brief</h3>
-                            <p className="text-xs text-slate-600 leading-relaxed italic">"{singleSupplier.notes}"</p>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-subtle-foreground mb-2">Notes</h3>
+                            <p className="text-xs text-muted-foreground leading-relaxed italic">"{singleSupplier.notes}"</p>
                         </section>
                     )}
                 </div>
+            )}
 
-                {/* Main: Catalog Table */}
-                <div className="lg:col-span-2">
-                    <div className="border border-slate-300 rounded-xl overflow-hidden bg-white">
-                        <div className="px-6 py-4 border-b border-slate-300 flex items-center justify-between bg-slate-50/30">
+            {section !== "overview" && productsLoading && <LoadingSkeleton label="Loading products" />}
+            {section === "catalog" && !productsLoading && (
+                <div>
+                    <div className="border border-input rounded-xl overflow-hidden bg-card">
+                        <div className="px-6 py-4 border-b border-input flex items-center justify-between bg-muted/30">
                             <div className="flex items-center gap-2">
-                                <Package size={16} className="text-slate-400" />
-                                <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-800">Linked Inventory</h2>
+                                <Package size={16} className="text-subtle-foreground" />
+                                <h2 className="text-[11px] font-black uppercase tracking-widest text-foreground">Linked products</h2>
                             </div>
                         {canWrite && <Button
                                 onClick={() => setIsAssigning(true)}
@@ -144,24 +156,24 @@ export default function SupplierView() {
                         <div className="overflow-x-auto">
                             <table className="records-table w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50/50 border-b border-slate-300">
-                                        <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">SKU/Item</th>
-                                        <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Base Cost</th>
-                                        <th className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                    <tr className="bg-muted/50 border-b border-input">
+                                        <th className="px-6 py-3 text-[9px] font-black text-subtle-foreground uppercase tracking-widest">Product</th>
+                                        <th className="px-6 py-3 text-[9px] font-black text-subtle-foreground uppercase tracking-widest text-center">Base Cost</th>
+                                        <th className="px-6 py-3 text-[9px] font-black text-subtle-foreground uppercase tracking-widest text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-border">
                                     {catalogProducts.length ? (
                                         catalogProducts.map((product) => (
-                                            <tr key={product._id} data-record className="hover:bg-slate-50/30 transition-colors group">
+                                            <tr key={product._id} data-record className="hover:bg-muted/30 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="text-sm font-semibold text-slate-900">{product.name}</span>
-                                                        <span className="text-xs text-slate-600">Stock: {product.quantity} units</span>
+                                                        <span className="text-sm font-semibold text-foreground">{product.name}</span>
+                                                        <span className="text-xs text-muted-foreground">Stock: {product.quantity} units</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    <span className="text-xs font-mono font-bold text-slate-600">₹{product.basePrice}</span>
+                                                    <span className="text-xs font-mono font-bold text-muted-foreground">{product.basePrice.toLocaleString()}</span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     {canWrite && <button
@@ -184,45 +196,30 @@ export default function SupplierView() {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {user?.isVerified && canWrite && (
-                <Button asChild variant="outline"><Link to={`/suppliers/v/${singleSupplier._id}/billing`}>Supplier billing</Link></Button>
             )}
 
-            {user?.isVerified && (
-                <SupplierReceiving
-                    key={singleSupplier._id}
-                    supplierId={singleSupplier._id}
-                    products={products}
-                    assignedProductIds={assignedProductIds}
-                    canWrite={canWrite}
-                    currency={settings?.currency ?? "NPR"}
-                />
-            )}
-
-            <AssignProductModal
+            {section === "catalog" && canWrite && <AssignProductModal
                 isOpen={isAssigning}
                 onClose={() => setIsAssigning(false)}
                 Products={products}
                 onAssign={handleAssignProducts}
                 excludeIds={assignedProductIds}
-            />
+            />}
         </div>
     );
 }
 
 const InfoRow = ({ label, value, isMono }: { label: string, value?: string, isMono?: boolean }) => (
     <div>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-        <p className={cn("text-xs font-bold text-slate-800", isMono && "font-mono text-brand-600")}>{value || "N/A"}</p>
+        <p className="text-[9px] font-bold text-subtle-foreground uppercase tracking-widest mb-1">{label}</p>
+        <p className={cn("text-xs font-bold text-foreground", isMono && "font-mono text-link")}>{value || "N/A"}</p>
     </div>
 );
 
 const NotFoundState = ({ onBack }: { onBack: () => void }) => (
     <div className="h-[60vh] flex flex-col items-center justify-center text-center">
         <SearchX size={40} className="text-slate-200 mb-4" />
-        <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Entry Not Found</h2>
-        <Button onClick={onBack} variant="link" className="text-brand-600 text-[10px] font-bold uppercase mt-2">Return to Directory</Button>
+        <h2 className="text-sm font-black text-foreground uppercase tracking-widest">Entry Not Found</h2>
+        <Button onClick={onBack} variant="link" className="text-link text-[10px] font-bold uppercase mt-2">Back</Button>
     </div>
 );

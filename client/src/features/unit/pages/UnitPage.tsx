@@ -69,7 +69,7 @@ export default function UnitPage() {
                 setPagination((previous) => ({ ...previous, pageIndex: 0 }));
             }} />
 
-            <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
                 <DataTable
                     columns={getUnitColumns(handleEditClick, handleDeleteClick)}
                     data={units}

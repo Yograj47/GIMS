@@ -33,20 +33,20 @@ export const DeleteConfirmDialog = ({
 }: DeleteConfirmDialogProps) => {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="rounded-sm border-slate-300 max-w-100">
+            <AlertDialogContent className="rounded-sm border-input max-w-100">
                 <AlertDialogHeader>
                     <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-4 border border-rose-100">
                         <AlertTriangle size={20} />
                     </div>
                     
-                    <AlertDialogTitle className="text-lg font-bold text-slate-900 uppercase tracking-tight">
+                    <AlertDialogTitle className="text-lg font-bold text-foreground uppercase tracking-tight">
                         {title}
                     </AlertDialogTitle>
                     
-                    <AlertDialogDescription className="text-slate-500 text-xs font-medium leading-relaxed">
+                    <AlertDialogDescription className="text-muted-foreground text-xs font-medium leading-relaxed">
                         {description || (
                             <>
-                                Removing <span className="text-slate-900 font-bold uppercase tracking-tight">{itemName}</span> from the registry is permanent. This action cannot be reversed within the current audit cycle.
+                                Removing <span className="text-foreground font-bold uppercase tracking-tight">{itemName}</span> from the registry is permanent. This action cannot be reversed within the current audit cycle.
                             </>
                         )}
                     </AlertDialogDescription>
@@ -55,7 +55,7 @@ export const DeleteConfirmDialog = ({
                 <AlertDialogFooter className="gap-2 mt-4">
                     <AlertDialogCancel 
                         disabled={isLoading}
-                        className="rounded-sm border-slate-300 font-extrabold text-[12px] uppercase tracking-widest h-9 px-4 transition-colors"
+                        className="rounded-sm border-input font-extrabold text-[12px] uppercase tracking-widest h-9 px-4 transition-colors"
                     >
                         Cancel
                     </AlertDialogCancel>

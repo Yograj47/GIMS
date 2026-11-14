@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import { z } from "zod";
 
 import { createTransactionSchema } from "./transaction.validation.js";
 import * as transactionService from "./transaction.service.js";
@@ -36,10 +37,18 @@ export const createTransaction = asyncHandler(
     }
 );
 
+const transactionFilters = z.object({
+    search: z.string().trim().max(200).optional(),
+    transactionType: createTransactionSchema.shape.transactionType.or(z.literal("")).optional(),
+    startDate: z.iso.date().or(z.literal("")).optional(),
+    endDate: z.iso.date().or(z.literal("")).optional(),
+});
+
 export const findTransactions = asyncHandler(
     async (req, res) => {
         const result =
             await transactionService.find({
+                ...transactionFilters.parse(req.query),
                 page: Number(
                     req.query.page
                 ) || 1,

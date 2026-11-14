@@ -1,3 +1,4 @@
+import { ThemeControl } from "@/components/common/ThemeControl";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +13,7 @@ type Unit = { id: string; name: string; multiplier: number; fractional: boolean 
 type Product = { id: string; name: string; price: number; available: number; units: Unit[] };
 type CartLine = { product: Product; unit: Unit; quantity: number };
 type Catalog = { data: Product[]; meta: { totalItems: number; pageSize: number; gatewayEnabled: boolean } };
-const field = "min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm";
+const field = "min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm";
 
 function ProductCard({ product, add }: { product: Product; add: (line: CartLine) => void }) {
     const [unitId, setUnitId] = useState("");
@@ -23,8 +24,8 @@ function ProductCard({ product, add }: { product: Product; add: (line: CartLine)
         if (unit) add({ product, unit, quantity: Number(quantity) });
     }
     return (
-        <form onSubmit={submit} className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
-            <div><h2 className="font-semibold">{product.name}</h2><p className="text-sm text-slate-600">{product.available} base units available</p></div>
+        <form onSubmit={submit} className="space-y-3 rounded-lg border border-border bg-card p-4">
+            <div><h2 className="font-semibold">{product.name}</h2><p className="text-sm text-muted-foreground">{product.available} base units available</p></div>
             {unit && <div className="grid grid-cols-2 gap-2">
                 <label className="grid gap-1 text-sm">Unit
                     <select className={field} value={unit.id} onChange={(event) => setUnitId(event.target.value)}>
@@ -102,16 +103,17 @@ export default function Shop() {
     }
 
     return (
-        <div className="min-h-dvh bg-market-paper text-slate-900">
-            <header className="border-b bg-white">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-                    <Link to="/shop" className="flex items-center gap-2 text-lg font-bold"><span className="grid size-9 place-items-center rounded-lg bg-market-yellow"><Box className="size-5 text-brand-600" /></span> GroceryPro</Link>
-                    <Link to="/checkout/return" className="text-sm text-brand-700">Order status</Link>
+        <div className="min-h-dvh bg-background text-foreground">
+            <header className="border-b bg-card">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-4">
+                    <Link to="/shop" className="flex items-center gap-2 text-lg font-bold"><span className="grid size-9 place-items-center rounded-lg bg-brand-soft"><Box className="size-5 text-brand-soft-foreground" /></span> GroceryPro</Link>
+                    <ThemeControl />
+                    <Link to="/checkout/return" className="text-sm text-link">Order status</Link>
                 </div>
             </header>
             <main className="mx-auto grid max-w-7xl gap-6 px-5 py-7 lg:grid-cols-[1fr_340px]">
                 <section className="space-y-4">
-                    <h1 className="rounded-lg border-l-4 border-market-orange bg-market-yellow px-5 py-4 text-2xl font-bold">Shop groceries</h1>
+                    <h1 className="rounded-lg border-l-4 border-chart-2 bg-brand-soft text-brand-soft-foreground px-5 py-4 text-2xl font-bold">Shop groceries</h1>
                     {notice && <p role="status" className="sr-only">{notice}</p>}
                     {catalog ? (
                         <>
@@ -125,10 +127,10 @@ export default function Shop() {
                         </>
                     ) : !error && <Skeleton role="status" aria-label="Loading shop" className="h-56 w-full" />}
                 </section>
-                <form onSubmit={checkout} className="h-fit space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-                    <h2 className="border-b-2 border-market-orange/60 pb-3 text-lg font-bold">Your cart</h2>
+                <form onSubmit={checkout} className="h-fit space-y-4 rounded-xl border border-border bg-card p-5">
+                    <h2 className="border-b-2 border-chart-2/60 pb-3 text-lg font-bold">Your cart</h2>
                     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-                    {cart.length === 0 ? <p className="text-sm text-slate-600">Add an item to get started.</p> : (
+                    {cart.length === 0 ? <p className="text-sm text-muted-foreground">Add an item to get started.</p> : (
                         <>
                             <ul className="divide-y">{cart.map((item) => <li key={`${item.product.id}:${item.unit.id}`} className="flex items-center justify-between gap-2 py-2 text-sm">
                                 <span>{item.product.name} · {item.quantity} {item.unit.name}</span>

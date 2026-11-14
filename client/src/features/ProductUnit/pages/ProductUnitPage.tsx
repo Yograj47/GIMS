@@ -87,7 +87,7 @@ export default function ProductUnitPage() {
                 setPagination((previous) => ({ ...previous, pageIndex: 0 }));
             }} />
 
-            <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
                 <DataTable
                     columns={getProductUnitColumns((id, name) => {
                         setContext({ id, name });
@@ -100,10 +100,10 @@ export default function ProductUnitPage() {
                     pagination={pagination}
                     setPagination={setPagination}
                     renderExpandedRow={(row) => (
-                        <div className="p-4 bg-slate-50 border-t border-slate-100">
+                        <div className="p-4 bg-muted border-t border-border">
                             {row.original.conversions?.length > 0 ? (
-                                <div className="rounded-md border border-slate-200 bg-white overflow-hidden shadow-sm">
-                                    <div className="hidden grid-cols-12 gap-3 px-4 py-2.5 md:grid bg-slate-50 text-[11px] font-bold text-slate-500 border-b">
+                                <div className="rounded-md border border-border bg-card overflow-hidden shadow-sm">
+                                    <div className="hidden grid-cols-12 gap-3 px-4 py-2.5 md:grid bg-muted text-[11px] font-bold text-muted-foreground border-b">
                                         <div className="col-span-4">Unit Name</div>
                                         <div className="col-span-3 text-center">Multiplier</div>
                                         <div className="col-span-3 text-center">Unit type</div>
@@ -111,15 +111,15 @@ export default function ProductUnitPage() {
                                             <div className="col-span-2 text-right">Actions</div>
                                         </AdminGate>
                                     </div>
-                                    <div className="divide-y divide-slate-100">
+                                    <div className="divide-y divide-border">
                                         {row.original.conversions.map((conv:ProductUnitConversion) => (
                                             <div key={conv._id} className="grid grid-cols-2 gap-2 px-3 py-3 items-center md:grid-cols-12 md:gap-3 md:px-4 hover:bg-brand-50/30 transition-colors">
-                                                <div className="col-span-2 flex flex-wrap items-center md:col-span-4 gap-2 font-semibold text-slate-700 text-sm">
+                                                <div className="col-span-2 flex flex-wrap items-center md:col-span-4 gap-2 font-semibold text-foreground text-sm">
                                                     <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                                                    {conv.unitName} <span className="text-xs text-slate-400 font-normal">({conv.shortName})</span>
+                                                    {conv.unitName} <span className="text-xs text-subtle-foreground font-normal">({conv.shortName})</span>
                                                 </div>
                                                 <div className="flex md:col-span-3 md:justify-center">
-                                                    <span className="px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-[11px] font-bold border border-brand-100 tabular-nums">
+                                                    <span className="px-2 py-0.5 rounded bg-brand-50 text-link text-[11px] font-bold border border-brand-100 tabular-nums">
                                                         × {conv.multiplier}
                                                     </span>
                                                 </div>
@@ -129,7 +129,7 @@ export default function ProductUnitPage() {
                                                             <CheckCircle2 size={12} /> Base Unit
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[11px] text-slate-400 font-medium">Secondary</span>
+                                                        <span className="text-[11px] text-subtle-foreground font-medium">Secondary</span>
                                                     )}
                                                 </div>
                                                 <AdminGate>
@@ -138,7 +138,7 @@ export default function ProductUnitPage() {
                                                             size="icon"
                                                             aria-label="Edit conversion"
                                                             variant="ghost"
-                                                            className="size-9 text-slate-600 hover:text-brand-600"
+                                                            className="size-9 text-muted-foreground hover:text-link"
                                                             onClick={() => {
                                                                 setContext({ id: row.original._id, name: row.original.productName, initialData: conv });
                                                                 setIsModalOpen(true);
@@ -150,7 +150,7 @@ export default function ProductUnitPage() {
                                                             size="icon"
                                                             aria-label="Delete conversion"
                                                             variant="ghost"
-                                                            className="size-9 text-slate-600 hover:text-rose-600"
+                                                            className="size-9 text-muted-foreground hover:text-rose-600"
                                                             disabled={conv.isDefault} 
                                                             onClick={() => openDeleteDialog(conv._id, row.original._id, conv.unitName)}
                                                         >
@@ -163,8 +163,8 @@ export default function ProductUnitPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="py-6 text-center bg-white rounded-md border border-dashed border-slate-200">
-                                    <p className="text-xs text-slate-400 font-medium">No conversion units mapped</p>
+                                <div className="py-6 text-center bg-card rounded-md border border-dashed border-border">
+                                    <p className="text-xs text-subtle-foreground font-medium">No conversion units mapped</p>
                                 </div>
                             )}
                         </div>

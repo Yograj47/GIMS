@@ -86,16 +86,16 @@ export default function StockMovementReport() {
             <div className="max-w-400 mx-auto space-y-6">
 
                 {/* 1. PRECISION HEADER */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
 
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(-1)}
-                            className="text-slate-500 hover:text-brand-600 group"
+                            className="text-muted-foreground hover:text-link group"
                         >
-                            <div className="w-8 h-8 rounded-sm bg-slate-100 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
+                            <div className="w-8 h-8 rounded-sm bg-secondary flex items-center justify-center group-hover:bg-brand-50 transition-colors">
                                 <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
                             </div>
                         </Button>
@@ -103,11 +103,11 @@ export default function StockMovementReport() {
                             <History size={20} strokeWidth={2.5} />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase">
                                 Movement Ledger
                             </h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                Audit Trail • <span className="text-brand-600 italic">Global Traffic</span>
+                            <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-1">
+                                Audit Trail • <span className="text-link italic">Global Traffic</span>
                             </p>
                         </div>
                     </div>
@@ -130,7 +130,7 @@ export default function StockMovementReport() {
                     {/* Search Field */}
                     <div className="relative flex-1 group">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-brand-600 transition-colors"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground group-focus-within:text-link transition-colors"
                             size={14}
                             strokeWidth={2.5}
                         />
@@ -138,7 +138,7 @@ export default function StockMovementReport() {
                             placeholder="Filter by Product, Operator..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-10 bg-white border-slate-200 rounded-sm text-sm focus-visible:ring-1
+                            className="w-full h-10 pl-10 bg-card border-border rounded-sm text-sm focus-visible:ring-1
                              focus-visible:ring-brand-500 transition-all shadow-none placeholder:text-slate-300 font-medium"
                         />
                     </div>
@@ -146,25 +146,25 @@ export default function StockMovementReport() {
                     {/* Movement Type Filter */}
                     <div className="relative min-w-64">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <Filter size={12} className="text-brand-600" strokeWidth={3} />
+                            <Filter size={12} className="text-link" strokeWidth={3} />
                         </div>
                         <select
                             value={movementType}
                             onChange={(e) => setMovementType(e.target.value)}
-                            className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200 rounded-sm text-[11px] font-bold uppercase tracking-tight text-slate-600 outline-none hover:border-slate-300 focus:border-brand-500 appearance-none cursor-pointer transition-all"
+                            className="w-full h-10 pl-9 pr-8 bg-card border border-border rounded-sm text-[11px] font-bold uppercase tracking-tight text-muted-foreground outline-none hover:border-input focus:border-brand-500 appearance-none cursor-pointer transition-all"
                         >
                             <option value="All Movements">All Transactions</option>
                             <option value="IN">Stock Inflow (+)</option>
                             <option value="OUT">Stock Outflow (-)</option>
                         </select>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-subtle-foreground">
                             <svg width="8" height="8" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 1L5 5L9 1" /></svg>
                         </div>
                     </div>
                 </div>
 
                 {/* 3. THE DATA TABLE */}
-                <div className="bg-white border border-slate-200 rounded-sm overflow-hidden shadow-sm">
+                <div className="bg-card border border-border rounded-sm overflow-hidden shadow-sm">
                     <DataTable
                         columns={getMovementColumns}
                         data={movements || []}

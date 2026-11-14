@@ -17,10 +17,10 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
             header: "Product",
             cell: ({ row }) => (
                 <div className="flex flex-col py-1">
-                    <span className="max-w-52 whitespace-normal break-words font-semibold text-slate-900">
+                    <span className="max-w-52 whitespace-normal break-words font-semibold text-foreground">
                         {row.original.name}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
+                    <span className="text-[10px] text-subtle-foreground font-medium uppercase tracking-tight">
                         SKU · {row.original._id.slice(-6).toUpperCase()}
                     </span>
                 </div>
@@ -30,7 +30,7 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
             accessorKey: "category.name",
             header: "Category",
             cell: ({ row }) => (
-                <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm uppercase tracking-tighter">
+                <span className="text-[11px] font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-sm uppercase tracking-tighter">
                     {row.original.category.name}
                 </span>
             ),
@@ -43,11 +43,11 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                 const status = quantity <= 0 ? "Out of stock" : quantity <= threshold ? "Low stock" : "In stock";
                 return (
                     <div className="flex flex-col items-start gap-1 tabular-nums">
-                        <span className="font-medium text-slate-900">{quantity.toLocaleString()} {baseUnit?.shortForm ?? unit.shortForm}</span>
+                        <span className="font-medium text-foreground">{quantity.toLocaleString()} {baseUnit?.shortForm ?? unit.shortForm}</span>
                         <span className={cn(
                             "text-[13px] font-bold px-2 py-0.5 rounded",
                             status === "Out of stock" ? "text-red-700 bg-red-50" :
-                                status === "Low stock" ? "text-amber-800 bg-amber-50" : "text-brand-700 bg-brand-50"
+                                status === "Low stock" ? "text-amber-800 bg-amber-50" : "text-link bg-brand-50"
                         )}>
                             {status}
                         </span>
@@ -65,10 +65,10 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                 const unitLabel = baseUnit?.shortForm ?? unit.shortForm;
                 return (
                     <div className="text-right tabular-nums">
-                        <div className="text-[13px] font-bold text-brand-600">
+                        <div className="text-[13px] font-bold text-link">
                             {currency}{pricePerBase.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {unitLabel}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-medium uppercase">
+                        <div className="text-[10px] text-subtle-foreground font-medium uppercase">
                             Cost: {currency}{costPerBase.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {unitLabel}
                         </div>
                     </div>
@@ -88,7 +88,7 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                         <span className="text-[13px] font-black text-emerald-600">
                             {currency}{totalVal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </span>
-                        <div className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+                        <div className="text-[9px] text-subtle-foreground font-bold uppercase tracking-tighter">
                             {quantity} {unitLabel} × {currency}{pricePerBase.toFixed(2)}
                         </div>
                     </div>
@@ -105,7 +105,7 @@ export const getProductColumns = (navigate: NavigateFunction): ColumnDef<Product
                             aria-label={`Edit ${row.original.name}`}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-all"
+                            className="h-8 w-8 text-subtle-foreground hover:text-link hover:bg-brand-50 transition-all"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/products/edit/${row.original._id}`);

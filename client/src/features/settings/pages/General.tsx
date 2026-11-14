@@ -42,9 +42,9 @@ export default function GeneralSettings() {
     <div className="min-w-0">
       <SettingsPageHeader title="General settings" description="Manage your store details and stock alert preferences." icon={Globe} />
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl space-y-5">
-        <section className="rounded-xl border border-slate-200 bg-white">
-          <h2 className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 text-sm font-semibold sm:px-6">
-            <Store size={17} className="text-brand-700" aria-hidden="true" /> Store details
+        <section className="rounded-xl border border-border bg-card">
+          <h2 className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-semibold sm:px-6">
+            <Store size={17} className="text-link" aria-hidden="true" /> Store details
           </h2>
           <div className="grid gap-4 p-4 sm:p-6 xl:grid-cols-2">
             <div className="space-y-2">
@@ -60,17 +60,17 @@ export default function GeneralSettings() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white">
-          <h2 className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 text-sm font-semibold sm:px-6">
-            <Bell size={17} className="text-brand-700" aria-hidden="true" /> Stock alerts
+        <section className="rounded-xl border border-border bg-card">
+          <h2 className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-semibold sm:px-6">
+            <Bell size={17} className="text-link" aria-hidden="true" /> Stock alerts
           </h2>
           <div className="space-y-5 p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted p-3 sm:p-4">
               <div className="flex min-w-0 items-center gap-3">
-                <Mail size={19} className="hidden shrink-0 text-brand-700 sm:block" aria-hidden="true" />
+                <Mail size={19} className="hidden shrink-0 text-link sm:block" aria-hidden="true" />
                 <div>
                   <Label htmlFor="settings-email-alerts">Email notifications</Label>
-                  <p className="mt-1 text-sm text-slate-600">Send an email when stock runs low.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Send an email when stock runs low.</p>
                 </div>
               </div>
               <Switch id="settings-email-alerts" checked={isNotificationsEnabled}

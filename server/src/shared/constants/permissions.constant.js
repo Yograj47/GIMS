@@ -24,6 +24,8 @@ export const PERMISSIONS = {
     SUPPLIER_DELETE: "supplier:delete",
 
     TRANSACTION_READ: "transaction:read",
+    STOCK_ADJUST: "stock:adjust",
+    CUSTOMER_MANAGE: "customer:manage",
     TRANSACTION_WRITE: "transaction:write",
     TRANSACTION_AUDIT: "transaction:audit",
     BILLING_MANAGE: "billing:manage",

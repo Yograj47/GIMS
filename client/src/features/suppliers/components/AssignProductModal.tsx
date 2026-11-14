@@ -37,22 +37,22 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-6 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-md rounded-xl border border-slate-300 shadow-2xl flex flex-col max-h-[70vh] overflow-hidden">
+            <div className="bg-card w-full max-w-md rounded-xl border border-input shadow-2xl flex flex-col max-h-[70vh] overflow-hidden">
                 
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em]">Link Inventory</h3>
-                    <button onClick={handleClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={16} /></button>
+                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                    <h3 className="text-[12px] font-black text-foreground uppercase tracking-[0.2em]">Link Inventory</h3>
+                    <button onClick={handleClose} className="text-subtle-foreground hover:text-muted-foreground transition-colors"><X size={16} /></button>
                 </div>
 
                 {/* Search */}
-                <div className="p-4 bg-slate-50/50 border-b border-slate-100">
+                <div className="p-4 bg-muted/50 border-b border-border">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground" size={14} />
                         <input
                             type="text"
                             placeholder="Filter items..."
-                            className="w-full bg-white border border-slate-300 rounded-lg py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-brand-500 transition-colors"
+                            className="w-full bg-card border border-input rounded-lg py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-brand-500 transition-colors"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -70,22 +70,22 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                                     "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border mb-1",
                                     selectedIds.includes(product._id)
                                         ? "bg-brand-50 border-brand-200 shadow-sm"
-                                        : "bg-white border-transparent hover:bg-slate-100"
+                                        : "bg-card border-transparent hover:bg-secondary"
                                 )}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
                                         "w-8 h-8 rounded-md flex items-center justify-center transition-colors",
-                                        selectedIds.includes(product._id) ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-400"
+                                        selectedIds.includes(product._id) ? "bg-brand-600 text-white" : "bg-secondary text-subtle-foreground"
                                     )}>
                                         <Package size={14} />
                                     </div>
                                     <div>
-                                        <p className="text-[11px] font-black text-slate-700 uppercase leading-none">{product.name}</p>
-                                        <p className="text-[9px] font-bold text-slate-400 mt-1 font-mono">₹{product.basePrice}</p>
+                                        <p className="text-[11px] font-black text-foreground uppercase leading-none">{product.name}</p>
+                                        <p className="text-[9px] font-bold text-subtle-foreground mt-1 font-mono">₹{product.basePrice}</p>
                                     </div>
                                 </div>
-                                {selectedIds.includes(product._id) && <Check size={14} className="text-brand-600" strokeWidth={4} />}
+                                {selectedIds.includes(product._id) && <Check size={14} className="text-link" strokeWidth={4} />}
                             </div>
                         ))
                     ) : (
@@ -97,8 +97,8 @@ export const AssignProductModal: React.FC<AssignProductModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex gap-2">
-                    <Button variant="ghost" onClick={handleClose} className="flex-1 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-slate-100 border">Cancel</Button>
+                <div className="p-4 border-t border-border bg-muted/50 flex gap-2">
+                    <Button variant="ghost" onClick={handleClose} className="flex-1 text-[10px] font-black uppercase tracking-widest h-10 hover:bg-secondary border">Cancel</Button>
                     <Button
                         disabled={selectedIds.length === 0 || isSubmitting}
                         onClick={async () => { 

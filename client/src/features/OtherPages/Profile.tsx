@@ -1,191 +1,103 @@
-import { useState } from "react";
-import {
-    Key, Camera, LogOut, CheckCircle2
-} from "lucide-react";
-import { InputGroup } from "@/components/common/InputGroup";
+import { useState, type FormEvent } from "react";
+import { BadgeCheck, KeyRound, LogOut, Mail, Pencil, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PasswordUpdateModal } from "../auth/components/PasswordUpdateModal";
 import { useUsers } from "../auth/hooks/useUsers";
 import { useAuth } from "../auth/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
+import type { UserRole } from "@/types/user";
+
+const roles: Record<UserRole, { label: string; responsibilities: string[] }> = {
+    admin: { label: "Admin", responsibilities: ["Store operations", "Billing and reports", "User and role management", "System settings"] },
+    owner: { label: "Owner / Manager", responsibilities: ["Inventory and suppliers", "Store reports and billing", "Categories, units, and settings"] },
+    staff: { label: "Staff", responsibilities: ["Counter sales", "Customer returns", "Online orders", "Customer contacts"] },
+    accountant: { label: "Accountant", responsibilities: ["Sales invoices", "Supplier bills and credits", "Payments and inventory costs", "Financial reports"] },
+    customer: { label: "Customer", responsibilities: ["Shop and track orders"] },
+};
 
 export default function ProfilePage() {
-    const [isEditing, setIsEditing] = useState(false);
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const { isLoading, updateProfile } = useUsers();
-    const { user } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
     const { logout } = useAuth();
+    const { isLoading, updateProfile } = useUsers();
+    const [draft, setDraft] = useState<{ name: string; email: string } | null>(null);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-    const [updatedData, setUpdatedData] = useState({
-        userId: user?._id || "",
-        name: user?.name || "",
-        email: user?.email || ""
-    });
+    if (!user) return null;
+    const { label, responsibilities } = roles[user.role];
+    const initials = user.name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase();
 
-    const handleToggleEdit = () => {
-        if (!isEditing && user) {
-            setUpdatedData({
-                userId: user._id,
-                name: user.name,
-                email: user.email
-            });
-        }
-        setIsEditing(!isEditing);
-    };
-
-    const handleProfileUpdate = async () => {
+    async function saveProfile(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!draft || isLoading) return;
         try {
-            await updateProfile(updatedData.name, updatedData.email);
-        } finally {
-            setIsEditing(false);
+            if (await updateProfile(draft.name.trim(), draft.email.trim())) setDraft(null);
+        } catch {
+            // The API displays the error. Keep the edits available for retry.
         }
-    };
-
-    const SYSTEM_ACCESS_MAPPING = [
-        {
-            role: "admin",
-            permissions: [
-                "Full Inventory Control",
-                "Financial Audit & Write",
-                "User Management",
-                "System Configuration",
-                "Security Monitoring",
-                "Root Access Control"
-            ]
-        },
-        {
-            role: "owner",
-            permissions: [
-                "Inventory Control",
-                "Vendor Registry",
-                "Financial Audit",
-                "Data Reporting",
-                "Security Monitoring",
-                "System Configuration"
-            ]
-        },
-        {
-            role: "staff",
-            permissions: [
-                "Ledger Management",
-                "Inventory View-Only",
-                "Vendor Registry",
-                "Security Monitoring",
-                "System Settings View"
-            ]
-        }
-    ];
-
-    const currentAccess = SYSTEM_ACCESS_MAPPING.find(
-        (item) => item.role === user?.role?.toLowerCase()
-    );
+    }
 
     return (
-        <div className="h-full p-2 animate-in fade-in duration-700">
-            <div className="max-w-5xl mx-auto">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 pb-12 border-b border-slate-200">
-                    <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                        <div className="relative">
-                            <div className="w-24 h-24 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 text-3xl font-black overflow-hidden">
-                                {user?.name ? user.name[0] : 'U'}
-                            </div>
-                            <button className="absolute -bottom-1 -right-1 p-2 bg-slate-600 text-white rounded-full shadow-lg hover:bg-brand-600 transition-all border-2 border-white">
-                                <Camera size={14} />
-                            </button>
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{user?.name}</h1>
-                            <div className="flex items-center gap-3 mt-3">
-                                <span className="px-2.5 py-1 bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md">
-                                    {user?.role}
-                                </span>
-                                <span className="text-slate-500 font-bold text-sm tracking-tight">{user?.email}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={logout}
-                        className="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 rounded-2xl transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-sm"
-                    >
-                        <LogOut size={16} /> Sign Out
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                    <div className="lg:col-span-2 space-y-8">
-                        <section className="bg-white rounded-[2rem] border border-slate-200 p-10 shadow-sm">
-                            <div className="flex justify-between items-center mb-10">
-                                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Identity Details</h3>
-                                <button
-                                    onClick={handleToggleEdit}
-                                    className="text-xs font-black text-brand-600 uppercase tracking-widest hover:underline decoration-2"
-                                >
-                                    {isEditing ? "Discard Changes" : "Edit Profile"}
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <InputGroup label="Full Name" disabled={!isEditing} value={updatedData.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpdatedData({ ...updatedData, name: e.target.value })} />
-                                <InputGroup label="Email Address" disabled={!isEditing} value={updatedData.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpdatedData({ ...updatedData, email: e.target.value })} />
-                            </div>
-
-                            {isEditing && (
-                                <button onClick={handleProfileUpdate} disabled={isLoading} className="mt-10 px-8 py-4 bg-brand-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-brand-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-60">
-                                    {isLoading ? "Saving…" : "Save Changes"}
-                                </button>
-                            )}
-                        </section>
-
-                        <section className="bg-white rounded-[2rem] border border-slate-200 p-8 shadow-sm">
-                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Security Configuration</h3>
-                            <div className="flex flex-col md:flex-row items-center justify-between p-6 bg-slate-50 border border-slate-100 rounded-2xl gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-900 border border-slate-200 shadow-sm">
-                                        <Key size={20} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-black text-slate-900 uppercase tracking-tight">Login Password</p>
-                                        <p className="text-[11px] text-slate-400 font-bold mt-0.5 uppercase tracking-tighter">Active Security Key</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => setShowPasswordModal(true)}
-                                    className="w-full md:w-auto px-6 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-slate-900 transition-all shadow-sm"
-                                >
-                                    Update Key
-                                </button>
-                            </div>
-                        </section>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-slate-300 relative overflow-hidden">
-                            <CheckCircle2 className="absolute -right-4 -bottom-4 w-24 h-24 text-white/5" />
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">System Access</h4>
-                            <div className="space-y-5">
-                                {currentAccess?.permissions.map((perm) => (
-                                    <div key={perm} className="flex items-center gap-4 group">
-                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-700/20 transition-colors">
-                                            <CheckCircle2 size={14} className="text-brand-400" />
-                                        </div>
-                                        <span className="text-[11px] font-bold text-slate-200 uppercase tracking-tighter">{perm}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Sync Active</span>
-                            </div>
-                            <p className="text-xs font-black text-slate-900 uppercase">Primary Node</p>
-                            <p className="text-[11px] font-bold text-slate-400 mt-1 font-mono">SECURE_TUNNEL_1.0</p>
-                        </div>
-                    </div>
-                </div>
+        <div className="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
+                <Button type="button" variant="outline" onClick={logout}><LogOut aria-hidden="true" /> Sign out</Button>
             </div>
 
+            <section aria-labelledby="profile-name" className="overflow-hidden rounded-xl border border-border bg-card">
+                <div aria-hidden="true" className="h-24 bg-[radial-gradient(ellipse_at_85%_0%,var(--palette-ice),transparent_60%),linear-gradient(110deg,var(--palette-navy),var(--palette-blue)_52%,var(--palette-sky))] sm:h-32" />
+                <div className="relative flex flex-col gap-3 px-5 pb-5 sm:flex-row sm:items-end sm:gap-4 sm:px-6">
+                    <span aria-hidden="true" className="-mt-9 grid size-18 shrink-0 place-items-center rounded-full border-4 border-card bg-brand-soft text-2xl font-semibold text-brand-soft-foreground sm:-mt-10 sm:size-20">
+                        {initials || "U"}
+                    </span>
+                    <div className="min-w-0 pt-0 sm:pt-3">
+                        <h2 id="profile-name" className="flex items-center gap-2 text-xl font-semibold tracking-tight">
+                            <span className="wrap-anywhere">{user.name}</span>
+                            {user.isVerified && <><BadgeCheck aria-hidden="true" className="size-5 shrink-0 text-link" /><span className="sr-only">Verified account</span></>}
+                        </h2>
+                        <p className="mt-1 flex items-start gap-2 text-sm text-muted-foreground"><Mail aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span className="wrap-anywhere">{user.email}</span></p>
+                    </div>
+                    {!draft && <Button type="button" variant="outline" className="self-start sm:ml-auto sm:self-end" onClick={() => setDraft({ name: user.name, email: user.email })}><Pencil aria-hidden="true" /> Edit profile</Button>}
+                </div>
+            </section>
+
+            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                <section aria-labelledby="details-heading" className="rounded-xl border border-border bg-card">
+                    <h2 id="details-heading" className="border-b border-border px-5 py-4 font-semibold sm:px-6">Personal details</h2>
+                    {draft ? (
+                        <form onSubmit={saveProfile} className="space-y-4 p-5 sm:p-6">
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <label className="grid gap-1.5 text-sm font-medium">Full name<Input autoFocus autoComplete="name" value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} required /></label>
+                                <label className="grid gap-1.5 text-sm font-medium">Email address<Input type="email" autoComplete="email" value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} required /></label>
+                            </div>
+                            <div className="flex flex-wrap justify-end gap-2">
+                                <Button type="button" variant="outline" disabled={isLoading} onClick={() => setDraft(null)}>Cancel</Button>
+                                <Button type="submit" disabled={isLoading || !draft.name.trim()}>{isLoading ? "Saving…" : "Save changes"}</Button>
+                            </div>
+                        </form>
+                    ) : (
+                        <dl className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+                            <div><dt className="text-sm text-muted-foreground">Full name</dt><dd className="mt-1 wrap-anywhere font-medium">{user.name}</dd></div>
+                            <div><dt className="text-sm text-muted-foreground">Email address</dt><dd className="mt-1 wrap-anywhere font-medium">{user.email}</dd></div>
+                        </dl>
+                    )}
+                </section>
+
+                <div className="space-y-5">
+                    <section aria-labelledby="access-heading" className="rounded-xl border border-border bg-card p-5">
+                        <h2 id="access-heading" className="flex items-center gap-2 font-semibold"><ShieldCheck aria-hidden="true" className="size-4 text-link" /> Workspace access</h2>
+                        <p className="mt-3 inline-flex rounded-md bg-accent px-2.5 py-1 text-sm font-medium text-accent-foreground">{label}</p>
+                        <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                            {responsibilities.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                    </section>
+
+                    <section aria-labelledby="security-heading" className="rounded-xl border border-border bg-card p-5">
+                        <h2 id="security-heading" className="font-semibold">Account security</h2>
+                        <Button type="button" variant="outline" className="mt-3" onClick={() => setShowPasswordModal(true)}><KeyRound aria-hidden="true" /> Change password</Button>
+                    </section>
+                </div>
+            </div>
             <PasswordUpdateModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} />
         </div>
     );

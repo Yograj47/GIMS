@@ -1,6 +1,7 @@
+import { BackButton } from "@/components/common/BackButton";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
@@ -10,19 +11,22 @@ type Bill = { _id: string; number: string; receiptId: string; totalMinor: number
 type Receipt = { _id: string; deliveryReference?: string; createdAt: string };
 type Return = { _id: string; receiptId: string; reason: string; baseQuantity: number };
 type Page<T> = { data: T[]; meta: { totalItems: number } };
-const field = "min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm";
+const field = "min-w-0 rounded-md border border-input px-3 py-2 text-sm";
 const limit = 25;
 
 export default function SupplierBilling() {
     const { id } = useParams();
-    return <SupplierBillingPage key={id} supplierId={id!} />;
+    const [params] = useSearchParams();
+    const receipt = params.get("receiptId") || "";
+    const bill = params.get("billId") || "";
+    return <SupplierBillingPage key={`${id}:${receipt}:${bill}`} supplierId={id!} initialReceipt={receipt} initialBill={bill} />;
 }
 
-function SupplierBillingPage({ supplierId }: { supplierId: string }) {
+function SupplierBillingPage({ supplierId, initialReceipt, initialBill }: { supplierId: string; initialReceipt: string; initialBill: string }) {
     const [bills, setBills] = useState<Bill[]>([]);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [returns, setReturns] = useState<Return[]>([]);
-    const [billId, setBillId] = useState("");
+    const [billId, setBillId] = useState(initialBill);
     const [billPage, setBillPage] = useState(1);
     const [receiptPage, setReceiptPage] = useState(1);
     const [returnPage, setReturnPage] = useState(1);
@@ -39,8 +43,8 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
     useEffect(() => {
         let active = true;
         Promise.all([
-            api.get<Page<Bill>>(`/billing/suppliers/${supplierId}/bills`, { params: { page: billPage } }),
-            api.get<Page<Receipt>>("/receiving/receipts", { params: { supplierId, page: receiptPage, limit } }),
+            api.get<Page<Bill>>(`/billing/suppliers/${supplierId}/bills`, { params: { page: billPage, billId: initialBill || undefined } }),
+            api.get<Page<Receipt>>("/receiving/receipts", { params: { supplierId, page: receiptPage, limit, receiptId: initialReceipt || undefined } }),
             billId
                 ? api.get<Page<Return>>("/receiving/returns", { params: { supplierId, receiptId: bill?.receiptId, page: returnPage, limit } })
                 : Promise.resolve(null),
@@ -57,7 +61,7 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
         }).catch(() => { if (active) setError("Could not load supplier billing records."); })
             .finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
-    }, [supplierId, billPage, receiptPage, returnPage, reload, billId, bill?.receiptId]);
+    }, [supplierId, initialBill, initialReceipt, billPage, receiptPage, returnPage, reload, billId, bill?.receiptId]);
 
     async function submit(event: FormEvent<HTMLFormElement>, action: "bill" | "credit" | "payment") {
         event.preventDefault();
@@ -105,18 +109,18 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
     );
 
     return (
-        <div className="mx-auto max-w-5xl space-y-5">
-            <Link to={`/suppliers/v/${supplierId}`} className="text-sm text-brand-700">Back to supplier</Link>
+        <div className="mx-auto w-full max-w-6xl space-y-7 px-4 py-7 sm:px-6 sm:py-10">
+            <BackButton className="text-sm text-link hover:underline" />
             <h1 className="text-xl font-bold">Supplier billing</h1>
             {message && <p role="status" className="text-sm text-emerald-700">{message}</p>}
             {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
             {loading ? <Skeleton role="status" aria-label="Loading supplier bills" className="h-24 w-full" /> : (
                 <>
-                    <form onSubmit={(event) => void submit(event, "bill")} className="space-y-3 rounded-lg border bg-white p-5">
+                    <form onSubmit={(event) => void submit(event, "bill")} className="space-y-5 rounded-xl border border-border bg-card p-5 sm:p-6">
                         <h2 className="font-semibold">Post supplier bill</h2>
                         <div className="flex flex-wrap items-end gap-3">
                             <label className="grid gap-1 text-sm">Goods receipt
-                                <select name="receiptId" className={field} required>
+                                <select name="receiptId" className={field} defaultValue={initialReceipt} required>
                                     <option value="">Select receipt</option>
                                     {receipts.map((receipt) => <option key={receipt._id} value={receipt._id}>{receipt.deliveryReference || receipt._id.slice(-8)} · {new Date(receipt.createdAt).toLocaleDateString()}</option>)}
                                 </select>
@@ -126,12 +130,12 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
                             </label>
                             <Button type="submit" disabled={busy || receipts.length === 0}>Post bill</Button>
                         </div>
-                        <p id="supplier-invoice-number-help" className="text-sm text-slate-600">
+                        <p id="supplier-invoice-number-help" className="text-sm text-muted-foreground">
                             Copy the invoice or bill number printed on the supplier’s invoice for this delivery.
                         </p>
                         {pageControls(receiptPage, totals.receipts, setReceiptPage, "Receipt pages")}
                     </form>
-                    <section className="space-y-3 rounded-lg border bg-white p-5">
+                    <section className="space-y-5 rounded-xl border border-border bg-card p-5 sm:p-6">
                         <h2 className="font-semibold">Supplier bills</h2>
                         <label className="grid max-w-sm gap-1 text-sm">Bill
                             <select className={field} value={billId} disabled={busy} onChange={(event) => { setBillId(event.target.value); setReturnPage(1); }}>
@@ -144,7 +148,7 @@ function SupplierBillingPage({ supplierId }: { supplierId: string }) {
                             <>
                                 <dl className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                                     {([["Total", bill.totalMinor], ["Credited", bill.creditedMinor], ["Paid", bill.paidMinor], ["Due", due]] as const).map(([label, amount]) => (
-                                        <div key={label}><dt className="text-slate-600">{label}</dt><dd className="font-semibold">{formatInvoiceMoney(amount, bill.currency)}</dd></div>
+                                        <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold">{formatInvoiceMoney(amount, bill.currency)}</dd></div>
                                     ))}
                                 </dl>
                                 {due > 0 && (

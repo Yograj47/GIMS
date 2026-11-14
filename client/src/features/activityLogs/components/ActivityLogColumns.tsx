@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 
 const getTypeStyles = (type: string) => {
   switch (type.toUpperCase()) {
-    case 'FINANCE': return 'bg-brand-50 text-brand-700 border-brand-200';
+    case 'FINANCE': return 'bg-brand-50 text-link border-brand-200';
     case 'INVENTORY': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     case 'AUTH': return 'bg-purple-50 text-purple-700 border-purple-200';
     case 'SYSTEM': return 'bg-rose-50 text-rose-700 border-rose-200';
-    default: return 'bg-slate-100 text-slate-600 border-slate-200';
+    default: return 'bg-secondary text-muted-foreground border-border';
   }
 };
 
@@ -24,7 +24,7 @@ export const getActivityLogColumns = (): ColumnDef<ActivityLogData>[] => [
           <Info size={14} />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-slate-900 text-[12px] leading-tight uppercase">
+          <span className="font-bold text-foreground text-[12px] leading-tight uppercase">
             {row.original.message}
           </span>
           <div className="flex items-center gap-2 mt-0.5">
@@ -45,14 +45,14 @@ export const getActivityLogColumns = (): ColumnDef<ActivityLogData>[] => [
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         {/* SKU-style Identifier Box */}
-        <div className="w-6 h-6 rounded-sm bg-slate-100 flex items-center justify-center text-slate-500 border border-slate-200">
+        <div className="w-6 h-6 rounded-sm bg-secondary flex items-center justify-center text-muted-foreground border border-border">
           <User size={12} strokeWidth={3} />
         </div>
         <div className="flex flex-col">
-          <span className="text-[11px] font-bold text-slate-700 uppercase">
+          <span className="text-[11px] font-bold text-foreground uppercase">
             {row.original.performedBy?.name || "System"}
           </span>
-          <span className="text-[9px] text-slate-400 font-black uppercase tracking-tighter">
+          <span className="text-[9px] text-subtle-foreground font-black uppercase tracking-tighter">
             {row.original.performedBy?.role || "Automated"}
           </span>
         </div>
@@ -64,11 +64,11 @@ export const getActivityLogColumns = (): ColumnDef<ActivityLogData>[] => [
     header: "Timestamp",
     cell: ({ row }) => (
       <div className="flex flex-col tabular-nums">
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-900 uppercase">
-          <Calendar size={10} strokeWidth={3} className="text-slate-400" />
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-foreground uppercase">
+          <Calendar size={10} strokeWidth={3} className="text-subtle-foreground" />
           {format(new Date(row.original.createdAt), "dd MMM, yyyy")}
         </div>
-        <span className="text-[10px] font-bold text-brand-600 uppercase mt-0.5 ml-4">
+        <span className="text-[10px] font-bold text-link uppercase mt-0.5 ml-4">
           {format(new Date(row.original.createdAt), "HH:mm:ss")}
         </span>
       </div>

@@ -10,7 +10,7 @@ export default function Home() {
                 Shop groceries for pickup or delivery. Store teams can sign in to manage inventory, sales, and supplier deliveries.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-                <Button size="lg" className="bg-market-yellow text-brand-950 hover:bg-market-yellow/90" asChild>
+                <Button size="lg" className="bg-brand-soft text-brand-950 hover:bg-brand-soft/90" asChild>
                     <Link to="/shop"><ShoppingBasket size={18} /> Shop groceries</Link>
                 </Button>
                 <Button variant="ghost" size="lg" className="text-white hover:bg-white/10 hover:text-white" asChild>

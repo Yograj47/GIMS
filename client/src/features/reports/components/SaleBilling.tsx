@@ -94,19 +94,19 @@ export function SaleBilling({ saleId, wasPaid, invoice, onInvoice }: {
 
     const outstanding = invoice ? invoice.totalMinor - invoice.paidMinor : 0;
     return (
-        <section className="no-print space-y-4 rounded-lg border border-slate-200 bg-white p-5">
+        <section className="no-print space-y-4 rounded-lg border border-border bg-card p-5">
             <h2 className="text-base font-bold">{invoice?.number ?? "Sales invoice"}</h2>
             {loading ? <Skeleton role="status" aria-label="Loading invoice" className="h-10 w-full" />
-                : failed ? <p className="text-sm text-slate-600">Invoice details could not be loaded. Refresh to try again.</p>
+                : failed ? <p className="text-sm text-muted-foreground">Invoice details could not be loaded. Refresh to try again.</p>
                 : !invoice ? (
-                    wasPaid ? <p className="text-sm text-slate-600">This sale was already marked paid and requires reconciliation.</p>
+                    wasPaid ? <p className="text-sm text-muted-foreground">This sale was already marked paid and requires reconciliation.</p>
                         : <Button onClick={issue} disabled={saving}>{saving ? "Issuing…" : "Issue invoice"}</Button>
                 ) : (
                     <>
                         <dl className="grid grid-cols-3 gap-3 text-sm">
                             {([["Total", invoice.totalMinor], ["Paid", invoice.paidMinor], ["Due", outstanding]] as const).map(([label, value]) => (
                                 <div key={label}>
-                                    <dt className="text-slate-600">{label}</dt>
+                                    <dt className="text-muted-foreground">{label}</dt>
                                     <dd className="font-semibold tabular-nums">{formatInvoiceMoney(value, invoice.currency)}</dd>
                                 </div>
                             ))}
