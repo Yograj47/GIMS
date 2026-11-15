@@ -34,12 +34,12 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
     {
         accessorKey: "productName",
         header: () => (
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
+            <span className="text-xs font-bold text-muted-foreground ">
                 Product Info
             </span>
         ),
         cell: ({ row }) => (
-            <div className="flex items-center gap-3 py-2">
+            <div className="flex items-center gap-3 ">
                 <div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center text-muted-foreground shrink-0">
                     <Package size={14} />
                 </div>
@@ -47,7 +47,7 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
                     <div className="font-bold text-foreground text-sm">
                         {row.original.productName}
                     </div>
-                    <div className="text-[10px] font-medium text-subtle-foreground">
+                    <div className="text-xs font-medium text-subtle-foreground">
                         REF: {row.original._id.slice(-6).toUpperCase()}
                     </div>
                 </div>
@@ -57,7 +57,7 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
     {
         accessorKey: "conversions",
         header: () => (
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
+            <span className="text-xs font-bold text-muted-foreground ">
                 Conversion Count
             </span>
         ),
@@ -73,14 +73,14 @@ export const getProductUnitColumns = (onAddUnit: AddUnitCallback): ColumnDef<Gro
     {
         id: "actions",
         header: () => (
-            <AdminGate>
-            <div className="text-right text-[11px] font-bold text-muted-foreground uppercase tracking-tight pr-4">
+            <AdminGate allowedRoles={["owner"]}>
+            <div className="text-right text-xs font-bold text-muted-foreground  pr-4">
                 Operations
             </div>
             </AdminGate>
         ),
         cell: ({ row }) => (
-            <AdminGate>
+            <AdminGate allowedRoles={["owner"]}>
             <div className="flex justify-end pr-2">
                 <Button
                     onClick={(e) => {

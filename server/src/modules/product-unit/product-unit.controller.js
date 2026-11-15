@@ -104,10 +104,7 @@ export const updateProductUnit = asyncHandler(
             );
 
         const productUnit =
-            await ProductUnitService.update(
-                req.params.id,
-                payload
-            );
+            await ProductUnitService.update({ id: req.params.id, payload });
 
         logInfo(
             LOG_CONTEXT.INVENTORY,

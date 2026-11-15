@@ -11,7 +11,7 @@ export const productUnitSchema = z.object({
 
     multiplier: z.coerce
         .number()
-        .min(0.0001, "Multiplier must be greater than 0")
+        .min(1, "Multiplier must be at least 1")
         .default(1),
 
     isDefault: z
@@ -48,7 +48,7 @@ export interface GroupedProductUnit {
         _id: string;
         unitId: string;
         unitName: string;
-        shortName: string;
+        shortForm: string;
         multiplier: number;
         isDefault: boolean;
         isFractionable: boolean;

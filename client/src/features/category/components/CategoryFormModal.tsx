@@ -1,14 +1,11 @@
-"use client";
+import { EntityField, entityInput } from "@/components/common/EntityField";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, X, LayoutGrid, ShieldAlert } from "lucide-react";
 import { categorySchema, type CategoryFormData, type CategoryData } from "@/types/category";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 interface CategoryFormModalProps {
@@ -48,98 +45,33 @@ export default function CategoryFormModal({
         }
     }, [initialData, reset, isOpen]);
 
-    if (!isOpen) return null;
-
+    const saving = isLoading || isSubmitting;
     return (
-        <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="bg-card w-full max-w-105 rounded-sm shadow-2xl overflow-hidden border border-border shadow-slate-900/20">
-                
-                {/* 1. HEADER - Sharp & Minimal */}
-                <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/80">
-                    <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-brand-600 rounded-sm text-white">
-                            <LayoutGrid size={14} />
-                        </div>
-                        <h2 className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">
-                            {initialData ? "Edit Classification" : "New Category Registry"}
-                        </h2>
-                    </div>
-                    <button onClick={onClose} className="p-1 hover:bg-card border border-transparent hover:border-border rounded-sm text-subtle-foreground transition-all">
-                        <X size={16} />
-                    </button>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !saving) onClose(); }}>
+            <DialogContent showCloseButton={!saving} className="rounded-sm sm:max-w-xl">
+                <div className="border-b-2 border-input pb-3">
+                    <DialogTitle>{initialData ? "Edit category" : "Add category"}</DialogTitle>
+                    <DialogDescription>Group related products for inventory and reporting.</DialogDescription>
                 </div>
-
-                <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-                    
-                    {/* Identifier Name */}
-                    <div className="space-y-1.5">
-                        <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-0.5">Classification Name</Label>
-                        <Input
-                            {...register("name")}
-                            placeholder="e.g. Raw materials"
-                            className="h-10 rounded-sm border-border bg-card font-bold text-xs focus-visible:ring-ring focus-visible:ring-1 focus-visible:border-brand-500 transition-all placeholder:text-slate-300"
-                        />
-                        {errors.name && (
-                            <div className="flex items-center gap-1 mt-1 ml-0.5 text-rose-500">
-                                <ShieldAlert size={10} />
-                                <p className="text-[9px] font-black uppercase tracking-tighter">{errors.name.message}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Technical Definition */}
-                    <div className="space-y-1.5">
-                        <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-0.5">Technical Definition</Label>
-                        <Textarea
-                            {...register("description")}
-                            placeholder="Provide brief specs..."
-                            className="min-h-25 rounded-sm border-border bg-card font-bold text-xs focus-visible:ring-ring focus-visible:ring-1 focus-visible:border-brand-500 transition-all resize-none placeholder:text-slate-300 tabular-nums"
-                        />
-                    </div>
-
-                    {/* Availability Switch - Industrial Card Style */}
-                    <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-sm">
-                        <div className="flex flex-col">
-                            <Label className="text-[10px] font-black text-foreground uppercase tracking-tight">System Status</Label>
-                            <span className="text-[8px] text-subtle-foreground font-bold uppercase tracking-tighter italic">Live in Registry</span>
-                        </div>
-                        <Controller
-                            control={control}
-                            name="isActive"
-                            render={({ field }) => (
-                                <Switch 
-                                    checked={field.value} 
-                                    onCheckedChange={field.onChange} 
-                                    className="data-[state=checked]:bg-brand-600 scale-90"
-                                />
-                            )}
-                        />
-                    </div>
-
-                    {/* ACTIONS - Flattened Hierarchy */}
-                    <div className="pt-2 flex gap-2">
-                        <Button 
-                            type="button" 
-                            onClick={onClose} 
-                            variant="outline" 
-                            className="flex-1 h-10 rounded-sm border-border text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all text-muted-foreground"
-                        >
-                            Discard
-                        </Button>
-                        <Button 
-                            type="submit" 
-                            disabled={isLoading || isSubmitting} 
-                            className="flex-1 h-10 bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest rounded-sm hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50"
-                        >
-                            {isLoading || isSubmitting ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                initialData ? "Commit Updates" : "Initialize Node"
-                            )}
-                        </Button>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <fieldset disabled={saving} className="space-y-4">
+                        <EntityField label="Category name" hint="Use a short name staff will recognize, such as Pantry staples." error={errors.name?.message}>
+                            {(field) => <input {...field} {...register("name")} className={entityInput} placeholder="e.g. Pantry staples" />}
+                        </EntityField>
+                        <EntityField label="Description (optional)" hint="Describe which products belong in this category." error={errors.description?.message}>
+                            {(field) => <textarea {...field} {...register("description")} className={entityInput} rows={3} />}
+                        </EntityField>
+                        <EntityField label="Active" hint="Active categories can be selected when adding products.">
+                            {(props) => <Controller name="isActive" control={control} render={({ field }) =>
+                                <Switch {...props} checked={field.value} onCheckedChange={field.onChange} />} />}
+                        </EntityField>
+                    </fieldset>
+                    <div className="flex justify-end gap-2 border-t-2 border-input pt-3">
+                        <Button type="button" variant="outline" disabled={saving} onClick={onClose}>Cancel</Button>
+                        <Button type="submit" disabled={saving}>{saving ? "Saving..." : "Save category"}</Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

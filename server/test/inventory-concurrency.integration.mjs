@@ -262,4 +262,35 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     ]);
     assert.deepEqual(crossChannel.map((response) => response.status).sort(), [200, 409]);
     assert.equal((await CheckoutOrder.findById(deliveryOrder.id)).status, "cancelled");
+
+    const { data: dryGoods } = (await api("post", "/categories", owner).send({ name: "Dry goods" }).expect(201)).body;
+    await api("put", `/categories/${dryGoods._id}`, owner).send({ description: "Shelf-stable goods" }).expect(200);
+    const { data: pack } = (await api("post", "/units", owner).send({
+        name: "Case", shortForm: "cs", unitType: "pack", multiplierToBase: 1,
+    }).expect(201)).body;
+    await api("put", `/units/${pack._id}`, owner).send({ shortForm: "case" }).expect(200);
+    const packedProduct = await Product.create({
+        name: "Beans", categoryId: dryGoods._id, unitId: unit.id, basePrice: 1, sellingPrice: 2,
+    });
+    const { data: conversion } = (await api("post", "/product-units", owner).send({
+        productId: packedProduct.id, unitId: pack._id, multiplier: 4,
+    }).expect(201)).body;
+    await api("put", `/product-units/${conversion._id}`, owner).send({ multiplier: 5 }).expect(200);
+    const { data: unitGroups } = (await api("get", "/product-units?search=Beans", owner).expect(200)).body;
+    assert.equal(unitGroups[0].conversions[0].unitId, pack._id);
+    assert.equal(unitGroups[0].conversions[0].shortForm, "case");
+    await api("post", "/receiving/receipts", owner).send({
+        requestKey: randomUUID(), supplierId: supplier.id, currency: "NPR",
+        items: [{ productId: packedProduct.id, unitId: pack._id, quantity: 2, unitCost: "5.00" }],
+    }).expect(201);
+    assert.equal((await Product.findById(packedProduct.id)).quantity, 10);
+    const packedSale = { ...counter, token: randomUUID(), items: [{ productId: packedProduct.id, unitId: pack._id, quantity: 1 }] };
+    assert.equal((await api("post", "/checkout/counter", firstStaff).send(packedSale).expect(200)).body.data.totalMinor, 1000);
+    assert.equal((await Product.findById(packedProduct.id)).quantity, 5);
+    const overview = (await api("get", "/analytics/store-overview", owner).expect(200)).body.data;
+    assert.equal(overview.days.length, 7);
+    assert.equal(overview.days.reduce((sum, day) => sum + day.purchases, 0), 11);
+    assert.equal(overview.onlineOrders, null);
+    assert.equal(typeof (await api("get", "/analytics/store-overview", admin).expect(200)).body.data.onlineOrders, "number");
+    await api("get", "/analytics/store-overview", firstStaff).expect(403);
 });

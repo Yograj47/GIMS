@@ -1,146 +1,121 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, BarChart3, Bell, ClipboardList, PackagePlus, Receipt, Truck } from "lucide-react";
+import { Line } from "react-chartjs-2";
 import { useTheme } from "next-themes";
-import { useEffect, useMemo, useState } from "react";
+import { PageHeader } from "@/components/common/PageHeader";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
-import { Package, AlertCircle, Activity, Plus, ArrowUpRight, Truck, CheckCircle2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-// Our New Components
-import StatCard from "../components/StatCard";
-import ActionTile from "../components/ActionTile";
-import ChartSection from "../components/ChartSection";
-import LiveFeedCard from "../components/LiveFeedCard";
-import AlertCard from "../components/AlertCard";
-import { DashboardPageHeader } from "../components/DashboardPageHeader";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
 import { useActivityLogs } from "@/features/activityLogs/hooks/useActivityLogs";
 import { chartData, chartOptions } from "@/lib/dashboardCharts";
-import { useAlerts } from "@/features/alerts/hooks/useAlerts";
-import { useAnalytics } from "../hooks/useAnalystics";
-import { useAuthStore } from "@/store/authStore";
+import api from "@/lib/api";
+
+type Overview = {
+    days: { date: string; sales: number; purchases: number }[];
+    lowStock: number;
+    onlineOrders: number | null;
+};
+
+const npr = new Intl.NumberFormat("en-NP", { style: "currency", currency: "NPR" });
+const dateLabel = new Intl.DateTimeFormat("en-NP", { month: "short", day: "numeric", timeZone: "UTC" });
 
 export default function Dashboard() {
+    const admin = useAuthStore((state) => state.user?.role === "admin");
     const { resolvedTheme } = useTheme();
-    const navigate = useNavigate();
-    const { user } = useAuthStore();
     const { logs, fetchRecentLogs } = useActivityLogs();
-    const { alerts, acknowledgeAlert } = useAlerts();
-    const { weeklyStats, fetchWeeklyStats, summary, fetchSummary } = useAnalytics();
-    const [isInitialLoading, setInitialLoading] = useState(true);
-    const role = user?.role;
+    const [overview, setOverview] = useState<Overview>();
+    const [failed, setFailed] = useState(false);
+    const [logsFailed, setLogsFailed] = useState(false);
+    const [attempt, setAttempt] = useState(0);
 
     useEffect(() => {
-        let active = true;
-        const syncDashboard = async () => {
-            const promises = [
-                fetchWeeklyStats(),
-                fetchSummary(),
-            ];
+        const request = new AbortController();
+        api.get<{ data: Overview }>("/analytics/store-overview", { signal: request.signal })
+            .then(({ data }) => { if (!request.signal.aborted) setOverview(data.data); })
+            .catch(() => { if (!request.signal.aborted) setFailed(true); });
+        return () => request.abort();
+    }, [attempt, admin]);
 
-            if (role === 'admin') {
-                promises.push(fetchRecentLogs(5));
-            }
+    useEffect(() => {
+        if (admin) void fetchRecentLogs(5).catch(() => setLogsFailed(true));
+    }, [admin, fetchRecentLogs]);
 
-            await Promise.allSettled(promises);
-            if (active) setInitialLoading(false);
-        };
-        void syncDashboard();
-        return () => { active = false; };
-    }, [fetchWeeklyStats, fetchSummary, fetchRecentLogs, role]);
-
-    const dynamicData = useMemo(() => {
-        if (!weeklyStats || weeklyStats.length === 0) {
-            return chartData([], [], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
-        }
-        const labels = [...new Set(weeklyStats.map(s => s._id.day))];
-        const stockIn = labels.map(day => weeklyStats.find(s => s._id.day === day && s._id.type === 'IN')?.totalQty || 0);
-        const stockOut = labels.map(day => weeklyStats.find(s => s._id.day === day && s._id.type === 'OUT')?.totalQty || 0);
-        return chartData(stockIn, stockOut, labels);
-    }, [weeklyStats, resolvedTheme]);
-
-    const criticalAlert = useMemo(
-        () =>
-            alerts.find(
-                (a) =>
-                    !a.acknowledged &&
-                    a.severity === "critical"
-            ) ?? null,
-        [alerts]
-    );
-
-    if (isInitialLoading) return <LoadingSkeleton layout="dashboard" label="Loading dashboard" />;
+    const sales = overview?.days.reduce((sum, day) => sum + day.sales, 0) ?? 0;
+    const purchases = overview?.days.reduce((sum, day) => sum + day.purchases, 0) ?? 0;
+    const series = overview?.days ?? [];
+    const metrics = admin ? [
+        { label: "Low-stock products", value: overview?.lowStock, to: "/reports/stock?level=low", icon: Bell },
+        { label: "Online orders awaiting action", value: overview?.onlineOrders, to: "/stock-movements/orders", icon: ClipboardList },
+        { label: "Sales in the last 7 days", value: npr.format(sales), to: "/reports/transactions", icon: Receipt },
+    ] : [
+        { label: "Sales in the last 7 days", value: npr.format(sales), to: "/reports/transactions", icon: Receipt },
+        { label: "Purchases received in the last 7 days", value: npr.format(purchases), to: "/stock-movements/purchase", icon: Truck },
+        { label: "Low-stock products", value: overview?.lowStock, to: "/reports/stock?level=low", icon: Bell },
+    ];
 
     return (
-        <div className="space-y-5 sm:space-y-7">
-
-            <DashboardPageHeader />
-
-            {/* 2. Metrics Row - Stat Cards */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-                <StatCard
-                    title="Stock Value"
-                    value={summary ? `Rs ${summary.stockValue.toLocaleString()}` : 'Rs 0'}
-                    icon={<Package size={20} />}
-                    color="text-link"
-                    bgColor="bg-brand-50"
-                    desc="Total inventory valuation"
-                />
-                <StatCard
-                    title="Low Items"
-                    value={summary?.lowItems ?? '0'}
-                    icon={<AlertCircle size={20} />}
-                    color="text-rose-600"
-                    bgColor="bg-rose-50"
-                    desc="Items below minimum stock"
-                />
-                <StatCard
-                    title="Today's Flow"
-                    value={summary?.todayFlow?.value ?? '0'}
-                    trend={summary ? `${summary.todayFlow.trend}% ${summary.todayFlow.status}` : '0% UP'}
-                    trendUp={summary?.todayFlow?.status === 'UP'}
-                    icon={<Activity size={20} />}
-                    color="text-emerald-600"
-                    bgColor="bg-emerald-50"
-                    desc="Movement vs yesterday"
-                />
-            </div>
-
-            {/* 3. Main Body - 3/4 Chart, 1/4 Actions */}
-            <div className="grid min-w-0 gap-5 pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(12rem,17rem)]">
-                {/* Primary Analytics Surface */}
-                <div className="min-w-0 space-y-5">
-                    <div className="rounded-xl border border-border bg-card p-3 sm:p-6">
-                        <ChartSection data={dynamicData} options={chartOptions()} />
+        <section className="space-y-4">
+            <PageHeader title={admin ? "Store operations" : "Store overview"} icon={BarChart3} />
+            {failed ? (
+                <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
+                    <p>Could not load the store overview.</p>
+                    <Button variant="outline" onClick={() => { setFailed(false); setAttempt((n) => n + 1); }}>Retry</Button>
+                </div>
+            ) : !overview ? <LoadingSkeleton layout="dashboard" label="Loading store overview" /> : (
+                <>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        {metrics.map(({ label, value, to, icon: Icon }) => (
+                            <Link key={label} to={to} className="flex items-start gap-3 rounded-lg border border-border bg-card p-4 hover:bg-accent">
+                                <span className="grid size-9 shrink-0 place-items-center rounded-md bg-accent text-link"><Icon className="size-4" aria-hidden="true" /></span>
+                                <span className="min-w-0 flex-1"><span className="block text-sm text-muted-foreground">{label}</span><strong className="mt-0.5 block wrap-anywhere text-xl tabular-nums">{value}</strong></span>
+                                <ArrowUpRight aria-hidden="true" className="size-4 shrink-0 text-link" />
+                            </Link>
+                        ))}
                     </div>
-
-                    {/* Secondary Data Surface */}
-                    <div className="grid gap-4 lg:grid-cols-2">
-                        {role === "admin" && <LiveFeedCard logs={logs} onViewAll={() => navigate('/reports/activity')} />}
-
-                        {criticalAlert ? (
-                            <AlertCard
-                                productName={criticalAlert.productId.name}
-                                remainingQty={`${criticalAlert.snapshotValue} ${criticalAlert.productId.unitId?.name ?? ""  }`} 
-                                    onAction={() => acknowledgeAlert(criticalAlert._id)}
-                            />
-                        ) : (
-                            <div className="h-full flex flex-col items-center justify-center border border-border rounded-sm bg-muted/30 p-8 text-center">
-                                <CheckCircle2 size={32} className="text-emerald-500/30 mb-4" />
-                                <p className="text-[10px] font-black text-subtle-foreground uppercase tracking-[0.2em]">Systems Nominal</p>
-                                <p className="text-[9px] font-bold text-slate-300 uppercase mt-2">No critical stock alerts</p>
+                    <div className={admin ? "grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,0.65fr)]" : "space-y-4"}>
+                        <section className="min-w-0 space-y-4 rounded-lg border border-border bg-card p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <h2 className="font-semibold">Sales and purchases</h2>
+                                <span className="text-sm text-muted-foreground">Last 7 days · NPR</span>
                             </div>
+                            <div className="flex gap-4 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-chart-1" />Sales</span>
+                                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-chart-2" />Purchases received</span>
+                            </div>
+                            <div className="h-64">
+                                <Line key={resolvedTheme} role="img" aria-label="Daily sale and received purchase values"
+                                    data={chartData(series.map((day) => day.sales), series.map((day) => day.purchases),
+                                        series.map((day) => dateLabel.format(new Date(day.date))), ["Sales", "Purchases received"])}
+                                    options={chartOptions()} />
+                            </div>
+                        </section>
+                        {admin && (
+                            <section className="rounded-lg border border-border bg-card">
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border p-4">
+                                    <h2 className="font-semibold">Recent system activity</h2>
+                                    <Link to="/reports/activity" className="text-sm text-link hover:underline">System log</Link>
+                                </div>
+                                {logs.length === 0 ? <p className="p-4 text-sm text-muted-foreground">{logsFailed ? "Could not load recent activity." : "No recent activity."}</p> : (
+                                    <ul className="divide-y divide-border">
+                                        {logs.map((log) => (
+                                            <li key={log._id} className="px-4 py-3 text-sm">
+                                                <p className="wrap-anywhere font-medium">{log.message}</p>
+                                                <p className="mt-1 text-xs text-muted-foreground">{log.performedBy?.name ?? "Unknown account"} · {new Date(log.createdAt).toLocaleString()}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </section>
                         )}
                     </div>
-                </div>
-
-                {/* Sidebar - Command Center */}
-                <section className="row-start-1 space-y-3 self-start xl:col-start-2 xl:sticky xl:top-21">
-                    <h2 className="text-sm font-semibold">Quick actions</h2>
-                    <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
-                        {role !== "staff" && <ActionTile icon={<Plus size={18} />} label="New Product" color="bg-brand-600" onClick={() => navigate('/products/add')} />}
-                        {role !== "owner" && <ActionTile icon={<ArrowUpRight size={18} />} label="Record Sale" color="bg-brand-600" onClick={() => navigate('/stock-movements/sale')} />}
-                        <ActionTile icon={<Truck size={18} />} label="Suppliers" color="bg-slate-800" onClick={() => navigate('/suppliers')} />
-                    </div>
-                </section>
-            </div>
-        </div>
+                </>
+            )}
+            <nav aria-label="Quick actions" className="flex flex-wrap gap-2">
+                <Button asChild variant="outline"><Link to="/stock-movements/purchase"><Truck aria-hidden="true" /> Receive delivery</Link></Button>
+                <Button asChild variant="outline"><Link to="/products/add"><PackagePlus aria-hidden="true" /> Add product</Link></Button>
+                <Button asChild variant="outline"><Link to="/reports/accounting"><BarChart3 aria-hidden="true" /> Accounting report</Link></Button>
+            </nav>
+        </section>
     );
 }

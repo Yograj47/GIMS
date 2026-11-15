@@ -56,6 +56,7 @@ export const findProductUnits = async (
                 conversions: {
                     $push: {
                         _id: "$_id",
+                        unitId: "$unitId",
 
                         unitName:
                             "$unit.name",

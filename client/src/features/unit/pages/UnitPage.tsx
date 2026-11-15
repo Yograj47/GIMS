@@ -62,7 +62,7 @@ export default function UnitPage() {
     return (
         <div className="min-w-0 space-y-3">
             <SettingsPageHeader title="Measurement units" description="Set up the units used to measure inventory." icon={Scale}>
-                <AdminGate><Button onClick={() => { handleAddClick(); }}><Plus size={16} /> Add unit</Button></AdminGate>
+                <AdminGate allowedRoles={["owner"]}><Button onClick={() => { handleAddClick(); }}><Plus size={16} /> Add unit</Button></AdminGate>
             </SettingsPageHeader>
                 <DataTable
                     toolbar={<SettingsSearch label="Search units" value={searchQuery} onChange={(value) => {

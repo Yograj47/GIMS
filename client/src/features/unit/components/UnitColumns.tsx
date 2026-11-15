@@ -10,7 +10,7 @@ export const getUnitColumns = (
         {
             accessorKey: "name",
             header: () => (
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                     Unit Name
                 </span>
             ),
@@ -20,15 +20,15 @@ export const getUnitColumns = (
                         <Scale size={14} strokeWidth={3} />
                     </div>
                     <div className="flex flex-col">
-                        <div className="font-black text-foreground uppercase text-[12px] tracking-tight leading-none mb-1">
+                        <div className="font-semibold text-foreground leading-tight">
                             {row.original.name}
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-mono font-black text-link uppercase tracking-widest bg-brand-50 px-1.5 rounded-sm border border-brand-100">
+                            <span className="text-xs font-mono font-black text-link uppercase tracking-widest bg-brand-50 px-1.5 rounded-sm border border-brand-100">
                                 {row.original.shortForm}
                             </span>
                             {row.original.baseUnit && (
-                                <span className="text-[8px] font-black bg-secondary text-muted-foreground border border-border px-1 rounded-sm uppercase tracking-tighter">
+                                <span className="text-[8px] font-black bg-secondary text-muted-foreground border border-border px-1 rounded-sm er">
                                     MASTER-UNIT
                                 </span>
                             )}
@@ -40,14 +40,14 @@ export const getUnitColumns = (
         {
             accessorKey: "unitType",
             header: () => (
-                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                     Dimension
                 </span>
             ),
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <Layers size={11} className="text-subtle-foreground" />
-                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
+                    <span className="text-xs font-bold text-muted-foreground ">
                         {row.original.unitType}
                     </span>
                 </div>
@@ -56,13 +56,13 @@ export const getUnitColumns = (
         {
             accessorKey: "multiplierToBase",
             header: () => (
-                <div className="text-center text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground">
+                <div className="text-center text-xs font-semibold text-muted-foreground">
                     Factor Ratio
                 </div>
             ),
             cell: ({ row }) => (
                 <div className="text-center">
-                    <span className="font-mono font-black text-foreground bg-muted px-3 py-1 rounded-sm border border-border text-[10px] tabular-nums">
+                    <span className="font-mono font-black text-foreground bg-muted px-3 py-1 rounded-sm border border-border text-xs tabular-nums">
                         x {row.original.baseUnit ? "1.000" : (row.original.multiplierToBase || 1).toFixed(4)}
                     </span>
                 </div>
@@ -71,14 +71,14 @@ export const getUnitColumns = (
         {
             id: "actions",
             header: () => (
-                <AdminGate>
-                    <div className="text-right text-[10px] font-black uppercase tracking-[0.15em] text-subtle-foreground pr-4">
-                        Control
+                <AdminGate allowedRoles={["owner"]}>
+                    <div className="text-right text-xs font-semibold text-muted-foreground pr-4">
+                        Actions
                     </div>
                 </AdminGate>
             ),
             cell: ({ row }) => (
-                <AdminGate>
+                <AdminGate allowedRoles={["owner"]}>
                     <div className="flex justify-end gap-1 pr-2">
                         <button
                             onClick={() => onEdit(row.original)}

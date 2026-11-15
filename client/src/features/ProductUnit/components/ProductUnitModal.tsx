@@ -1,12 +1,10 @@
-"use client";
+import { EntityField, entityInput } from "@/components/common/EntityField";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
-import Select, { type StylesConfig } from 'react-select'; 
-import { X, Scale, AlertCircle, Loader2 } from 'lucide-react';
 import { productUnitSchema, type ProductUnitFormData } from '@/types/product-unit';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useUnits } from '@/features/unit/hooks/useUnits';
 import { Button } from '@/components/ui/button';
@@ -15,7 +13,7 @@ interface ProductUnitConversion {
     _id: string;
     unitId: string;
     unitName: string;
-    shortName: string;
+    shortForm: string;
     multiplier: number;
     isDefault: boolean;
     isFractionable: boolean;
@@ -28,71 +26,33 @@ interface ProductUnitModalProps {
     onSubmit: (data: ProductUnitFormData) => Promise<void>;
     productId: string;
     productName: string;
-    initialData?: ProductUnitConversion; 
+    initialData?: ProductUnitConversion;
 }
-
-interface SelectOption {
-    value: string;
-    label: string;
-}
-
-// Custom Styles for react-select to match your UI
-const selectStyles: StylesConfig<SelectOption, false> = {
-    control: (base, state) => ({
-        ...base,
-        minHeight: '36px',
-        borderRadius: '6px',
-        borderColor: state.isFocused ? '#047857' : '#e2e8f0', // brand-600 : slate-200
-        boxShadow: state.isFocused ? '0 0 0 1px #047857' : 'none',
-        '&:hover': {
-            borderColor: state.isFocused ? '#047857' : '#cbd5e1',
-        },
-        fontSize: '14px',
-        fontWeight: '500',
-    }),
-    option: (base, state) => ({
-        ...base,
-        fontSize: '13px',
-        fontWeight: '500',
-        backgroundColor: state.isSelected ? '#047857' : state.isFocused ? '#ecfdf5' : 'white',
-        color: state.isSelected ? 'white' : '#20392e',
-        '&:active': {
-            backgroundColor: '#d1fae5',
-        }
-    }),
-};
 
 export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
     isOpen, onClose, onSubmit, productId, productName, initialData
 }) => {
     const { units, fetchUnits } = useUnits();
 
-    const { register, handleSubmit, control, watch, reset, formState: { errors, isSubmitting } } = useForm<ProductUnitFormData>({
+    const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<ProductUnitFormData>({
         resolver: zodResolver(productUnitSchema) as Resolver<ProductUnitFormData>,
-        defaultValues: { 
-            productId, 
-            multiplier: 1, 
-            isDefault: false, 
-            isFractionable: false, 
-            isActive: true 
+        defaultValues: {
+            productId,
+            unitId: "",
+            multiplier: 1,
+            isDefault: false,
+            isFractionable: false,
+            isActive: true
         }
     });
-
-    const currentMultiplier = watch('multiplier');
-
-    const unitOptions: SelectOption[] = useMemo(() => 
-        units.map(u => ({
-            value: u._id,
-            label: `${u.name} (${u.shortForm})`
-        })), [units]
-    );
 
     useEffect(() => {
         if (isOpen) {
             fetchUnits(undefined, undefined, undefined, true);
-            reset(initialData ? { ...initialData, productId } : { 
-                productId, 
-                multiplier: 1, 
+            reset(initialData ? { ...initialData, productId } : {
+                productId,
+                unitId: "",
+                multiplier: 1,
                 isDefault: false,
                 isFractionable: false,
                 isActive: true
@@ -100,136 +60,45 @@ export const ProductUnitModal: React.FC<ProductUnitModalProps> = ({
         }
     }, [isOpen, initialData, productId, reset, fetchUnits]);
 
-    if (!isOpen) return null;
-
+    const saving = isSubmitting;
     return (
-        <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto overscroll-contain p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="bg-card w-full max-w-105 rounded-md shadow-xl border border-border overflow-hidden">
-                
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/50">
-                    <div>
-                        <h2 className="text-sm font-bold text-foreground">
-                            {initialData ? 'Update Conversion' : 'Link New Unit'}
-                        </h2>
-                        <p className="text-[11px] text-link font-medium mt-0.5">{productName}</p>
-                    </div>
-                    <button onClick={onClose} className="p-1 hover:bg-card rounded border border-transparent hover:border-border text-subtle-foreground transition-all">
-                        <X size={18} />
-                    </button>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !saving) onClose(); }}>
+            <DialogContent showCloseButton={!saving} className="rounded-sm sm:max-w-xl">
+                <div className="border-b-2 border-input pb-3">
+                    <DialogTitle>{initialData ? "Edit product unit" : "Add product unit"}</DialogTitle>
+                    <DialogDescription>Set the conversion for {productName}.</DialogDescription>
                 </div>
-
-                <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-                    
-                    {/* Unit Selection with React-Select */}
-                    <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-muted-foreground ml-0.5">Measurement Unit</label>
-                        <Controller
-                            control={control}
-                            name="unitId"
-                            render={({ field: { onChange, value, ref } }) => (
-                                <Select
-                                    ref={ref}
-                                    options={unitOptions}
-                                    value={unitOptions.find(opt => opt.value === value)}
-                                    onChange={(val) => onChange(val?.value)}
-                                    placeholder="Search or select unit..."
-                                    styles={selectStyles}
-                                    classNamePrefix="react-select"
-                                    isClearable
-                                />
-                            )}
-                        />
-                        {errors.unitId && (
-                            <p className="text-[10px] text-rose-500 mt-1 flex items-center gap-1">
-                                <AlertCircle size={10} /> {errors.unitId.message}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Multiplier */}
-                    <div className="space-y-1.5">
-                        <div className="flex justify-between items-center px-0.5">
-                            <label className="text-[11px] font-semibold text-muted-foreground">Multiplier Factor</label>
-                            <span className="text-[10px] text-link font-bold bg-brand-50 px-2 py-0.5 rounded border border-brand-100 tabular-nums">
-                                1 Unit = {currentMultiplier || 0} Base
-                            </span>
-                        </div>
-                        <div className="relative">
-                            <Scale className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground" size={16} />
-                            <Input 
-                                type="number" 
-                                step="any" 
-                                {...register("multiplier", { valueAsNumber: true })} 
-                                className="pl-10 h-9 rounded-md border-border text-sm font-bold tabular-nums focus-visible:ring-ring focus-visible:ring-1 focus-visible:border-brand-500"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Toggles */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center justify-between p-3 rounded-md border border-border bg-muted/50">
-                            <div className="flex flex-col">
-                                <span className="text-[11px] font-bold text-foreground">Set as Base</span>
-                                <span className="text-[9px] text-subtle-foreground">Primary unit</span>
-                            </div>
-                            <Controller
-                                control={control}
-                                name="isDefault"
-                                render={({ field }) => (
-                                    <Switch 
-                                        checked={field.value} 
-                                        onCheckedChange={field.onChange} 
-                                        className="scale-75 data-[state=checked]:bg-brand-600"
-                                    />
-                                )}
-                            />
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-md border border-border bg-muted/50">
-                            <div className="flex flex-col">
-                                <span className="text-[11px] font-bold text-foreground">Allow Decimals</span>
-                                <span className="text-[9px] text-subtle-foreground">Partial sales</span>
-                            </div>
-                            <Controller
-                                control={control}
-                                name="isFractionable"
-                                render={({ field }) => (
-                                    <Switch 
-                                        checked={field.value} 
-                                        onCheckedChange={field.onChange} 
-                                        className="scale-75 data-[state=checked]:bg-brand-600"
-                                    />
-                                )}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="pt-2 flex gap-3">
-                        <Button 
-                            type="button" 
-                            onClick={onClose} 
-                            variant="ghost" 
-                            className="flex-1 h-10 text-muted-foreground font-semibold text-xs hover:bg-muted"
-                        >
-                            Discard
-                        </Button>
-                        <Button 
-                            type="submit" 
-                            disabled={isSubmitting} 
-                            className="flex-1 h-10 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm rounded-md transition-all active:scale-95"
-                        >
-                            {isSubmitting ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : initialData ? (
-                                'Save Changes'
-                            ) : (
-                                'Link Product Unit'
-                            )}
-                        </Button>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <fieldset disabled={saving} className="space-y-4">
+                        <EntityField label="Measurement unit" hint="Choose the unit staff will select when entering quantities." error={errors.unitId?.message}>
+                            {(field) => <select {...field} {...register("unitId")} className={entityInput}>
+                                <option value="">Choose a unit</option>
+                                {units.filter((unit) => unit.isActive || unit._id === initialData?.unitId).map((unit) =>
+                                    <option key={unit._id} value={unit._id}>{unit.name} ({unit.shortForm})</option>)}
+                            </select>}
+                        </EntityField>
+                        <EntityField label="Base units per selected unit" hint="If one sack contains 25 kg and kg is the product base unit, enter 25." error={errors.multiplier?.message}>
+                            {(field) => <input {...field} {...register("multiplier", { valueAsNumber: true })} className={entityInput} type="number" min="1" step="any" />}
+                        </EntityField>
+                        <EntityField label="Default unit" hint="Preselect this unit when staff add the product to a transaction.">
+                            {(props) => <Controller name="isDefault" control={control} render={({ field }) =>
+                                <Switch {...props} checked={field.value} onCheckedChange={field.onChange} />} />}
+                        </EntityField>
+                        <EntityField label="Allow fractional quantities" hint="Use when staff can enter quantities such as half a kilogram.">
+                            {(props) => <Controller name="isFractionable" control={control} render={({ field }) =>
+                                <Switch {...props} checked={field.value} onCheckedChange={field.onChange} />} />}
+                        </EntityField>
+                        <EntityField label="Active" hint="Make this conversion available for new transactions.">
+                            {(props) => <Controller name="isActive" control={control} render={({ field }) =>
+                                <Switch {...props} checked={field.value} onCheckedChange={field.onChange} />} />}
+                        </EntityField>
+                    </fieldset>
+                    <div className="flex justify-end gap-2 border-t-2 border-input pt-3">
+                        <Button type="button" variant="outline" disabled={saving} onClick={onClose}>Cancel</Button>
+                        <Button type="submit" disabled={saving}>{saving ? "Saving..." : "Save product unit"}</Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
-};
+}

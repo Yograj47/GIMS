@@ -15,7 +15,7 @@ interface ProductUnitConversion {
     _id: string;
     unitId: string;
     unitName: string;
-    shortName: string;
+    shortForm: string;
     multiplier: number;
     isDefault: boolean;
     isFractionable: boolean;
@@ -101,11 +101,11 @@ export default function ProductUnitPage() {
                         <div className="p-4 bg-muted border-t border-border">
                             {row.original.conversions?.length > 0 ? (
                                 <div className="rounded-md border border-border bg-card overflow-hidden shadow-sm">
-                                    <div className="hidden grid-cols-12 gap-3 px-4 py-2.5 md:grid bg-muted text-[11px] font-bold text-muted-foreground border-b">
+                                    <div className="hidden grid-cols-12 gap-3 px-4 py-2.5 md:grid bg-muted text-xs font-bold text-muted-foreground border-b">
                                         <div className="col-span-4">Unit Name</div>
                                         <div className="col-span-3 text-center">Multiplier</div>
                                         <div className="col-span-3 text-center">Unit type</div>
-                                        <AdminGate>
+                                        <AdminGate allowedRoles={["owner"]}>
                                             <div className="col-span-2 text-right">Actions</div>
                                         </AdminGate>
                                     </div>
@@ -114,23 +114,23 @@ export default function ProductUnitPage() {
                                             <div key={conv._id} className="grid grid-cols-2 gap-2 px-3 py-3 items-center md:grid-cols-12 md:gap-3 md:px-4 hover:bg-brand-50/30 transition-colors">
                                                 <div className="col-span-2 flex flex-wrap items-center md:col-span-4 gap-2 font-semibold text-foreground text-sm">
                                                     <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                                                    {conv.unitName} <span className="text-xs text-subtle-foreground font-normal">({conv.shortName})</span>
+                                                    {conv.unitName} <span className="text-xs text-subtle-foreground font-normal">({conv.shortForm})</span>
                                                 </div>
                                                 <div className="flex md:col-span-3 md:justify-center">
-                                                    <span className="px-2 py-0.5 rounded bg-brand-50 text-link text-[11px] font-bold border border-brand-100 tabular-nums">
+                                                    <span className="px-2 py-0.5 rounded bg-brand-50 text-link text-xs font-bold border border-brand-100 tabular-nums">
                                                         × {conv.multiplier}
                                                     </span>
                                                 </div>
                                                 <div className="flex md:col-span-3 md:justify-center">
                                                     {conv.isDefault ? (
-                                                        <span className="flex items-center gap-1 text-emerald-600 text-[11px] font-bold">
+                                                        <span className="flex items-center gap-1 text-emerald-600 text-xs font-bold">
                                                             <CheckCircle2 size={12} /> Base Unit
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[11px] text-subtle-foreground font-medium">Secondary</span>
+                                                        <span className="text-xs text-subtle-foreground font-medium">Secondary</span>
                                                     )}
                                                 </div>
-                                                <AdminGate>
+                                                <AdminGate allowedRoles={["owner"]}>
                                                     <div className="col-span-2 flex justify-end gap-1">
                                                         <Button 
                                                             size="icon"

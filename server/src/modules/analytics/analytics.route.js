@@ -1,3 +1,4 @@
+import { storeOverview } from "./store-overview.service.js";
 import { Router } from "express";
 
 import {
@@ -35,5 +36,9 @@ router
         ),
         getWeeklyMovementStats
     );
+
+router.get("/store-overview", authenticate, authorize(PERMISSIONS.REPORT_READ), async (req, res) => {
+    res.json({ success: true, data: await storeOverview(req.user.role === "admin") });
+});
 
 export default router;

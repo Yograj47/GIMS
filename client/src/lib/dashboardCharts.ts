@@ -25,12 +25,12 @@ ChartJS.register(
 
 const themeColor = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-export const chartData = (stockIn: number[], stockOut: number[], labels: string[]): ChartData<'line'> => ({
+export const chartData = (stockIn: number[], stockOut: number[], labels: string[], series = ["Stock In", "Stock Out"]): ChartData<'line'> => ({
     labels: labels,
     datasets: [
         {
             fill: true,
-            label: 'Stock In',
+            label: series[0],
             data: stockIn,
             borderColor: themeColor("--chart-1"),
             backgroundColor: themeColor("--chart-1") + "1f",
@@ -41,7 +41,7 @@ export const chartData = (stockIn: number[], stockOut: number[], labels: string[
         },
         {
             fill: true,
-            label: 'Stock Out',
+            label: series[1],
             data: stockOut,
             borderColor: themeColor("--chart-2"),
             backgroundColor: themeColor("--chart-2") + "1f",
