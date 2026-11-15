@@ -8,6 +8,15 @@ const activityLogSchema = new mongoose.Schema(
             required: true,
         },
 
+        actorRole: String,
+        statusCode: Number,
+        requestId: String,
+        sourceIp: String,
+        protocol: String,
+        httpVersion: String,
+        userAgent: String,
+        durationMs: Number,
+
         action: {
             type: String,
             required: true,

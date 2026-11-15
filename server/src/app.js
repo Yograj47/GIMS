@@ -17,6 +17,7 @@ import movementRoutes from "./modules/movement/movement.route.js";
 import transactionRoutes from "./modules/transaction/transaction.route.js";
 import alertRoutes from "./modules/alert/alert.route.js";
 import settingRoute from "./modules/setting/setting.route.js";
+import { recordActivity } from "./modules/activity-log/activity-log.middleware.js";
 import activityLogRoute from "./modules/activity-log/activity-log.route.js";
 import analyticsRoute from "./modules/analytics/analytics.route.js";
 import receivingRoute from "./modules/receiving/receiving.route.js";
@@ -28,6 +29,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cookieParser());
+app.use(recordActivity);
 
 app.use(
     cors({

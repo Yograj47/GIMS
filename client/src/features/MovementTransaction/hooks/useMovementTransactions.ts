@@ -8,7 +8,6 @@ import type { PaginationMetadata } from "@/types/pagination";
 export const useMovementTransactions = () => {
     const [transactions, setTransactions] = useState<TransactionData[]>([]);
     const [movements, setMovements] = useState<MovementData[]>([]);
-    const [productMovements, setProductMovements] = useState<MovementData[]>([]);
     const [meta, setMeta] = useState<PaginationMetadata | null>(null);
 
     const [isLoading, setLoading] = useState(false);
@@ -56,24 +55,6 @@ export const useMovementTransactions = () => {
         }
     }, [setLoading]);
 
-    const fetchProductMovements = useCallback(async (productId: string, page: number = 1,
-        limit: number = 10, all?: boolean) => {
-        try {
-            setLoading(true);
-            const response = await MovementTransactionService.getProductMovements(productId, page, limit, all);
-            if (response.success) {
-                setProductMovements((response.data as MovementData[]) || []);
-                setMeta(all ? null : (response.meta || null));
-                return true;
-
-            }
-        } catch {
-            notify.error("Failed to load product history");
-        } finally {
-            setLoading(false);
-        }
-    }, [setLoading]);
-
     const createTransaction = async (payload: TransactionFormData) => {
         try {
             setLoading(true);
@@ -83,7 +64,7 @@ export const useMovementTransactions = () => {
                 const newTransaction = response.data as TransactionData;
                 setTransactions((prev) => [newTransaction, ...prev]);
                 fetchMovements();
-                return true;
+                return newTransaction;
             }
         } catch {
             notify.error("Transaction failed");
@@ -115,12 +96,10 @@ export const useMovementTransactions = () => {
     return {
         transactions,
         movements,
-        productMovements,
         meta,
         isLoading,
         fetchTransactions,
         fetchMovements,
-        fetchProductMovements,
         createTransaction,
         updateCreditStatus
     };

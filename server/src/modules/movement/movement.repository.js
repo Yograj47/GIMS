@@ -61,15 +61,6 @@ export const findMovements = async (
     };
 };
 
-export const findMovementsByProductId =
-    async (productId) => {
-        return Movement.find({
-            productId,
-        }).sort({
-            createdAt: -1,
-        });
-    };
-
 export const findMovementsByTransactionId =
     async (
         transactionId

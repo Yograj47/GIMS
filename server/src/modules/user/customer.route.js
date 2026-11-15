@@ -10,15 +10,32 @@ const CustomerContact = mongoose.model("CustomerContact", new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
 }, { timestamps: true }));
 
+const phoneNumber = z.string().trim().regex(/^\+?[0-9]{7,15}$/);
 const contact = z.object({
     name: z.string().trim().min(1).max(120),
-    phone: z.string().trim().regex(/^\+?[0-9]{7,15}$/),
+    phone: phoneNumber,
 });
 
 const router = express.Router();
 router.use(authenticate, authorize(PERMISSIONS.CUSTOMER_MANAGE), (req, _res, next) => {
     if (!req.user.isVerified) throw AppError.forbidden("Verify your account first");
     next();
+});
+
+router.get("/lookup", async (req, res) => {
+    const phone = phoneNumber.parse(req.query.phone);
+    const data = await CustomerContact.findOne({ phone }).select("name phone").lean();
+    res.json({ data });
+});
+
+router.put("/lookup", async (req, res) => {
+    const input = contact.parse(req.body);
+    await CustomerContact.init();
+    const data = await CustomerContact.findOneAndUpdate(
+        { phone: input.phone }, { $setOnInsert: { ...input, createdAt: new Date(), updatedAt: new Date() } },
+        { upsert: true, returnDocument: "after", timestamps: false, setDefaultsOnInsert: true },
+    ).select("name phone").lean();
+    res.json({ data });
 });
 
 router.get("/", async (req, res) => {

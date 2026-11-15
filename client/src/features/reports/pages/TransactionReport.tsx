@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/common/PageHeader";
+import { useAuthStore } from "@/store/authStore";
 import { useMovementTransactions } from "../../MovementTransaction/hooks/useMovementTransactions";
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/common/DataTable";
@@ -5,7 +7,8 @@ import { getTransactionColumns } from "../components/TransactionColumns";
 import { Button } from "@/components/ui/button";
 import { Download, Search, Receipt } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Loading } from "@/lib/loader";
 import { notify } from "@/lib/toast";
 import { exportToCSV } from "@/lib/csvExport";
@@ -22,10 +25,13 @@ export default function Transaction() {
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
     const [IsExporting, setIsExporting] = useState<boolean>(false);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const accountant = useAuthStore((state) => state.user?.role === "accountant");
+    const showChannels = searchParams.get("view") === "channels";
     const debouncedSearch = useDebounce(searchQuery, 500);
 
     useEffect(() => {
-        if (!IsExporting) {
+        if (!IsExporting && !showChannels) {
             fetchTransactions(
                 pagination.pageIndex + 1,
                 pagination.pageSize,
@@ -35,7 +41,7 @@ export default function Transaction() {
                 dateRange.end
             );
         }
-    }, [fetchTransactions, pagination, debouncedSearch, transactionType, dateRange, IsExporting]);
+    }, [fetchTransactions, pagination, debouncedSearch, transactionType, dateRange, IsExporting, showChannels]);
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -71,48 +77,58 @@ export default function Transaction() {
         setTransactionType("All Types");
         firstPage();
     };
-    const fieldStyle = "h-10 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-sm";
+    const fieldStyle = "h-9 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-sm";
 
     return (
-        <section className="mx-auto w-full max-w-6xl space-y-7 px-4 py-7 sm:px-6 sm:py-10">
-            <header className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Sales and invoices</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">Find transactions, open receipts, and review sales by channel.</p>
-                </div>
-                <AdminGate allowedRoles={["admin", "owner", "accountant"]}>
-                    <Button variant="outline" onClick={handleExport} disabled={IsExporting || isLoading || !meta?.totalItems}>
-                        {IsExporting ? <><Loading /> Exporting…</> : <><Download aria-hidden="true" /> Export CSV</>}
+        <section className={cn("w-full space-y-3", accountant && "p-3 sm:p-4",
+            !showChannels && (accountant ? "lg:flex lg:h-dvh lg:flex-col" : "lg:flex lg:h-[calc(100dvh-2.5rem)] lg:flex-col"))}>
+            <PageHeader title={showChannels ? "Sales by channel" : "Sales and invoices"} icon={Receipt}>
+                {!showChannels && <AdminGate allowedRoles={["admin", "owner", "accountant"]}>
+                    <Button size="sm" variant="outline" onClick={handleExport} disabled={IsExporting || isLoading || !meta?.totalItems}>
+                        {IsExporting ? <><Loading /> Exporting...</> : <><Download aria-hidden="true" /> Export CSV</>}
                     </Button>
-                </AdminGate>
-            </header>
+                </AdminGate>}
+            </PageHeader>
 
-            <SalesChannels />
+            {!accountant && <nav aria-label="Sales and invoices views" className="flex flex-wrap gap-2 border-b border-border pb-2">
+                {[
+                    { label: "Transactions", view: "", active: !showChannels },
+                    { label: "Sales by channel", view: "channels", active: showChannels },
+                ].map(({ label, view, active }) => {
+                    const params = new URLSearchParams(searchParams);
+                    if (view) params.set("view", view);
+                    else params.delete("view");
+                    return (
+                        <Link key={label} to={{ search: params.toString() }} aria-current={active ? "page" : undefined}
+                            className={cn("inline-flex min-h-9 items-center rounded-md px-3 text-sm font-medium",
+                                active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+                            {label}
+                        </Link>
+                    );
+                })}
+            </nav>}
 
-            <section aria-labelledby="transaction-list" className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
-                <div className="space-y-4 border-b border-border p-5 sm:p-6">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h2 id="transaction-list" className="font-semibold">Transactions</h2>
-                        {filtered && <Button variant="ghost" size="sm" onClick={clearFilters}>Clear filters</Button>}
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+            {showChannels ? <SalesChannels /> : <div className="transaction-list min-w-0 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
+                <DataTable fill
+                    toolbar={
+                    <div className="grid items-end gap-2 sm:grid-cols-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]">
                         <label className="grid min-w-0 gap-1.5 text-sm font-medium sm:col-span-3 lg:col-span-1">
-                            Search transactions
+                            <span className="sr-only">Search transactions</span>
                             <span className="relative">
                                 <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input placeholder="Party name or notes" className="pl-9" value={searchQuery} onChange={(event) => { setSearchQuery(event.target.value); firstPage(); }} />
+                                <Input placeholder="Party name or notes" className="h-9 pl-9" value={searchQuery} onChange={(event) => { setSearchQuery(event.target.value); firstPage(); }} />
                             </span>
                         </label>
                         <label className="grid min-w-0 gap-1.5 text-sm font-medium">
-                            From
+                            <span className="text-xs text-muted-foreground">From</span>
                             <input type="date" className={fieldStyle} value={dateRange.start} max={dateRange.end || undefined} onChange={(event) => { setDateRange({ ...dateRange, start: event.target.value }); firstPage(); }} />
                         </label>
                         <label className="grid min-w-0 gap-1.5 text-sm font-medium">
-                            To
+                            <span className="text-xs text-muted-foreground">To</span>
                             <input type="date" className={fieldStyle} value={dateRange.end} min={dateRange.start || undefined} onChange={(event) => { setDateRange({ ...dateRange, end: event.target.value }); firstPage(); }} />
                         </label>
                         <label className="grid min-w-0 gap-1.5 text-sm font-medium">
-                            Type
+                            <span className="sr-only">Type</span>
                             <select className={fieldStyle} value={transactionType} onChange={(event) => { setTransactionType(event.target.value); firstPage(); }}>
                                 <option>All Types</option>
                                 <option>Sale</option>
@@ -122,9 +138,9 @@ export default function Transaction() {
                                 <option>Adjustment</option>
                             </select>
                         </label>
+                        {filtered && <Button variant="ghost" size="sm" className="justify-self-start" onClick={clearFilters}>Clear filters</Button>}
                     </div>
-                </div>
-                <DataTable embedded
+                    }
                     columns={columns}
                     data={transactions || []}
                     rowCount={meta?.totalItems || 0}
@@ -138,7 +154,7 @@ export default function Transaction() {
                         <p>{filtered ? "Try a different search or date range." : "Recorded sales and returns will appear here."}</p>
                     </div>}
                 />
-            </section>
+            </div>}
         </section>
     );
 }

@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/authStore";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, BookOpen, CheckCircle2, ClipboardList, Receipt, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ type Bill = { _id: string; number: string; supplierId: string };
 type Queue = { receipts: Receipt[]; unpaidInvoices: Invoice[]; uncostedInvoices: Invoice[]; openBills: Bill[] };
 
 export default function AccountingWorkspace() {
+    const accountant = useAuthStore((state) => state.user?.role === "accountant");
     const [selected, setSelected] = useState<string | null>(null);
     const [queue, setQueue] = useState<Queue>();
     const [failed, setFailed] = useState(false);
@@ -24,7 +26,7 @@ export default function AccountingWorkspace() {
     }, [attempt]);
     const sales = (items: Invoice[]) => items.map((item) => ({ id: item._id, label: item.number, to: `/reports/transaction/${item.transactionId}` }));
     const sections = queue ? [
-        { title: "Deliveries to bill", rows: queue.receipts.map((item) => ({ id: item._id, label: item.supplierName + (item.deliveryReference ? ` Â· ${item.deliveryReference}` : ""), to: `/suppliers/v/${item.supplierId}/billing?receiptId=${item._id}` })) },
+        { title: "Deliveries to bill", rows: queue.receipts.map((item) => ({ id: item._id, label: item.supplierName + (item.deliveryReference ? ` Ã‚Â· ${item.deliveryReference}` : ""), to: `/suppliers/v/${item.supplierId}/billing?receiptId=${item._id}` })) },
         { title: "Invoices awaiting payment", rows: sales(queue.unpaidInvoices) },
         { title: "Supplier bills due", rows: queue.openBills.map((item) => ({ id: item._id, label: item.number, to: `/suppliers/v/${item.supplierId}/billing?billId=${item._id}` })) },
         { title: "Sales awaiting inventory cost", rows: sales(queue.uncostedInvoices) },
@@ -34,16 +36,16 @@ export default function AccountingWorkspace() {
         ?? sections[0];
 
     return (
-        <main className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-9">
+        <main className="w-full space-y-4 p-3 sm:p-4 lg:p-5">
             <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-semibold tracking-tight">Accounting</h1>
                     <p className="mt-1 text-sm text-muted-foreground">Post bills, collect payments, and reconcile inventory costs.</p>
                 </div>
-                <Button asChild><Link to="/reports/accounting"><BookOpen aria-hidden="true" /> Accounting report</Link></Button>
+                {!accountant && <Button asChild><Link to="/reports/accounting"><BookOpen aria-hidden="true" /> Accounting report</Link></Button>}
             </header>
 
-            <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_17rem]">
+            <div className={accountant ? "min-w-0" : "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_17rem]"}>
                 <section aria-labelledby="worklist-title" className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
                     <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-5">
                         <ClipboardList aria-hidden="true" className="size-5 text-link" />
@@ -93,7 +95,7 @@ export default function AccountingWorkspace() {
                     )}
                 </section>
 
-                <nav aria-label="Billing shortcuts" className="overflow-hidden rounded-xl border border-border bg-card">
+                {!accountant && <nav aria-label="Billing shortcuts" className="overflow-hidden rounded-xl border border-border bg-card">
                     <h2 className="border-b border-border px-4 py-4 font-semibold">Billing</h2>
                     <div className="divide-y divide-border">
                         <Link to="/reports/transactions" className="flex min-h-12 items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-accent">
@@ -103,7 +105,7 @@ export default function AccountingWorkspace() {
                             <Truck aria-hidden="true" className="size-4 text-link" /> Supplier billing
                         </Link>
                     </div>
-                </nav>
+                </nav>}
             </div>
         </main>
     );

@@ -1,5 +1,6 @@
+import { PageHeader } from "@/components/common/PageHeader";
 import { useEffect, useState } from "react"
-import { Download, Search, Filter, History, ArrowLeft } from "lucide-react"
+import { Download, Search, Filter, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import { Input } from "@/components/ui/input"
@@ -9,7 +10,6 @@ import { exportToCSV } from "@/lib/csvExport"
 import { useMovementTransactions } from "@/features/MovementTransaction/hooks/useMovementTransactions"
 import { getMovementColumns } from "../components/MovementColumns"
 import { useDebounce } from "@/lib/debounce"
-import { useNavigate } from "react-router-dom"
 
 interface MovementTransaction {
     createdAt: string;
@@ -27,7 +27,6 @@ export default function StockMovementReport() {
     const [movementType, setMovementType] = useState<string>("All Movements")
     const [isExporting, setIsExporting] = useState<boolean>(false);
     const debouncedSearch = useDebounce(searchQuery, 500);
-    const navigate = useNavigate();
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -83,36 +82,10 @@ export default function StockMovementReport() {
 
     return (
         <div className="h-full animate-in fade-in duration-500">
-            <div className="max-w-400 mx-auto space-y-6">
+            <div className="space-y-3">
 
-                {/* 1. PRECISION HEADER */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
-
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(-1)}
-                            className="text-muted-foreground hover:text-link group"
-                        >
-                            <div className="w-8 h-8 rounded-sm bg-secondary flex items-center justify-center group-hover:bg-brand-50 transition-colors">
-                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-                            </div>
-                        </Button>
-                        <div className="p-2 bg-brand-600 rounded-sm text-white shadow-sm shadow-brand-100">
-                            <History size={20} strokeWidth={2.5} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase">
-                                Movement Ledger
-                            </h1>
-                            <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-1">
-                                Audit Trail • <span className="text-link italic">Global Traffic</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <Button
+                <PageHeader title="Stock movements report" icon={History}>
+<Button
                         onClick={handleExport}
                         disabled={isExporting}
                         className="h-9 px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
@@ -123,9 +96,8 @@ export default function StockMovementReport() {
                             <><Download size={14} className="mr-2" /> Export CSV</>
                         )}
                     </Button>
-                </div>
-
-                {/* 2. PRECISION FILTER BAR */}
+                </PageHeader>
+                <DataTable toolbar={(
                 <div className="flex flex-col lg:flex-row gap-3">
                     {/* Search Field */}
                     <div className="relative flex-1 group">
@@ -135,7 +107,7 @@ export default function StockMovementReport() {
                             strokeWidth={2.5}
                         />
                         <Input
-                            placeholder="Filter by Product, Operator..."
+                            aria-label="Search movements" placeholder="Search products or operators"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-10 pl-10 bg-card border-border rounded-sm text-sm focus-visible:ring-1
@@ -148,7 +120,7 @@ export default function StockMovementReport() {
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                             <Filter size={12} className="text-link" strokeWidth={3} />
                         </div>
-                        <select
+                        <select aria-label="Movement type"
                             value={movementType}
                             onChange={(e) => setMovementType(e.target.value)}
                             className="w-full h-10 pl-9 pr-8 bg-card border border-border rounded-sm text-[11px] font-bold uppercase tracking-tight text-muted-foreground outline-none hover:border-input focus:border-brand-500 appearance-none cursor-pointer transition-all"
@@ -163,9 +135,7 @@ export default function StockMovementReport() {
                     </div>
                 </div>
 
-                {/* 3. THE DATA TABLE */}
-                <div className="bg-card border border-border rounded-sm overflow-hidden shadow-sm">
-                    <DataTable
+                )}
                         columns={getMovementColumns}
                         data={movements || []}
                         pageCount={meta?.totalPages || 0}
@@ -173,8 +143,7 @@ export default function StockMovementReport() {
                         pagination={pagination}
                         setPagination={setPagination}
                         isLoading={isLoading}
-                    />
-                </div>
+                />
             </div>
         </div>
     )

@@ -1,5 +1,7 @@
 import { AppError } from "../../shared/errors/index.js";
 import express from "express";
+import { z } from "zod";
+import Transaction from "./transaction.model.js";
 
 import {
     createTransaction,
@@ -47,5 +49,14 @@ router
         ),
         findTransactionById
     );
+
+router.put("/:id/credit", authenticate, authorize(PERMISSIONS.BILLING_MANAGE), async (req, res) => {
+    if (!req.user.isVerified) throw AppError.forbidden("Verify your account first");
+    const id = z.string().regex(/^[a-f0-9]{24}$/i).parse(req.params.id);
+    const update = z.object({ isPaid: z.boolean(), notes: z.string().trim().max(2000).optional() }).parse(req.body);
+    const result = await Transaction.updateOne({ _id: id, transactionType: { $ne: "Sale" } }, { $set: update });
+    if (!result.matchedCount) throw AppError.conflict("Sale balances are updated through invoice payments. Select an eligible transaction.");
+    res.json({ success: true });
+});
 
 export default router;

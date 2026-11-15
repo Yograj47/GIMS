@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
     findActivityLogById,
     findActivityLogs,
@@ -19,16 +20,26 @@ export const find = async ({
     page = 1,
     limit = 20,
     search = "",
+    startDate,
+    endDate,
     type,
     paginate = true,
 }) => {
     const query = {};
 
-    if (search) {
-        query.message = {
-            $regex: search,
-            $options: "i",
-        };
+    const term = z.string().trim().max(200).parse(search);
+    if (term) {
+        const pattern = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const match = { $regex: pattern, $options: "i" };
+        query.$or = [{ message: match }, { action: match }, { actorRole: match }, { sourceIp: match }, { requestId: match }];
+    }
+    const date = z.iso.date().or(z.literal("")).optional();
+    const start = date.parse(startDate);
+    const end = date.parse(endDate);
+    if (start || end) {
+        query.createdAt = {};
+        if (start) query.createdAt.$gte = new Date(start);
+        if (end) query.createdAt.$lte = new Date(end + "T23:59:59.999Z");
     }
 
     if (type) {

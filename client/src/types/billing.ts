@@ -6,7 +6,7 @@ export interface SalesInvoice {
     totalMinor: number;
     paidMinor: number;
     costMinor?: number;
-    items: { productName?: string; quantity: number; totalMinor: number }[];
+    items: { productName?: string; unitName?: string; rateMinor: number; quantity: number; totalMinor: number }[];
 }
 
 export function parseMinorAmount(value: string) {

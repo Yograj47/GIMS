@@ -50,14 +50,24 @@ export const getActivityLogColumns = (): ColumnDef<ActivityLogData>[] => [
         </div>
         <div className="flex flex-col">
           <span className="text-[11px] font-bold text-foreground uppercase">
-            {row.original.performedBy?.name || "System"}
+            {row.original.performedBy?.name || "Unavailable"}
           </span>
           <span className="text-[9px] text-subtle-foreground font-black uppercase tracking-tighter">
-            {row.original.performedBy?.role || "Automated"}
+            {row.original.actorRole || row.original.performedBy?.role || "Unknown role"}
           </span>
         </div>
       </div>
     )
+  },
+  {
+    accessorKey: "sourceIp",
+    header: "Source IP",
+    cell: ({ row }) => <span className="font-mono text-xs">{row.original.sourceIp ?? "Not recorded"}</span>,
+  },
+  {
+    accessorKey: "statusCode",
+    header: "Result",
+    cell: ({ row }) => row.original.statusCode ? `${row.original.statusCode < 400 ? "Succeeded" : "Failed"} (${row.original.statusCode})` : "Not recorded",
   },
   {
     accessorKey: "createdAt",
@@ -73,5 +83,15 @@ export const getActivityLogColumns = (): ColumnDef<ActivityLogData>[] => [
         </span>
       </div>
     )
-  }
+  },
+  {
+    id: "details",
+    header: "Request",
+    cell: ({ row }) => (
+      <button type="button" aria-expanded={row.getIsExpanded()} onClick={row.getToggleExpandedHandler()}
+        className="rounded-md px-2 py-1 text-sm font-medium text-link hover:bg-accent">
+        {row.getIsExpanded() ? "Hide details" : "View details"}
+      </button>
+    ),
+  },
 ];

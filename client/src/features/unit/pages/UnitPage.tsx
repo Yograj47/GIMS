@@ -60,17 +60,15 @@ export default function UnitPage() {
     }
 
     return (
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-3">
             <SettingsPageHeader title="Measurement units" description="Set up the units used to measure inventory." icon={Scale}>
                 <AdminGate><Button onClick={() => { handleAddClick(); }}><Plus size={16} /> Add unit</Button></AdminGate>
             </SettingsPageHeader>
-            <SettingsSearch label="Search units" value={searchQuery} onChange={(value) => {
+                <DataTable
+                    toolbar={<SettingsSearch label="Search units" value={searchQuery} onChange={(value) => {
                 setSearchQuery(value);
                 setPagination((previous) => ({ ...previous, pageIndex: 0 }));
-            }} />
-
-            <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
-                <DataTable
+            }} />}
                     columns={getUnitColumns(handleEditClick, handleDeleteClick)}
                     data={units}
                     pageCount={meta?.totalPages || 0}
@@ -88,7 +86,6 @@ export default function UnitPage() {
                     itemName={selectedUnit?.name || "this unit"}
                     isLoading={isLoading}
                 />
-            </div>
 
             <UnitFormModal
                 isOpen={isModalOpen}

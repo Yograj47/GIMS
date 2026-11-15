@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/common/PageHeader";
 import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, Search, Truck } from "lucide-react";
 import { Link } from 'react-router-dom';
@@ -29,20 +30,13 @@ const Suppliers: React.FC = () => {
     };
 
     return (
-        <section className="mx-auto w-full max-w-6xl space-y-7 px-4 py-7 sm:px-6 sm:py-10">
-            <header className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">{billing ? "Supplier billing" : "Suppliers"}</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {billing ? "Choose a supplier to post bills or review payments and credits." : "Find suppliers and open their profiles."}
-                    </p>
-                </div>
+        <section className="w-full space-y-3 p-3 sm:p-4">
+            <PageHeader title={billing ? "Supplier billing" : "Suppliers"} icon={Truck}>
                 {!billing && <Button asChild><Link to="/suppliers/add"><Plus aria-hidden="true" /> Add supplier</Link></Button>}
-            </header>
+            </PageHeader>
 
-            <section aria-labelledby="supplier-directory" className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
-                <div className="space-y-3 border-b border-border p-5 sm:p-6">
-                    <h2 id="supplier-directory" className="font-semibold">Supplier directory</h2>
+            <DataTable
+                toolbar={
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="relative w-full sm:max-w-md">
                             <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -50,8 +44,7 @@ const Suppliers: React.FC = () => {
                         </div>
                         {searchQuery && <Button variant="ghost" onClick={() => updateSearch("")}>Clear search</Button>}
                     </div>
-                </div>
-                <DataTable embedded
+                }
                     columns={columns}
                     data={Suppliers || []}
                     isLoading={isLoading}
@@ -65,7 +58,6 @@ const Suppliers: React.FC = () => {
                         <p>{searchQuery ? "Try another name, contact, or address." : billing ? "Suppliers will appear when a manager adds them." : "Add a supplier to start tracking deliveries and bills."}</p>
                     </div>}
                 />
-            </section>
         </section>
     );
 };

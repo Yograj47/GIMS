@@ -7,6 +7,14 @@ export interface ActivityLogData {
         name: string;
         role: string;
     };
+    actorRole?: string;
+    statusCode?: number;
+    requestId?: string;
+    sourceIp?: string;
+    protocol?: string;
+    httpVersion?: string;
+    userAgent?: string;
+    durationMs?: number;
     action: string;
     type: string;
     message: string;

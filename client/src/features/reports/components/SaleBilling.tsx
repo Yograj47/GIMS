@@ -95,7 +95,7 @@ export function SaleBilling({ saleId, wasPaid, invoice, onInvoice }: {
     const outstanding = invoice ? invoice.totalMinor - invoice.paidMinor : 0;
     return (
         <section className="no-print space-y-4 rounded-lg border border-border bg-card p-5">
-            <h2 className="text-base font-bold">{invoice?.number ?? "Sales invoice"}</h2>
+            <h2 className="text-base font-semibold">Invoice and payment</h2>
             {loading ? <Skeleton role="status" aria-label="Loading invoice" className="h-10 w-full" />
                 : failed ? <p className="text-sm text-muted-foreground">Invoice details could not be loaded. Refresh to try again.</p>
                 : !invoice ? (

@@ -35,7 +35,7 @@ export default function Dashboard() {
                 fetchSummary(),
             ];
 
-            if (role === 'admin' || role === 'owner') {
+            if (role === 'admin') {
                 promises.push(fetchRecentLogs(5));
             }
 
@@ -113,7 +113,7 @@ export default function Dashboard() {
 
                     {/* Secondary Data Surface */}
                     <div className="grid gap-4 lg:grid-cols-2">
-                        <LiveFeedCard logs={logs} onViewAll={() => navigate('/reports/activity')} />
+                        {role === "admin" && <LiveFeedCard logs={logs} onViewAll={() => navigate('/reports/activity')} />}
 
                         {criticalAlert ? (
                             <AlertCard

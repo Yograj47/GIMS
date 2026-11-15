@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import axios from "axios";
 
 // Shadcn UI Components
@@ -10,7 +10,6 @@ import { useAuthStore } from "./store/authStore";
 
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
-import AppLayout from "./layout/AppLayout";
 import FocusedWorkspace from "./features/workspaces/FocusedWorkspace";
 import { workspaceHome } from "./shared/constants/roles";
 import SettingsLayout from "./layout/SettingLayout";
@@ -48,7 +47,6 @@ const UnitPage = lazy(() => import("./features/unit/pages/UnitPage"));
 const ForgotPassword = lazy(() => import("./features/auth/pages/ForgetPassword"));
 const StockMovementForm = lazy(() => import("./features/MovementTransaction/components/MovementTransactionForm"));
 const SupplierMovement = lazy(() => import("./features/MovementTransaction/pages/SupplierMovement"));
-const ProductMovementHistory = lazy(() => import("./features/reports/pages/ProductMovementHistory"));
 const TransactionViewPage = lazy(() => import("./features/reports/pages/TransactionViewPage"));
 const ProductUnitPage = lazy(() => import("./features/ProductUnit/pages/ProductUnitPage"));
 const ProfilePage = lazy(() => import("./features/OtherPages/Profile"));
@@ -56,16 +54,15 @@ const Unauthorized = lazy(() => import("./features/OtherPages/Unauthorized"));
 const HelpPage = lazy(() => import("./features/OtherPages/Helper"));
 const Shop = lazy(() => import("./features/checkout/Shop"));
 const CheckoutStatus = lazy(() => import("./features/checkout/CheckoutStatus"));
-const StaffWorkspace = lazy(() => import("./features/workspaces/StaffWorkspace"));
 const AccountingWorkspace = lazy(() => import("./features/workspaces/AccountingWorkspace"));
 const Customers = lazy(() => import("./features/workspaces/Customers"));
 const StaffOrders = lazy(() => import("./features/checkout/StaffOrders"));
 
 axios.defaults.withCredentials = true;
 
-function WorkspaceLayout() {
-  const role = useAuthStore((state) => state.user?.role);
-  return role === "staff" || role === "accountant" ? <FocusedWorkspace /> : <AppLayout />;
+function RegisterLayout() {
+  const staff = useAuthStore((state) => state.user?.role === "staff");
+  return staff ? <FocusedWorkspace /> : <Outlet />;
 }
 
 function WorkspaceDashboard() {
@@ -101,7 +98,7 @@ function App() {
 
               {/* --- Protected Inventory/Admin Routes --- */}
               <Route element={<ProtectedRoute />}>
-                <Route element={<WorkspaceLayout />}>
+                <Route element={<FocusedWorkspace />}>
                   <Route path="/dashboard" element={<WorkspaceDashboard />} />
                   <Route path="/me" element={<ProfilePage />} />
 
@@ -113,16 +110,11 @@ function App() {
                   <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
                     <Route path="/alerts" element={<Navigate replace to="/reports/stock?level=low" />} />
                     <Route path="/products" element={<Products />} />
-                    <Route path="/products/add" element={<ManageProduct />} />
-                    <Route path="/products/edit/:productId" element={<ManageProduct />} />
-                    <Route path="/suppliers/add" element={<ManageSupplier />} />
-                    <Route path="/suppliers/edit/:id" element={<ManageSupplier />} />
                     <Route path="/suppliers/v/:id" element={<SupplierView />} />
                     <Route path="/suppliers/v/:id/catalog" element={<SupplierView section="catalog" />} />
                     <Route path="/stock-movements" element={<StockManagement />} />
                     <Route path="/reports/movement" element={<StockMovementReport />} />
                     <Route path="/reports/stock" element={<StockReport />} />
-                    <Route path="/reports/stock/product-history/:productId" element={<ProductMovementHistory />} />
                   </Route>
 
                   <Route element={<ProtectedRoute allowedRoles={["admin", "owner", "accountant"]} />}>
@@ -134,7 +126,7 @@ function App() {
                   </Route>
 
                   <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
-                    <Route path="/staff" element={<StaffWorkspace />} />
+                    <Route path="/staff" element={<Navigate replace to="/stock-movements/sale" />} />
                     <Route path="/staff/customers" element={<Customers />} />
                     <Route path="/stock-movements/orders" element={<StaffOrders />} />
                   </Route>
@@ -157,10 +149,16 @@ function App() {
 
               <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
                 <Route path="/stock-movements/form" element={<StockMovementForm />} />
-                <Route path="/stock-movements/sale" element={<StockMovementForm purpose="Sale" />} />
-                <Route path="/stock-movements/customer-return" element={<StockMovementForm purpose="Return" />} />
+                <Route element={<RegisterLayout />}>
+                  <Route path="/stock-movements/sale" element={<StockMovementForm purpose="Sale" />} />
+                  <Route path="/stock-movements/customer-return" element={<StockMovementForm purpose="Return" />} />
+                </Route>
               </Route>
               <Route element={<ProtectedRoute allowedRoles={["admin", "owner"]} />}>
+                <Route path="/products/add" element={<ManageProduct />} />
+                <Route path="/products/edit/:productId" element={<ManageProduct />} />
+                <Route path="/suppliers/add" element={<ManageSupplier />} />
+                <Route path="/suppliers/edit/:id" element={<ManageSupplier />} />
                 <Route path="/stock-movements/adjustment" element={<StockMovementForm purpose="Adjustment" />} />
                 <Route path="/stock-movements/purchase" element={<SupplierMovement mode="purchase" />} />
                 <Route path="/stock-movements/supplier-lots" element={<SupplierMovement mode="lots" />} />

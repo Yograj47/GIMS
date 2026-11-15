@@ -1,12 +1,15 @@
 import { BackButton } from "@/components/common/BackButton";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatInvoiceMoney } from "@/types/billing";
 import { checkoutPost, checkoutTokenKey, goToPayment, type Order } from "./checkout";
 
 export default function CheckoutStatus() {
+    const canCompleteCounter = useAuthStore((state) => state.user?.isVerified &&
+        (state.user.role === "staff" || state.user.role === "admin"));
     const [query] = useSearchParams();
     const [token] = useState(() => sessionStorage.getItem(checkoutTokenKey));
     const [order, setOrder] = useState<Order | null>(null);
@@ -55,7 +58,7 @@ export default function CheckoutStatus() {
                         <p className="font-semibold">{formatInvoiceMoney(order.totalMinor, "NPR")}</p>
                         <p role="status" className="text-sm">
                             {order.status === "reserved" && (order.paymentMethod === "cash" ? `Reserved. Pay cash at ${order.fulfillment === "delivery" ? "delivery" : "pickup"}.` : "Reserved. Waiting for verified payment.")}
-                            {order.status === "paid" && "Payment confirmed. The order is ready for staff to fulfill."}
+                            {order.status === "paid" && (order.fulfillment === "counter" ? "Payment confirmed. Complete the sale to issue the receipt." : "Payment confirmed. The order is ready for staff to fulfill.")}
                             {order.status === "completed" && "Order completed."}
                             {order.status === "cancelled" && "Order cancelled."}
                             {order.status === "expired" && "Reservation expired."}
@@ -72,6 +75,12 @@ export default function CheckoutStatus() {
                     )}
                     {order?.status === "reserved" && order.paymentMethod === "gateway" && (
                         <Button disabled={busy} onClick={() => void action("start")}>Continue to payment</Button>
+                    )}
+                    {canCompleteCounter && order?.fulfillment === "counter" && order.status === "paid" && (
+                        <Button disabled={busy} onClick={() => void action(`staff/orders/${order.id}/fulfill`)}>Complete sale</Button>
+                    )}
+                    {canCompleteCounter && order?.fulfillment === "counter" && order.transactionId && (
+                        <Button asChild><Link to={`/reports/transaction/${order.transactionId}`}>View receipt</Link></Button>
                     )}
                 </div>}
             </div>

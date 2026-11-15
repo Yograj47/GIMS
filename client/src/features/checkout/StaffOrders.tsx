@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/authStore";
 import { BackButton } from "@/components/common/BackButton";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -36,24 +37,26 @@ export default function StaffOrders() {
         }
     }
 
+    const staff = useAuthStore((state) => state.user?.role === "staff");
+
     return (
-        <section className="mx-auto max-w-5xl space-y-4">
-            <BackButton className="text-sm text-link hover:underline" />
-            <div className="flex items-center justify-between"><h1 className="text-xl font-bold">Checkout orders</h1><Button variant="outline" onClick={() => setReload(reload + 1)}>Refresh</Button></div>
+        <section className="w-full space-y-4 p-3 sm:p-4 lg:p-5">
+            {!staff && <BackButton className="text-sm text-link hover:underline" />}
+            <div className="flex items-center justify-between"><h1 className="text-xl font-bold">Orders</h1><Button variant="outline" onClick={() => setReload(reload + 1)}>Refresh</Button></div>
             {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
             {!orders && !error && <LoadingSkeleton label="Loading checkout orders" />}
             {orders?.length === 0 && <p className="text-sm text-muted-foreground">No orders on this page.</p>}
             {orders?.map((order) => (
                 <article key={order.id} className="space-y-3 rounded-lg border bg-card p-4 text-sm">
                     <div className="flex flex-wrap justify-between gap-3">
-                        <h2 className="font-semibold">Order {order.id.slice(-8).toUpperCase()} · {order.channel === "online" ? "Online" : "In store"}</h2>
-                        <span>{formatInvoiceMoney(order.totalMinor, "NPR")} · {order.paymentMethod === "cash" ? "Cash" : "Khalti"} · {order.status.replaceAll("_", " ")}</span>
+                        <h2 className="font-semibold">Order {order.id.slice(-8).toUpperCase()} Â· {order.channel === "online" ? "Online" : "In store"}</h2>
+                        <span>{formatInvoiceMoney(order.totalMinor, "NPR")} Â· {order.paymentMethod === "cash" ? "Cash" : "Khalti"} Â· {order.status.replaceAll("_", " ")}</span>
                     </div>
-                    <p className="text-muted-foreground">{order.items.map((item) => `${item.productName} × ${item.qty}`).join(", ")}</p>
-                    <p className="text-muted-foreground capitalize">{order.fulfillment}{order.customer?.name && ` · ${order.customer.name}`}{order.customer?.phone && ` · ${order.customer.phone}`}{order.customer?.address && ` · ${order.customer.address}`}</p>
+                    <p className="text-muted-foreground">{order.items.map((item) => `${item.productName} Ã— ${item.qty}`).join(", ")}</p>
+                    <p className="text-muted-foreground capitalize">{order.fulfillment}{order.customer?.name && ` Â· ${order.customer.name}`}{order.customer?.phone && ` Â· ${order.customer.phone}`}{order.customer?.address && ` Â· ${order.customer.address}`}</p>
                     <div className="flex flex-wrap gap-2">
                         {order.paymentMethod === "gateway" && (order.status === "reserved" || order.status === "expired") && <Button size="sm" variant="outline" disabled={Boolean(busy)} onClick={() => void update(order, "verify")}>Verify payment</Button>}
-                        {(order.status === "paid" || (order.status === "reserved" && order.paymentMethod === "cash")) && <Button size="sm" disabled={Boolean(busy)} onClick={() => void update(order, "fulfill")}>{order.paymentMethod === "cash" ? "Cash collected · fulfill" : "Fulfill order"}</Button>}
+                        {(order.status === "paid" || (order.status === "reserved" && order.paymentMethod === "cash")) && <Button size="sm" disabled={Boolean(busy)} onClick={() => void update(order, "fulfill")}>{order.paymentMethod === "cash" ? "Cash collected Â· fulfill" : "Fulfill order"}</Button>}
                         {order.transactionId && <Button variant="outline" size="sm" asChild><Link to={`/reports/transaction/${order.transactionId}`}>View sale</Link></Button>}
                     </div>
                 </article>

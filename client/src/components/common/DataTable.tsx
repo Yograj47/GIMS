@@ -33,6 +33,8 @@ interface DataTableProps<TData> {
     isLoading: boolean
     emptyState?: React.ReactNode
     embedded?: boolean
+    fill?: boolean
+    toolbar?: React.ReactNode
     renderExpandedRow?: (row: Row<TData>) => React.ReactNode
 }
 
@@ -46,6 +48,8 @@ export function DataTable<TData>({
     isLoading,
     emptyState,
     embedded = false,
+    fill = false,
+    toolbar,
     renderExpandedRow
 }: DataTableProps<TData>) {
     const [expanded, setExpanded] = React.useState({})
@@ -69,9 +73,10 @@ export function DataTable<TData>({
     })
 
     return (
-        <div className={cn("flex min-w-0 flex-col bg-card", !embedded && "overflow-hidden rounded-xl border border-border")}>
+        <div className={cn("flex h-[80dvh] min-h-56 min-w-0 flex-col bg-card", fill && "lg:h-auto lg:min-h-0 lg:flex-1", !embedded && "overflow-hidden rounded-xl border border-border")}>
+            {toolbar && <div className="shrink-0 border-b border-border p-3">{toolbar}</div>}
             {isLoading && <span role="status" className="sr-only">Loading records</span>}
-            <div aria-busy={isLoading} role="region" aria-label="Table results" tabIndex={0} className="max-h-[min(32rem,60dvh)] min-w-0 overflow-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring">
+            <div aria-busy={isLoading} role="region" aria-label="Table results" tabIndex={0} className="min-h-0 min-w-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring">
                 <Table noWrapper className="records-table w-full border-separate border-spacing-0">
                     <TableHeader className="sticky top-0 z-20 bg-muted">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -133,7 +138,7 @@ export function DataTable<TData>({
                 </Table>
             </div>
 
-            <div className="border-t border-border bg-card px-4 py-4 sm:px-6">
+            <div className="shrink-0 border-t border-border bg-card px-4 py-2 sm:px-6">
                 <DataTablePagination table={table} totalItems={rowCount} />
             </div>
         </div>

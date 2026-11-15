@@ -37,8 +37,9 @@ export const registerUser = asyncHandler(async (req, res) => {
 export const loginUser = asyncHandler(async (req, res) => {
     const payload = loginSchema.parse(req.body);
 
-    const { token } =
+    const { token, user } =
         await authService.loginUser(payload);
+    res.locals.activityActor = { id: user.id, role: user.role };
 
     logInfo(
         LOG_CONTEXT.AUTH,

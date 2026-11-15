@@ -109,7 +109,7 @@ function SupplierBillingPage({ supplierId, initialReceipt, initialBill }: { supp
     );
 
     return (
-        <div className="mx-auto w-full max-w-6xl space-y-7 px-4 py-7 sm:px-6 sm:py-10">
+        <div className="w-full space-y-4 p-3 sm:p-4 lg:p-5">
             <BackButton className="text-sm text-link hover:underline" />
             <h1 className="text-xl font-bold">Supplier billing</h1>
             {message && <p role="status" className="text-sm text-emerald-700">{message}</p>}

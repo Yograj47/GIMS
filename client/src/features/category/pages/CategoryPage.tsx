@@ -64,17 +64,15 @@ export default function CategoryPage() {
     }
 
     return (
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-3">
             <SettingsPageHeader title="Categories" description="Organize products into categories." icon={LayoutGrid}>
                 <AdminGate><Button onClick={() => { setSelectedCategory(null); setIsModalOpen(true);; }}><Plus size={16} /> Add category</Button></AdminGate>
             </SettingsPageHeader>
-            <SettingsSearch label="Search categories" value={searchQuery} onChange={(value) => {
+                <DataTable
+                    toolbar={<SettingsSearch label="Search categories" value={searchQuery} onChange={(value) => {
                 setSearchQuery(value);
                 setPagination((previous) => ({ ...previous, pageIndex: 0 }));
-            }} />
-
-            <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
-                <DataTable
+            }} />}
                     columns={getCategoryColumns(handleEditClick, handleDeleteClick)}
                     data={categories}
                     isLoading={isLoading}
@@ -92,7 +90,6 @@ export default function CategoryPage() {
                     itemName={selectedCategory?.name || "this category"}
                     isLoading={isLoading}
                 />
-            </div>
 
             <CategoryFormModal
                 isOpen={isModalOpen}

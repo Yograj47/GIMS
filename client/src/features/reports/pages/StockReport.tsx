@@ -1,11 +1,12 @@
-import { Search, Download, Filter, PackageSearch, ArrowLeft } from "lucide-react";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Search, Download, Filter, PackageSearch } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "@/features/products/hooks/useProducts";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { DataTable } from "@/components/common/DataTable";
-import { getStockColumns } from "../components/StockColumns";
+import { stockColumns } from "../components/StockColumns";
 import { exportToCSV } from "@/lib/csvExport";
 import { notify } from "@/lib/toast";
 import { Loading } from "@/lib/loader";
@@ -19,11 +20,11 @@ export default function StockReport() {
     const { fetchProducts, products, isLoading, meta } = useProducts();
     const [searchQuery, setSearchQuery] = useState("");
     const [searchParams, setSearchParams] = useSearchParams();
+    const reconcile = searchParams.get("view") === "reconciliation";
     const requestedLevel = searchParams.get("level");
     const stockLevel = requestedLevel === "low" || requestedLevel === "out" || requestedLevel === "healthy"
         ? requestedLevel
         : "";
-    const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const [isExporting, setIsExporting] = useState<boolean>(false);
     const debouncedSearch = useDebounce(searchQuery, 500);
@@ -34,7 +35,9 @@ export default function StockReport() {
     });
 
     useEffect(() => {
-        if (!isExporting) {
+        if (reconcile) {
+            void fetchProducts(undefined, undefined, undefined, undefined, undefined, true);
+        } else if (!isExporting) {
             fetchProducts(
                 pagination.pageIndex + 1,
                 pagination.pageSize,
@@ -43,7 +46,7 @@ export default function StockReport() {
                 stockLevel
             );
         }
-    }, [fetchProducts, pagination, debouncedSearch, stockLevel, isExporting]);
+    }, [fetchProducts, pagination, debouncedSearch, stockLevel, isExporting, reconcile]);
 
     const handleExport = async () => {
         try {
@@ -91,39 +94,11 @@ export default function StockReport() {
         }
     };
 
-    const columns = useMemo(() => getStockColumns(navigate), [navigate]);
-
     return (
-        <div className="h-full animate-in fade-in duration-500">
-            <div className="max-w-400 mx-auto space-y-6">
+        <div className={reconcile ? "space-y-3" : "space-y-3 lg:flex lg:h-[calc(100dvh-2.5rem)] lg:flex-col"}>
 
-                {/* 1. PRECISION HEADER */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(-1)}
-                            className="text-muted-foreground hover:text-link group"
-                        >
-                            <div className="w-8 h-8 rounded-sm bg-secondary flex items-center justify-center group-hover:bg-brand-50 transition-colors">
-                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-                            </div>
-                        </Button>
-                        <div className="p-2 bg-brand-600 rounded-sm text-white">
-                            <PackageSearch size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase">
-                                Stock Report
-                            </h1>
-                            <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-1">
-                                Inventory levels and stock counts
-                            </p>
-                        </div>
-                    </div>
-
-                    <AdminGate allowedRoles={["admin", "owner"]}>
+                <PageHeader title="Stock report" icon={PackageSearch}>
+                    {!reconcile && <AdminGate allowedRoles={["admin", "owner"]}>
                         <Button
                             onClick={handleExport}
                             disabled={isExporting}
@@ -135,9 +110,22 @@ export default function StockReport() {
                                 <><Download size={14} className="mr-2" /> Export CSV</>
                             )}
                         </Button>
-                    </AdminGate>
-                </div>
+                    </AdminGate>}
+                </PageHeader>
 
+                <nav aria-label="Stock report views" className="flex flex-wrap gap-2">
+                    {[{ label: "Inventory levels", selected: !reconcile }, { label: "Stock reconciliation", selected: reconcile }].map(({ label, selected }, index) => {
+                        const params = new URLSearchParams(searchParams);
+                        if (index === 1) params.set("view", "reconciliation");
+                        else params.delete("view");
+                        return <Button key={label} asChild size="sm" variant={selected ? "secondary" : "ghost"}>
+                            <Link to={{ search: params.toString() }} aria-current={selected ? "page" : undefined}>{label}</Link>
+                        </Button>;
+                    })}
+                </nav>
+
+                {!reconcile && <DataTable fill
+                    toolbar={(
                 <div className="flex flex-col lg:flex-row gap-3">
                     {/* Search Field */}
                     <div className="relative flex-1 group">
@@ -147,7 +135,7 @@ export default function StockReport() {
                             strokeWidth={2.5}
                         />
                         <Input
-                            placeholder="Filter stock by name or SKU..."
+                            aria-label="Search stock" placeholder="Search stock"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-10 pl-10 bg-card border-border rounded-sm text-sm focus-visible:ring-1 focus-visible:ring-brand-500 transition-all shadow-none placeholder:text-slate-300"
@@ -179,30 +167,19 @@ export default function StockReport() {
                     </div>
                 </div>
 
-                {/* 3. THE DATA TABLE WRAPPER */}
-                <div className="bg-card border border-border shadow-sm rounded-sm overflow-hidden">
-                    <DataTable
-                        columns={columns}
+                    )}
+                        columns={stockColumns}
                         data={products || []}
                         rowCount={meta?.totalItems || 0}
                         pageCount={meta?.totalPages || 0}
                         pagination={pagination}
                         setPagination={setPagination}
                         isLoading={isLoading}
-                    />
-                </div>
-                {user?.isVerified && <StockReconciliation
+                />}
+                {reconcile && user?.isVerified && <StockReconciliation
                     products={products}
                     canWrite={user.role === "admin" || user.role === "owner"}
-                    onCount={() => fetchProducts(
-                        pagination.pageIndex + 1,
-                        pagination.pageSize,
-                        debouncedSearch,
-                        undefined,
-                        stockLevel,
-                    )}
                 />}
-            </div>
         </div>
     );
 }

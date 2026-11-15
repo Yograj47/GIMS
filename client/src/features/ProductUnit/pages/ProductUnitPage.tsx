@@ -80,15 +80,13 @@ export default function ProductUnitPage() {
     }
 
     return (
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-3">
             <SettingsPageHeader title="Product units" description="Set the units and conversion rates available for each product." icon={Scale} />
-            <SettingsSearch label="Search products" value={searchQuery} onChange={(value) => {
+                <DataTable
+                    toolbar={<SettingsSearch label="Search products" value={searchQuery} onChange={(value) => {
                 setSearchQuery(value);
                 setPagination((previous) => ({ ...previous, pageIndex: 0 }));
-            }} />
-
-            <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
-                <DataTable
+            }} />}
                     columns={getProductUnitColumns((id, name) => {
                         setContext({ id, name });
                         setIsModalOpen(true);
@@ -170,7 +168,6 @@ export default function ProductUnitPage() {
                         </div>
                     )}
                 />
-            </div>
 
             {/* Global Dialogs */}
             <DeleteConfirmDialog

@@ -12,7 +12,7 @@ export type Role =
 export function workspaceHome(role?: Role) {
     switch (role) {
         case ROLES.CUSTOMER: return "/shop";
-        case ROLES.STAFF: return "/staff";
+        case ROLES.STAFF: return "/stock-movements/sale";
         case ROLES.ACCOUNTANT: return "/accounting";
         default: return "/dashboard";
     }

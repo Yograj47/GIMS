@@ -1,11 +1,9 @@
-import { Package, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { NavigateFunction } from "react-router-dom";
+import { Package } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import type { ProductData } from "@/types/product";
 
-export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductData>[] => [
+export const stockColumns: ColumnDef<ProductData>[] = [
     {
         accessorKey: "name",
         header: "Product / Identifier",
@@ -63,20 +61,4 @@ export const getStockColumns = (navigate: NavigateFunction): ColumnDef<ProductDa
             );
         }
     },
-    {
-        id: "actions",
-        header: () => <div className="text-right">Audit</div>,
-        cell: ({ row }) => (
-            <div className="flex justify-end">
-                <Button 
-                    variant="ghost" 
-                    className="h-8 px-3 text-subtle-foreground hover:text-link hover:bg-brand-50 transition-all rounded-sm text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-brand-100"
-                    onClick={() => navigate(`/reports/stock/product-history/${row.original._id}`)}
-                >
-                    <History size={12} strokeWidth={3} />
-                    View History
-                </Button>
-            </div>
-        )
-    }
 ];

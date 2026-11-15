@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import Product from "../product/product.model.js";
+import Unit from "../unit/unit.model.js";
 
 import { AppError } from "../../shared/errors/index.js";
 import logger from "../../shared/logger/logger.js";
@@ -275,5 +277,19 @@ export const findById = async (
         );
     }
 
-    return transaction;
+    const [products, units] = await Promise.all([
+        Product.find({ _id: { $in: transaction.items.map((item) => item.productId) } }).select("name").lean(),
+        Unit.find({ _id: { $in: transaction.items.map((item) => item.unitId) } }).select("name").lean(),
+    ]);
+    const productNames = new Map(products.map((product) => [String(product._id), product.name]));
+    const unitNames = new Map(units.map((unit) => [String(unit._id), unit.name]));
+    const record = transaction.toObject();
+    return {
+        ...record,
+        items: record.items.map((item) => ({
+            ...item,
+            productName: productNames.get(String(item.productId)),
+            unitName: item.unitName || unitNames.get(String(item.unitId)),
+        })),
+    };
 };

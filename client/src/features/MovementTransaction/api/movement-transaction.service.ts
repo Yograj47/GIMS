@@ -35,14 +35,4 @@ export const MovementTransactionService = {
         });
         return data;
     },
-
-    getProductMovements: async (productId: string, page: number = 1,
-        limit: number = 10, all?: boolean): Promise<ApiResponse> => {
-        const { data } = await api.get<ApiResponse>(`/movements/product-history/${productId}`, {
-            params: all
-                ? { paginate: false, productId }
-                : { productId, page, limit }
-        });
-        return data;
-    }
 };

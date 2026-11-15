@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { z } from "zod";
+import { AppError } from "../../shared/errors/index.js";
 
 import { createTransactionSchema } from "./transaction.validation.js";
 import * as transactionService from "./transaction.service.js";
@@ -17,6 +18,15 @@ export const createTransaction = asyncHandler(
             createTransactionSchema.parse(
                 req.body
             );
+
+        if (payload.transactionType === "Return") {
+            const name = payload.partyDetails?.name?.trim();
+            const phone = payload.partyDetails?.phone?.trim();
+            if (!name || !phone || !/^\+?[0-9]{7,15}$/.test(phone)) {
+                throw AppError.badRequest("Customer name and a valid phone number are required for returns");
+            }
+            payload.partyDetails = { name, phone };
+        }
 
         const transaction =
             await transactionService.create(

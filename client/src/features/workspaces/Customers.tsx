@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/authStore";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { BackButton } from "@/components/common/BackButton";
@@ -63,20 +64,22 @@ export default function Customers() {
         }
     }
 
+    const staff = useAuthStore((state) => state.user?.role === "staff");
+
     return (
-        <main className="mx-auto max-w-3xl space-y-5 p-4 sm:p-8">
-            <BackButton className="text-sm text-link hover:underline" />
+        <main className="w-full space-y-4 p-3 sm:p-4 lg:p-5">
+            {!staff && <BackButton className="text-sm text-link hover:underline" />}
             <h1 className="text-2xl font-semibold">Customers</h1>
             <form onSubmit={save} className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2">
                 <h2 className="font-semibold sm:col-span-2">Add customer</h2>
                 <label className="space-y-1 text-sm">Name<Input name="name" maxLength={120} required /></label>
                 <label className="space-y-1 text-sm">Phone<Input name="phone" type="tel" pattern="\+?[0-9]{7,15}" placeholder="e.g. 9800000000" required /></label>
-                <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save customer"}</Button>
+                <Button type="submit" disabled={saving}>{saving ? "Savingâ€¦" : "Save customer"}</Button>
                 {message && <p role="status" className="text-sm sm:col-span-2">{message}</p>}
             </form>
             <section className="space-y-3 rounded-xl border bg-card p-4">
                 <Input aria-label="Search customers" placeholder="Search by name or phone" value={search} maxLength={120} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
-                {loading ? <p role="status">Loading customers…</p> : failed ? (
+                {loading ? <p role="status">Loading customersâ€¦</p> : failed ? (
                     <Button variant="outline" onClick={() => setReload((value) => value + 1)}>Retry loading customers</Button>
                 ) : contacts.length === 0 ? <p className="text-sm text-muted-foreground">No customers found.</p> : (
                     <ul className="divide-y">{contacts.map((contact) => <li key={contact._id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{contact.name}</span><span>{contact.phone}</span></li>)}</ul>

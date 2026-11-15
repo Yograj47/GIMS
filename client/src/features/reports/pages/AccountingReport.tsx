@@ -1,4 +1,5 @@
-import { BookOpen, CircleAlert } from "lucide-react";
+import { PageHeader } from "@/components/common/PageHeader";
+import { BookOpen, CircleAlert, Receipt, Truck, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
@@ -10,9 +11,14 @@ type AccountingData = { currency: string; accounts: Account[]; invoicesWithoutCo
 
 function money(minor: string) {
     const value = BigInt(minor);
-    const sign = value < 0n ? "âˆ’" : "";
+    const sign = value < 0n ? "-" : "";
     const amount = value < 0n ? -value : value;
     return `${sign}${(amount / 100n).toLocaleString("en-NP")}.${String(amount % 100n).padStart(2, "0")}`;
+}
+
+function netDebit(accounts: Account[], name: string) {
+    const account = accounts.find((entry) => entry.account === name);
+    return account ? BigInt(account.debitMinor) - BigInt(account.creditMinor) : 0n;
 }
 
 export default function AccountingReport() {
@@ -32,13 +38,13 @@ export default function AccountingReport() {
     const debits = report?.accounts.reduce((total, account) => total + BigInt(account.debitMinor), 0n) ?? 0n;
     const credits = report?.accounts.reduce((total, account) => total + BigInt(account.creditMinor), 0n) ?? 0n;
     const hasEntries = !!report?.accounts.length;
+    const sales = -netDebit(report?.accounts ?? [], "sales_revenue");
+    const customerDue = netDebit(report?.accounts ?? [], "accounts_receivable");
+    const supplierDue = -netDebit(report?.accounts ?? [], "accounts_payable");
 
     return (
-        <section className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-9">
-            <header>
-                <h1 className="text-3xl font-semibold tracking-tight">Accounting report</h1>
-                <p className="mt-1 text-sm text-muted-foreground">Posted debits and credits by ledger account.</p>
-            </header>
+        <section className="w-full space-y-4 p-3 sm:p-4 lg:p-5">
+            <PageHeader title="Accounting report" icon={BookOpen} description="All-time totals from posted invoices, supplier bills, and payments." />
             {failed ? (
                 <div role="alert" className="space-y-3 rounded-xl border border-border bg-card p-5">
                     <p className="text-sm text-muted-foreground">Could not load accounting balances.</p>
@@ -46,19 +52,29 @@ export default function AccountingReport() {
                 </div>
             ) : !report ? <LoadingSkeleton label="Loading accounting report" /> : (
                 <>
-                    {hasEntries && (
-                        <dl className="grid gap-3 sm:grid-cols-3">
-                            {[
-                                { label: "Total debits", value: `${report.currency} ${money(String(debits))}` },
-                                { label: "Total credits", value: `${report.currency} ${money(String(credits))}` },
-                                { label: "Invoices awaiting inventory cost", value: report.invoicesWithoutCost },
-                            ].map(({ label, value }) => (
-                                <div key={label} className="rounded-xl border border-border bg-card p-4 sm:p-5">
-                                    <dt className="text-sm text-muted-foreground">{label}</dt>
-                                    <dd className="mt-1 wrap-anywhere text-xl font-semibold tabular-nums">{value}</dd>
-                                </div>
-                            ))}
-                        </dl>
+                    <dl className="grid gap-3 md:grid-cols-3">
+                        {[
+                            { label: "Total invoiced sales", value: sales, detail: "Sales with a posted invoice", icon: Receipt },
+                            { label: "Customers owe us", value: customerDue, detail: "Invoice balances after payments", icon: Wallet },
+                            { label: "We owe suppliers", value: supplierDue, detail: "Bill balances after payments and credits", icon: Truck },
+                        ].map(({ label, value, detail, icon: Icon }) => (
+                            <div key={label} className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-5">
+                                <dt className="flex items-center gap-2.5 text-sm font-medium">
+                                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent text-accent-foreground">
+                                        <Icon aria-hidden="true" className="size-4" />
+                                    </span>
+                                    {label}
+                                </dt>
+                                <dd className="mt-3 wrap-anywhere text-2xl font-semibold tabular-nums">{report.currency} {money(String(value))}</dd>
+                                <dd className="mt-1 text-sm text-muted-foreground">{detail}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                    {report.invoicesWithoutCost > 0 && (
+                        <div className="flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-sm">
+                            <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-link" />
+                            <p>{report.invoicesWithoutCost} {report.invoicesWithoutCost === 1 ? "invoice is" : "invoices are"} awaiting inventory cost.</p>
+                        </div>
                     )}
                     {debits !== credits && (
                         <p role="alert" className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-card p-4 text-sm text-foreground">
@@ -67,11 +83,11 @@ export default function AccountingReport() {
                     )}
                     <section aria-labelledby="balances-title" className="overflow-hidden rounded-xl border border-border bg-card">
                         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-4">
-                            <h2 id="balances-title" className="font-semibold">Account balances</h2>
+                            <h2 id="balances-title" className="font-semibold">Ledger balances</h2>
                             <span className="text-sm text-muted-foreground">{report.currency}</span>
                         </div>
                         {hasEntries ? (
-                            <div className="max-h-[min(32rem,60dvh)] overflow-auto" tabIndex={0} role="region" aria-label="Ledger balances table">
+                            <div className="max-h-[80dvh] overflow-auto" tabIndex={0} role="region" aria-label="Ledger balances table">
                                 <table className="records-table w-full min-w-[32rem] text-left text-sm">
                                     <thead className="sticky top-0 bg-muted text-muted-foreground">
                                         <tr><th scope="col" className="px-5 py-4">Account</th><th scope="col" className="px-5 py-4 text-right">Debits</th><th scope="col" className="px-5 py-4 text-right">Credits</th><th scope="col" className="px-5 py-4 text-right">Net debit</th></tr>

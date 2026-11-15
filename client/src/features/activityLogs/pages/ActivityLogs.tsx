@@ -1,11 +1,10 @@
+import { PageHeader } from "@/components/common/PageHeader";
 import { useEffect, useState } from "react";
-import { Search, Calendar, Info, ArrowLeft } from "lucide-react";
+import { Search, Calendar, Info } from "lucide-react";
 import { useActivityLogs } from "../hooks/useActivityLogs";
 import { DataTable } from "@/components/common/DataTable";
 import { getActivityLogColumns } from "../components/ActivityLogColumns";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { useDebounce } from "@/lib/debounce";
 
 export default function ActivityLogsPage() {
@@ -20,7 +19,6 @@ export default function ActivityLogsPage() {
     // Track previous filters to detect changes during render without violating rules
     const [prevFilters, setPrevFilters] = useState({ searchQuery, typeFilter, startDate, endDate });
 
-    const navigate = useNavigate();
     const debouncedSearch = useDebounce(searchQuery, 400);
 
     const currentFilters = { searchQuery, typeFilter, startDate, endDate };
@@ -50,41 +48,10 @@ export default function ActivityLogsPage() {
 
     return (
         <div className="h-full animate-in fade-in duration-500">
-            <div className="max-w-400 mx-auto space-y-6">
+            <div className="space-y-3 lg:flex lg:h-[calc(100dvh-2.5rem)] lg:flex-col">
 
-                {/* 1. PRECISION HEADER */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border pb-6">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(-1)}
-                            className="text-muted-foreground hover:text-link group"
-                        >
-                            <div className="w-8 h-8 rounded-sm bg-secondary flex items-center justify-center group-hover:bg-brand-50 transition-colors">
-                                <ArrowLeft size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
-                            </div>
-                        </Button>
-                        <div className="p-2 bg-brand-600 rounded-sm text-white">
-                            <Info size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-foreground tracking-tight uppercase">
-                                Activity Logs
-                            </h1>
-                            <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest mt-1">
-                                System Audit Trail • <span className="text-link italic">Audit Mode</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="text-right hidden md:block">
-                        <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">Total Events</p>
-                        <p className="text-xl font-black text-foreground tabular-nums">{meta?.totalItems || 0}</p>
-                    </div>
-                </div>
-
-                {/* 2. PRECISION TOOLBAR */}
+                <PageHeader title="System log" icon={Info} description="Review recorded changes and sign-ins by account, time, and outcome." />
+                <DataTable fill toolbar={(
                 <div className="flex flex-col lg:flex-row gap-3">
                     {/* Search Field */}
                     <div className="relative flex-1 group">
@@ -94,7 +61,7 @@ export default function ActivityLogsPage() {
                             strokeWidth={2.5}
                         />
                         <Input
-                            placeholder="Search by message or operator..."
+                            aria-label="Search activity logs" placeholder="Search event, IP, or request ID" maxLength={200}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-10 pl-10 bg-card border-border rounded-sm text-sm focus-visible:ring-1
@@ -107,14 +74,14 @@ export default function ActivityLogsPage() {
                         <Calendar size={12} className="text-subtle-foreground" />
                         <input
                             type="date"
-                            value={startDate}
+                            aria-label="From date" max={endDate || undefined} value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
                             className="bg-transparent border-none p-1 text-[10px] font-black outline-none text-muted-foreground"
                         />
                         <span className="text-slate-300 text-[10px]">to</span>
                         <input
                             type="date"
-                            value={endDate}
+                            aria-label="To date" min={startDate || undefined} value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
                             className="bg-transparent border-none p-1 text-[10px] font-black outline-none text-muted-foreground"
                         />
@@ -122,7 +89,7 @@ export default function ActivityLogsPage() {
 
                     {/* Module Filter */}
                     <div className="relative min-w-40">
-                        <select
+                        <select aria-label="Module"
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
                             className="w-full h-10 px-4 bg-card border border-border rounded-sm text-[11px] font-bold uppercase tracking-tight text-muted-foreground outline-none hover:border-input focus:border-brand-500 appearance-none cursor-pointer transition-all"
@@ -131,22 +98,37 @@ export default function ActivityLogsPage() {
                             <option value="INVENTORY">Inventory</option>
                             <option value="FINANCE">Finance</option>
                             <option value="AUTH">Security</option>
+                            <option value="SYSTEM">System</option>
                         </select>
                     </div>
                 </div>
 
-                {/* 3. DATA TABLE WRAPPER */}
-                <div className="bg-card border border-border shadow-sm rounded-sm overflow-hidden">
-                    <DataTable
+                )}
                         columns={getActivityLogColumns()}
+                        renderExpandedRow={({ original: entry }) => (
+                            <dl className="grid gap-4 p-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                                {[
+                                    ["Request ID", entry.requestId],
+                                    ["Source IP", entry.sourceIp],
+                                    ["Protocol", entry.protocol?.toUpperCase()],
+                                    ["HTTP version", entry.httpVersion],
+                                    ["Duration", entry.durationMs === undefined ? undefined : `${entry.durationMs} ms`],
+                                    ["Client user agent", entry.userAgent],
+                                ].map(([label, value]) => (
+                                    <div key={label} className="min-w-0">
+                                        <dt className="text-muted-foreground">{label}</dt>
+                                        <dd className="mt-1 wrap-anywhere whitespace-normal">{value ?? "Not recorded"}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        )}
                         data={logs}
                         isLoading={isLoading}
                         pageCount={meta?.totalPages || 0}
                         rowCount={meta?.totalItems || 0}
                         pagination={pagination}
                         setPagination={setPagination}
-                    />
-                </div>
+                />
             </div>
         </div>
     );

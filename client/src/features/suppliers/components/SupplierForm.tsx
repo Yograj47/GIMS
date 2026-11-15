@@ -1,6 +1,6 @@
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, MapPin, Notebook, Phone, Mail, Power } from "lucide-react";
+import { EntityField, EntitySection, entityInput } from "@/components/common/EntityField";
 import { supplierSchema, type SupplierData, type SupplierFormData } from "@/types/supplier"
 import { useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
@@ -27,77 +27,36 @@ export default function SupplierForm({ initialData, onSubmit }: SupplierFormProp
         if (initialData) reset(initialData);
     }, [initialData, reset]);
 
-    const inputStyle = "w-full rounded-sm border border-input bg-card px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all font-medium placeholder:text-slate-300";
-    const labelStyle = "text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2";
-    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-link mb-4 flex items-center gap-2";
-
     return (
-        <form id="supplier-form" onSubmit={handleSubmit(onSubmit)} className="w-full space-y-8">
-            
-            {/* Section 1: Basic Identity */}
-            <div>
-                <div className={sectionTitle}>
-                    <User size={14} strokeWidth={3} /> Partner Identity
+        <form id="supplier-form" onSubmit={handleSubmit(onSubmit)}>
+            <EntitySection title="Supplier details">
+                <EntityField label="Supplier name (required)" hint="Use the name shown on the supplier’s bills or delivery notes." error={errors.name?.message}>
+                    {(field) => <input {...field} {...register("name")} autoComplete="organization" className={entityInput} />}
+                </EntityField>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <EntityField label="Phone (required)" hint="Enter the main contact number using 10–15 digits, with no spaces or punctuation." error={errors.phone?.message}>
+                        {(field) => <input {...field} {...register("phone")} type="tel" autoComplete="tel" maxLength={15} placeholder="e.g. 9800000000" className={entityInput} />}
+                    </EntityField>
+                    <EntityField label="Email (optional)" hint="Use the email address for billing or delivery questions." error={errors.email?.message}>
+                        {(field) => <input {...field} {...register("email")} type="email" autoComplete="email" className={entityInput} />}
+                    </EntityField>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="md:col-span-2 space-y-2">
-                        <label className={labelStyle}>Full Company Name <span className="text-red-500">*</span></label>
-                        <input {...register("name")} placeholder="Legal entity name..." className={inputStyle} />
-                        {errors.name && <p className="text-[10px] text-red-500 font-bold mt-1 ">{errors.name.message}</p>}
-                    </div>
+                <EntityField label="Address (required)" hint="Enter the supplier’s street or area and municipality so staff can identify the correct location." error={errors.address?.message}>
+                    {(field) => <input {...field} {...register("address")} autoComplete="street-address" className={entityInput} />}
+                </EntityField>
+            </EntitySection>
 
-                    <div className="space-y-2">
-                        <label className={labelStyle}><Phone size={12}/> Direct Contact <span className="text-red-500">*</span></label>
-                        <input {...register("phone")} placeholder="+977-1-XXXXXXX" className={inputStyle} />
-                        {errors.phone && <p className="text-[10px] text-red-500 font-bold mt-1 ">{errors.phone.message}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className={labelStyle}><Mail size={12}/> Email Registry</label>
-                        <input {...register("email")} type="email" placeholder="vendor@domain.com" className={inputStyle} />
-                    </div>
-                </div>
-            </div>
-
-            {/* Section 2: Geographic Parameters (Styled like Product Valuation Box) */}
-            <div className="bg-muted border border-input p-5 rounded-sm">
-                <div className={sectionTitle}>
-                    <MapPin size={14} strokeWidth={3} /> Geographic Parameters
-                </div>
-                <div className="space-y-2">
-                    <label className={labelStyle}>Full Physical Address <span className="text-red-500">*</span></label>
-                    <input {...register("address")} placeholder="Warehouse location, Street, City..." className={inputStyle} />
-                    {errors.address && <p className="text-[10px] text-red-500 font-bold mt-1 ">{errors.address.message}</p>}
-                </div>
-            </div>
-
-            {/* Section 3: Internal Notes */}
-            <div>
-                <div className={sectionTitle}>
-                    <Notebook size={14} strokeWidth={3} /> Procurement Notes
-                </div>
-                <textarea 
-                    {...register("notes")} 
-                    placeholder="Enter credit terms, delivery windows, or historical notes..." 
-                    className={`${inputStyle} min-h-25 resize-none`}
-                />
-            </div>
-
-            {/* Status Check */}
-            <div className="flex items-center justify-between p-4 bg-card border border-input rounded-sm">
-                <div className="flex items-center gap-3">
-                    <Power size={18} className="text-subtle-foreground" />
-                    <div>
-                        <p className="text-[9px] font-bold uppercase text-subtle-foreground leading-none mb-1">System Visibility</p>
-                        <p className="text-sm font-black text-foreground uppercase">Partner Active Status</p>
-                    </div>
-                </div>
-                <Controller
-                    control={control}
-                    name="isActive"
-                    render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
-                />
-            </div>
+            <EntitySection title="Purchasing">
+                <EntityField label="Internal notes (optional)" hint="Record practical details such as payment terms, order cutoffs, or delivery days." error={errors.notes?.message}>
+                    {(field) => <textarea {...field} {...register("notes")} rows={3} className={entityInput} />}
+                </EntityField>
+                <EntityField label="Active supplier" hint="Active suppliers can be selected when recording a delivery.">
+                    {({ id, "aria-describedby": describedBy }) => (
+                        <Controller control={control} name="isActive"
+                            render={({ field }) => <Switch id={id} aria-describedby={describedBy} checked={field.value} onCheckedChange={field.onChange} />} />
+                    )}
+                </EntityField>
+            </EntitySection>
         </form>
     );
 }

@@ -51,10 +51,35 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     await api("post", "/transactions", accountant).send({ transactionType: "Sale" }).expect(403);
     await api("post", "/receiving/receipts", accountant).send({}).expect(403);
     const contact = { name: "Example customer", phone: "9800000001" };
-    await api("post", "/customers", firstStaff).send(contact).expect(201);
+    const customerResponse = await api("post", "/customers", firstStaff)
+        .set("X-Forwarded-For", "203.0.113.10")
+        .set("X-Forwarded-Proto", "https")
+        .set("User-Agent", "GIMS integration test").send(contact).expect(201);
+    await api("get", "/activity-logs", owner).expect(403);
+    await api("get", "/activity-logs", firstStaff).expect(403);
+    let activity;
+    for (let attempt = 0; attempt < 10 && !activity; attempt++) {
+        const report = await api("get", "/activity-logs?search=POST%20%2Fapi%2Fv1%2Fcustomers", admin).expect(200);
+        activity = report.body.data.find((entry) => entry.statusCode === 201);
+        if (!activity) await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    assert.equal(activity?.actorRole, "staff");
+    assert.equal(activity?.performedBy._id, firstStaff.id);
+    assert.equal(activity?.requestId, customerResponse.headers["x-request-id"]);
+    assert.ok(activity?.sourceIp);
+    assert.notEqual(activity.sourceIp, "203.0.113.10");
+    assert.equal(activity.protocol, "http");
+    assert.equal(activity.httpVersion, "1.1");
+    assert.equal(activity.userAgent, "GIMS integration test");
+    assert.equal(activity?.message.includes(contact.phone), false);
     await api("post", "/customers", secondStaff).send(contact).expect(409);
     assert.equal((await api("get", "/customers?search=9800000001", secondStaff).expect(200)).body.data[0].name, contact.name);
     await api("get", "/customers", accountant).expect(403);
+    assert.equal((await api("get", "/customers/lookup?phone=9800000001", firstStaff).expect(200)).body.data.name, contact.name);
+    assert.equal((await api("get", "/customers/lookup?phone=9800000002", firstStaff).expect(200)).body.data, null);
+    await api("put", "/customers/lookup", firstStaff).send({ name: "New customer", phone: "9800000002" }).expect(200);
+    assert.equal((await api("put", "/customers/lookup", secondStaff)
+        .send({ name: "Different name", phone: "9800000002" }).expect(200)).body.data.name, "New customer");
     const [category, unit, supplier] = await Promise.all([
         Category.create({ name: "Pantry" }),
         Unit.create({ name: "Each", shortForm: "ea", unitType: "count" }),
@@ -90,6 +115,10 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.deepEqual(await readAccounts(), { currency: "NPR", accounts: [], invoicesWithoutCost: 0 });
 
     const sale = await Transaction.findOne({ transactionType: "Sale" });
+    const saleDetails = (await api("get", `/transactions/${sale.id}`, accountant).expect(200)).body.data;
+    assert.equal(saleDetails.items[0].productName, "Rice");
+    assert.equal(saleDetails.items[0].unitName, "Each");
+    await api("put", `/transactions/${sale.id}/credit`, accountant).send({ isPaid: true }).expect(409);
     const saleDay = sale.createdAt.toISOString().slice(0, 10);
     const listPath = `/transactions?transactionType=Sale&startDate=${saleDay}&endDate=${saleDay}`;
     assert.equal((await api("get", listPath, accountant).expect(200)).body.data[0]._id, sale.id);

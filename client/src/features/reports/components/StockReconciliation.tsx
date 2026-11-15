@@ -16,10 +16,9 @@ interface StockBalance {
 
 const field = "rounded-md border border-input px-3 py-2 text-sm";
 
-export function StockReconciliation({ products, canWrite, onCount }: {
+export function StockReconciliation({ products, canWrite }: {
     products: ProductData[];
     canWrite: boolean;
-    onCount: () => Promise<unknown>;
 }) {
     const [productId, setProductId] = useState("");
     const [balance, setBalance] = useState<StockBalance | null>(null);
@@ -67,7 +66,7 @@ export function StockReconciliation({ products, canWrite, onCount }: {
             pending.current = null;
             form.reset();
             setMessage("Stock count recorded.");
-            await Promise.all([read(productId), onCount()]);
+            await read(productId);
         } catch {
             // The API displays the validation or concurrency error.
         } finally {
@@ -81,7 +80,7 @@ export function StockReconciliation({ products, canWrite, onCount }: {
             <div className="flex flex-wrap items-end gap-3">
                 <label className="grid gap-1 text-sm">Product
                     <select className={field} value={productId} onChange={(event) => void select(event.target.value)} disabled={busy}>
-                        <option value="">Select a product from the report</option>
+                        <option value="">Select a product</option>
                         {products.map((product) => <option key={product._id} value={product._id}>{product.name}</option>)}
                     </select>
                 </label>

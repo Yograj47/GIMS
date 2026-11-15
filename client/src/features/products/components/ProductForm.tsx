@@ -1,23 +1,16 @@
-import { useForm, type Resolver, Controller, useWatch } from "react-hook-form";
+import { useForm, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData, type ProductData } from "@/types/product";
-import { TrendingUp, BadgeIndianRupee, Package, AlertCircle, Percent } from "lucide-react";
+import { EntityField, EntitySection, entityInput } from "@/components/common/EntityField";
 import type { CategoryData } from "@/types/category";
 import type { UnitData } from "@/types/unit";
 import { useEffect } from "react";
-import Select, { type StylesConfig } from "react-select";
-
 type ProductFormProps = {
     initialData?: ProductData;
     categories: CategoryData[];
     units: UnitData[];
     onSubmit?: (data: ProductFormData) => void;
 };
-
-interface SelectOption {
-    value: string;
-    label: string;
-}
 
 export default function ProductForm({ initialData, categories, units, onSubmit }: ProductFormProps) {
     const { register, handleSubmit, reset, control, formState: { errors } } = useForm<ProductFormData>({
@@ -28,28 +21,12 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
             unitId: initialData?.unit?._id ?? "",
             supplierId: initialData?.supplier?._id ?? "",
             quantity: initialData?.quantity ?? 0,
-            threshold: initialData?.threshold ?? 0,
+            threshold: initialData?.threshold ?? 10,
             basePrice: initialData?.basePrice ?? 0,
             sellingPrice: initialData?.sellingPrice ?? 0,
             isActive: initialData?.isActive ?? true,
         },
     });
-
-    const categoryOptions = categories?.filter(c => c.isActive).map(c => ({ value: c._id, label: c.name })) || [];
-    const unitOptions = units?.filter(u => u.isActive).map(u => ({ value: u._id, label: `${u.name} (${u.shortForm})` })) || [];
-
-    const customSelectStyles: StylesConfig<SelectOption, false> = {
-        control: (base, state) => ({
-            ...base,
-            borderRadius: '0.125rem',
-            padding: '2px',
-            fontSize: '13px',
-            border: state.isFocused ? '1px solid #047857' : '1px solid #e2e8f0',
-            boxShadow: 'none',
-            backgroundColor: 'white',
-            '&:hover': { border: '1px solid #cbd5e1' }
-        }),
-    };
 
     useEffect(() => {
         if (initialData) {
@@ -70,127 +47,53 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const buyPrice = useWatch({ control, name: "basePrice" }) || 0;
     const sellPrice = useWatch({ control, name: "sellingPrice" }) || 0;
     const profit = sellPrice - buyPrice;
-    const profitPercentage = buyPrice > 0 ? ((profit / buyPrice) * 100).toFixed(1) : 0;
-
-    const inputStyle = "w-full rounded-sm border border-input bg-card px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all font-medium placeholder:text-slate-300";
-    const labelStyle = "text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2";
-    const sectionTitle = "font-black uppercase tracking-[0.15em] text-[10px] text-link mb-4 flex items-center gap-2";
+    const categoryOptions = categories.filter((item) => item.isActive || item._id === initialData?.category?._id);
+    const unitOptions = units.filter((item) => item.isActive || item._id === initialData?.unit?._id);
 
     return (
-        <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => { }))} className="w-full space-y-8">
-            {/* Section 1: Basic Info */}
-            <div>
-                <div className={sectionTitle}>
-                    <Package size={14} strokeWidth={3} /> Basic Identity
+        <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => {}))}>
+            <EntitySection title="Product details">
+                <EntityField label="Product name (required)" hint="Use the name staff should search for at the register. Include the brand or size if it distinguishes this item." error={errors.name?.message}>
+                    {(field) => <input {...field} {...register("name")} className={entityInput} placeholder="e.g. Dried green peas" />}
+                </EntityField>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <EntityField label="Category (required)" hint="Groups this item with similar products in the catalog and reports." error={errors.categoryId?.message}>
+                        {(field) => <select {...field} {...register("categoryId")} className={entityInput}>
+                            <option value="">Choose a category</option>
+                            {categoryOptions.map((item) => <option key={item._id} value={item._id}>{item.name}</option>)}
+                        </select>}
+                    </EntityField>
+                    <EntityField label="Base measurement unit (required)" hint="Choose the unit used to track stock, such as kilograms. Set up sack and other pack conversions in Product units." error={errors.unitId?.message}>
+                        {(field) => <select {...field} {...register("unitId")} className={entityInput}>
+                            <option value="">Choose a unit</option>
+                            {unitOptions.map((item) => <option key={item._id} value={item._id}>{item.name} ({item.shortForm})</option>)}
+                        </select>}
+                    </EntityField>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="md:col-span-2 space-y-2">
-                        <label className={labelStyle}>Full Product Name <span className="text-red-500">*</span></label>
-                        <input {...register("name")} placeholder="Search or enter product name..." className={inputStyle} />
-                        {errors.name && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.name.message}</p>}
-                    </div>
+            </EntitySection>
 
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Classification <span className="text-red-500">*</span></label>
-                        <Controller
-                            name="categoryId"
-                            control={control}
-                            render={({ field }) => (
-                                <Select<SelectOption, false>
-                                    {...field}
-                                    options={categoryOptions}
-                                    value={categoryOptions.find(opt => opt.value === field.value) || null}
-                                    onChange={(val) => field.onChange(val?.value)}
-                                    styles={customSelectStyles}
-                                    isClearable
-                                />
-                            )}
-                        />
-                        {errors.categoryId && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.categoryId.message}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Standard Unit <span className="text-red-500">*</span></label>
-                        <Controller
-                            name="unitId"
-                            control={control}
-                            render={({ field }) => (
-                                <Select<SelectOption, false>
-                                    {...field}
-                                    options={unitOptions}
-                                    value={unitOptions.find(opt => opt.value === field.value) || null}
-                                    onChange={(val) => field.onChange(val?.value)}
-                                    styles={customSelectStyles}
-                                    isClearable
-                                />
-                            )}
-                        />
-                        {errors.unitId && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.unitId.message}</p>}
-                    </div>
+            <EntitySection title="Pricing">
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <EntityField label="Cost price (NPR)" hint="What the store pays for one selected unit. If a 25 kg sack costs NPR 2,500 and the unit is kg, enter 100." error={errors.basePrice?.message}>
+                        {(field) => <input {...field} type="number" min="0.01" step="0.01" {...register("basePrice", { valueAsNumber: true })} className={entityInput} />}
+                    </EntityField>
+                    <EntityField label="Selling price (NPR)" hint="What the customer pays for one selected unit. Enter a price at least as high as the cost price." error={errors.sellingPrice?.message}>
+                        {(field) => <input {...field} type="number" min="0.01" step="0.01" {...register("sellingPrice", { valueAsNumber: true })} className={entityInput} />}
+                    </EntityField>
                 </div>
-            </div>
+                <p className="border-l-2 border-ring bg-muted px-3 py-2 text-sm">Selling price less cost per unit <strong className="ml-2 tabular-nums">NPR {profit.toLocaleString("en-NP", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
+            </EntitySection>
 
-            {/* Section 2: Pricing Logic */}
-            <div className="bg-muted border border-border p-5 rounded-sm">
-                <div className={sectionTitle}>
-                    <BadgeIndianRupee size={14} strokeWidth={3} /> Valuation Logic
+            <EntitySection title="Stock">
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <EntityField label={initialData ? "Current stock" : "Opening stock"} hint={initialData ? "Use stock movements or stock reconciliation to change the recorded quantity." : "Enter stock you already have in the base unit. Leave 0 if you will record the stock through supplier deliveries."} error={errors.quantity?.message}>
+                        {(field) => <input {...field} type="number" min="0" step="any" {...register("quantity", { valueAsNumber: true })} readOnly={Boolean(initialData)} className={entityInput + " read-only:bg-muted"} />}
+                    </EntityField>
+                    <EntityField label="Low-stock threshold" hint="A low-stock warning appears at or below this quantity. Enter at least 10 base units." error={errors.threshold?.message}>
+                        {(field) => <input {...field} type="number" min="10" step="any" {...register("threshold", { valueAsNumber: true })} className={entityInput} />}
+                    </EntityField>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Base Cost (Unit)</label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground font-bold text-xs">Rs.</span>
-                            <input type="number" {...register("basePrice", { valueAsNumber: true })} className={`${inputStyle} pl-10`} />
-                            {errors.basePrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.basePrice.message}</p>}
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Market Price (Retail)</label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-link font-bold text-xs">Rs.</span>
-                            <input type="number" {...register("sellingPrice", { valueAsNumber: true })} className={`${inputStyle} pl-10 border-brand-100`} />
-                            {errors.sellingPrice && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.sellingPrice.message}</p>}
-                        </div>
-                    </div>
-
-                    <div className={`md:col-span-2 flex items-center justify-between p-4 bg-card border ${profit >= 0 ? "border-emerald-100" : "border-red-100"}`}>
-                        <div className="flex items-center gap-3">
-                            <TrendingUp size={18} className={profit >= 0 ? "text-emerald-500" : "text-red-500"} />
-                            <div>
-                                <p className="text-[9px] font-bold uppercase text-subtle-foreground leading-none mb-1">Projected Net Margin</p>
-                                <p className={`text-lg font-black ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                                    Rs.{profit.toLocaleString()}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-right flex items-center gap-2">
-                            <Percent size={12} className="text-slate-300" />
-                            <span className={`px-2 py-0.5 rounded-sm font-black text-[11px] ${profit >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
-                                {profitPercentage}%
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Section 3: Stock Control */}
-            <div>
-                <div className={sectionTitle}>
-                    <AlertCircle size={14} strokeWidth={3} /> Stock Parameters
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                        <label className={labelStyle}>In-Hand Quantity</label>
-                        <input type="number" {...register("quantity", { valueAsNumber: true })} readOnly={Boolean(initialData)} className={inputStyle} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className={labelStyle}>Critical Alert Level</label>
-                        <input type="number" {...register("threshold", { valueAsNumber: true })} className={inputStyle} />
-                        {errors.threshold && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">{errors.threshold.message}</p>}
-                    </div>
-                </div>
-            </div>
+            </EntitySection>
         </form>
     );
 }

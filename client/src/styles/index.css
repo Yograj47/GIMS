@@ -213,6 +213,14 @@
     overflow-wrap: anywhere;
   }
 
+  .transaction-list .records-table > tbody > tr[data-record]:nth-of-type(even) {
+    background: var(--card);
+  }
+
+  .transaction-list .records-table > tbody > tr[data-record]:is(:hover, :focus-within) {
+    background: var(--accent);
+  }
+
   .spinner-pro {
     width: 44px;
     height: 44px;

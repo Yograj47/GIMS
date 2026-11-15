@@ -1,10 +1,11 @@
-import { useDebounce } from "@/lib/debounce";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Trash2, Loader2, ShoppingCart } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Banknote, CreditCard, Receipt, Trash2, Loader2, ShoppingCart } from "lucide-react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useFieldArray, type Resolver, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RegisterCatalog } from "./RegisterCatalog";
@@ -25,13 +26,23 @@ export default function MovementForm({ purpose }: { purpose?: Purpose }) {
 }
 
 function MovementRegister({ purpose }: { purpose: Purpose }) {
+    const staff = useAuthStore((state) => state.user?.role === "staff");
     const isStockIn = purpose === "Return";
     const navigate = useNavigate();
 
-    const { fetchTransactions, transactions, createTransaction, isLoading } = useMovementTransactions();
+    const { createTransaction, isLoading } = useMovementTransactions();
     const [gatewayEnabled, setGatewayEnabled] = useState(false);
-    const [checkoutMethod, setCheckoutMethod] = useState("cash");
+    const [checkoutMethod, setCheckoutMethod] = useState<"cash" | "gateway" | "credit">("cash");
+    const [checkoutOpen, setCheckoutOpen] = useState(false);
+    const [cashReceived, setCashReceived] = useState("");
+    const [customerPhone, setCustomerPhone] = useState("");
+    const [customerName, setCustomerName] = useState("");
+    const [lookup, setLookup] = useState<"idle" | "loading" | "found" | "new" | "failed">("idle");
+    const phone = customerPhone.trim();
+    const validPhone = /^\+?[0-9]{7,15}$/.test(phone);
+    const submitLock = useRef(false);
     const [checkingOut, setCheckingOut] = useState(false);
+    const [savingCustomer, setSavingCustomer] = useState(false);
     const checkoutRequest = useRef<{ signature: string; token: string } | null>(null);
 
     const { register, control, handleSubmit, setValue, getValues, formState: { errors } } = useForm<TransactionFormData>({
@@ -49,23 +60,27 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
     const { fields, append, remove } = useFieldArray({ control, name: "items" });
     const currentType = useWatch({ control, name: "transactionType" });
     const watchedItems = useWatch({ control, name: "items" });
-    const watchedName = useWatch({ control, name: "partyDetails.name" });
-    const contactSearch = useDebounce(watchedName ?? "", 300);
-    const [savedContacts, setSavedContacts] = useState<{ name: string; phone: string }[]>([]);
     useEffect(() => {
-        if (purpose === "Adjustment") return;
+        if (!checkoutOpen || !validPhone) return;
         const request = new AbortController();
-        api.get<{ data: { name: string; phone: string }[] }>("/customers", {
-            params: { search: contactSearch.slice(0, 120) }, signal: request.signal,
-        }).then(({ data }) => {
-            if (!request.signal.aborted) setSavedContacts(data.data);
-        }).catch(() => {});
-        return () => request.abort();
-    }, [contactSearch, purpose]);
+        const timer = window.setTimeout(async () => {
+            try {
+                const { data } = await api.get<{ data: { name: string } | null }>("/customers/lookup", {
+                    params: { phone }, signal: request.signal,
+                });
+                if (request.signal.aborted) return;
+                setCustomerName(data.data?.name ?? "");
+                setLookup(data.data ? "found" : "new");
+            } catch {
+                if (!request.signal.aborted) setLookup("failed");
+            }
+        }, 300);
+        return () => { window.clearTimeout(timer); request.abort(); };
+    }, [checkoutOpen, phone, validPhone]);
 
-    const showSettlement = currentType === "Return" || currentType === "Sale";
+    const sale = purpose === "Sale";
     
-    const canEditRate = currentType !== "Sale" || checkoutMethod === "credit";
+    const canEditRate = currentType !== "Sale";
     const lineRate = (item: Item) => canEditRate ? item.rate : Math.round(item.pricePerBase * item.multiplier * 100) / 100;
     const lineTotalMinor = (item: Item) => Math.round(item.qty * Math.round(lineRate(item) * 100));
     const grandTotal = watchedItems.reduce((sum, item) => sum + lineTotalMinor(item), 0) / 100;
@@ -74,7 +89,8 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
         usedStock.set(item.productId, (usedStock.get(item.productId) ?? 0) + item.baseQuantity);
     }
 
-    const onFormSubmit = async (data: TransactionFormData) => {
+    const recordTransaction = async (data: TransactionFormData) => {
+
         if (data.transactionType === "Sale" && checkoutMethod !== "credit") {
             if (checkingOut) return;
             const payload = {
@@ -92,7 +108,7 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
                 if (checkoutMethod === "gateway") {
                     sessionStorage.setItem(checkoutTokenKey, token);
                     try { await goToPayment(token); } catch { navigate("/checkout/return"); }
-                } else if (order.transactionId) navigate(`/reports/transaction/${order.transactionId}`);
+                } else if (order.transactionId) navigate(`/reports/transaction/${order.transactionId}`, { replace: true });
             } catch {
                 // The API shows stock and payment errors.
             } finally {
@@ -106,8 +122,12 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
             items: data.items.map((item) => ({ ...item, total: lineTotalMinor(item) / 100 })),
             isPaid: data.transactionType === "Sale" ? false : data.isPaid,
         };
-        const success = await createTransaction(data);
-        if (success) navigate(-1);
+        const transaction = await createTransaction(data);
+        if (transaction) {
+            if (data.transactionType === "Sale") navigate(`/reports/transaction/${transaction._id}`, { replace: true });
+            else if (staff) navigate("/stock-movements/sale", { replace: true });
+            else navigate(-1);
+        }
     };
 
     useEffect(() => {
@@ -119,27 +139,6 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
         );
         return () => { active = false; };
     }, [isStockIn]);
-
-    useEffect(() => {
-        if (purpose !== "Adjustment") {
-            fetchTransactions();
-        }
-    }, [purpose, fetchTransactions]);
-
-    const pastCustomers = useMemo(() => {
-        const customers = transactions
-            .filter(t => t.transactionType === "Sale")
-            .map(t => t.partyDetails);
-
-        return Array.from(new Map([...customers, ...savedContacts].map(c => [c.name, c])).values());
-    }, [transactions, savedContacts]);
-
-    useEffect(() => {
-        const match = pastCustomers.find(entity => entity.name === watchedName);
-        if (match) {
-            setValue("partyDetails.phone", match.phone);
-        }
-    }, [watchedName, pastCustomers, setValue]);
 
     function updateQuantity(index: number, qty: number) {
         const item = getValues(`items.${index}`);
@@ -155,24 +154,59 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
         else updateQuantity(index, currentItems[index].qty + item.qty);
     }
 
-    const saving = isLoading || checkingOut;
+    const saving = isLoading || checkingOut || savingCustomer;
     const totalLabel = formatInvoiceMoney(Math.round(grandTotal * 100), "NPR");
-    const submitLabel = currentType === "Sale" && checkoutMethod === "cash" ? "Confirm cash sale"
-        : currentType === "Sale" && checkoutMethod === "gateway" ? "Continue to payment" : "Record transaction";
+    const totalMinor = Math.round(grandTotal * 100);
+    const cashMinor = /^\d+(?:\.\d{1,2})?$/.test(cashReceived) ? Math.round(Number(cashReceived) * 100) : 0;
+    const cashValid = Number.isSafeInteger(cashMinor) && cashMinor >= totalMinor;
+    const needsCustomer = !validPhone || (lookup !== "found" && lookup !== "new") || !customerName.trim();
+    const paymentOptions = [
+        { value: "cash", label: "Cash", icon: Banknote },
+        { value: "gateway", label: "Card or wallet via Khalti", icon: CreditCard },
+        { value: "credit", label: "Credit sale", icon: Receipt },
+    ] as const;
+
+    async function confirmCheckout() {
+        if (submitLock.current || saving || needsCustomer || (sale && (totalMinor <= 0 || (checkoutMethod === "cash" && !cashValid)))) return;
+        submitLock.current = true;
+        setSavingCustomer(true);
+        try {
+            await handleSubmit(async (data) => {
+                let name = customerName.trim();
+                if (lookup === "new") {
+                    const response = await api.put<{ data: { name: string } }>("/customers/lookup", { name, phone });
+                    name = response.data.data.name;
+                    setCustomerName(name);
+                    setLookup("found");
+                }
+                await recordTransaction({ ...data, partyDetails: { name, phone } });
+            })();
+        } catch {
+            // The API displays the error and the cashier can retry.
+        } finally {
+            setSavingCustomer(false);
+            submitLock.current = false;
+        }
+    }
+
     const field = "h-10 w-full rounded-lg border border-border bg-card px-3 text-sm";
 
     return (
-        <main className="flex min-h-dvh w-full min-w-0 flex-col bg-background lg:h-dvh">
+        <main className={`flex w-full min-w-0 flex-col bg-background lg:h-dvh ${staff ? "" : "min-h-dvh"}`}>
             <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
                 <div className="flex items-center gap-3">
-                    <Button type="button" variant="outline" size="icon" aria-label="Back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></Button>
+                    {!staff && <Button type="button" variant="outline" size="icon" aria-label="Back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></Button>}
                     <h1 className="text-xl font-semibold tracking-tight">{titles[purpose]}</h1>
                 </div>
-                <a href="#register-cart" className="text-sm font-medium text-link lg:hidden">Transaction · {fields.length} {fields.length === 1 ? "line" : "lines"}</a>
             </header>
             <div className="grid min-h-0 min-w-0 flex-1 items-start gap-4 p-3 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:overflow-y-auto">
                 <RegisterCatalog inbound={isStockIn} usedStock={usedStock} onAdd={add} />
-                <form id="register-cart" onSubmit={(event) => void handleSubmit(onFormSubmit)(event)}
+                <form id="register-cart" onSubmit={(event) => void handleSubmit((data) => {
+                    if (purpose === "Adjustment") return recordTransaction(data);
+                    setCashReceived("");
+                    setLookup(validPhone ? "loading" : "idle");
+                    setCheckoutOpen(true);
+                })(event)}
                     className="min-w-0 scroll-mt-20 space-y-4 rounded-xl border border-border bg-card p-3 sm:p-5">
                     <div className="flex items-center gap-2">
                         <ShoppingCart size={18} className="text-link" aria-hidden="true" />
@@ -214,28 +248,6 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
                         </table>
                         </div>
                     ) : <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">Add products from the catalog to start.</p>}
-                    {showSettlement && (
-                        <div className="grid gap-3">
-                            {currentType === "Sale" ? (
-                                <label className="grid gap-1 text-sm font-medium">Payment
-                                    <select className={field} value={checkoutMethod} onChange={(event) => setCheckoutMethod(event.target.value)}>
-                                        <option value="cash">Cash</option>
-                                        {gatewayEnabled && <option value="gateway">Card or wallet via Khalti</option>}
-                                        <option value="credit">Invoice on credit</option>
-                                    </select>
-                                </label>
-                            ) : null}
-                            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-                                <label className="grid gap-1 text-sm font-medium">Customer (optional)
-                                    <Input list="register-contacts" {...register("partyDetails.name")} />
-                                </label>
-                                <label className="grid gap-1 text-sm font-medium">Phone (optional)
-                                    <Input type="tel" {...register("partyDetails.phone")} />
-                                </label>
-                            </div>
-                            <datalist id="register-contacts">{pastCustomers.map((party, index) => <option key={index} value={party?.name}>{party?.phone}</option>)}</datalist>
-                        </div>
-                    )}
                     <details className="text-sm">
                         <summary className="cursor-pointer text-link">Add a note</summary>
                         <textarea aria-label="Transaction note" {...register("notes")} rows={2} className="mt-2 w-full rounded-lg border border-border p-2" />
@@ -243,12 +255,70 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
                     <div className="flex justify-between gap-2 border-t border-border pt-3 font-semibold">
                         <span>Total</span><span className="tabular-nums">{totalLabel}</span>
                     </div>
-                    <Button type="submit" className="w-full" disabled={saving || !fields.length}>
+                    <Button type="submit" className="w-full" disabled={saving || !fields.length || (purpose === "Sale" && totalMinor <= 0)}>
                         {saving && <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden="true" />}
-                        {saving ? "Recording…" : submitLabel}
+                        {saving ? "Recording..." : sale ? "Go to checkout" : isStockIn ? "Review return" : "Record transaction"}
                     </Button>
                 </form>
             </div>
+            {purpose !== "Adjustment" && (
+                <Dialog open={checkoutOpen} onOpenChange={(open) => { if (!saving) setCheckoutOpen(open); }}>
+                    <DialogContent showCloseButton={!saving} className="gap-5">
+                        <div>
+                            <DialogTitle>{sale ? "Counter checkout" : "Confirm customer return"}</DialogTitle>
+                            <DialogDescription>{sale ? "Confirm the customer and choose a payment method." : "Confirm who is returning these items."}</DialogDescription>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 rounded-lg bg-muted px-4 py-3">
+                            <span className="text-sm">{sale ? "Amount due" : "Return value"}</span>
+                            <strong className="text-xl tabular-nums">{totalLabel}</strong>
+                        </div>
+                        <fieldset disabled={saving} className="grid gap-2">
+                            <legend className="mb-2 text-sm font-medium">Customer details</legend>
+                            <label className="grid gap-1 text-sm">Phone number
+                                <Input type="tel" autoComplete="tel" maxLength={16} required value={customerPhone} onChange={(event) => {
+                                    if (event.target.value.trim() !== phone) {
+                                        setCustomerName("");
+                                        setLookup("loading");
+                                    }
+                                    setCustomerPhone(event.target.value);
+                                }} />
+                            </label>
+                            {!validPhone ? <p className="text-sm text-muted-foreground">Enter 7–15 digits, with an optional country prefix starting with +.</p>
+                                : lookup === "failed" ? <p role="alert" className="text-sm text-destructive">Customer lookup failed. Reopen checkout to retry.</p>
+                                : lookup === "loading" ? <p role="status" className="text-sm">Looking up customer…</p>
+                                : <label className="grid gap-1 text-sm">Customer name
+                                    <Input required maxLength={120} readOnly={lookup === "found"} value={customerName} onChange={(event) => setCustomerName(event.target.value)} />
+                                </label>}
+                            {validPhone && lookup === "new" && <p className="text-sm text-muted-foreground">New number. Enter the customer’s name to register them at checkout.</p>}
+                        </fieldset>
+                        {sale && <fieldset disabled={saving} className="grid gap-2">
+                            <legend className="mb-2 text-sm font-medium">Payment method</legend>
+                            {paymentOptions.filter(({ value }) => value !== "gateway" || gatewayEnabled).map(({ value, label, icon: Icon }) => (
+                                <label key={value} className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2.5 has-checked:border-ring has-checked:bg-accent">
+                                    <input type="radio" name="counter-payment" checked={checkoutMethod === value} onChange={() => setCheckoutMethod(value)} />
+                                    <Icon aria-hidden="true" className="size-4 text-link" />
+                                    <span className="text-sm font-medium">{label}</span>
+                                </label>
+                            ))}
+                        </fieldset>}
+                        {sale && checkoutMethod === "cash" && (
+                            <div className="grid gap-2">
+                                <label className="grid gap-1 text-sm font-medium">Cash received (NPR)
+                                    <Input inputMode="decimal" value={cashReceived} disabled={saving} onChange={(event) => setCashReceived(event.target.value)} placeholder="0.00" />
+                                </label>
+                                <Button type="button" variant="ghost" size="sm" className="justify-self-start" disabled={saving} onClick={() => setCashReceived(grandTotal.toFixed(2))}>Use exact amount</Button>
+                                <p aria-live="polite" className="text-sm font-medium">Change due: {cashValid ? formatInvoiceMoney(cashMinor - totalMinor, "NPR") : "â€”"}</p>
+                            </div>
+                        )}
+                        <div className="flex flex-wrap justify-end gap-2">
+                            <Button variant="outline" disabled={saving} onClick={() => setCheckoutOpen(false)}>Back to items</Button>
+                            <Button disabled={saving || needsCustomer || (sale && checkoutMethod === "cash" && !cashValid)} onClick={() => void confirmCheckout()}>
+                                {saving ? "Processingâ€¦" : !sale ? "Record return" : checkoutMethod === "cash" ? "Confirm cash payment" : checkoutMethod === "gateway" ? "Continue to Khalti" : "Record credit sale"}
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
         </main>
     );
 }

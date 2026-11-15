@@ -20,6 +20,9 @@ export const findActivityLogs =
                     req.query.search ||
                     "",
 
+                startDate: req.query.startDate,
+                endDate: req.query.endDate,
+
                 type:
                     req.query.type,
 
