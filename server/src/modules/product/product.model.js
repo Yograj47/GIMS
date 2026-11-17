@@ -41,6 +41,11 @@ const productSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        photos: [{
+            _id: false,
+            mediaId: { type: mongoose.Schema.Types.ObjectId, ref: "MediaAssets", required: true },
+            altText: { type: String, default: "" },
+        }],
 
         threshold: {
             type: Number,

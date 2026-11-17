@@ -82,8 +82,9 @@ export async function issueInvoiceInSession(transactionId, userId, session, { ch
         number: `INV-${String(counter.sequence).padStart(6, "0")}`,
         transactionId,
         issuedBy: userId,
+        customerId: sale.customerId,
         currency: "NPR",
-        customer: { name: sale.partyDetails?.name, phone: sale.partyDetails?.phone },
+        customer: sale.partyDetails,
         items,
         totalMinor,
     }], { session });

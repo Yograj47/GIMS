@@ -1,8 +1,9 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useOutletContext } from "react-router-dom";
 
 import { useAuthStore } from "@/store/authStore";
 
 import { StartupSkeleton } from "@/components/common/LoadingSkeleton";
+import { ShopPageSkeleton } from "@/features/checkout/ShopLoading";
 import type { UserRole } from "@/types/user";
 
 
@@ -22,16 +23,17 @@ export const ProtectedRoute = ({
   } = useAuthStore();
 
   const location = useLocation();
+  const outletContext = useOutletContext();
 
 
   if (isInitialLoading) {
-    return <StartupSkeleton label="Checking your session" />;
+    return location.pathname.startsWith("/shop/") ? <ShopPageSkeleton /> : <StartupSkeleton label="Checking your session" />;
   }
 
   if (!isAuthenticated || !user) {
     return (
       <Navigate
-        to="/login"
+        to={location.pathname.startsWith("/shop/") ? "/shop/login" : "/login"}
         state={{ from: location }}
         replace
       />
@@ -44,13 +46,13 @@ export const ProtectedRoute = ({
   ) {
     return (
       <Navigate
-        to="/verify"
+        to={user.role === "customer" ? "/shop/verify" : "/verify"}
         replace
       />
     );
   }
 
-  if (requireVerified && user.role === "customer") return <Navigate to="/shop" replace />;
+  if (requireVerified && user.role === "customer" && !allowedRoles?.includes("customer")) return <Navigate to="/shop" replace />;
 
   if (
     allowedRoles &&
@@ -66,5 +68,5 @@ export const ProtectedRoute = ({
     );
   }
 
-  return <Outlet />;
+  return <Outlet context={outletContext} />;
 };

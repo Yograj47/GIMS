@@ -10,7 +10,7 @@ import {
 } from "../../shared/constants/index.js";
 
 export const getMe = asyncHandler(async (req, res) => {
-    const user = await userService.findMe(req.user.id);
+    const user = await userService.findMe(req.user);
 
     return successResponse(res, {
         statusCode: 200,
@@ -34,7 +34,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
     const user =
         await userService.updateProfile(
-            req.user.id,
+            req.user,
             payload
         );
 
@@ -45,9 +45,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
     return successResponse(res, {
         statusCode: 200,
-        data: user,
-        message:
-            "Profile updated successfully",
+        data: { _id: user._id, name: user.name, email: user.email, avatar: user.avatar, role: user.role, isVerified: user.isVerified },
+        message: "Profile updated successfully",
     });
 });
 
@@ -56,6 +55,7 @@ export const updatePassword = asyncHandler(async (req, res) => {
 
     await userService.updatePassword({
         userId: req.user.id,
+        role: req.user.role,
         ...payload,
     });
 

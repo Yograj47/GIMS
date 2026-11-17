@@ -5,6 +5,10 @@ import type { UserData } from "@/types/user";
 const BASE_URL = "/users";
 
 export const userService = {
+    createStaff: async (payload: { name: string; email: string; password: string }) => {
+        await api.post("/auth/users/staff", payload);
+    },
+
     getMe: async () => {
         const { data } =
             await api.get<
@@ -28,8 +32,9 @@ export const userService = {
     },
 
     updateProfile: async (
-        name: string,
-        email: string
+        name: string | undefined,
+        email: string | undefined,
+        contact?: Pick<UserData, "phone" | "deliveryAddress">
     ) => {
         const { data } =
             await api.patch<
@@ -39,6 +44,7 @@ export const userService = {
                 {
                     name,
                     email,
+                    ...contact,
                 }
             );
 

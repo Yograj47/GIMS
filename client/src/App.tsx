@@ -10,6 +10,8 @@ import { useAuthStore } from "./store/authStore";
 
 // Layouts
 import AuthLayout from "./layout/AuthLayout";
+import ShopLayout, { ShopAccountPage } from "./layout/ShopLayout";
+import PublicInfoPage from "./features/OtherPages/PublicInfoPage";
 import FocusedWorkspace from "./features/workspaces/FocusedWorkspace";
 import { workspaceHome } from "./shared/constants/roles";
 import SettingsLayout from "./layout/SettingLayout";
@@ -21,9 +23,9 @@ import { SocketProvider } from "./features/socket/socket.context";
 import { StartupSkeleton } from "./components/common/LoadingSkeleton";
 
 // --- Lazy Loaded Pages ---
+const Home = lazy(() => import("./features/OtherPages/Home"));
 const Login = lazy(() => import("./features/auth/pages/Login"));
 const Register = lazy(() => import("./features/auth/pages/Register"));
-const Home = lazy(() => import("./features/OtherPages/Home"));
 const VerifyAccount = lazy(() => import("./features/auth/pages/VerifyAccount"));
 const NotFound = lazy(() => import("./features/OtherPages/NotFound"));
 const Products = lazy(() => import("./features/products/pages/Products"));
@@ -52,7 +54,11 @@ const ProductUnitPage = lazy(() => import("./features/ProductUnit/pages/ProductU
 const ProfilePage = lazy(() => import("./features/OtherPages/Profile"));
 const Unauthorized = lazy(() => import("./features/OtherPages/Unauthorized"));
 const HelpPage = lazy(() => import("./features/OtherPages/Helper"));
+const ShopCheckout = lazy(() => import("./features/checkout/ShopCheckout"));
+const ShopOrders = lazy(() => import("./features/checkout/ShopOrders"));
+const ShopProfile = lazy(() => import("./features/checkout/ShopProfile"));
 const Shop = lazy(() => import("./features/checkout/Shop"));
+const ShopProductDetail = lazy(() => import("./features/checkout/ShopProductDetail"));
 const CheckoutStatus = lazy(() => import("./features/checkout/CheckoutStatus"));
 const AccountingWorkspace = lazy(() => import("./features/workspaces/AccountingWorkspace"));
 const Customers = lazy(() => import("./features/workspaces/Customers"));
@@ -86,15 +92,19 @@ function App() {
               <Route element={<AuthLayout />}>
                 <Route element={<PublicRoute />}>
                   <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/help" element={<HelpPage />} />
+                  <Route path="/login" element={<Home />} />
+                  <Route path="/register" element={<Navigate to="/shop/register" replace />} />
                   <Route path="/forget-password" element={<ForgotPassword />} />
                 </Route>
+                <Route path="/help" element={<HelpPage />} />
                 <Route element={<ProtectedRoute requireVerified={false} />}>
                   <Route path="/verify" element={<VerifyAccount />} />
                 </Route>
               </Route>
+              <Route path="/about" element={<PublicInfoPage page="about" />} />
+              <Route path="/contact" element={<PublicInfoPage page="contact" />} />
+              <Route path="/terms" element={<PublicInfoPage page="terms" />} />
+              <Route path="/privacy" element={<PublicInfoPage page="privacy" />} />
 
               {/* --- Protected Inventory/Admin Routes --- */}
               <Route element={<ProtectedRoute />}>
@@ -113,6 +123,7 @@ function App() {
                     <Route path="/suppliers/v/:id" element={<SupplierView />} />
                     <Route path="/suppliers/v/:id/catalog" element={<SupplierView section="catalog" />} />
                     <Route path="/stock-movements" element={<StockManagement />} />
+                    <Route path="/management/online-orders" element={<StaffOrders key="management" management />} />
                     <Route path="/reports/movement" element={<StockMovementReport />} />
                     <Route path="/reports/stock" element={<StockReport />} />
                   </Route>
@@ -165,7 +176,26 @@ function App() {
                 <Route path="/stock-movements/supplier-return" element={<SupplierMovement mode="return" />} />
               </Route>
 
-              <Route path="/shop" element={<Shop />} />
+              <Route element={<ShopLayout />}>
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/all/" element={<Shop />} />
+                <Route path="/shop/products/:id" element={<ShopProductDetail />} />
+                <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
+                  <Route path="/shop/cart" element={<ShopCheckout />} />
+                  <Route path="/shop/checkout" element={<ShopCheckout checkout />} />
+                  <Route path="/shop/orders" element={<ShopOrders key="history" />} />
+                  <Route path="/shop/orders/:id" element={<ShopOrders key="tracking" />} />
+                  <Route path="/shop/profile" element={<ShopProfile />} />
+                </Route>
+                <Route element={<PublicRoute />}>
+                  <Route path="/shop/login" element={<ShopAccountPage><Login customer /></ShopAccountPage>} />
+                  <Route path="/shop/register" element={<ShopAccountPage><Register /></ShopAccountPage>} />
+                  <Route path="/shop/forget-password" element={<ShopAccountPage><ForgotPassword customer /></ShopAccountPage>} />
+                </Route>
+                <Route element={<ProtectedRoute requireVerified={false} />}>
+                  <Route path="/shop/verify" element={<ShopAccountPage><VerifyAccount /></ShopAccountPage>} />
+                </Route>
+              </Route>
               <Route path="/checkout/return" element={<CheckoutStatus />} />
               {/* --- 404 Route --- */}
               <Route path="/unauthorized" element={<Unauthorized />} />

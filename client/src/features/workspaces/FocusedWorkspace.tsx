@@ -2,7 +2,10 @@ import { managementLinks } from "@/components/common/managementLinks";
 import { WorkspaceNotifications } from "@/components/common/WorkspaceNotifications";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
 import { staffActions } from "./staffNavigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useOrderUpdates, type OrderUpdate } from "@/features/checkout/useOrderUpdates";
+import { orderLabel } from "@/features/checkout/checkout";
+import { notify } from "@/lib/toast";
 import { ArrowLeft, BarChart3, BookOpen, Calculator, ClipboardList, LayoutGrid, Menu, Receipt, Ruler, Store, Truck, UserRound, X } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -37,6 +40,13 @@ export default function FocusedWorkspace({ section = "workspace" }: { section?: 
     const inSettings = section === "settings";
     const accountant = role === "accountant";
     const management = role === "admin" || role === "owner";
+    const notifyOrder = useCallback(({ orderId, status }: OrderUpdate) => {
+        const relevant = management
+            ? ["awaiting_review", "details_resubmitted", "paid", "payment_review", "refund_pending"].includes(status)
+            : role === "staff" && status === "approved";
+        if (relevant) notify.info(orderLabel(status), `Online order #${orderId.slice(-8).toUpperCase()}`);
+    }, [management, role]);
+    useOrderUpdates(notifyOrder);
     const settings = useGlobalStore((state) => state.settings);
     const fetchSettings = useGlobalStore((state) => state.fetchSettings);
     useEffect(() => {

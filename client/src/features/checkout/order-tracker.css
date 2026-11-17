@@ -1,0 +1,68 @@
+.order-timeline-event:not(:last-child)::before {
+    position: absolute;
+    inset-block: 1.625rem -1.625rem;
+    inset-inline-start: calc(1.125rem - 0.5px);
+    width: 1px;
+    background: var(--border);
+    content: "";
+}
+
+.order-history-rail::after {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 1.625rem;
+    inset-inline-start: calc(1.125rem - 1px);
+    width: 2px;
+    height: var(--order-history-progress, 0px);
+    background: var(--color-link);
+    pointer-events: none;
+    content: "";
+}
+
+.order-tracker-halo {
+    position: absolute;
+    width: 1.9rem;
+    aspect-ratio: 1;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.order-tracker-road {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0.65rem;
+    height: 1px;
+    background: linear-gradient(to right, currentColor 0 5px, transparent 5px) 0 0 / 11px 100%;
+    mask-image: linear-gradient(to right, transparent, black 22%, black 78%, transparent);
+    opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .order-tracker-enter {
+        animation: order-tracker-enter 320ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
+    }
+
+    .order-tracker-halo {
+        animation: order-tracker-halo 3.2s ease-out infinite;
+    }
+
+    .order-tracker-road {
+        animation: order-tracker-road 600ms linear infinite;
+    }
+}
+
+@keyframes order-tracker-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes order-tracker-halo {
+    0% { opacity: 0; transform: scale(0.92); }
+    25% { opacity: 0.24; }
+    75%, 100% { opacity: 0; transform: scale(1.65); }
+}
+
+@keyframes order-tracker-road {
+    to { background-position-x: -11px; }
+}

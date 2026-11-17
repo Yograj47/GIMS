@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useForm, type FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2, User, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock, Phone, ShieldCheck } from "lucide-react";
 import { registerSchema, type RegisterFormData } from "@/types/auth";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ function RegisterForm() {
 
   const { handleSubmit, register, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: { name: "", email: "", phone: "", claimCode: "", password: "", confirmPassword: "" },
   });
 
   const navigate = useNavigate();
@@ -24,16 +24,16 @@ function RegisterForm() {
     const success = await registerUser(data);
 
     if (success) {
-      navigate("/verify");
+      navigate("/shop/verify");
     }
   };
 
   const inputClasses = (error: FieldError | undefined) => `
     w-full rounded-xl border pl-11 pr-4 py-2.5 text-sm transition-all outline-none
-    focus:ring-4 focus:ring-brand-500/10
+    focus:ring-4 focus:ring-ring/10
     ${error
-      ? 'border-red-500/50 bg-red-500/5 text-red-200 placeholder:text-red-900/50'
-      : 'border-white/5 bg-slate-950/40 text-slate-200 placeholder:text-slate-600 focus:border-brand-500/50 focus:bg-slate-950/60'}
+      ? 'border-destructive text-foreground placeholder:text-muted-foreground'
+      : 'border-input bg-card text-foreground placeholder:text-muted-foreground focus:border-ring'}
   `;
 
   return (
@@ -41,30 +41,47 @@ function RegisterForm() {
 
       {/* Full Name */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Full Name</label>
+        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</label>
         <div className="relative group">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-brand-500 transition-colors" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
           <input {...register("name")} placeholder="John Doe" className={inputClasses(errors.name)} />
         </div>
-        {errors.name && <p className="text-[10px] font-bold text-red-400 ml-1 uppercase tracking-tight">{errors.name.message}</p>}
+        {errors.name && <p className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">{errors.name.message}</p>}
       </div>
 
       {/* Email */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Email Address</label>
+        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</label>
         <div className="relative group">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-brand-500 transition-colors" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
           <input {...register("email")} placeholder="admin@grocery.local" className={inputClasses(errors.email)} />
         </div>
-        {errors.email && <p className="text-[10px] font-bold text-red-400 ml-1 uppercase tracking-tight">{errors.email.message}</p>}
+        {errors.email && <p className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">{errors.email.message}</p>}
       </div>
+
+      <div className="space-y-2">
+        <label htmlFor="register-mobile" className="text-sm font-medium">Mobile number</label>
+        <div className="relative">
+          <Phone aria-hidden="true" className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input id="register-mobile" type="tel" autoComplete="tel" {...register("phone")} placeholder="9841234567" className={inputClasses(errors.phone)} />
+        </div>
+        {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
+      </div>
+
+      <details className="space-y-2 text-sm">
+        <summary className="cursor-pointer font-medium text-link">Have a linking code from the store?</summary>
+        <label className="grid gap-1">Account linking code
+          <input {...register("claimCode")} autoComplete="off" maxLength={22} className="rounded-md border border-input bg-card px-3 py-2" />
+        </label>
+        {errors.claimCode && <p className="text-xs text-destructive">{errors.claimCode.message}</p>}
+      </details>
 
       {/* Passwords Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Password</label>
+          <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</label>
           <div className="relative group">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-brand-500 transition-colors" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
             <input
               type={isPasswordVisible ? "text" : "password"}
               {...register("password")}
@@ -75,9 +92,9 @@ function RegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Confirm</label>
+          <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm</label>
           <div className="relative group">
-            <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-brand-500 transition-colors" />
+            <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
             <input
               type={isPasswordVisible ? "text" : "password"}
               {...register("confirmPassword")}
@@ -87,7 +104,7 @@ function RegisterForm() {
             <button
               type="button"
               onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               {isPasswordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -96,7 +113,7 @@ function RegisterForm() {
       </div>
 
       {(errors.password || errors.confirmPassword) && (
-        <p className="text-[10px] font-bold text-red-400 ml-1 uppercase tracking-tight">
+        <p className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">
           {errors.password?.message || errors.confirmPassword?.message}
         </p>
       )}
@@ -104,7 +121,7 @@ function RegisterForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full h-12 mt-4 text-sm font-bold transition-all active:scale-[0.98] bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-900/20 rounded-xl"
+        className="w-full h-12 mt-4 text-sm font-bold transition-all active:scale-[0.98] rounded-xl"
       >
         {isLoading ? (
           <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...</>

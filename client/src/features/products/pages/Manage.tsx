@@ -73,7 +73,7 @@ function ProductEditor({ id }: { id?: string }) {
                 />
             </>}
         >
-            <ProductForm initialData={singleProduct ?? undefined} categories={categories} units={units} onSubmit={submit} />
+            <ProductForm initialData={singleProduct ?? undefined} categories={categories} units={units} onSubmit={submit} saving={isLoading} />
         </EntityFormPage>
     );
 }

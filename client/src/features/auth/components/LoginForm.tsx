@@ -1,98 +1,81 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { loginSchema, type LoginFormData } from "@/types/auth";
 import { useAuth } from "../hooks/useAuth";
 
-function LoginForm() {
-  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
-  const { login, isLoading, } = useAuth()
+export default function LoginForm({ customer = false }: { customer?: boolean }) {
+    const [showPassword, setShowPassword] = useState(false);
+    const { login, isLoading } = useAuth();
+    const { handleSubmit, register, formState: { errors } } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: "", password: "" },
+    });
 
-  const { handleSubmit, register, formState: { errors } } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
+    const onSubmit = async (data: LoginFormData) => {
+        try {
+            await login(data, customer);
+        } catch {
+            // The API client surfaces the error.
+        }
+    };
 
-  const onSubmit = async (data: LoginFormData) => {
-    await login(data)
-  };
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+                <label htmlFor="email" className="text-sm font-medium">Email address</label>
+                <Input
+                    id="email"
+                    type="email"
+                    autoComplete="username"
+                    placeholder="you@example.com"
+                    className="h-11"
+                    aria-invalid={Boolean(errors.email)}
+                    aria-describedby={errors.email ? "login-email-error" : undefined}
+                    {...register("email")}
+                />
+                {errors.email && <p id="login-email-error" className="text-sm text-destructive">{errors.email.message}</p>}
+            </div>
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
-      {/* Email Field */}
-      <div className="space-y-2.5">
-        <label htmlFor="email" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">
-          Email Address
-        </label>
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-600 group-focus-within:text-brand-500 transition-colors">
-            <Mail size={18} />
-          </div>
-          <input
-            id="email"
-            type="email"
-            {...register("email")}
-            placeholder="admin@grocerypro.com"
-            className={`w-full rounded-xl border pl-11 pr-4 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-brand-500/10
-          ${errors.email
-                ? 'border-red-500/50 bg-red-500/5 text-red-200'
-                : 'border-white/5 bg-slate-950/40 text-slate-200 focus:border-brand-500/50 focus:bg-slate-950/60'}`}
-          />
-        </div>
-        {errors.email && <p className="text-[11px] font-bold text-red-400 ml-1">{errors.email.message}</p>}
-      </div>
+            <div className="space-y-1.5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <label htmlFor="password" className="text-sm font-medium">Password</label>
+                    <Link to={customer ? "/shop/forget-password" : "/forget-password"} className="text-sm text-link underline-offset-4 hover:underline">
+                        Forgot password?
+                    </Link>
+                </div>
+                <div className="relative">
+                    <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        className="h-11 pr-12"
+                        aria-invalid={Boolean(errors.password)}
+                        aria-describedby={errors.password ? "login-password-error" : undefined}
+                        {...register("password")}
+                    />
+                    <button
+                        type="button"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? <EyeOff size={17} aria-hidden="true" /> : <Eye size={17} aria-hidden="true" />}
+                    </button>
+                </div>
+                {errors.password && <p id="login-password-error" className="text-sm text-destructive">{errors.password.message}</p>}
+            </div>
 
-      {/* Password Field */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between ml-1">
-          <label htmlFor="password" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
-            Password
-          </label>
-          <button onClick={() => window.location.href = "/forget-password"} type="button" className="text-[11px] font-bold text-brand-500 hover:text-brand-400 uppercase tracking-widest">
-            Forgot?
-          </button>
-        </div>
-
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-600 group-focus-within:text-brand-500 transition-colors">
-            <Lock size={18} />
-          </div>
-          <input
-            id="password"
-            type={isPasswordVisible ? "text" : "password"}
-            {...register("password")}
-            placeholder="••••••••"
-            className={`w-full rounded-xl border pl-11 pr-11 py-3 text-sm transition-all focus:outline-none focus:ring-4 focus:ring-brand-500/10
-          ${errors.password
-                ? 'border-red-500/50 bg-red-500/5 text-red-200'
-                : 'border-white/5 bg-slate-950/40 text-slate-200 focus:border-brand-500/50 focus:bg-slate-950/60'}`}
-          />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-600 hover:text-slate-400 transition-colors"
-            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-          >
-            {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
-        {errors.password && <p className="text-[11px] font-bold text-red-400 ml-1">{errors.password.message}</p>}
-      </div>
-
-      <Button
-        type="submit"
-        disabled={isLoading}
-        className="w-full h-12 text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-900/20 rounded-xl mt-4 active:scale-95 transition-all"
-      >
-        {isLoading ? (
-          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Securing Session...</>
-        ) : (
-          "Sign In to Dashboard"
-        )}
-      </Button>
-    </form>
-  );
+            <Button type="submit" disabled={isLoading} className="relative h-11 w-full">
+                {isLoading ? "Signing in…" : "Sign in"}
+                {isLoading
+                    ? <Loader2 className="absolute right-3.5 size-4 animate-spin" aria-hidden="true" />
+                    : <ArrowRight className="absolute right-3.5 size-4" aria-hidden="true" />}
+            </Button>
+        </form>
+    );
 }
-
-export default LoginForm;

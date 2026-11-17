@@ -2,20 +2,28 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import sharp from "sharp";
 import mongoose from "mongoose";
 import { MongoMemoryReplSet } from "mongodb-memory-server";
 import request from "supertest";
 import app from "../src/app.js";
 import CheckoutOrder from "../src/modules/checkout/checkout.model.js";
+import { publishExpiredOnlineOrders } from "../src/modules/checkout/orderWorkflow.js";
 import Category from "../src/modules/category/category.model.js";
 import Movement from "../src/modules/movement/movement.model.js";
 import Product from "../src/modules/product/product.model.js";
+import { MediaAsset } from "../src/modules/product/product-media.js";
+import { connectMediaDB, imageFiles } from "../src/config/mediaDb.js";
+import { cleanUnusedImageFiles, migrateImageFiles } from "../src/modules/product/media-storage.js";
 import ProductUnit from "../src/modules/product-unit/product-unit.model.js";
 import { StockLot } from "../src/modules/receiving/receiving.model.js";
 import Supplier from "../src/modules/supplier/supplier.model.js";
 import Transaction from "../src/modules/transaction/transaction.model.js";
 import Unit from "../src/modules/unit/unit.model.js";
 import User from "../src/modules/user/user.model.js";
+import { Customer, CustomerAccount } from "../src/modules/user/customer.model.js";
+import { migrateCustomerAccounts } from "../src/modules/user/customer.migration.js";
 import logger from "../src/shared/logger/logger.js";
 
 test("staff sales, checkout reservations and payment confirmation share one stock balance", async (t) => {
@@ -30,6 +38,18 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     process.env.JWT_SECRET = randomUUID();
     logger.silent = true;
     await mongoose.connect(db.getUri());
+    process.env.MEDIA_MONGO_URI = db.getUri();
+    process.env.MEDIA_DB_NAME = "gims_media_test";
+    await connectMediaDB();
+
+    const legacyImageId = new mongoose.Types.ObjectId();
+    const legacyBytes = Buffer.from("legacy file migration fixture");
+    await mongoose.connection.collection("mediafiles").insertOne({ _id: legacyImageId, data: legacyBytes });
+    await migrateImageFiles();
+    await migrateImageFiles();
+    assert.equal(await mongoose.connection.collection("mediafiles").countDocuments({ _id: legacyImageId }), 0);
+    assert.deepEqual(Buffer.from((await imageFiles().findById(legacyImageId)).data), legacyBytes);
+    await imageFiles().deleteOne({ _id: legacyImageId });
 
     const [admin, firstStaff, secondStaff, owner, accountant] = await User.create([
         { name: "Inventory admin", email: "admin@example.test", password: "test", role: "admin", isVerified: true },
@@ -38,10 +58,36 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         { name: "Store manager", email: "owner@example.test", password: "test", role: "owner", isVerified: true },
         { name: "Accountant", email: "accountant@example.test", password: "test", role: "accountant", isVerified: true },
     ]);
+    const shopperId = new mongoose.Types.ObjectId();
+    await Customer.collection.createIndex({ phone: 1 }, { unique: true });
+    await User.collection.insertOne({
+        _id: shopperId, name: "Shopper", email: "shopper@example.test", password: await bcrypt.hash("test-password", 4),
+        role: "customer", isVerified: true,
+    });
+    const legacyOrder = await CheckoutOrder.collection.insertOne({
+        channel: "online", status: "completed", customerId: shopperId, accessHash: "legacy-order-test",
+        fulfillment: "pickup", items: [], timeline: [{ status: "picked_up", actorId: shopperId, at: new Date() }],
+    });
+    await migrateCustomerAccounts();
+    await migrateCustomerAccounts();
+    const shopper = await CustomerAccount.findById(shopperId);
+    assert.equal(String(shopper.customerId), String(shopperId));
+    assert.equal(await User.exists({ _id: shopperId }), null);
+    assert.equal((await CheckoutOrder.findById(legacyOrder.insertedId)).timeline[0].actorType, "customer");
+    await request(app).post("/api/v1/auth/customer/login").send({ email: shopper.email, password: "test-password" }).expect(200);
+    await request(app).post("/api/v1/auth/login").send({ email: shopper.email, password: "test-password" }).expect(401);
+    await request(app).post("/api/v1/auth/customer/register").send({
+        name: "Other shopper", email: "other@example.test", password: "test-password", phone: "9800000099",
+    }).expect(201);
+    const otherShopper = await CustomerAccount.findOne({ email: "other@example.test" });
+    await otherShopper.updateOne({ isVerified: true });
+    assert.equal((await Customer.findById(otherShopper.customerId)).phone, "9800000099");
     const api = (method, path, actor) => {
         const token = jwt.sign({ id: actor.id, role: actor.role }, process.env.JWT_SECRET);
         return request(app)[method](`/api/v1${path}`).set("Cookie", `token=${token}`);
     };
+    await api("get", `/checkout/customer/orders/${legacyOrder.insertedId}`, shopper).expect(200);
+    await CheckoutOrder.deleteOne({ _id: legacyOrder.insertedId });
     await api("get", "/users", admin).expect(200);
     await api("get", "/users", owner).expect(403);
     await api("get", "/settings/", accountant).expect(200);
@@ -55,6 +101,23 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         .set("X-Forwarded-For", "203.0.113.10")
         .set("X-Forwarded-Proto", "https")
         .set("User-Agent", "GIMS integration test").send(contact).expect(201);
+    const claimId = customerResponse.body.data._id;
+    const counterRecord = await CheckoutOrder.collection.insertOne({
+        channel: "in_store", status: "completed", customerId: new mongoose.Types.ObjectId(claimId),
+        accessHash: "claim-counter-test", items: [], timeline: [], createdAt: new Date(),
+    });
+    const claimRegistration = { ...contact, phone: "+977" + contact.phone, email: "claim@example.test", password: "test-password" };
+    await request(app).post("/api/v1/auth/customer/register").send(claimRegistration).expect(409);
+    await api("post", `/customers/${claimId}/claim-code`, shopper).send({ verifiedPhone: true }).expect(403);
+    const claim = (await api("post", `/customers/${claimId}/claim-code`, firstStaff).send({ verifiedPhone: true }).expect(200)).body.data;
+    await request(app).post("/api/v1/auth/customer/register").send({ ...claimRegistration, claimCode: claim.code }).expect(201);
+    const claimed = await CustomerAccount.findOne({ email: claimRegistration.email });
+    assert.equal(String(claimed.customerId), claimId);
+    await claimed.updateOne({ isVerified: true });
+    await api("get", `/checkout/customer/orders/${counterRecord.insertedId}`, claimed).expect(200);
+    await api("get", `/checkout/customer/orders/${counterRecord.insertedId}`, otherShopper).expect(404);
+    await CheckoutOrder.deleteOne({ _id: counterRecord.insertedId });
+    await request(app).post("/api/v1/auth/customer/register").send({ ...claimRegistration, email: "replay@example.test", claimCode: claim.code }).expect(409);
     await api("get", "/activity-logs", owner).expect(403);
     await api("get", "/activity-logs", firstStaff).expect(403);
     let activity;
@@ -85,6 +148,50 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         Unit.create({ name: "Each", shortForm: "ea", unitType: "count" }),
         Supplier.create({ name: "Supplier", phone: "9800000000", address: "Warehouse" }),
     ]);
+    const productPayload = { name: "Media test product", categoryId: category.id, unitId: unit.id, basePrice: 1, sellingPrice: 2 };
+    const photoRequest = (method, path, actor, payload) => api(method, path, actor)
+        .set("Content-Type", "application/vnd.grocerypro.product+json").send(JSON.stringify(payload));
+    const photo = (await sharp({ create: { width: 12, height: 8, channels: 3, background: "#24604c" } }).png().toBuffer()).toString("base64");
+    await photoRequest("post", "/products", shopper, { ...productPayload, photos: [{ image: photo }] }).expect(403);
+    await photoRequest("post", "/products", admin, { ...productPayload, photos: [{ image: "AAAA" }] }).expect(400);
+    assert.equal(await Product.countDocuments({ name: productPayload.name }), 0);
+    const withPhotos = (await photoRequest("post", "/products", admin, {
+        ...productPayload, photos: [{ image: photo, altText: "Front" }, { image: photo, altText: "Back" }],
+    }).expect(201)).body.data;
+    const [cover, back] = withPhotos.photos;
+    assert.equal(await mongoose.connection.collection("mediafiles").countDocuments({}), 0);
+    const coverStorageKey = (await MediaAsset.findById(cover.mediaId)).storageKey;
+    assert.ok(await imageFiles().exists({ _id: coverStorageKey }));
+    const photoPath = (entry) => `/api/v1/products/media/${entry.mediaId}`;
+    assert.equal((await MediaAsset.findById(cover.mediaId)).width, 12);
+    await request(app).get(photoPath(cover)).expect("Content-Type", /image\/webp/).expect(200);
+    const publicProduct = async () => (await request(app).get(`/api/v1/checkout/catalog/products/${withPhotos._id}`).expect(200)).body.data.product;
+    assert.deepEqual((await publicProduct()).photos, [cover, back]);
+    const foreignProduct = (await api("post", "/products", admin).send({ ...productPayload, name: "Other media product" }).expect(201)).body.data;
+    await photoRequest("put", `/products/${foreignProduct._id}`, admin, { name: "Should roll back", photos: [cover] }).expect(400);
+    assert.equal((await Product.findById(foreignProduct._id)).name, "Other media product");
+    await api("delete", `/products/${foreignProduct._id}`, admin).expect(200);
+    await photoRequest("put", `/products/${withPhotos._id}`, admin, { photos: [cover, cover] }).expect(400);
+    await photoRequest("put", `/products/${withPhotos._id}`, admin, {
+        photos: Array.from({ length: 7 }, () => ({ image: photo })),
+    }).expect(400);
+    await photoRequest("put", `/products/${withPhotos._id}`, admin, { photos: [back, cover] }).expect(200);
+    assert.equal((await publicProduct()).cover.mediaId, back.mediaId);
+    await photoRequest("put", `/products/${withPhotos._id}`, admin, { photos: [back], isActive: false }).expect(200);
+    await request(app).get(photoPath(back)).expect(404);
+    await api("get", `/products/media/${back.mediaId}/preview`, admin).expect(200);
+    assert.equal(await MediaAsset.exists({ _id: cover.mediaId }), null);
+    await request(app).get(photoPath(cover)).expect(404);
+    await cleanUnusedImageFiles();
+    assert.ok(await imageFiles().exists({ _id: coverStorageKey }));
+    await imageFiles().updateOne({ _id: coverStorageKey }, { $set: { createdAt: new Date(0) } }, { overwriteImmutable: true });
+    const backStorageKey = (await MediaAsset.findById(back.mediaId)).storageKey;
+    await imageFiles().updateOne({ _id: backStorageKey }, { $set: { createdAt: new Date(0) } }, { overwriteImmutable: true });
+    await cleanUnusedImageFiles();
+    assert.equal(await imageFiles().exists({ _id: coverStorageKey }), null);
+    assert.ok(await imageFiles().exists({ _id: backStorageKey }));
+    await api("delete", `/products/${withPhotos._id}`, admin).expect(200);
+    assert.equal(await MediaAsset.exists({ _id: back.mediaId }), null);
     const product = await Product.create({
         name: "Rice", categoryId: category.id, unitId: unit.id, basePrice: 1, sellingPrice: 2,
     });
@@ -179,19 +286,62 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         items, fulfillment: "pickup", paymentMethod: "cash",
         customer: { name: "Shopper", phone: "9800000000" },
     };
+    const smallStock = (await request(app).get("/api/v1/checkout/catalog").expect(200)).body.data;
+    assert.equal(smallStock.find(({ id }) => id === product.id).available, 0);
+    await guest("orders", { ...online, token: randomUUID() }).expect(409);
+    await Product.updateOne({ _id: product.id }, { $set: { quantity: 10 } });
     const orders = await Promise.all([
-        guest("orders", { ...online, token: randomUUID() }),
-        guest("orders", { ...online, token: randomUUID() }),
+        api("post", "/checkout/customer/orders", shopper).send({ ...online, token: randomUUID() }),
+        api("post", "/checkout/customer/orders", shopper).send({ ...online, token: randomUUID() }),
     ]);
     assert.deepEqual(orders.map((response) => response.status).sort(), [200, 409]);
     const onlineOrder = orders.find((response) => response.status === 200).body.data;
+    const history = (await api("get", "/checkout/customer/orders", shopper).expect(200)).body;
+    assert.deepEqual(history.data.map(({ id }) => id), [onlineOrder.id]);
+    assert.deepEqual(history.data[0].customer, { name: online.customer.name });
+    assert.deepEqual(history.data[0].items, onlineOrder.items);
+    const otherHistory = (await api("get", "/checkout/customer/orders", otherShopper).expect(200)).body;
+    assert.deepEqual(otherHistory.data, []);
+    await api("get", `/checkout/customer/orders/${onlineOrder.id}`, shopper).expect(200);
+    await api("get", `/checkout/customer/orders/${onlineOrder.id}`, otherShopper).expect(404);
+    await api("post", `/checkout/customer/orders/${onlineOrder.id}/payment`, otherShopper).send({}).expect(404);
+    await api("get", "/checkout/customer/orders", firstStaff).expect(403);
+    const profile = (await api("patch", "/users/profile", otherShopper)
+        .send({ name: "Updated shopper", email: "updated-shopper@example.test" }).expect(200)).body.data;
+    assert.equal(profile.name, "Updated shopper");
+    assert.equal(profile.isVerified, false);
+    assert.equal(profile.password, undefined);
+    await api("get", "/checkout/customer/orders", otherShopper).expect(403);
     const counter = { items, token: randomUUID(), fulfillment: "counter", paymentMethod: "cash" };
-    await api("post", "/checkout/counter", firstStaff).send(counter).expect(409);
+    await api("post", "/checkout/counter", firstStaff).send({ ...counter, items: [{ ...items[0], quantity: 10 }] }).expect(409);
+    const manageOrder = (order, action, fields = {}) => api("post", `/checkout/management/orders/${order.id}/workflow`, owner).send({ action, ...fields });
+    const staffOrder = (order, action) => api("post", `/checkout/staff/orders/${order.id}/workflow`, firstStaff).send({ action });
+    await api("get", "/checkout/management/orders", firstStaff).expect(403);
+    assert.ok((await api("get", "/checkout/management/orders", owner).expect(200)).body.data.some(({ id }) => id === onlineOrder.id));
+    assert.ok(!(await api("get", "/checkout/staff/orders", firstStaff).expect(200)).body.data.some(({ id }) => id === onlineOrder.id));
+    await staffOrder(onlineOrder, "start_packing").expect(409);
+    await manageOrder(onlineOrder, "request_confirmation", { note: "Please confirm your contact number." }).expect(200);
+    await api("post", `/checkout/customer/orders/${onlineOrder.id}/contact`, otherShopper).send(online.customer).expect(403);
+    await api("post", `/checkout/customer/orders/${onlineOrder.id}/contact`, shopper).send(online.customer).expect(200);
+    await manageOrder(onlineOrder, "approve").expect(200);
+    await CheckoutOrder.updateOne({ _id: onlineOrder.id }, { $set: { expiresAt: new Date(0) } });
+    assert.ok((await api("get", "/checkout/staff/orders", firstStaff).expect(200)).body.data.some(({ id }) => id === onlineOrder.id));
+    await api("post", "/checkout/counter", firstStaff).send({ ...counter, items: [{ ...items[0], quantity: 10 }] }).expect(409);
+    await staffOrder(onlineOrder, "start_packing").expect(200);
+    await staffOrder(onlineOrder, "mark_packed").expect(200);
+    const pickup = (await staffOrder(onlineOrder, "ready").expect(200)).body.data;
+    assert.equal(pickup.fulfillmentStatus, "ready_for_pickup");
     const fulfillPath = `/checkout/staff/orders/${onlineOrder.id}/fulfill`;
     await api("post", fulfillPath, firstStaff).send({ cashCollected: false }).expect(400);
     const cash = (await api("post", fulfillPath, firstStaff).send({ cashCollected: true }).expect(200)).body.data;
     await api("post", fulfillPath, secondStaff).send({ cashCollected: true }).expect(200);
     assert.equal(cash.status, "completed");
+    assert.equal(cash.fulfillmentStatus, "picked_up");
+    assert.equal(cash.paymentStatus, "paid");
+    const pickupUpdates = (await api("get", "/checkout/customer/order-updates", shopper).expect(200)).body.data;
+    assert.deepEqual(pickupUpdates.filter(({ orderId }) => orderId === cash.id).map(({ status }) => status), [
+        "picked_up", "ready_for_pickup", "packed", "packing", "approved", "details_resubmitted", "needs_confirmation", "awaiting_review",
+    ]);
     assert.equal((await Transaction.findById(cash.transactionId)).channel, "online");
     const { data: invoice } = (await api("get", `/billing/sales/${cash.transactionId}/invoice`, admin).expect(200)).body;
     assert.equal(invoice.paidMinor, 200);
@@ -204,33 +354,40 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.equal(cashCounter.status, "completed");
     assert.equal((await Transaction.findById(cashCounter.transactionId)).channel, "in_store");
 
-    await Product.updateOne({ _id: product.id }, { $set: { quantity: 1 } });
+    await Product.updateOne({ _id: product.id }, { $set: { quantity: 10 } });
     process.env.KHALTI_SECRET_KEY = "test-key";
     process.env.KHALTI_MODE = "sandbox";
     process.env.CHECKOUT_CLIENT_URL = "https://shop.example.test";
     let confirmedAmount = 199;
+    let providerReference = "test-payment";
     t.mock.method(globalThis, "fetch", async (url, options) => {
         assert.match(String(url), /^https:\/\/dev\.khalti\.com\/api\/v2\/epayment\//);
         if (String(url).endsWith("/initiate/")) {
             assert.equal(JSON.parse(options.body).amount, 200);
+            assert.match(JSON.parse(options.body).return_url, /\/shop\/orders\/[a-f0-9]{24}$/);
             return Response.json({
-                pidx: "test-payment",
+                pidx: providerReference,
                 payment_url: "https://test-pay.khalti.com/pay",
                 expires_at: new Date(Date.now() + 60_000).toISOString(),
             });
         }
         return Response.json({
-            pidx: "test-payment", status: "Completed", total_amount: confirmedAmount, transaction_id: "provider-test",
+            pidx: providerReference, status: "Completed", total_amount: confirmedAmount, transaction_id: providerReference + "-transaction",
         });
     });
     const gateway = { ...online, token: randomUUID(), paymentMethod: "gateway" };
-    const gatewayOrder = (await guest("orders", gateway).expect(200)).body.data;
-    await guest("payment/start", { token: gateway.token }).expect(200);
+    const gatewayOrder = (await api("post", "/checkout/customer/orders", shopper).send(gateway).expect(200)).body.data;
+    await api("post", `/checkout/customer/orders/${gatewayOrder.id}/payment`, shopper).send({}).expect(200);
     const gatewayFulfill = `/checkout/staff/orders/${gatewayOrder.id}/fulfill`;
     await api("post", gatewayFulfill, firstStaff).send({}).expect(409);
+    await manageOrder(gatewayOrder, "approve").expect(409);
     await guest("payment/verify", { token: gateway.token }).expect(409);
     confirmedAmount = 200;
-    assert.equal((await guest("payment/verify", { token: gateway.token }).expect(200)).body.data.status, "paid");
+    assert.equal((await api("post", `/checkout/customer/orders/${gatewayOrder.id}/verify`, shopper).send({}).expect(200)).body.data.status, "paid");
+    await manageOrder(gatewayOrder, "approve").expect(200);
+    await staffOrder(gatewayOrder, "start_packing").expect(200);
+    await staffOrder(gatewayOrder, "mark_packed").expect(200);
+    await staffOrder(gatewayOrder, "ready").expect(200);
     const completed = (await api("post", gatewayFulfill, firstStaff).send({}).expect(200)).body.data;
     const { data: paid } = (await api("get", `/billing/sales/${completed.transactionId}/invoice`, admin).expect(200)).body;
     assert.equal(paid.paidMinor, 200);
@@ -245,7 +402,7 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     const { data: summary } = (await api("get", "/checkout/sales-summary", admin).expect(200)).body;
     assert.equal(summary.channels.find((channel) => channel._id === "online").sales, 2);
 
-    await Product.updateOne({ _id: product.id }, { $set: { quantity: 1 } });
+    await Product.updateOne({ _id: product.id }, { $set: { quantity: 10 } });
     const delivery = {
         ...online, token: randomUUID(), fulfillment: "delivery",
         customer: { ...online.customer, address: "Delivery address" },
@@ -256,9 +413,13 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     const expiring = (await guest("orders", next).expect(200)).body.data;
     await CheckoutOrder.updateOne({ _id: expiring.id }, { $set: { expiresAt: new Date(0) } });
     assert.equal((await guest("status", { token: next.token }).expect(200)).body.data.status, "expired");
+    await publishExpiredOnlineOrders();
+    await publishExpiredOnlineOrders();
+    assert.equal((await CheckoutOrder.findById(expiring.id)).timeline.filter(({ status }) => status === "expired").length, 1);
+    assert.equal((await CheckoutOrder.findById(onlineOrder.id)).timeline.some(({ status }) => status === "expired"), false);
     const crossChannel = await Promise.all([
         guest("orders", { ...delivery, token: randomUUID() }),
-        api("post", "/checkout/counter", firstStaff).send({ ...counter, token: randomUUID() }),
+        api("post", "/checkout/counter", firstStaff).send({ ...counter, token: randomUUID(), items: [{ ...items[0], quantity: 10 }] }),
     ]);
     assert.deepEqual(crossChannel.map((response) => response.status).sort(), [200, 409]);
     assert.equal((await CheckoutOrder.findById(deliveryOrder.id)).status, "cancelled");
@@ -293,4 +454,88 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.equal(overview.onlineOrders, null);
     assert.equal(typeof (await api("get", "/analytics/store-overview", admin).expect(200)).body.data.onlineOrders, "number");
     await api("get", "/analytics/store-overview", firstStaff).expect(403);
+
+    const emptyCategory = await Category.create({ name: "Empty shelf" });
+    const previewProducts = await Product.create(Array.from({ length: 9 }, (_, index) => ({
+        name: `Pantry test rice ${index + 1}`, categoryId: category.id, unitId: unit.id,
+        quantity: index < 8 ? 20 : 0, basePrice: 1, sellingPrice: 2,
+    })));
+    await Product.create({
+        name: "Pantry test rice hidden", categoryId: category.id, unitId: unit.id,
+        quantity: 50, basePrice: 1, sellingPrice: 2, isActive: false,
+    });
+    const catalog = "/api/v1/checkout/catalog";
+    const previews = (await request(app).get(catalog + "/previews").expect(200)).body.data;
+    const pantry = previews.find(({ id }) => id === category.id);
+    assert.equal(pantry.products.length, 8);
+    assert.ok(pantry.products.every(({ available }) => available > 0));
+    assert.deepEqual(previews.find(({ id }) => id === emptyCategory.id).products, []);
+    const results = (await request(app).get(catalog).query({ q: "RICE test", page: 2 }).expect(200)).body;
+    assert.equal(results.meta.totalItems, 9);
+    assert.deepEqual(results.data.map(({ id }) => id), [previewProducts[8].id]);
+    const selected = (await request(app).get(catalog).query({ productId: previewProducts[8].id }).expect(200)).body;
+    assert.equal(selected.data[0].id, previewProducts[8].id);
+    const { data: detail } = (await request(app).get(`${catalog}/products/${previewProducts[8].id}`).expect(200)).body;
+    assert.equal(detail.product.id, previewProducts[8].id);
+    assert.equal(detail.product.available, 0);
+    assert.equal(detail.category.id, category.id);
+    assert.equal(detail.related.length, 4);
+    assert.ok(detail.related.every(({ id, name }) => id !== detail.product.id && name.startsWith("Pantry test rice")));
+    const hidden = await Product.findOne({ name: "Pantry test rice hidden" });
+    await request(app).get(`${catalog}/products/${hidden.id}`).expect(404);
+    const exactCategory = (await request(app).get(catalog).query({ categoryId: category.id }).expect(200)).body;
+    assert.ok(exactCategory.meta.totalItems > pantry.products.length);
+    const literal = (await request(app).get(catalog).query({ q: ".*" }).expect(200)).body;
+    assert.equal(literal.meta.totalItems, 0);
+    const priced = (await request(app).get(catalog)
+        .query({ q: "pantry test", categoryId: category.id, minPrice: "2.00", maxPrice: "2.00" }).expect(200)).body;
+    assert.equal(priced.meta.totalItems, 9);
+    const excluded = (await request(app).get(catalog)
+        .query({ q: "pantry test", maxPrice: "1.99" }).expect(200)).body;
+    assert.equal(excluded.meta.totalItems, 0);
+    await request(app).get(catalog).query({ minPrice: "3", maxPrice: "2" }).expect(400);
+    await Product.updateOne({ _id: product.id }, { $set: { quantity: 20 } });
+    await api("post", "/checkout/customer/orders", shopper)
+        .send({ ...delivery, token: randomUUID() }).expect(400);
+    const savedAddress = { province: "Bagmati", district: "Kathmandu", address: "Ward 4, near the market" };
+    await api("patch", "/users/profile", shopper).send({ phone: "9841234567", deliveryAddress: savedAddress }).expect(200);
+    const savedProfile = (await api("get", "/users/me", shopper).expect(200)).body.data;
+    assert.equal(savedProfile.phone, "9841234567");
+    assert.deepEqual(savedProfile.deliveryAddress, savedAddress);
+    const deliveryCheckout = (await api("post", "/checkout/customer/orders", shopper)
+        .send({ ...delivery, customer: { ...delivery.customer, ...savedAddress }, token: randomUUID() }).expect(200)).body.data;
+    const deliveryContact = (await api("get", `/checkout/customer/orders/${deliveryCheckout.id}`, shopper).expect(200)).body.data.customer;
+    assert.equal(deliveryContact.province, savedAddress.province);
+    assert.equal(deliveryContact.district, savedAddress.district);
+    assert.equal(deliveryContact.address, savedAddress.address);
+    await api("patch", "/users/profile", shopper).send({ phone: null, deliveryAddress: null }).expect(200);
+    const clearedProfile = (await api("get", "/users/me", shopper).expect(200)).body.data;
+    assert.equal(clearedProfile.phone, null);
+    assert.equal(clearedProfile.deliveryAddress, null);
+    await manageOrder(deliveryCheckout, "approve").expect(200);
+    await staffOrder(deliveryCheckout, "start_packing").expect(200);
+    await staffOrder(deliveryCheckout, "mark_packed").expect(200);
+    const dispatched = (await staffOrder(deliveryCheckout, "ready").expect(200)).body.data;
+    assert.equal(dispatched.fulfillmentStatus, "out_for_delivery");
+    assert.equal(dispatched.paymentStatus, "cash_on_delivery");
+    const deliveryHandover = `/checkout/staff/orders/${deliveryCheckout.id}/fulfill`;
+    await api("post", deliveryHandover, firstStaff).send({ cashCollected: false }).expect(400);
+    const delivered = (await api("post", deliveryHandover, firstStaff).send({ cashCollected: true }).expect(200)).body.data;
+    assert.equal(delivered.fulfillmentStatus, "delivered");
+    assert.equal(delivered.paymentStatus, "paid");
+
+    providerReference = "refund-test-payment";
+    const refundOrder = (await api("post", "/checkout/customer/orders", shopper)
+        .send({ ...gateway, token: randomUUID() }).expect(200)).body.data;
+    await api("post", `/checkout/customer/orders/${refundOrder.id}/payment`, shopper).send({}).expect(200);
+    await api("post", `/checkout/management/orders/${refundOrder.id}/verify`, owner).send({}).expect(200);
+    const cancelled = (await manageOrder(refundOrder, "cancel", { note: "Unable to fulfill the order." }).expect(200)).body.data;
+    assert.equal(cancelled.fulfillmentStatus, "cancelled");
+    assert.equal(cancelled.paymentStatus, "refund_pending");
+    assert.ok((await api("get", "/checkout/management/orders", owner).expect(200)).body.data.some(({ id }) => id === refundOrder.id));
+    const refunded = (await manageOrder(refundOrder, "record_refund", { note: "Provider refund reference" }).expect(200)).body.data;
+    assert.equal(refunded.paymentStatus, "refunded");
+    assert.ok(!refunded.timeline.some(({ note }) => note === "Provider refund reference"));
+    assert.equal(await Transaction.countDocuments({ checkoutOrderId: refundOrder.id }), 0);
+
 });

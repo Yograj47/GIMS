@@ -118,6 +118,7 @@ export const findProductById = async (id) => {
                 isActive: 1,
                 createdAt: 1,
                 updatedAt: 1,
+                photos: 1,
 
                 category: {
                     _id: "$categoryDoc._id",
@@ -198,13 +199,15 @@ export const findProductByName = async (name) => {
     return Product.findOne({ name });
 };
 
-export const createProduct = async (payload) => {
-    return Product.create(payload);
+export const createProduct = async (payload, session) => {
+    const [product] = await Product.create([payload], { session });
+    return product;
 };
 
 export const updateProductById = async (
     id,
-    payload
+    payload,
+    session
 ) => {
     const filter = { _id: id };
     const { quantity, ...changes } = payload;
@@ -221,14 +224,16 @@ export const updateProductById = async (
         {
             new: true,
             runValidators: true,
+            session,
         }
     );
 };
 
 export const deleteProductById = async (
-    id
+    id,
+    session
 ) => {
-    return Product.findOneAndDelete({ _id: id, hasStockLots: { $ne: true } });
+    return Product.findOneAndDelete({ _id: id, hasStockLots: { $ne: true } }, { session });
 };
 
 export const findProducts = async (

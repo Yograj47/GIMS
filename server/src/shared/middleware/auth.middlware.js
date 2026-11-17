@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import User from "../../modules/user/user.model.js";
+import { CustomerAccount } from "../../modules/user/customer.model.js";
 
 export const authenticate = asyncHandler(
     async (req, res, next) => {
@@ -18,9 +19,10 @@ export const authenticate = asyncHandler(
             process.env.JWT_SECRET
         );
 
-        const user = await User.findById(
+        const model = decoded.role === "customer" ? CustomerAccount : User;
+        const user = await model.findById(
             decoded.id
-        ).select("role isVerified");
+        ).select("role isVerified customerId counterHistoryBefore");
 
         if (!user) {
             return res.status(401).json({
@@ -39,6 +41,8 @@ export const authenticate = asyncHandler(
 
         req.user = {
             id: user._id,
+            customerId: user.customerId,
+            counterHistoryBefore: user.counterHistoryBefore,
             role: user.role,
             isVerified: user.isVerified,
         };

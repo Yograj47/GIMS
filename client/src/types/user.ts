@@ -6,6 +6,8 @@ export interface UserData {
     email: string;
     role: Role;
     isVerified: boolean;
+    phone?: string | null;
+    deliveryAddress?: { province: string; district: string; address: string } | null;
 }
 
 export type UserRole = Role;

@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const productPhoto = z.object({ mediaId: z.string(), altText: z.string().max(180) });
+const photoDraft = z.union([productPhoto, z.object({ file: z.file(), altText: z.string().max(180) })]);
+export type ProductPhoto = z.infer<typeof productPhoto>;
+export type ProductPhotoDraft = z.infer<typeof photoDraft>;
+
 export const productSchema = z.object({
     name: z.string().min(1, "Product name cannot be empty").trim(),
     categoryId: z.string().min(1, "Category is required"),
@@ -10,6 +15,7 @@ export const productSchema = z.object({
     basePrice: z.coerce.number().min(0.01, "Base price must be at least 0.01"),
     sellingPrice: z.coerce.number().min(0.01, "Selling price must be at least 0.01"),
     isActive: z.boolean().default(true),
+    photos: z.array(photoDraft).max(6).optional(),
 })
     .refine((data) => data.sellingPrice >= data.basePrice, {
         message: "Selling price must be greater than or equal to the base price",
@@ -47,6 +53,7 @@ export interface ProductData {
     };
     supplier: { _id: string; name: string } | null;
     isActive: boolean;
+    photos?: ProductPhoto[];
     createdAt: string;
     sellingUnits: SellingUnit[];
     baseUnit: { name: string; shortForm: string } | null;

@@ -45,7 +45,6 @@ export default function UserListing({ user, isSelf, isProtected, handleRoleChang
             <SelectItem value="owner" className="text-[10px] font-black uppercase tracking-widest">Owner / Manager</SelectItem>
             <SelectItem value="staff" className="text-[10px] font-black uppercase tracking-widest">Staff</SelectItem>
             <SelectItem value="accountant">Accountant</SelectItem>
-            <SelectItem value="customer">Customer</SelectItem>
           </SelectContent>
         </Select>
       </td>

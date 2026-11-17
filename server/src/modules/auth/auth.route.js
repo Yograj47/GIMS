@@ -14,8 +14,12 @@ import {
 const router = Router();
 
 // Public
+router.post("/customer/register", authController.registerUser);
 router.post("/register", authController.registerUser);
 router.post("/login", authController.loginUser);
+router.post("/customer/login", authController.loginCustomer);
+router.post("/customer/forgot-password", authController.resetPasswordOtp);
+router.post("/customer/reset-password", authController.resetPassword);
 
 router.post(
     "/forgot-password",
@@ -47,6 +51,13 @@ router.post(
 );
 
 // User Management
+router.post(
+    "/users/staff",
+    authenticate,
+    authorize(PERMISSIONS.USER_WRITE),
+    authController.createStaffAccount
+);
+
 router.patch(
     "/users/:id/role",
     authenticate,

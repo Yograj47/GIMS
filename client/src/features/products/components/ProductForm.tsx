@@ -5,15 +5,17 @@ import { EntityField, EntitySection, entityInput } from "@/components/common/Ent
 import type { CategoryData } from "@/types/category";
 import type { UnitData } from "@/types/unit";
 import { useEffect } from "react";
+import ProductPhotosField from "./ProductPhotosField";
 type ProductFormProps = {
     initialData?: ProductData;
     categories: CategoryData[];
     units: UnitData[];
     onSubmit?: (data: ProductFormData) => void;
+    saving?: boolean;
 };
 
-export default function ProductForm({ initialData, categories, units, onSubmit }: ProductFormProps) {
-    const { register, handleSubmit, reset, control, formState: { errors } } = useForm<ProductFormData>({
+export default function ProductForm({ initialData, categories, units, onSubmit, saving = false }: ProductFormProps) {
+    const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema) as Resolver<ProductFormData>,
         defaultValues: {
             name: initialData?.name ?? "",
@@ -47,11 +49,13 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
     const buyPrice = useWatch({ control, name: "basePrice" }) || 0;
     const sellPrice = useWatch({ control, name: "sellingPrice" }) || 0;
     const profit = sellPrice - buyPrice;
+    const photos = useWatch({ control, name: "photos" }) ?? initialData?.photos ?? [];
     const categoryOptions = categories.filter((item) => item.isActive || item._id === initialData?.category?._id);
     const unitOptions = units.filter((item) => item.isActive || item._id === initialData?.unit?._id);
 
     return (
         <form id="product-form" onSubmit={handleSubmit(onSubmit || (() => {}))}>
+            <fieldset disabled={saving} className="min-w-0">
             <EntitySection title="Product details">
                 <EntityField label="Product name (required)" hint="Use the name staff should search for at the register. Include the brand or size if it distinguishes this item." error={errors.name?.message}>
                     {(field) => <input {...field} {...register("name")} className={entityInput} placeholder="e.g. Dried green peas" />}
@@ -70,6 +74,10 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                         </select>}
                     </EntityField>
                 </div>
+            </EntitySection>
+
+            <EntitySection title="Product photos">
+                <ProductPhotosField photos={photos} onChange={(next) => setValue("photos", next, { shouldDirty: true })} />
             </EntitySection>
 
             <EntitySection title="Pricing">
@@ -94,6 +102,7 @@ export default function ProductForm({ initialData, categories, units, onSubmit }
                     </EntityField>
                 </div>
             </EntitySection>
+            </fieldset>
         </form>
     );
 }

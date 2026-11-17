@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
             required: [true, "Please add a password"],
         },
 
+
         avatar: {
             type: String,
             default: null,
@@ -29,8 +30,8 @@ const userSchema = new mongoose.Schema(
 
         role: {
             type: String,
-            enum: Object.values(ROLES),
-            default: ROLES.CUSTOMER,
+            enum: Object.values(ROLES).filter((role) => role !== ROLES.CUSTOMER),
+            required: true,
         },
 
         isVerified: {

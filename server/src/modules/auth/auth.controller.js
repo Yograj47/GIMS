@@ -8,6 +8,8 @@ import {
 } from "../user/user.validation.js";
 import { successResponse } from "../../shared/utils/response.js";
 import { COOKIE_OPTIONS } from "../../shared/constants/index.js";
+import { z } from "zod";
+import { validContactPhone } from "../../shared/utils/deliveryContact.js";
 import {
     logInfo,
 } from "../../shared/logger/index.js";
@@ -16,7 +18,10 @@ import {
 } from "../../shared/constants/index.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
-    const payload = registerSchema.parse(req.body);
+    const payload = registerSchema.extend({
+        phone: z.string().trim().max(30).refine(validContactPhone, "Enter a valid mobile number"),
+        claimCode: z.string().trim().regex(/^[A-Za-z0-9_-]{22}$/).optional(),
+    }).parse(req.body);
 
     const { token } =
         await authService.registerUser(payload);
@@ -34,11 +39,20 @@ export const registerUser = asyncHandler(async (req, res) => {
     });
 });
 
-export const loginUser = asyncHandler(async (req, res) => {
+export const createStaffAccount = asyncHandler(async (req, res) => {
+    await authService.createStaffAccount(registerSchema.parse(req.body));
+
+    return successResponse(res, {
+        statusCode: 201,
+        message: "Staff account created",
+    });
+});
+
+const login = (customer) => asyncHandler(async (req, res) => {
     const payload = loginSchema.parse(req.body);
 
     const { token, user } =
-        await authService.loginUser(payload);
+        await authService.loginUser(payload, { customer });
     res.locals.activityActor = { id: user.id, role: user.role };
 
     logInfo(
@@ -52,6 +66,9 @@ export const loginUser = asyncHandler(async (req, res) => {
         message: "User logged in successfully",
     });
 });
+
+export const loginUser = login(false);
+export const loginCustomer = login(true);
 
 export const logoutUser = asyncHandler(async (req, res) => {
     logInfo(
@@ -68,7 +85,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
 
 export const sendVerifyOtp = asyncHandler(async (req, res) => {
     await authService.sendVerifyOtp(
-        req.user.id
+        req.user.id, req.user.role
     );
 
     logInfo(
@@ -86,6 +103,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
     await authService.verifyEmail({
         userId: req.user.id,
+        role: req.user.role,
         otp,
     });
 
@@ -103,7 +121,7 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
     await authService.resetPasswordOtp(
-        email
+        email, req.path.startsWith("/customer/")
     );
 
     logInfo(
@@ -120,7 +138,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     const payload = resetPasswordSchema.parse(req.body);
 
     await authService.resetPassword(
-        payload
+        payload, req.path.startsWith("/customer/")
     );
 
     logInfo(

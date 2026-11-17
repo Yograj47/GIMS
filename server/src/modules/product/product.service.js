@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
+import ProductUnit from "../product-unit/product-unit.model.js";
+import { prepareProductPhotos, removeProductPhotos, writeProductPhotos } from "./product-media.js";
 
 import {
     findProductById,
@@ -23,12 +25,9 @@ import {
     findSupplierById,
 } from "../supplier/supplier.repository.js";
 
-import {
-    create as createProductUnit,
-} from "../product-unit/product-unit.service.js";
-
 export const create = async (
-    payload
+    { photos, ...payload },
+    uploadedBy
 ) => {
     const {
         name,
@@ -79,21 +78,19 @@ export const create = async (
         }
     }
 
-    const product =
-        await createProduct(payload);
-
-    await createProductUnit({
-        productId: product._id,
-        unitId: unit._id,
-        multiplier:
-            unit.multiplierToBase,
-        isDefault: true,
-        isFractionable:
-            unit.isFractional,
-        isActive: true,
+    const prepared = photos && await prepareProductPhotos(photos);
+    return mongoose.connection.transaction(async (session) => {
+        const product = await createProduct(payload, session);
+        await ProductUnit.create([{
+            productId: product._id, unitId: unit._id, multiplier: unit.multiplierToBase,
+            isDefault: true, isFractionable: unit.isFractional, isActive: true,
+        }], { session });
+        if (prepared?.length) {
+            product.photos = await writeProductPhotos(product._id, prepared, uploadedBy, session);
+            await product.save({ session });
+        }
+        return product;
     });
-
-    return product;
 };
 
 export const find = async ({
@@ -176,7 +173,8 @@ export const findById = async (
 
 export const update = async (
     productId,
-    payload
+    { photos, ...payload },
+    uploadedBy
 ) => {
     if (payload.categoryId) {
         const category =
@@ -217,11 +215,16 @@ export const update = async (
         }
     }
 
-    const product =
-        await updateProductById(
-            productId,
-            payload
-        );
+    const prepared = photos && await prepareProductPhotos(photos);
+    const product = prepared === undefined
+        ? await updateProductById(productId, payload)
+        : await mongoose.connection.transaction(async (session) => {
+            const current = await updateProductById(productId, payload, session);
+            if (!current) return null;
+            current.photos = await writeProductPhotos(current._id, prepared, uploadedBy, session);
+            await current.save({ session });
+            return current;
+        });
 
     if (!product) {
         if (await findProductStock(productId)) {
@@ -238,10 +241,11 @@ export const update = async (
 export const remove = async (
     productId
 ) => {
-    const product =
-        await deleteProductById(
-            productId
-        );
+    const product = await mongoose.connection.transaction(async (session) => {
+        const deleted = await deleteProductById(productId, session);
+        if (deleted?.photos.length) await removeProductPhotos(deleted._id, [], session);
+        return deleted;
+    });
 
     if (!product) {
         if ((await findProductStock(productId))?.hasStockLots) {

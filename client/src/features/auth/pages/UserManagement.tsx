@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { SearchX, ShieldCheck } from "lucide-react";
+import { SearchX, ShieldCheck, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import AddStaffForm from "../components/AddStaffForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import UserListing from "../components/UserListing";
@@ -11,6 +13,7 @@ import { notify } from "@/lib/toast";
 export default function UserManagement() {
     const { users, fetchUsers, isLoading, updateRole, removeUser } = useUsers();
     const { user: currentUser } = useAuth();
+    const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
 
@@ -63,13 +66,20 @@ export default function UserManagement() {
                         </div>
                     </div>
 
-                    <div className="text-right hidden md:block">
-                        <p className="text-[10px] font-bold text-subtle-foreground uppercase tracking-widest">Active Accounts</p>
-                        <p className="text-xl font-black text-foreground tabular-nums leading-none">
-                            {users?.length || 0}
-                        </p>
-                    </div>
+                    <Button type="button" aria-expanded={isAddStaffOpen} onClick={() => setIsAddStaffOpen(!isAddStaffOpen)}>
+                        <UserPlus aria-hidden="true" /> Add staff
+                    </Button>
                 </div>
+
+                {isAddStaffOpen && (
+                    <AddStaffForm
+                        onClose={() => setIsAddStaffOpen(false)}
+                        onCreated={() => {
+                            setIsAddStaffOpen(false);
+                            void fetchUsers();
+                        }}
+                    />
+                )}
 
                 {/* 2. PRECISION TABLE CONTAINER */}
                 <div className="bg-card border border-border shadow-sm rounded-sm overflow-x-auto min-h-100">

@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import cookie from "cookie";
 
 import User from "../../modules/user/user.model.js";
+import { CustomerAccount } from "../../modules/user/customer.model.js";
 
 export const socketAuth = async (
     socket,
@@ -27,11 +28,12 @@ export const socketAuth = async (
             process.env.JWT_SECRET
         );
 
+        const model = decoded.role === "customer" ? CustomerAccount : User;
         const user =
-            await User.findById(
+            await model.findById(
                 decoded.id
             ).select(
-                "role isVerified name email"
+                "role isVerified name email customerId"
             );
 
         if (!user) {
@@ -55,6 +57,7 @@ export const socketAuth = async (
 
         socket.user = {
             id: user._id.toString(),
+            customerId: user.customerId?.toString(),
             role: user.role,
             isVerified:
                 user.isVerified,

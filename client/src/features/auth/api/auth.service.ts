@@ -21,21 +21,22 @@ export const authService = {
             await api.post<
                 ApiResponse<UserData>
             >(
-                `${BASE_URL}/register`,
-                payload
+                `${BASE_URL}/customer/register`,
+                { ...payload, claimCode: payload.claimCode || undefined }
             );
 
         return data;
     },
 
     login: async (
-        payload: LoginFormData
+        payload: LoginFormData,
+        customer = false,
     ) => {
         const { data } =
             await api.post<
                 ApiResponse
             >(
-                `${BASE_URL}/login`,
+                `${BASE_URL}/${customer ? "customer/login" : "login"}`,
                 payload
             );
 
@@ -79,13 +80,14 @@ export const authService = {
     },
 
     forgotPassword: async (
-        payload: ForgotPasswordFormData
+        payload: ForgotPasswordFormData,
+        customer = false,
     ) => {
         const { data } =
             await api.post<
                 ApiResponse
             >(
-                `${BASE_URL}/forgot-password`,
+                `${BASE_URL}/${customer ? "customer/" : ""}forgot-password`,
                 payload
             );
 
@@ -93,13 +95,14 @@ export const authService = {
     },
 
     resetPassword: async (
-        payload: ResetPasswordPayload
+        payload: ResetPasswordPayload,
+        customer = false,
     ) => {
         const { data } =
             await api.post<
                 ApiResponse
             >(
-                `${BASE_URL}/reset-password`,
+                `${BASE_URL}/${customer ? "customer/" : ""}reset-password`,
                 payload
             );
 

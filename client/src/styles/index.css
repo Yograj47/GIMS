@@ -15,6 +15,11 @@
   to { background-position: -100% 0; }
 }
 
+@keyframes workspace-highlight {
+  0%, 100% { background-color: var(--card); }
+  35% { background-color: var(--accent); }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

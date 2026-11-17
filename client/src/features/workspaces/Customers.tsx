@@ -4,10 +4,11 @@ import type { FormEvent } from "react";
 import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useDebounce } from "@/lib/debounce";
 import api from "@/lib/api";
 
-type Contact = { _id: string; name: string; phone: string };
+type Contact = { _id: string; name: string; phone?: string | null };
 
 export default function Customers() {
     const [search, setSearch] = useState("");
@@ -19,6 +20,9 @@ export default function Customers() {
     const [loading, setLoading] = useState(true);
     const [failed, setFailed] = useState(false);
     const [message, setMessage] = useState("");
+    const [claimCustomer, setClaimCustomer] = useState<Contact>();
+    const [claimCode, setClaimCode] = useState("");
+    const [issuing, setIssuing] = useState(false);
     const query = useDebounce(search, 300);
     useEffect(() => {
         const request = new AbortController();
@@ -66,6 +70,19 @@ export default function Customers() {
 
     const staff = useAuthStore((state) => state.user?.role === "staff");
 
+    async function generateClaimCode() {
+        if (!claimCustomer || issuing) return;
+        setIssuing(true);
+        try {
+            const { data } = await api.post<{ data: { code: string } }>(`/customers/${claimCustomer._id}/claim-code`, { verifiedPhone: true });
+            setClaimCode(data.data.code);
+        } catch {
+            // The API client displays issuance errors.
+        } finally {
+            setIssuing(false);
+        }
+    }
+
     return (
         <main className="w-full space-y-4 p-3 sm:p-4 lg:p-5">
             {!staff && <BackButton className="text-sm text-link hover:underline" />}
@@ -82,7 +99,12 @@ export default function Customers() {
                 {loading ? <p role="status">Loading customersâ€¦</p> : failed ? (
                     <Button variant="outline" onClick={() => setReload((value) => value + 1)}>Retry loading customers</Button>
                 ) : contacts.length === 0 ? <p className="text-sm text-muted-foreground">No customers found.</p> : (
-                    <ul className="divide-y">{contacts.map((contact) => <li key={contact._id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{contact.name}</span><span>{contact.phone}</span></li>)}</ul>
+                    <ul className="divide-y">{contacts.map((contact) => (
+                        <li key={contact._id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+                            <div><p className="font-medium">{contact.name}</p><p className="text-muted-foreground">{contact.phone || "No mobile saved"}</p></div>
+                            {contact.phone && <Button variant="outline" size="sm" onClick={() => { setClaimCode(""); setClaimCustomer(contact); }}>Link online account</Button>}
+                        </li>
+                    ))}</ul>
                 )}
                 {total > 25 && <div className="flex items-center gap-3">
                     <Button variant="outline" disabled={page === 1 || loading} onClick={() => setPage(page - 1)}>Previous</Button>
@@ -90,6 +112,22 @@ export default function Customers() {
                     <Button variant="outline" disabled={page * 25 >= total || loading} onClick={() => setPage(page + 1)}>Next</Button>
                 </div>}
             </section>
+            <Dialog open={Boolean(claimCustomer)} onOpenChange={(open) => { if (!open && !issuing) setClaimCustomer(undefined); }}>
+                <DialogContent>
+                    <DialogTitle>Link online account</DialogTitle>
+                    <DialogDescription>
+                        Verify that {claimCustomer?.name} can receive a call or message at {claimCustomer?.phone} before issuing a code.
+                    </DialogDescription>
+                    {claimCode ? <div className="space-y-2">
+                        <label className="grid gap-1 text-sm">One-time linking code
+                            <Input readOnly value={claimCode} onFocus={(event) => event.currentTarget.select()} />
+                        </label>
+                        <p className="text-sm text-muted-foreground">Share this code with the verified customer. It expires in 15 minutes.</p>
+                    </div> : <Button disabled={issuing} onClick={() => void generateClaimCode()}>
+                        {issuing ? "Generating…" : "Mobile verified · Generate code"}
+                    </Button>}
+                </DialogContent>
+            </Dialog>
         </main>
     );
 }

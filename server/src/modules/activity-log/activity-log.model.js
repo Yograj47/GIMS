@@ -4,7 +4,7 @@ const activityLogSchema = new mongoose.Schema(
     {
         performedBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Users",
+            ref() { return this.actorRole === "customer" ? "CustomerAccounts" : "Users"; },
             required: true,
         },
 

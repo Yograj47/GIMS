@@ -12,6 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export default function VerifyAccount() {
+  const customer = useAuthStore((state) => state.user?.role === "customer");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState<string>("");
   const { isLoading, sendVerifyOtp, verifyEmail } = useAuth();
@@ -37,31 +38,31 @@ export default function VerifyAccount() {
   };
 
   return (
-    <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 shadow-2xl p-8 md:p-10 animate-in fade-in zoom-in duration-500">
+    <div className="w-full max-w-md bg-card rounded-[2.5rem] border border-border shadow-2xl p-8 md:p-10 animate-in fade-in zoom-in duration-500">
 
       {/* Visual Header */}
       <div className="flex flex-col items-center text-center mb-10">
         <div className={`p-5 rounded-2xl mb-6 transition-all duration-700 shadow-lg ${otpSent
-          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-emerald-500/5'
-          : 'bg-brand-500/10 text-brand-400 border border-brand-500/20 shadow-brand-500/5'
+          ? 'bg-accent text-accent-foreground border border-border'
+          : 'bg-muted text-link border border-border'
           }`}>
           {otpSent ? <ShieldCheck size={36} /> : <MailWarning size={36} />}
         </div>
 
-        <h2 className="text-3xl font-black text-white tracking-tight">
+        <h2 className="text-3xl font-black text-foreground tracking-tight">
           {otpSent ? "Verify Identity" : "Security Check"}
         </h2>
 
-        <p className="text-sm text-slate-400 mt-3 font-medium max-w-65 leading-relaxed">
+        <p className="text-sm text-muted-foreground mt-3 font-medium max-w-65 leading-relaxed">
           {otpSent
             ? "We've sent a 6-digit code to your registered email address."
-            : "To protect your inventory data, please verify your account identity."}
+            : customer ? "Verify your email to finish creating your shopping account." : "Verify your email to access your workspace."}
         </p>
       </div>
 
       {!otpSent ? (
         <Button
-          className="w-full h-14 text-base font-bold transition-all active:scale-[0.98] bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-900/20 rounded-xl group"
+          className="w-full h-14 text-base font-bold transition-all active:scale-[0.98] rounded-xl group"
           onClick={handleSendOtp}
           disabled={isLoading}
         >
@@ -89,19 +90,19 @@ export default function VerifyAccount() {
                   <InputOTPSlot
                     key={index}
                     index={index}
-                    className="w-12 h-14 md:w-14 md:h-16 text-xl font-black border-white/5 bg-slate-950/40 text-brand-400 rounded-xl focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500/50 transition-all"
+                    className="w-12 h-14 md:w-14 md:h-16 text-xl font-black border-input bg-card text-link rounded-xl focus:ring-4 focus:ring-ring/20 focus:border-ring transition-all"
                   />
                 ))}
               </InputOTPGroup>
             </InputOTP>
-            <label className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
+            <label className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">
               Input Security Token
             </label>
           </div>
 
           <div className="w-full space-y-4">
             <Button
-              className="w-full h-14 text-sm font-bold transition-all active:scale-[0.98] bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 rounded-xl"
+              className="w-full h-14 text-sm font-bold transition-all active:scale-[0.98] rounded-xl"
               onClick={handleVerifyOtp}
               disabled={otp.length !== 6 || isLoading}
             >
@@ -111,7 +112,7 @@ export default function VerifyAccount() {
             <button
               type="button"
               onClick={handleSendOtp}
-              className="w-full flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-400 transition-colors py-2"
+              className="w-full flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-link transition-colors py-2"
               disabled={isLoading}
             >
               <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />

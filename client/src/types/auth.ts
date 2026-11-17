@@ -10,6 +10,8 @@ export const registerSchema = z
       .max(100, "Name is too long"),
 
     email: z.email("Invalid email format"),
+    phone: z.string().trim().regex(/^\+?[0-9]{7,15}$/, "Enter a valid mobile number"),
+    claimCode: z.string().trim().regex(/^(?:[A-Za-z0-9_-]{22})?$/, "Enter the code provided by the store").optional(),
 
     password: z.string()
       .min(6, "Password must be at least 6 characters")

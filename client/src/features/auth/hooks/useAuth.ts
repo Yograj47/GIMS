@@ -25,13 +25,14 @@ export const useAuth = () => {
     } = useAuthStore();
 
     const login = async (
-        payload: LoginFormData
+        payload: LoginFormData,
+        customer = false,
     ) => {
         try {
             setLoading(true);
 
             await authService.login(
-                payload
+                payload, customer
             );
 
             await fetchUser();
@@ -55,6 +56,8 @@ export const useAuth = () => {
             await authService.register(
                 payload
             );
+
+            await fetchUser();
 
             notify.success(
                 "Account created successfully"
@@ -124,14 +127,15 @@ export const useAuth = () => {
 
     const forgotPassword =
         async (
-            payload: ForgotPasswordFormData
+            payload: ForgotPasswordFormData,
+            customer = false,
         ) => {
             try {
                 setLoading(true);
 
                 const response =
                     await authService.forgotPassword(
-                        payload
+                        payload, customer
                     );
 
                 notify.success(
@@ -147,13 +151,14 @@ export const useAuth = () => {
 
     const resetPassword =
         async (
-            payload: ResetPasswordPayload
+            payload: ResetPasswordPayload,
+            customer = false,
         ) => {
             try {
                 setLoading(true);
 
                 await authService.resetPassword(
-                    payload
+                    payload, customer
                 );
 
                 notify.success(

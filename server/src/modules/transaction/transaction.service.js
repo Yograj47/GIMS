@@ -6,6 +6,7 @@ import { AppError } from "../../shared/errors/index.js";
 import logger from "../../shared/logger/logger.js";
 import { consumeReceivedStock, resolveStockUnit } from "../receiving/receiving.service.js";
 import { reservedStock } from "../checkout/reservation.js";
+import { findOrCreateCustomer } from "../user/customer.service.js";
 
 import {
     createTransaction,
@@ -130,10 +131,16 @@ export async function writeStockTransaction(payload, userId, session, { excludeO
         });
     }
 
+    const customerId = payload.customerId ?? (
+        !payload.checkoutOrderId && ["Sale", "Return"].includes(payload.transactionType)
+            ? (await findOrCreateCustomer(payload.partyDetails, session))?._id
+            : undefined
+    );
     const [transaction] =
         await createTransaction(
             {
                 ...payload,
+                customerId,
                 ...(payload.transactionType === "Sale" && { channel: payload.channel ?? "in_store" }),
             },
             session

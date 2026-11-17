@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 
-export default function LoginPage() {
+export default function LoginPage({ customer = false }: { customer?: boolean }) {
     return (
-        <section className="space-y-6 rounded-2xl border border-white/15 bg-white/5 p-5 sm:p-8">
+        <section className="space-y-6 rounded-xl border border-border bg-card shadow-sm p-5 sm:p-8">
             <header>
-                <h1 className="text-2xl font-semibold tracking-tight text-white">Sign in</h1>
-                <p className="mt-1 text-sm text-slate-300">Sign in to your GroceryPro account.</p>
+                <h1 className="shop-display text-3xl font-semibold tracking-tight">{customer ? "Customer sign in" : "Workspace sign in"}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">{customer ? "Sign in with your grocery shopping account." : "Sign in with your store team account."}</p>
             </header>
-            <LoginForm />
-            <p className="border-t border-white/10 pt-4 text-sm text-slate-300">
-                New to GroceryPro? <Link to="/register" className="font-medium text-brand-300 underline-offset-4 hover:underline">Create account</Link>
-            </p>
+            <LoginForm customer={customer} />
+            {customer && <p className="border-t border-border pt-4 text-sm text-muted-foreground">
+                New to GroceryPro? <Link to="/shop/register" className="font-medium text-link underline-offset-4 hover:underline">Create account</Link>
+            </p>}
         </section>
     );
 }

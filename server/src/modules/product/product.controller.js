@@ -21,7 +21,7 @@ export const createProduct = asyncHandler(
 
         const product =
             await ProductService.create(
-                payload
+                payload, req.user.id
             );
 
         logInfo(
@@ -109,7 +109,7 @@ export const updateProduct = asyncHandler(
         const product =
             await ProductService.update(
                 req.params.id,
-                payload
+                payload, req.user.id
             );
 
         logInfo(

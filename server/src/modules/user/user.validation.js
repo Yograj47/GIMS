@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ROLES } from "../../shared/constants/index.js";
+import { deliveryAddressFields, validContactPhone } from "../../shared/utils/deliveryContact.js";
 
 export const registerSchema = z.object({
     name: z.string()
@@ -54,6 +55,8 @@ export const resetPasswordSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
+    phone: z.string().trim().max(30).refine(validContactPhone, "Enter a valid mobile number").nullable().optional(),
+    deliveryAddress: z.object(deliveryAddressFields).nullable().optional(),
     name: z.string()
         .trim()
         .min(2)
@@ -83,5 +86,5 @@ export const changePasswordSchema = z.object({
 });
 
 export const updateRoleSchema = z.object({
-    role: z.enum(Object.values(ROLES)),
+    role: z.enum(Object.values(ROLES).filter((role) => role !== ROLES.CUSTOMER)),
 });

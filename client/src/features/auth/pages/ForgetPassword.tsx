@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { notify } from "@/lib/toast";
 import { useAuth } from "../hooks/useAuth";
 
-export default function ForgotPassword() {
+export default function ForgotPassword({ customer = false }: { customer?: boolean }) {
     const [step, setStep] = useState<"email" | "otp" | "password">(() => {
         const savedExpiry = localStorage.getItem("otp_expiry");
         if (savedExpiry) {
@@ -70,7 +70,7 @@ export default function ForgotPassword() {
 
     // --- Step 1: Request OTP ---
     const handleSendOtp = async (data: ForgotPasswordFormData) => {
-        const success = await forgotPassword(data);
+        const success = await forgotPassword(data, customer);
         if (!success) return;
 
         setUserEmail(data.email);
@@ -99,19 +99,19 @@ export default function ForgotPassword() {
             email: userEmail,
             otp: data.otp,
             newPassword: data.password,
-        });
+        }, customer);
 
         if (!success) return;
 
         localStorage.removeItem("otp_expiry");
         localStorage.removeItem("reset_email");
-        navigate("/login");
+        navigate(customer ? "/shop/login" : "/login");
     };
 
     const handleResend = async () => {
         if (timer > 0 || !userEmail) return;
         try {
-            await forgotPassword({ email: userEmail });
+            await forgotPassword({ email: userEmail }, customer);
             setTimer(600);
             notify.success("New code sent!");
         } catch {
@@ -119,27 +119,27 @@ export default function ForgotPassword() {
         }
     };
 
-    const midnightInput = "bg-slate-950/40 border-white/5 text-slate-200 placeholder:text-slate-600 focus:border-brand-500/50 focus:bg-slate-950/60 transition-all rounded-2xl py-7 pl-6 shadow-inner";
+    const inputClass = "bg-card border-input text-foreground placeholder:text-muted-foreground focus:border-ring transition-all rounded-2xl py-7 pl-6 shadow-inner";
 
     return (
-        <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl animate-in fade-in zoom-in duration-500">
+        <div className="w-full max-w-md bg-card p-8 md:p-10 rounded-[2.5rem] border border-border shadow-2xl animate-in fade-in zoom-in duration-500">
             <div className="mb-10 flex flex-col items-center">
-                <div className="w-16 h-16 bg-brand-600/10 border border-brand-500/20 rounded-2xl flex items-center justify-center text-brand-500 mb-6 shadow-[0_0_20px_rgba(4,120,87,0.1)]">
+                <div className="w-16 h-16 bg-accent border border-border rounded-2xl flex items-center justify-center text-link mb-6">
                     {step === "email" && <Mail size={32} />}
                     {step === "otp" && <KeyRound size={32} />}
                     {step === "password" && <ShieldCheck size={32} />}
                 </div>
 
-                <h2 className="text-3xl font-black text-white tracking-tight text-center">
+                <h2 className="text-3xl font-black text-foreground tracking-tight text-center">
                     {step === "email" && "Reset Access"}
                     {step === "otp" && "Check Email"}
                     {step === "password" && "New Credentials"}
                 </h2>
 
-                <p className="text-slate-400 text-sm text-center mt-3 font-medium leading-relaxed">
+                <p className="text-muted-foreground text-sm text-center mt-3 font-medium leading-relaxed">
                     {step === "email" && "Enter your email to receive a secure recovery code."}
                     {step === "otp" && (
-                        <span>Sent to <span className="text-brand-400 font-bold">{userEmail}</span></span>
+                        <span>Sent to <span className="text-link font-bold">{userEmail}</span></span>
                     )}
                     {step === "password" && "Choose a strong password for your GIMS account."}
                 </p>
@@ -150,9 +150,9 @@ export default function ForgotPassword() {
                     <Input
                         {...requestForm.register("email")}
                         placeholder="admin@grocery.local"
-                        className={midnightInput}
+                        className={inputClass}
                     />
-                    <Button className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 font-bold text-white shadow-lg shadow-brand-900/20" disabled={isLoading}>
+                    <Button className="w-full py-7 rounded-2xl font-bold" disabled={isLoading}>
                         {isLoading ? <Loader2 className="animate-spin" /> : "Request Security Code"}
                     </Button>
                 </form>
@@ -163,16 +163,16 @@ export default function ForgotPassword() {
                     <Input
                         {...resetForm.register("otp")}
                         placeholder="000000"
-                        className="py-10 rounded-2xl bg-slate-950/60 border-white/10 text-center text-3xl font-black tracking-[0.6em] text-brand-400 focus:border-brand-500"
+                        className="py-10 rounded-2xl bg-card border-input text-center text-3xl font-black tracking-[0.6em] text-link focus:border-ring"
                         maxLength={6}
                     />
-                    <Button onClick={goToPasswordStep} className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 font-bold text-white shadow-lg shadow-brand-900/20">
+                    <Button onClick={goToPasswordStep} className="w-full py-7 rounded-2xl font-bold">
                         Verify Identity
                     </Button>
                     <button
                         onClick={handleResend}
                         disabled={timer > 0}
-                        className="w-full text-[11px] font-black text-brand-500 uppercase tracking-[0.2em] disabled:opacity-30 transition-opacity"
+                        className="w-full text-[11px] font-black text-link uppercase tracking-[0.2em] disabled:opacity-30 transition-opacity"
                     >
                         {timer > 0 ? `Resend available in ${formatTime(timer)}` : "Request New Code"}
                     </button>
@@ -185,29 +185,29 @@ export default function ForgotPassword() {
                         type="password"
                         {...resetForm.register("password")}
                         placeholder="Strong New Password"
-                        className={midnightInput}
+                        className={inputClass}
                     />
                     <Input
                         type="password"
                         {...resetForm.register("confirmPassword")}
                         placeholder="Repeat New Password"
-                        className={midnightInput}
+                        className={inputClass}
                     />
-                    <Button className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 font-bold text-white shadow-xl shadow-brand-900/20" disabled={isLoading}>
+                    <Button className="w-full py-7 rounded-2xl font-bold" disabled={isLoading}>
                         {isLoading ? <Loader2 className="animate-spin" /> : "Update Credentials"}
                     </Button>
                     <button
                         type="button"
                         onClick={() => setStep("otp")}
-                        className="w-full text-[11px] font-black text-slate-500 uppercase tracking-widest hover:text-slate-300"
+                        className="w-full text-[11px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground"
                     >
                         Back to Code Entry
                     </button>
                 </form>
             )}
 
-            <div className="mt-10 pt-6 border-t border-white/5 text-center">
-                <BackButton className="text-sm font-bold text-slate-500 hover:text-brand-500 transition-colors flex items-center justify-center gap-2 group">
+            <div className="mt-10 pt-6 border-t border-border text-center">
+                <BackButton className="text-sm font-bold text-muted-foreground hover:text-link transition-colors flex items-center justify-center gap-2 group">
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Back
                 </BackButton>

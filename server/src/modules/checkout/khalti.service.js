@@ -3,6 +3,8 @@ import { AppError } from "../../shared/errors/index.js";
 import Product from "../product/product.model.js";
 import CheckoutOrder from "./checkout.model.js";
 import { getOrder, orderExpired } from "./checkout.service.js";
+import { addOrderEvent } from "./orderLifecycle.js";
+import { notifyOrderUpdate } from "./orderNotifications.js";
 
 export const gatewayEnabled = () => Boolean(process.env.KHALTI_SECRET_KEY && process.env.CHECKOUT_CLIENT_URL);
 
@@ -28,8 +30,11 @@ async function khalti(path, body) {
 }
 
 export async function startOnlinePayment(token) {
+    return startOrderPayment(await getOrder(token));
+}
+
+export async function startOrderPayment(order) {
     if (!gatewayEnabled()) throw new AppError("Online payment is unavailable", 503);
-    const order = await getOrder(token);
     if (order.paymentMethod !== "gateway" || order.status !== "reserved" || orderExpired(order)) {
         throw AppError.conflict("This order is not eligible for online payment");
     }
@@ -45,7 +50,7 @@ export async function startOnlinePayment(token) {
     if (!claimed.modifiedCount) throw AppError.conflict("Payment initiation is already in progress for this order");
     const website = new URL(process.env.CHECKOUT_CLIENT_URL);
     const response = await khalti("initiate", {
-        return_url: new URL("/checkout/return", website).href,
+        return_url: new URL(order.channel === "online" && order.customerId ? `/shop/orders/${order.id}` : "/checkout/return", website).href,
         website_url: website.origin,
         amount: order.totalMinor,
         purchase_order_id: order.id,
@@ -77,17 +82,22 @@ export async function verifyOnlinePayment(order) {
     const lookup = await khalti("lookup", { pidx: order.providerPaymentId });
     if (lookup.pidx !== order.providerPaymentId) throw new AppError("Payment lookup did not match this order", 502);
     if (["Expired", "User canceled", "Failed"].includes(lookup.status)) {
-        return await CheckoutOrder.findOneAndUpdate(
-            { _id: order.id, status: "reserved" }, { $set: { status: "cancelled" } }, { returnDocument: "after" },
-        ) ?? await CheckoutOrder.findById(order.id);
+        const cancelled = await CheckoutOrder.findOneAndUpdate(
+            { _id: order.id, status: "reserved" },
+            { $set: { status: "cancelled", ...(order.channel === "online" ? { fulfillmentStatus: "cancelled" } : {}) },
+                $push: { timeline: { status: "cancelled", at: new Date(), note: "Online payment did not complete." } } },
+            { returnDocument: "after" },
+        );
+        if (cancelled) notifyOrderUpdate(cancelled, cancelled.timeline.at(-1));
+        return cancelled ?? await CheckoutOrder.findById(order.id);
     }
     if (lookup.status !== "Completed" || lookup.refunded) return order;
     if (lookup.total_amount !== order.totalMinor || typeof lookup.transaction_id !== "string" || !lookup.transaction_id) {
         throw AppError.conflict("Payment details require manual reconciliation");
     }
-    return mongoose.connection.transaction(async (session) => {
+    const result = await mongoose.connection.transaction(async (session) => {
         const latest = await CheckoutOrder.findById(order.id).session(session);
-        if (["paid", "completed", "payment_review"].includes(latest.status)) return latest;
+        if (["paid", "completed", "payment_review"].includes(latest.status)) return { order: latest, changed: false };
         if (latest.status === "reserved" && !orderExpired(latest)) {
             await Product.updateMany({ _id: { $in: latest.items.map((item) => item.productId) } },
                 { $inc: { stockRevision: 1 } }, { session });
@@ -97,6 +107,9 @@ export async function verifyOnlinePayment(order) {
         }
         latest.providerTransactionId = lookup.transaction_id;
         latest.paidAt = new Date();
-        return latest.save({ session });
+        if (latest.channel === "online") addOrderEvent(latest, latest.status);
+        return { order: await latest.save({ session }), changed: true };
     });
+    if (result.changed) notifyOrderUpdate(result.order, result.order.timeline.at(-1));
+    return result.order;
 }

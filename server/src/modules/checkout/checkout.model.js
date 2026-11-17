@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { orderStages } from "./orderLifecycle.js";
 
 const { Schema } = mongoose;
 const item = new Schema({
@@ -23,7 +24,19 @@ const schema = new Schema({
     expiresAt: Date,
     items: { type: [item], required: true },
     totalMinor: { type: Number, required: true },
-    customer: { name: String, phone: String, address: String },
+    customer: { name: String, phone: String, province: String, district: String, address: String },
+    customerId: { type: Schema.Types.ObjectId, ref: "Customers" },
+    fulfillmentStatus: { type: String, enum: orderStages },
+    timeline: [{
+        status: { type: String, required: true },
+        at: { type: Date, required: true },
+        actorId: { type: Schema.Types.ObjectId, ref() { return this.actorType === "customer" ? "Customers" : "Users"; } },
+        actorType: { type: String, enum: ["customer", "staff"] },
+        note: String,
+    }],
+    refundedAt: Date,
+    refundReference: String,
+    expiryNotifiedAt: Date,
     providerPaymentId: String,
     providerPaymentUrl: String,
     providerTransactionId: String,
@@ -32,6 +45,9 @@ const schema = new Schema({
     transactionId: { type: Schema.Types.ObjectId, ref: "Transactions" },
 }, { timestamps: true });
 schema.index({ "items.productId": 1, status: 1, expiresAt: 1 });
+schema.index({ customerId: 1, createdAt: -1, _id: -1 });
+schema.index({ channel: 1, fulfillmentStatus: 1, createdAt: -1 });
+schema.index({ channel: 1, status: 1, expiryNotifiedAt: 1, expiresAt: 1 });
 schema.index({ providerPaymentId: 1 }, { unique: true, partialFilterExpression: { providerPaymentId: { $type: "string" } } });
 schema.index({ providerTransactionId: 1 }, { unique: true, partialFilterExpression: { providerTransactionId: { $type: "string" } } });
 

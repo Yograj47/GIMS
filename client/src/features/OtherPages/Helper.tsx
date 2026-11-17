@@ -10,6 +10,7 @@ import {
     LayoutDashboard
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { supportEmail } from "./publicInfo";
 
 export default function HelpPage() {
     const commonIssues = [
@@ -30,7 +31,7 @@ export default function HelpPage() {
         }
     ];
 
-    const email = "yograjrijal926@gmail.com";
+    const email = supportEmail;
     const subject = "GIMS Issue: [Brief Description]";
     const body = "Hello Han IT Hub Support,I am experiencing the following issue with GIMS: ";
 

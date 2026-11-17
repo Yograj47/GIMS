@@ -1,0 +1,27 @@
+@media print {
+  body:has(.order-packing-slip) > :not(.order-packing-slip) {
+    display: none !important;
+  }
+
+  body:has(.order-packing-slip) .order-packing-slip {
+    position: static;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    transform: none;
+    translate: none;
+    background: white;
+    color: black;
+    border: none;
+    box-shadow: none;
+  }
+
+  body:has(.order-packing-slip) .order-packing-slip button {
+    display: none;
+  }
+
+  .order-packing-slip :is(li, h2) {
+    break-inside: avoid;
+  }
+}

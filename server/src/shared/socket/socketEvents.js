@@ -9,6 +9,7 @@ export const SOCKET_EVENTS = {
 
     // Notifications
     NOTIFICATION: "notification:new",
+    ORDER_UPDATED: "order:updated",
 
     // Inventory
     INVENTORY_UPDATED: "inventory:updated",

@@ -1,4 +1,5 @@
 import z from "zod";
+import { productPhotosSchema } from "./product-media.js";
 
 const productBaseSchema = z.object({
     name: z.string().min(1).trim(),
@@ -39,6 +40,7 @@ const productBaseSchema = z.object({
     sellingPrice: z.number().min(0.01),
 
     isActive: z.boolean(),
+    photos: productPhotosSchema.optional(),
 });
 
 export const createProductSchema =

@@ -1,4 +1,7 @@
 import bcrypt from "bcryptjs";
+import { randomInt } from "node:crypto";
+import { CustomerAccount } from "../user/customer.model.js";
+import { registerCustomer } from "../user/customer.service.js";
 
 import {
     findUserByEmail,
@@ -20,11 +23,11 @@ import {
 } from "../../shared/services/index.js";
 import { AppError } from "../../shared/errors/index.js";
 
-export const registerUser = async ({
+const createAccount = async ({
     name,
     email,
     password,
-}) => {
+}, role) => {
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
@@ -33,13 +36,18 @@ export const registerUser = async ({
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await createUser({
+    return createUser({
         name,
         email,
         password: hashedPassword,
-        role: ROLES.CUSTOMER,
+        role,
     });
+};
 
+export const createStaffAccount = (payload) => createAccount(payload, ROLES.STAFF);
+
+export const registerUser = async (payload) => {
+    const user = await registerCustomer(payload);
     const token = generateToken(user);
 
     return {
@@ -51,8 +59,8 @@ export const registerUser = async ({
 export const loginUser = async ({
     email,
     password,
-}) => {
-    const user = await findUserByEmail(email);
+}, { customer = false } = {}) => {
+    const user = customer ? await CustomerAccount.findOne({ email }) : await findUserByEmail(email);
 
     if (!user) {
         throw AppError.unauthorized("Invalid credentials");
@@ -63,7 +71,7 @@ export const loginUser = async ({
         user.password
     );
 
-    if (!isPasswordValid) {
+    if (!isPasswordValid || (user.role === ROLES.CUSTOMER) !== customer) {
         throw AppError.unauthorized("Invalid credentials");
     }
 
@@ -75,9 +83,10 @@ export const loginUser = async ({
     };
 };
 
-export const sendVerifyOtp = async (userId) => {
-    const user = await findUserById(userId);
+const findAccount = (id, role) => role === ROLES.CUSTOMER ? CustomerAccount.findById(id) : findUserById(id);
 
+export const sendVerifyOtp = async (userId, role) => {
+    const user = await findAccount(userId, role);
     if (!user) {
         throw AppError.notFound("User not found");
     }
@@ -88,7 +97,7 @@ export const sendVerifyOtp = async (userId) => {
 
     const otp = generateOtp();
 
-    await updateUserById(userId, {
+    await user.updateOne({
         verifyOtp: otp,
         verifyOtpExpiresAt:
             Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000,
@@ -116,8 +125,9 @@ export const sendVerifyOtp = async (userId) => {
 export const verifyEmail = async ({
     userId,
     otp,
+    role,
 }) => {
-    const user = await findUserById(userId);
+    const user = await findAccount(userId, role);
 
     if (!user) {
         throw AppError.notFound("User not found");
@@ -132,7 +142,7 @@ export const verifyEmail = async ({
         throw AppError.badRequest("Invalid or expired OTP");
     }
 
-    const updatedUser = await updateUserById(userId, {
+    const updatedUser = await user.updateOne({
         isVerified: true,
         verifyOtp: null,
         verifyOtpExpiresAt: 0,
@@ -141,8 +151,8 @@ export const verifyEmail = async ({
     return updatedUser;
 };
 
-export const resetPasswordOtp = async (email) => {
-    const user = await findUserByEmail(email);
+export const resetPasswordOtp = async (email, customer) => {
+    const user = customer ? await CustomerAccount.findOne({ email }) : await findUserByEmail(email);
 
     if (!user) {
         throw AppError.notFound("User not found");
@@ -150,7 +160,7 @@ export const resetPasswordOtp = async (email) => {
 
     const otp = generateOtp();
 
-    await updateUserById(user._id, {
+    await user.updateOne({
         resetOtp: otp,
         resetOtpExpiresAt:
             Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000,
@@ -170,7 +180,7 @@ export const resetPasswordOtp = async (email) => {
         <p>This code expires in ${OTP_EXPIRY_MINUTES} minutes.</p>
         `,
         "Reset Password",
-        `${process.env.CLIENT_URL}/reset-password`
+        `${process.env.CLIENT_URL}${customer ? "/shop" : ""}/forget-password`
     );
 
     await sendEmail(
@@ -186,8 +196,8 @@ export const resetPassword = async ({
     email,
     otp,
     newPassword,
-}) => {
-    const user = await findUserByEmail(email);
+}, customer) => {
+    const user = customer ? await CustomerAccount.findOne({ email }) : await findUserByEmail(email);
 
     if (!user) {
         throw AppError.notFound("User not found");
@@ -207,7 +217,7 @@ export const resetPassword = async ({
         10
     );
 
-    return updateUserById(user._id, {
+    return user.updateOne({
         password: hashedPassword,
         resetOtp: null,
         resetOtpExpiresAt: 0,
@@ -219,7 +229,7 @@ export const updateRole = async ({
     targetUserId,
     role,
 }) => {
-    const validRoles = Object.values(ROLES);
+    const validRoles = Object.values(ROLES).filter((value) => value !== ROLES.CUSTOMER);
 
     if (!validRoles.includes(role)) {
 
@@ -262,5 +272,4 @@ export const removeUser = async ({
     return user;
 };
 
-const generateOtp = () =>
-    Math.floor(100000 + Math.random() * 900000).toString();
+const generateOtp = () => randomInt(100000, 1000000).toString();
