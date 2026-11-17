@@ -2,12 +2,12 @@ import { Server } from "socket.io";
 import { socketAuth } from "./socketAuth.js";
 import { SOCKET_EVENTS } from "./socketEvents.js";
 import { joinUserRooms } from "./socketRooms.js";
+import { allowedOrigin } from "../middleware/requestSecurity.js";
 import { emitEvent } from "./emitter.js"
 import {
     addConnection,
     removeConnection,
     getOnlineCount,
-    getOnlineUsers,
 } from "./socketPresence.js";
 import {
     logInfo,
@@ -23,9 +23,10 @@ export const initializeSocket = (
 ) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.CLIENT_URL,
+            origin: (origin, callback) => callback(null, Boolean(origin && allowedOrigin(origin))),
             credentials: true,
         },
+        allowRequest: (req, callback) => callback(null, !req.headers.origin || allowedOrigin(req.headers.origin)),
     });
 
     io.use(socketAuth);
@@ -42,6 +43,14 @@ export const initializeSocket = (
         (socket) => {
 
             joinUserRooms(socket);
+            let expiryTimer;
+            function expireSession() {
+                const remaining = socket.user.sessionExpiresAt - Date.now();
+                if (remaining <= 0) return socket.disconnect(true);
+                expiryTimer = setTimeout(expireSession, Math.min(remaining, 2_147_483_647));
+                expiryTimer.unref();
+            }
+            if (socket.user.sessionExpiresAt) expireSession();
 
             addConnection(
                 socket.user.id,
@@ -66,6 +75,7 @@ export const initializeSocket = (
             socket.on(
                 SOCKET_EVENTS.DISCONNECT,
                 () => {
+                    clearTimeout(expiryTimer);
                     removeConnection(
                         socket.user.id,
                         socket.id

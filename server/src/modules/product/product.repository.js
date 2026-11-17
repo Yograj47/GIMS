@@ -211,6 +211,9 @@ export const updateProductById = async (
 ) => {
     const filter = { _id: id };
     const { quantity, ...changes } = payload;
+    if (changes.basePrice !== undefined || changes.sellingPrice !== undefined) {
+        filter.$expr = { $gte: [changes.sellingPrice ?? "$sellingPrice", changes.basePrice ?? "$basePrice"] };
+    }
     if (quantity !== undefined) filter.quantity = quantity;
     if (changes.unitId !== undefined) {
         filter.$or = [

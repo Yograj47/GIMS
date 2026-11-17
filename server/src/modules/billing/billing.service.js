@@ -15,7 +15,7 @@ export function scaledInteger(value, scale) {
 }
 
 export function safeMoney(value) {
-    if (value > BigInt(Number.MAX_SAFE_INTEGER)) throw AppError.badRequest("Invoice amount is too large");
+    if (value < 0n || value > BigInt(Number.MAX_SAFE_INTEGER)) throw AppError.badRequest("Invoice amount is outside the supported range");
     return Number(value);
 }
 

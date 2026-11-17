@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { AppError } from "../../shared/errors/index.js";
 import { validContactPhone } from "../../shared/utils/deliveryContact.js";
 import { Customer, CustomerAccount } from "./customer.model.js";
+import { disconnectAccountSessions } from "../../shared/socket/emitter.js";
 
 export function normalizeCustomerPhone(phone) {
     if (!validContactPhone(phone)) return null;
@@ -78,7 +79,7 @@ export async function registerCustomer({ name, email, password, phone, claimCode
 
 export async function updateCustomerProfile(accountId, { name, email, phone, deliveryAddress }) {
     try {
-        return await mongoose.connection.transaction(async (session) => {
+        const updated = await mongoose.connection.transaction(async (session) => {
             const account = await CustomerAccount.findById(accountId).session(session);
             if (!account) throw AppError.notFound("Account not found");
             const customer = await Customer.findById(account.customerId).session(session);
@@ -101,6 +102,8 @@ export async function updateCustomerProfile(accountId, { name, email, phone, del
             await customer.save({ session });
             return { _id: account._id, role: account.role, name: customer.name, email: account.email, isVerified: account.isVerified };
         });
+        if (!updated.isVerified) disconnectAccountSessions(accountId);
+        return updated;
     } catch (error) {
         if (error.code === 11000) throw AppError.conflict("An account already uses this email or mobile number");
         throw error;

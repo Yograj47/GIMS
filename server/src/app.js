@@ -23,8 +23,11 @@ import analyticsRoute from "./modules/analytics/analytics.route.js";
 import receivingRoute from "./modules/receiving/receiving.route.js";
 import billingRoute from "./modules/billing/billing.route.js";
 import checkoutRoute from "./modules/checkout/checkout.route.js";
+import { allowedOrigin, requestSecurity } from "./shared/middleware/requestSecurity.js";
 
 const app = express();
+app.disable("x-powered-by");
+app.use(requestSecurity);
 
 app.use(express.json());
 
@@ -33,9 +36,7 @@ app.use(recordActivity);
 
 app.use(
     cors({
-        origin:
-            process.env.CLIENT_URL ||
-            "http://localhost:5173",
+        origin: (origin, callback) => callback(null, Boolean(origin && allowedOrigin(origin))),
         credentials: true,
     })
 );

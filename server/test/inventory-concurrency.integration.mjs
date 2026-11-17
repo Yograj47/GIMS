@@ -258,6 +258,10 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
 
     await api("put", `/products/${product.id}`, admin).send({ name: "Renamed", quantity: 1 }).expect(409);
     await api("put", `/products/${product.id}`, admin).send({ name: "Renamed" }).expect(200);
+    await api("put", `/products/${product.id}`, admin).send({ basePrice: 3 }).expect(409);
+    await api("put", `/products/${product.id}`, admin).send({ sellingPrice: 0.5 }).expect(409);
+    assert.equal((await Product.findById(product.id)).basePrice, 1);
+    assert.equal((await Product.findById(product.id)).sellingPrice, 2);
     assert.equal((await Product.findById(product.id)).quantity, 0);
 
     const balancePath = `/receiving/stock/${product.id}`;

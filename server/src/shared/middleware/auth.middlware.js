@@ -1,7 +1,5 @@
-import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import User from "../../modules/user/user.model.js";
-import { CustomerAccount } from "../../modules/user/customer.model.js";
+import { readSession } from "../services/token/session.service.js";
 
 export const authenticate = asyncHandler(
     async (req, res, next) => {
@@ -14,30 +12,8 @@ export const authenticate = asyncHandler(
             });
         }
 
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        const model = decoded.role === "customer" ? CustomerAccount : User;
-        const user = await model.findById(
-            decoded.id
-        ).select("role isVerified customerId counterHistoryBefore");
-
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "User not found",
-            });
-        }
-
-        if (user.role !== decoded.role) {
-            return res.status(403).json({
-                success: false,
-                message:
-                    "Permissions changed. Please login again.",
-            });
-        }
+        const user = await readSession(token);
+        res.set("Cache-Control", "no-store");
 
         req.user = {
             id: user._id,

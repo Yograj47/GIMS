@@ -2,6 +2,8 @@ import asyncHandler from "express-async-handler";
 import * as userService from "./user.service.js";
 import { changePasswordSchema, updateProfileSchema } from "./user.validation.js"
 import { successResponse } from "../../shared/utils/response.js";
+import { generateToken } from "../../shared/services/index.js";
+import { COOKIE_OPTIONS } from "../../shared/constants/index.js";
 import {
     logInfo,
 } from "../../shared/logger/index.js";
@@ -53,11 +55,12 @@ export const updateProfile = asyncHandler(async (req, res) => {
 export const updatePassword = asyncHandler(async (req, res) => {
     const payload = changePasswordSchema.parse(req.body);
 
-    await userService.updatePassword({
+    const account = await userService.updatePassword({
         userId: req.user.id,
         role: req.user.role,
         ...payload,
     });
+    res.cookie("token", generateToken(account), COOKIE_OPTIONS);
 
     logInfo(
         LOG_CONTEXT.AUTH,

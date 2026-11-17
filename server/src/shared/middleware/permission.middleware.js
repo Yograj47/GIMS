@@ -5,6 +5,9 @@ import {
 export const authorize =
     (...requiredPermissions) =>
         (req, res, next) => {
+            if (!req.user.isVerified) {
+                return res.status(403).json({ success: false, message: "Verify your account first" });
+            }
             const role = req.user.role;
 
             const permissions =

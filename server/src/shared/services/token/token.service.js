@@ -6,10 +6,12 @@ export const generateToken = (user) => {
         {
             id: user._id,
             role: user.role,
+            version: user.tokenVersion ?? 0,
         },
         process.env.JWT_SECRET,
         {
             expiresIn: JWT_EXPIRES_IN,
+            algorithm: "HS256",
         }
     );
 };

@@ -5,6 +5,8 @@ import {
     loginSchema,
     resetPasswordSchema,
     updateRoleSchema,
+    resetPasswordOtpSchema,
+    verifyOtpSchema,
 } from "../user/user.validation.js";
 import { successResponse } from "../../shared/utils/response.js";
 import { COOKIE_OPTIONS } from "../../shared/constants/index.js";
@@ -71,6 +73,7 @@ export const loginUser = login(false);
 export const loginCustomer = login(true);
 
 export const logoutUser = asyncHandler(async (req, res) => {
+    await authService.logoutSession(req.user);
     logInfo(
         LOG_CONTEXT.AUTH,
         `User logged out: ${req.user.id}`
@@ -99,7 +102,7 @@ export const sendVerifyOtp = asyncHandler(async (req, res) => {
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
-    const { otp } = req.body;
+    const { otp } = verifyOtpSchema.parse(req.body);
 
     await authService.verifyEmail({
         userId: req.user.id,
@@ -118,7 +121,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 export const resetPasswordOtp = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+    const { email } = resetPasswordOtpSchema.parse(req.body);
 
     await authService.resetPasswordOtp(
         email, req.path.startsWith("/customer/")
@@ -130,7 +133,7 @@ export const resetPasswordOtp = asyncHandler(async (req, res) => {
     );
 
     return successResponse(res, {
-        message: "Reset OTP sent successfully",
+        message: "If an account exists, a reset code has been sent.",
     });
 });
 
@@ -168,7 +171,7 @@ export const updateRole = asyncHandler(async (req, res) => {
 
     return successResponse(res, {
         message: "Role updated successfully",
-        data: user,
+        data: { _id: user._id, name: user.name, email: user.email, role: user.role, isVerified: user.isVerified },
     });
 });
 

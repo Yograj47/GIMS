@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
 
 import * as authController from "./auth.controller.js";
 
@@ -12,6 +13,13 @@ import {
 } from "../../shared/constants/index.js";
 
 const router = Router();
+router.use((_req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
+const loginLimit = rateLimit({ windowMs: 15 * 60_000, limit: 30, standardHeaders: "draft-8", legacyHeaders: false });
+const registerLimit = rateLimit({ windowMs: 60 * 60_000, limit: 15, standardHeaders: "draft-8", legacyHeaders: false });
+const otpLimit = rateLimit({ windowMs: 15 * 60_000, limit: 10, standardHeaders: "draft-8", legacyHeaders: false });
+router.use(["/login", "/customer/login"], loginLimit);
+router.use(["/register", "/customer/register"], registerLimit);
+router.use(["/verify-otp", "/verify-email", "/forgot-password", "/reset-password", "/customer/forgot-password", "/customer/reset-password"], otpLimit);
 
 // Public
 router.post("/customer/register", authController.registerUser);

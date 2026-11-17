@@ -40,6 +40,9 @@ const userSchema = new mongoose.Schema(
         },
 
         verifyOtp: String,
+        tokenVersion: { type: Number, default: 0 },
+        verifyOtpAttempts: { type: Number, default: 0 },
+        resetOtpAttempts: { type: Number, default: 0 },
 
         verifyOtpExpiresAt: {
             type: Number,
@@ -57,7 +60,5 @@ const userSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
-
-userSchema.index({ email: 1 });
 
 export default mongoose.model("Users", userSchema);

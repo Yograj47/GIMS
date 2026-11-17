@@ -1,8 +1,6 @@
-import jwt from "jsonwebtoken";
 import cookie from "cookie";
 
-import User from "../../modules/user/user.model.js";
-import { CustomerAccount } from "../../modules/user/customer.model.js";
+import { readSession } from "../services/token/session.service.js";
 
 export const socketAuth = async (
     socket,
@@ -23,37 +21,8 @@ export const socketAuth = async (
             );
         }
 
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        const model = decoded.role === "customer" ? CustomerAccount : User;
-        const user =
-            await model.findById(
-                decoded.id
-            ).select(
-                "role isVerified name email customerId"
-            );
-
-        if (!user) {
-            return next(
-                new Error(
-                    "User not found"
-                )
-            );
-        }
-
-        if (
-            user.role !==
-            decoded.role
-        ) {
-            return next(
-                new Error(
-                    "Permissions changed"
-                )
-            );
-        }
+        const user = await readSession(token);
+        if (!user.isVerified) return next(new Error("Verify your account first"));
 
         socket.user = {
             id: user._id.toString(),
@@ -63,6 +32,7 @@ export const socketAuth = async (
                 user.isVerified,
             name: user.name,
             email: user.email,
+            sessionExpiresAt: user.$locals.sessionExpiresAt,
         };
 
         next();

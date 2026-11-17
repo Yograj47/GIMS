@@ -228,7 +228,7 @@ export const update = async (
 
     if (!product) {
         if (await findProductStock(productId)) {
-            throw AppError.conflict("Use a stock movement to change quantity. The base unit can only change before stock is recorded");
+            throw AppError.conflict("Check that selling price covers cost. Use stock movements for quantity changes, and change the base unit only before stock is recorded.");
         }
         throw AppError.notFound(
             "Product not found"

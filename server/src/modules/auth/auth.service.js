@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { randomInt } from "node:crypto";
 import { CustomerAccount } from "../user/customer.model.js";
 import { registerCustomer } from "../user/customer.service.js";
+import { consumeOtp, otpDigest } from "./otp.service.js";
+import { disconnectAccountSessions } from "../../shared/socket/emitter.js";
 
 import {
     findUserByEmail,
@@ -85,6 +87,12 @@ export const loginUser = async ({
 
 const findAccount = (id, role) => role === ROLES.CUSTOMER ? CustomerAccount.findById(id) : findUserById(id);
 
+export async function logoutSession({ id, role }) {
+    const account = await findAccount(id, role);
+    if (account) await account.updateOne({ $inc: { tokenVersion: 1 } });
+    disconnectAccountSessions(id);
+}
+
 export const sendVerifyOtp = async (userId, role) => {
     const user = await findAccount(userId, role);
     if (!user) {
@@ -98,7 +106,8 @@ export const sendVerifyOtp = async (userId, role) => {
     const otp = generateOtp();
 
     await user.updateOne({
-        verifyOtp: otp,
+        verifyOtp: otpDigest(otp),
+        verifyOtpAttempts: 0,
         verifyOtpExpiresAt:
             Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000,
     });
@@ -133,35 +142,21 @@ export const verifyEmail = async ({
         throw AppError.notFound("User not found");
     }
 
-    const isOtpInvalid =
-        !user.verifyOtp ||
-        user.verifyOtp !== String(otp) ||
-        Date.now() > user.verifyOtpExpiresAt;
-
-    if (isOtpInvalid) {
-        throw AppError.badRequest("Invalid or expired OTP");
-    }
-
-    const updatedUser = await user.updateOne({
-        isVerified: true,
-        verifyOtp: null,
-        verifyOtpExpiresAt: 0,
-    });
-
-    return updatedUser;
+    return consumeOtp(user, "verify", otp, { isVerified: true });
 };
 
 export const resetPasswordOtp = async (email, customer) => {
     const user = customer ? await CustomerAccount.findOne({ email }) : await findUserByEmail(email);
 
     if (!user) {
-        throw AppError.notFound("User not found");
+        return true;
     }
 
     const otp = generateOtp();
 
     await user.updateOne({
-        resetOtp: otp,
+        resetOtp: otpDigest(otp),
+        resetOtpAttempts: 0,
         resetOtpExpiresAt:
             Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000,
     });
@@ -203,25 +198,14 @@ export const resetPassword = async ({
         throw AppError.notFound("User not found");
     }
 
-    const isOtpInvalid =
-        !user.resetOtp ||
-        user.resetOtp !== String(otp) ||
-        Date.now() > user.resetOtpExpiresAt;
-
-    if (isOtpInvalid) {
-        throw AppError.badRequest("Invalid or expired OTP");
-    }
-
     const hashedPassword = await bcrypt.hash(
         newPassword,
         10
     );
 
-    return user.updateOne({
-        password: hashedPassword,
-        resetOtp: null,
-        resetOtpExpiresAt: 0,
-    });
+    const updated = await consumeOtp(user, "reset", otp, { password: hashedPassword });
+    disconnectAccountSessions(user.id);
+    return updated;
 };
 
 export const updateRole = async ({
@@ -240,16 +224,14 @@ export const updateRole = async ({
         throw AppError.badRequest("You cannot change your own role");
     }
 
-    const user = await updateUserById(
-        targetUserId,
-        { role }
-    );
+    const user = await updateUserById(targetUserId, { $set: { role }, $inc: { tokenVersion: 1 } });
 
     if (!user) {
         throw AppError.notFound("User not found");
 
     }
 
+    disconnectAccountSessions(user.id);
     return user;
 };
 
@@ -269,6 +251,7 @@ export const removeUser = async ({
         throw AppError.notFound("User not found");
     }
 
+    disconnectAccountSessions(user.id);
     return user;
 };
 

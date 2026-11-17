@@ -2,10 +2,10 @@ import bcrypt from "bcryptjs";
 import User from "./user.model.js";
 import { Customer, CustomerAccount } from "./customer.model.js";
 import { updateCustomerProfile } from "./customer.service.js";
+import { disconnectAccountSessions } from "../../shared/socket/emitter.js";
 
 import {
     findUserById,
-    updateUserById,
 } from "./user.repository.js";
 import { AppError } from "../../shared/errors/index.js"
 
@@ -50,10 +50,16 @@ export const updateProfile = async (
         throw AppError.forbidden("Delivery contact details are for customer accounts");
     }
 
-    const user = await updateUserById(
-        userId,
-        payload
-    );
+    const current = await findUserById(userId);
+    if (!current) throw AppError.notFound("User not found");
+    const emailChanged = payload.email && payload.email !== current.email;
+    const user = await User.findOneAndUpdate({ _id: userId, email: current.email }, {
+        $set: {
+            ...payload,
+            ...(emailChanged ? { isVerified: false, verifyOtp: null, verifyOtpExpiresAt: 0, resetOtp: null, resetOtpExpiresAt: 0 } : {}),
+        },
+    }, { returnDocument: "after", runValidators: true });
+    if (emailChanged) disconnectAccountSessions(userId);
 
     if (!user) {
         throw AppError.notFound("User not found");
@@ -85,12 +91,12 @@ export const updatePassword = async ({
         );
     }
 
-    user.password = await bcrypt.hash(
-        newPassword,
-        10
-    );
-
-    await user.save();
-
-    return true;
+    const password = await bcrypt.hash(newPassword, 10);
+    const updated = await user.constructor.findOneAndUpdate({ _id: userId, password: user.password }, {
+        $set: { password, resetOtp: null, resetOtpExpiresAt: 0 },
+        $inc: { tokenVersion: 1 },
+    }, { returnDocument: "after" });
+    if (!updated) throw AppError.conflict("Your password changed. Sign in again before retrying.");
+    disconnectAccountSessions(userId);
+    return updated;
 };
