@@ -35,7 +35,7 @@ export const useAuth = () => {
                 payload, customer
             );
 
-            await fetchUser();
+            if (!await fetchUser()) return false;
 
             notify.success(
                 "Welcome back!"
@@ -57,7 +57,7 @@ export const useAuth = () => {
                 payload
             );
 
-            await fetchUser();
+            if (!await fetchUser()) return false;
 
             notify.success(
                 "Account created successfully"
@@ -113,7 +113,7 @@ export const useAuth = () => {
                     payload
                 );
 
-                await fetchUser();
+                if (!await fetchUser()) return false;
 
                 notify.success(
                     "Email verified"

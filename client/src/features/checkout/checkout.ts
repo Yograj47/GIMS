@@ -1,4 +1,6 @@
 import api from "@/lib/api";
+import { writeStorage } from "@/lib/browserStorage";
+import { notify } from "@/lib/toast";
 
 export type Order = {
     id: string;
@@ -63,7 +65,11 @@ export async function checkoutPost(path: string, payload: object) {
 }
 
 export async function goToPayment(token: string) {
-    sessionStorage.setItem(checkoutTokenKey, token);
+    if (!writeStorage("session", checkoutTokenKey, token)) {
+        const message = "Allow tab storage before starting online payment so your checkout can be restored.";
+        notify.error(message);
+        throw new Error(message);
+    }
     const order = await checkoutPost("payment/start", { token });
     if (order.paymentUrl) window.location.assign(order.paymentUrl);
 }

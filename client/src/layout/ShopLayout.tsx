@@ -7,7 +7,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { publicInfoLinks, supportEmail } from "@/features/OtherPages/publicInfo";
 import api from "@/lib/api";
 import { workspaceHome } from "@/shared/constants/roles";
-import { cartKey, readCart } from "@/features/checkout/shopCart";
+import { readCart, saveCart } from "@/features/checkout/shopCart";
 import ShopSearch from "@/features/checkout/ShopSearch";
 import CustomerOrderUpdates from "@/features/checkout/CustomerOrderUpdates";
 import { ShopPageSkeleton } from "@/features/checkout/ShopLoading";
@@ -15,6 +15,11 @@ import { useAuthStore } from "@/store/authStore";
 import "@/features/checkout/shop.css";
 
 export default function ShopLayout() {
+    const accountId = useAuthStore((state) => state.user?.role === "customer" ? state.user._id : undefined);
+    return <Storefront key={accountId ?? "guest"} accountId={accountId} />;
+}
+
+function Storefront({ accountId }: { accountId?: string }) {
     const [params] = useSearchParams();
     const query = params.get("q") ?? "";
     const { user, logout, isLoading } = useAuth();
@@ -23,7 +28,7 @@ export default function ShopLayout() {
     const workspace = user && user.role !== "customer" ? workspaceHome(user.role) : null;
     const [storeName, setStoreName] = useState("Grocery Store");
 
-    const [cart, setCart] = useState(readCart);
+    const [cart, setCart] = useState(() => readCart(accountId));
     const [accountOpen, setAccountOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -35,8 +40,8 @@ export default function ShopLayout() {
     }, []);
 
     useEffect(() => {
-        sessionStorage.setItem(cartKey, JSON.stringify(cart));
-    }, [cart]);
+        if (accountId) saveCart(accountId, cart);
+    }, [accountId, cart]);
 
     useEffect(() => {
         const controller = new AbortController();

@@ -21,10 +21,11 @@ function RegisterForm() {
   const onSubmit = async (
     data: RegisterFormData
   ) => {
-    const success = await registerUser(data);
-
-    if (success) {
-      navigate("/shop/verify");
+    try {
+      const success = await registerUser(data);
+      if (success) navigate("/shop/verify");
+    } catch {
+      // The API client displays registration errors.
     }
   };
 
@@ -41,31 +42,34 @@ function RegisterForm() {
 
       {/* Full Name */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</label>
+        <label htmlFor="register-name" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</label>
         <div className="relative group">
           <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
-          <input {...register("name")} placeholder="John Doe" className={inputClasses(errors.name)} />
+          <input id="register-name" autoComplete="name" aria-required="true" aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "register-name-error" : undefined} {...register("name")} placeholder="John Doe" className={inputClasses(errors.name)} />
         </div>
-        {errors.name && <p className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">{errors.name.message}</p>}
+        {errors.name && <p id="register-name-error" role="alert" className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">{errors.name.message}</p>}
       </div>
 
       {/* Email */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</label>
+        <label htmlFor="register-email" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</label>
         <div className="relative group">
           <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
-          <input {...register("email")} placeholder="admin@grocery.local" className={inputClasses(errors.email)} />
+          <input id="register-email" type="email" autoComplete="email" aria-required="true" aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "register-email-error" : undefined} {...register("email")} placeholder="you@example.com" className={inputClasses(errors.email)} />
         </div>
-        {errors.email && <p className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">{errors.email.message}</p>}
+        {errors.email && <p id="register-email-error" role="alert" className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-2">
         <label htmlFor="register-mobile" className="text-sm font-medium">Mobile number</label>
         <div className="relative">
           <Phone aria-hidden="true" className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input id="register-mobile" type="tel" autoComplete="tel" {...register("phone")} placeholder="9841234567" className={inputClasses(errors.phone)} />
+          <input id="register-mobile" type="tel" autoComplete="tel" aria-required="true" aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "register-mobile-error" : undefined} {...register("phone")} placeholder="9841234567" className={inputClasses(errors.phone)} />
         </div>
-        {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
+        {errors.phone && <p id="register-mobile-error" role="alert" className="text-xs text-destructive">{errors.phone.message}</p>}
       </div>
 
       <details className="space-y-2 text-sm">
@@ -79,10 +83,15 @@ function RegisterForm() {
       {/* Passwords Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</label>
+          <label htmlFor="register-password" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</label>
           <div className="relative group">
             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
             <input
+              id="register-password"
+              autoComplete="new-password"
+              aria-required="true"
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? "register-password-error" : undefined}
               type={isPasswordVisible ? "text" : "password"}
               {...register("password")}
               placeholder="••••••••"
@@ -92,10 +101,15 @@ function RegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm</label>
+          <label htmlFor="register-confirm" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm password</label>
           <div className="relative group">
             <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-link transition-colors" />
             <input
+              id="register-confirm"
+              autoComplete="new-password"
+              aria-required="true"
+              aria-invalid={Boolean(errors.confirmPassword)}
+              aria-describedby={errors.confirmPassword ? "register-password-error" : undefined}
               type={isPasswordVisible ? "text" : "password"}
               {...register("confirmPassword")}
               placeholder="••••••••"
@@ -103,6 +117,8 @@ function RegisterForm() {
             />
             <button
               type="button"
+              aria-label={isPasswordVisible ? "Hide passwords" : "Show passwords"}
+              aria-pressed={isPasswordVisible}
               onClick={() => setIsPasswordVisible(!isPasswordVisible)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -113,7 +129,7 @@ function RegisterForm() {
       </div>
 
       {(errors.password || errors.confirmPassword) && (
-        <p className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">
+        <p id="register-password-error" role="alert" className="text-[10px] font-bold text-destructive ml-1 uppercase tracking-tight">
           {errors.password?.message || errors.confirmPassword?.message}
         </p>
       )}

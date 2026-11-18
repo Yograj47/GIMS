@@ -21,6 +21,7 @@ import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { PublicRoute } from "./features/auth/components/PublicRoute";
 import { SocketProvider } from "./features/socket/socket.context";
 import { StartupSkeleton } from "./components/common/LoadingSkeleton";
+import PageErrorBoundary from "./components/common/PageErrorBoundary";
 
 // --- Lazy Loaded Pages ---
 const Home = lazy(() => import("./features/OtherPages/Home"));
@@ -79,13 +80,17 @@ function WorkspaceDashboard() {
 
 function App() {
   useEffect(() => {
+    const expireSession = () => useAuthStore.getState().reset();
+    window.addEventListener("session:expired", expireSession);
     void useAuthStore.getState().fetchUser();
+    return () => window.removeEventListener("session:expired", expireSession);
   }, []);
 
   return (
     <SocketProvider>
       <BrowserRouter>
         <div className="antialiased selection:bg-brand-100 selection:text-link">
+          <PageErrorBoundary>
           <Suspense fallback={<StartupSkeleton />}>
             <Routes>
               {/* --- Public / Auth Routes --- */}
@@ -202,6 +207,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </PageErrorBoundary>
 
           <Toaster position="top-right" closeButton richColors />
         </div>

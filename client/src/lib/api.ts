@@ -16,9 +16,12 @@ api.interceptors.response.use(
         const status = error.response?.status;
         const data = error.response?.data;
         const config = error.config;
+        if (status === 401 && !/\/auth\/(customer\/)?login$/.test(config?.url ?? "")) {
+            window.dispatchEvent(new Event("session:expired"));
+        }
 
         const message =
-            data?.message ||
+            (typeof data === "string" ? data : data?.message) ||
             data?.error ||
             "Something went wrong";
 
@@ -33,7 +36,7 @@ api.interceptors.response.use(
         // Rate limiting
         if (status === 429) {
             const retryAfter =
-                data?.retryAfter || 60;
+                data?.retryAfter || error.response.headers?.["retry-after"] || 60;
 
             notify.error(
                 `${message} (Retry in ${retryAfter}s)`

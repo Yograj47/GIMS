@@ -18,8 +18,8 @@ export default function UserManagement() {
     const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
 
     useEffect(() => {
-        fetchUsers();
-    }, []);
+        void fetchUsers().catch(() => {});
+    }, [fetchUsers]);
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         try {

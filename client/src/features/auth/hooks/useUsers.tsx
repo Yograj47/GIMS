@@ -5,6 +5,7 @@ import { userService } from "../api/user.service";
 import { notify } from "@/lib/toast";
 
 import type { UserData } from "@/types/user";
+import { useCallback } from "react";
 
 export const useUsers = () => {
     const {
@@ -14,10 +15,11 @@ export const useUsers = () => {
         user,
         isLoading,
         setLoading,
+        fetchUser,
     } = useAuthStore();
 
     const fetchUsers =
-        async () => {
+        useCallback(async () => {
             try {
                 setLoading(true);
 
@@ -30,7 +32,7 @@ export const useUsers = () => {
             } finally {
                 setLoading(false);
             }
-        };
+        }, [setLoading, setUsers]);
 
     const updateRole =
         async (
@@ -146,6 +148,7 @@ export const useUsers = () => {
                     currentPassword,
                     newPassword,
                 );
+                await fetchUser();
 
                 notify.success(
                     "Password updated successfully"

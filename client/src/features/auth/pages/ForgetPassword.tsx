@@ -9,34 +9,13 @@ import { Loader2, Mail, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { notify } from "@/lib/toast";
 import { useAuth } from "../hooks/useAuth";
+import { clearPasswordReset, readPasswordReset, savePasswordReset } from "../passwordReset";
 
 export default function ForgotPassword({ customer = false }: { customer?: boolean }) {
-    const [step, setStep] = useState<"email" | "otp" | "password">(() => {
-        const savedExpiry = localStorage.getItem("otp_expiry");
-        if (savedExpiry) {
-            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
-            if (remaining > 0) return "otp";
-        }
-        return "email";
-    });
-
-    const [userEmail, setUserEmail] = useState(() => {
-        const savedExpiry = localStorage.getItem("otp_expiry");
-        if (savedExpiry) {
-            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
-            if (remaining > 0) return localStorage.getItem("reset_email") || "";
-        }
-        return "";
-    });
-
-    const [timer, setTimer] = useState(() => {
-        const savedExpiry = localStorage.getItem("otp_expiry");
-        if (savedExpiry) {
-            const remaining = Math.floor((parseInt(savedExpiry) - Date.now()) / 1000);
-            if (remaining > 0) return remaining;
-        }
-        return 0;
-    });
+    const [savedReset] = useState(() => readPasswordReset(customer));
+    const [step, setStep] = useState<"email" | "otp" | "password">(savedReset ? "otp" : "email");
+    const [userEmail, setUserEmail] = useState(savedReset?.email ?? "");
+    const [timer, setTimer] = useState(savedReset?.remaining ?? 0);
 
     const navigate = useNavigate();
     const {
@@ -70,23 +49,21 @@ export default function ForgotPassword({ customer = false }: { customer?: boolea
 
     // --- Step 1: Request OTP ---
     const handleSendOtp = async (data: ForgotPasswordFormData) => {
-        const success = await forgotPassword(data, customer);
-        if (!success) return;
-
-        setUserEmail(data.email);
-        setStep("otp");
-
-        // eslint-disable-next-line react-hooks/purity
-        const expiry = Date.now() + 600000;
-        localStorage.setItem("otp_expiry", expiry.toString());
-        localStorage.setItem("reset_email", data.email);
-        setTimer(600);
+        try {
+            if (!await forgotPassword(data, customer)) return;
+            setUserEmail(data.email);
+            setStep("otp");
+            savePasswordReset(customer, data.email);
+            setTimer(600);
+        } catch {
+            // The API client displays the error.
+        }
     };
 
     // --- Step 2: Validate OTP format locally & move to password ---
     const goToPasswordStep = async () => {
         const currentOtp = resetForm.getValues("otp");
-        if (currentOtp?.length === 6) {
+        if (/^\d{6}$/.test(currentOtp ?? "")) {
             setStep("password");
         } else {
             notify.error("Please enter the 6-digit code first");
@@ -95,25 +72,26 @@ export default function ForgotPassword({ customer = false }: { customer?: boolea
 
     // --- Step 3: Final API Call ---
     const onFinalSubmit = async (data: ResetPasswordFormData) => {
-        const success = await resetPassword({
-            email: userEmail,
-            otp: data.otp,
-            newPassword: data.password,
-        }, customer);
-
-        if (!success) return;
-
-        localStorage.removeItem("otp_expiry");
-        localStorage.removeItem("reset_email");
-        navigate(customer ? "/shop/login" : "/login");
+        try {
+            const success = await resetPassword({
+                email: userEmail,
+                otp: data.otp,
+                newPassword: data.password,
+            }, customer);
+            if (!success) return;
+            clearPasswordReset(customer);
+            navigate(customer ? "/shop/login" : "/login");
+        } catch {
+            // Keep the current form available for correction or retry.
+        }
     };
 
     const handleResend = async () => {
         if (timer > 0 || !userEmail) return;
         try {
             await forgotPassword({ email: userEmail }, customer);
+            savePasswordReset(customer, userEmail);
             setTimer(600);
-            notify.success("New code sent!");
         } catch {
             // Error handled via service or ignored safely
         }

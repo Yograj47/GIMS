@@ -152,7 +152,10 @@ export default function ShopOrders() {
                     }
                 } else {
                     const { data } = await api.get<{ data: Order[]; total: number }>(path, { params: { page }, signal: controller.signal });
-                    if (!controller.signal.aborted) setResult(data);
+                    if (!controller.signal.aborted) {
+                        setResult(data);
+                        setError("");
+                    }
                 }
             } catch {
                 if (!controller.signal.aborted) setError("Could not load your orders.");

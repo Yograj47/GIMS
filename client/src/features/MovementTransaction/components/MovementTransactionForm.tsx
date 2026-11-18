@@ -14,7 +14,7 @@ import { formatInvoiceMoney } from "@/types/billing";
 import { transactionSchema, type Item, type TransactionFormData } from "@/types/transaction";
 import { useMovementTransactions } from "../hooks/useMovementTransactions";
 import api from "@/lib/api";
-import { checkoutPost, checkoutTokenKey, goToPayment } from "@/features/checkout/checkout";
+import { checkoutPost, goToPayment } from "@/features/checkout/checkout";
 
 type Purpose = "Sale" | "Return" | "Adjustment";
 const titles = { Sale: "Sales register", Return: "Customer return", Adjustment: "Stock adjustment" };
@@ -106,7 +106,6 @@ function MovementRegister({ purpose }: { purpose: Purpose }) {
             try {
                 const order = await checkoutPost("counter", { ...payload, token });
                 if (checkoutMethod === "gateway") {
-                    sessionStorage.setItem(checkoutTokenKey, token);
                     try { await goToPayment(token); } catch { navigate("/checkout/return"); }
                 } else if (order.transactionId) navigate(`/reports/transaction/${order.transactionId}`, { replace: true });
             } catch {

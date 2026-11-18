@@ -6,12 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { notify } from "@/lib/toast";
 import api from "@/lib/api";
+import { readStorage, writeStorage } from "@/lib/browserStorage";
 import { orderLabel, type OrderEvent } from "./checkout";
 import { useOrderUpdates, type OrderUpdate } from "./useOrderUpdates";
 
 export default function CustomerOrderUpdates({ accountKey }: { accountKey: string }) {
     const storageKey = `shop-order-updates-seen:${accountKey}`;
-    const [seen, setSeen] = useState(() => localStorage.getItem(storageKey) ?? "");
+    const [seen, setSeen] = useState(() => readStorage("local", storageKey) ?? "");
     const [open, setOpen] = useState(false);
     const [updates, setUpdates] = useState<(OrderEvent & { orderId: string })[]>();
     const [error, setError] = useState(false);
@@ -39,7 +40,7 @@ export default function CustomerOrderUpdates({ accountKey }: { accountKey: strin
         const latest = updates?.[0]?.id;
         if (!latest) return;
         setSeen(latest);
-        localStorage.setItem(storageKey, latest);
+        writeStorage("local", storageKey, latest);
     }
 
     return (

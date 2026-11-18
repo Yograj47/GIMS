@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatInvoiceMoney } from "@/types/billing";
 import { checkoutPost, checkoutTokenKey, goToPayment, type Order } from "./checkout";
+import { readStorage } from "@/lib/browserStorage";
 
 export default function CheckoutStatus() {
     const canCompleteCounter = useAuthStore((state) => state.user?.isVerified &&
         (state.user.role === "staff" || state.user.role === "admin"));
     const [query] = useSearchParams();
-    const [token] = useState(() => sessionStorage.getItem(checkoutTokenKey));
+    const [token] = useState(() => readStorage("session", checkoutTokenKey));
     const [order, setOrder] = useState<Order | null>(null);
     const [busy, setBusy] = useState(Boolean(token));
     const [error, setError] = useState("");

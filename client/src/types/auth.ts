@@ -45,7 +45,7 @@ export const loginSchema = z.object({
 
 export const verifyEmailSchema = z.object({
   otp: z.string()
-    .length(6, "OTP must be 6 digits"),
+    .regex(/^\d{6}$/, "OTP must be 6 digits"),
 });
 
 /* ---------------------- Forgot Password ------------------------ */
@@ -62,7 +62,7 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z
   .object({
     otp: z.string()
-      .length(6, "OTP must be 6 digits"),
+      .regex(/^\d{6}$/, "OTP must be 6 digits"),
 
     password: z.string()
       .min(6, "Password must be at least 6 characters")

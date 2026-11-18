@@ -12,12 +12,12 @@ export const userService = {
     getMe: async () => {
         const { data } =
             await api.get<
-                ApiResponse<UserData>
+                ApiResponse<UserData & { id?: string }>
             >(
                 `${BASE_URL}/me`
             );
 
-        return data;
+        return { ...data, data: data.data ? { ...data.data, _id: data.data._id ?? data.data.id ?? "" } : undefined };
     },
 
     getUsers: async () => {
