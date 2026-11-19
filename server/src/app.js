@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { readFileSync } from "node:fs";
 
 import { API, ROUTES } from "./shared/constants/index.js";
 import { errorHandler } from "./shared/middleware/index.js";
@@ -26,6 +27,7 @@ import checkoutRoute from "./modules/checkout/checkout.route.js";
 import { allowedOrigin, requestSecurity } from "./shared/middleware/requestSecurity.js";
 
 const app = express();
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 app.disable("x-powered-by");
 app.use(requestSecurity);
 
@@ -45,6 +47,17 @@ app.get("/", (req, res) => {
     res.json({
         success: true,
         message: "Grocery Pro API",
+        version,
+        apiBasePath: API,
+    });
+});
+
+// Liveness only: available without authentication or database queries.
+app.get("/health", (req, res) => {
+    res.set("Cache-Control", "no-store").status(200).json({
+        status: "ok",
+        version,
+        uptimeSeconds: Math.floor(process.uptime()),
     });
 });
 

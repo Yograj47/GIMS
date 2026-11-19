@@ -74,9 +74,9 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.equal(String(shopper.customerId), String(shopperId));
     assert.equal(await User.exists({ _id: shopperId }), null);
     assert.equal((await CheckoutOrder.findById(legacyOrder.insertedId)).timeline[0].actorType, "customer");
-    await request(app).post("/api/v1/auth/customer/login").send({ email: shopper.email, password: "test-password" }).expect(200);
-    await request(app).post("/api/v1/auth/login").send({ email: shopper.email, password: "test-password" }).expect(401);
-    await request(app).post("/api/v1/auth/customer/register").send({
+    await request(app).post("/api/v2/auth/customer/login").send({ email: shopper.email, password: "test-password" }).expect(200);
+    await request(app).post("/api/v2/auth/login").send({ email: shopper.email, password: "test-password" }).expect(401);
+    await request(app).post("/api/v2/auth/customer/register").send({
         name: "Other shopper", email: "other@example.test", password: "test-password", phone: "9800000099",
     }).expect(201);
     const otherShopper = await CustomerAccount.findOne({ email: "other@example.test" });
@@ -84,7 +84,7 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.equal((await Customer.findById(otherShopper.customerId)).phone, "9800000099");
     const api = (method, path, actor) => {
         const token = jwt.sign({ id: actor.id, role: actor.role }, process.env.JWT_SECRET);
-        return request(app)[method](`/api/v1${path}`).set("Cookie", `token=${token}`);
+        return request(app)[method](`/api/v2${path}`).set("Cookie", `token=${token}`);
     };
     await api("get", `/checkout/customer/orders/${legacyOrder.insertedId}`, shopper).expect(200);
     await CheckoutOrder.deleteOne({ _id: legacyOrder.insertedId });
@@ -107,22 +107,22 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         accessHash: "claim-counter-test", items: [], timeline: [], createdAt: new Date(),
     });
     const claimRegistration = { ...contact, phone: "+977" + contact.phone, email: "claim@example.test", password: "test-password" };
-    await request(app).post("/api/v1/auth/customer/register").send(claimRegistration).expect(409);
+    await request(app).post("/api/v2/auth/customer/register").send(claimRegistration).expect(409);
     await api("post", `/customers/${claimId}/claim-code`, shopper).send({ verifiedPhone: true }).expect(403);
     const claim = (await api("post", `/customers/${claimId}/claim-code`, firstStaff).send({ verifiedPhone: true }).expect(200)).body.data;
-    await request(app).post("/api/v1/auth/customer/register").send({ ...claimRegistration, claimCode: claim.code }).expect(201);
+    await request(app).post("/api/v2/auth/customer/register").send({ ...claimRegistration, claimCode: claim.code }).expect(201);
     const claimed = await CustomerAccount.findOne({ email: claimRegistration.email });
     assert.equal(String(claimed.customerId), claimId);
     await claimed.updateOne({ isVerified: true });
     await api("get", `/checkout/customer/orders/${counterRecord.insertedId}`, claimed).expect(200);
     await api("get", `/checkout/customer/orders/${counterRecord.insertedId}`, otherShopper).expect(404);
     await CheckoutOrder.deleteOne({ _id: counterRecord.insertedId });
-    await request(app).post("/api/v1/auth/customer/register").send({ ...claimRegistration, email: "replay@example.test", claimCode: claim.code }).expect(409);
+    await request(app).post("/api/v2/auth/customer/register").send({ ...claimRegistration, email: "replay@example.test", claimCode: claim.code }).expect(409);
     await api("get", "/activity-logs", owner).expect(403);
     await api("get", "/activity-logs", firstStaff).expect(403);
     let activity;
     for (let attempt = 0; attempt < 10 && !activity; attempt++) {
-        const report = await api("get", "/activity-logs?search=POST%20%2Fapi%2Fv1%2Fcustomers", admin).expect(200);
+        const report = await api("get", "/activity-logs?search=POST%20%2Fapi%2Fv2%2Fcustomers", admin).expect(200);
         activity = report.body.data.find((entry) => entry.statusCode === 201);
         if (!activity) await new Promise((resolve) => setTimeout(resolve, 20));
     }
@@ -162,10 +162,10 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
     assert.equal(await mongoose.connection.collection("mediafiles").countDocuments({}), 0);
     const coverStorageKey = (await MediaAsset.findById(cover.mediaId)).storageKey;
     assert.ok(await imageFiles().exists({ _id: coverStorageKey }));
-    const photoPath = (entry) => `/api/v1/products/media/${entry.mediaId}`;
+    const photoPath = (entry) => `/api/v2/products/media/${entry.mediaId}`;
     assert.equal((await MediaAsset.findById(cover.mediaId)).width, 12);
     await request(app).get(photoPath(cover)).expect("Content-Type", /image\/webp/).expect(200);
-    const publicProduct = async () => (await request(app).get(`/api/v1/checkout/catalog/products/${withPhotos._id}`).expect(200)).body.data.product;
+    const publicProduct = async () => (await request(app).get(`/api/v2/checkout/catalog/products/${withPhotos._id}`).expect(200)).body.data.product;
     assert.deepEqual((await publicProduct()).photos, [cover, back]);
     const foreignProduct = (await api("post", "/products", admin).send({ ...productPayload, name: "Other media product" }).expect(201)).body.data;
     await photoRequest("put", `/products/${foreignProduct._id}`, admin, { name: "Should roll back", photos: [cover] }).expect(400);
@@ -285,12 +285,12 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
 
     await Product.updateOne({ _id: product.id }, { $set: { quantity: 1 } });
     const items = [{ productId: product.id, unitId: unit.id, quantity: 1 }];
-    const guest = (path, body) => request(app).post(`/api/v1/checkout/${path}`).send(body);
+    const guest = (path, body) => request(app).post(`/api/v2/checkout/${path}`).send(body);
     const online = {
         items, fulfillment: "pickup", paymentMethod: "cash",
         customer: { name: "Shopper", phone: "9800000000" },
     };
-    const smallStock = (await request(app).get("/api/v1/checkout/catalog").expect(200)).body.data;
+    const smallStock = (await request(app).get("/api/v2/checkout/catalog").expect(200)).body.data;
     assert.equal(smallStock.find(({ id }) => id === product.id).available, 0);
     await guest("orders", { ...online, token: randomUUID() }).expect(409);
     await Product.updateOne({ _id: product.id }, { $set: { quantity: 10 } });
@@ -468,7 +468,7 @@ test("staff sales, checkout reservations and payment confirmation share one stoc
         name: "Pantry test rice hidden", categoryId: category.id, unitId: unit.id,
         quantity: 50, basePrice: 1, sellingPrice: 2, isActive: false,
     });
-    const catalog = "/api/v1/checkout/catalog";
+    const catalog = "/api/v2/checkout/catalog";
     const previews = (await request(app).get(catalog + "/previews").expect(200)).body.data;
     const pantry = previews.find(({ id }) => id === category.id);
     assert.equal(pantry.products.length, 8);

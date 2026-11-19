@@ -1,5 +1,7 @@
 # 🛒 Grocery Pro – Frontend
 
+GIMS version: **2.0.0**. Configure `VITE_BASE_URL` with the `/api/v2` base path.
+
 ## 📌 Overview
 **Grocery Pro** is a lightweight, user-friendly web application designed for small and medium-sized grocery store owners in Nepal. It replaces manual inventory processes with a simple digital system that remains accessible even for users with limited technical knowledge.
 

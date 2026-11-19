@@ -37,7 +37,7 @@ test("server security boundaries", async (t) => {
     const customer = await Customer.create({ name: "Shopper", phone: "9841234567" });
     let shopper = await CustomerAccount.create({ _id: customer._id, customerId: customer._id, email: "shopper@security.test", password: hash, isVerified: true });
     const cookie = (actor) => `token=${generateToken(actor)}`;
-    const api = (method, path, actor) => request(app)[method](`/api/v1${path}`).set("Cookie", cookie(actor));
+    const api = (method, path, actor) => request(app)[method](`/api/v2${path}`).set("Cookie", cookie(actor));
 
     await t.test("invalid and expired JWTs return 401", async () => {
         for (const token of [
@@ -45,7 +45,7 @@ test("server security boundaries", async (t) => {
             jwt.sign({ id: admin.id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: -1 }),
             jwt.sign({ id: "invalid-id", role: admin.role }, process.env.JWT_SECRET),
         ]) {
-            await request(app).get("/api/v1/users/me").set("Cookie", `token=${token}`).expect(401);
+            await request(app).get("/api/v2/users/me").set("Cookie", `token=${token}`).expect(401);
         }
     });
 
@@ -74,24 +74,24 @@ test("server security boundaries", async (t) => {
         const response = await api("patch", `/auth/users/${roleTarget.id}/role`, admin).send({ role: "accountant" }).expect(200);
         assert.equal(response.body.data.role, "accountant");
         for (const field of ["password", "verifyOtp", "resetOtp", "tokenVersion"]) assert.equal(response.body.data[field], undefined);
-        await request(app).get("/api/v1/users/me").set("Cookie", oldCookie).expect(401);
+        await request(app).get("/api/v2/users/me").set("Cookie", oldCookie).expect(401);
     });
 
     await t.test("password changes revoke existing sessions and issue a new session", async () => {
         const oldCookie = cookie(staff);
         const response = await api("patch", "/users/password", staff)
             .send({ currentPassword: password, newPassword: "changed-password-123" }).expect(200);
-        await request(app).get("/api/v1/users/me").set("Cookie", oldCookie).expect(401);
-        await request(app).get("/api/v1/users/me").set("Cookie", response.headers["set-cookie"]).expect(200);
+        await request(app).get("/api/v2/users/me").set("Cookie", oldCookie).expect(401);
+        await request(app).get("/api/v2/users/me").set("Cookie", response.headers["set-cookie"]).expect(200);
     });
 
     await t.test("reset OTPs can only be consumed once under concurrent requests", async () => {
         const oldCookie = cookie(shopper);
         await shopper.updateOne({ resetOtp: otpDigest("123456"), resetOtpAttempts: 0, resetOtpExpiresAt: Date.now() + 60_000 });
-        const responses = await Promise.all([0, 1].map(() => request(app).post("/api/v1/auth/customer/reset-password")
+        const responses = await Promise.all([0, 1].map(() => request(app).post("/api/v2/auth/customer/reset-password")
             .send({ email: shopper.email, otp: "123456", newPassword: "new-shop-password" })));
         assert.deepEqual(responses.map(({ status }) => status).sort(), [200, 400]);
-        await request(app).get("/api/v1/users/me").set("Cookie", oldCookie).expect(401);
+        await request(app).get("/api/v2/users/me").set("Cookie", oldCookie).expect(401);
         shopper = await CustomerAccount.findById(shopper.id);
         assert.equal(await bcrypt.compare("new-shop-password", shopper.password), true);
         assert.equal(shopper.resetOtp, null);
@@ -112,8 +112,8 @@ test("server security boundaries", async (t) => {
     });
 
     await t.test("reset email validation blocks query operators without sending email", async () => {
-        await request(app).post("/api/v1/auth/customer/forgot-password").send({ email: { $ne: null } }).expect(400);
-        const response = await request(app).post("/api/v1/auth/customer/forgot-password").send({ email: "unknown@security.test" }).expect(200);
+        await request(app).post("/api/v2/auth/customer/forgot-password").send({ email: { $ne: null } }).expect(400);
+        const response = await request(app).post("/api/v2/auth/customer/forgot-password").send({ email: "unknown@security.test" }).expect(200);
         assert.match(response.body.message, /If an account exists/);
     });
 
@@ -151,14 +151,14 @@ test("server security boundaries", async (t) => {
 
     await t.test("login attempts are rate limited", async () => {
         for (let attempt = 0; attempt < 30; attempt++) {
-            await request(app).post("/api/v1/auth/customer/login").send({ email: "missing@security.test", password }).expect(401);
+            await request(app).post("/api/v2/auth/customer/login").send({ email: "missing@security.test", password }).expect(401);
         }
-        await request(app).post("/api/v1/auth/customer/login").send({ email: "missing@security.test", password }).expect(429);
+        await request(app).post("/api/v2/auth/customer/login").send({ email: "missing@security.test", password }).expect(429);
     });
 
     await t.test("logout invalidates the previous session token", async () => {
         const previous = cookie(shopper);
         await api("post", "/auth/logout", shopper).expect(200);
-        await request(app).get("/api/v1/users/me").set("Cookie", previous).expect(401);
+        await request(app).get("/api/v2/users/me").set("Cookie", previous).expect(401);
     });
 });

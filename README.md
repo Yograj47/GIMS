@@ -1,6 +1,16 @@
 # 🛒 Grocery Pro  
 ### Full Stack Inventory Management System
 
+GIMS release: **2.0.0**. API base path: **`/api/v2`**.
+
+When upgrading, update `VITE_BASE_URL` and any external API clients from `/api/v1` to `/api/v2`, then restart the frontend and backend.
+
+### Server health
+
+`GET /health` is a public liveness endpoint on the server origin (outside `/api/v2`). It returns HTTP 200 with `status`, `version`, and `uptimeSeconds`, without querying the databases. Set Render's Health Check Path to `/health`. This checks that the HTTP process responds; it does not verify database or payment-provider availability. Startup connects both databases before accepting requests.
+
+Render Free services can sleep after 15 idle minutes. A request wakes the service and can take about a minute to receive a response. Clients should show a waking-up state and use bounded retries for health reads; avoid automatically retrying order or payment submissions.
+
 ![Status](https://img.shields.io/badge/status-development-orange)
 ![Frontend](https://img.shields.io/badge/frontend-React-blue)
 ![Backend](https://img.shields.io/badge/backend-Node.js-green)
@@ -141,7 +151,7 @@ SENDER_EMAIL=your_verified_sender_email
 For local development, set these values in the client's `.env` file.
 
 ```env
-VITE_BASE_URL=http://localhost:5000/api/v1
+VITE_BASE_URL=http://localhost:5000/api/v2
 VITE_SOCKET_URL=http://localhost:5000
 ```
 
@@ -149,7 +159,7 @@ VITE_SOCKET_URL=http://localhost:5000
 
 ## 🔗 API Endpoints
 
-Routes below are relative to `/api/v1`.
+Routes below are relative to `/api/v2`.
 
 | Endpoint        | Description            |
 |----------------|------------------------|
@@ -165,7 +175,7 @@ Routes below are relative to `/api/v1`.
 ### Supplier receiving and returns
 
 Verified users with supplier access can list receipts, lots, and returns under
-`/api/v1/receiving`. The list endpoints accept `supplierId`, `page`, and `limit`.
+`/api/v2/receiving`. The list endpoints accept `supplierId`, `page`, and `limit`.
 Supplier write permission is required to post a receipt or return.
 
 - `POST /receiving/receipts` accepts a UUID `requestKey`, `supplierId`,
